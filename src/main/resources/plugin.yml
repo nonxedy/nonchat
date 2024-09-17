@@ -1,0 +1,13 @@
+name: nonchat
+author: hgtoiwr
+main: com.hgtoiwr.nonchat.nonchat.Plugin
+description: The best chat plugin for me :3
+version: 0sshot.1t
+prefix: nonchat
+api-version: 1.20
+load: STARTUP
+
+softdepend:
+  - Vault
+  - PlaceholderAPI
+  - LuckPerms
