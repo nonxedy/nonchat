@@ -1,8 +1,8 @@
 name: nonchat
 author: hgtoiwr
-main: com.hgtoiwr.nonchat.nonchat.Plugin
+main: com.hgtoiwr.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 0sshot.1t
+version: 0sshot.2t
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -11,3 +11,21 @@ softdepend:
   - Vault
   - PlaceholderAPI
   - LuckPerms
+
+permissions:
+  nonchat.*:
+    description: Give access to all nonchat commands
+    default: op
+    children:
+      - nonchat.message
+  nonchat.msg:
+    description: Allows /message command
+    default: true
+
+commands:
+  message:
+    description: Send a message to a player.
+    aliases: [msg, tell, w, m, whisper]
+    usage: /message <player> <message>
+    permission: nonchat.message
+    permission-message: You do not have <permission> to use this command!
