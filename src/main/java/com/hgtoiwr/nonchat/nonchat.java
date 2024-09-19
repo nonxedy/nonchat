@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
 
 public class nonchat extends JavaPlugin {
@@ -12,6 +13,8 @@ public class nonchat extends JavaPlugin {
 
   public void onEnable() {
     getCommand("message").setExecutor(new MessageCommand());
+
+    getCommand("broadcast").setExecutor(new BroadcastCommand());
 
     LOGGER.info("nonchat enabled");
   }

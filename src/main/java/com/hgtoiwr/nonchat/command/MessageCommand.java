@@ -22,6 +22,11 @@ public class MessageCommand implements CommandExecutor {
             command.getName().equalsIgnoreCase("m") ||
             command.getName().equalsIgnoreCase("whisper")) {
             
+            if (!sender.hasPermission("nonchat.message")) {
+                sender.sendMessage("§x§A§D§F§3§F§DНедостаточно прав.");
+                return true;
+            }
+            
             if (args.length < 2) {
                 sender.sendMessage("§x§A§D§F§3§F§DИспользуйте: /msg <игрок> <сообщение>");
                 return true;

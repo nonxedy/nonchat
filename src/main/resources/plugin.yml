@@ -2,7 +2,7 @@ name: nonchat
 author: hgtoiwr
 main: com.hgtoiwr.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 0sshot.2t
+version: 0sshot.3t
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -18,9 +18,13 @@ permissions:
     default: op
     children:
       - nonchat.message
-  nonchat.msg:
+      - nonchat.broadcast
+  nonchat.message:
     description: Allows /message command
     default: true
+  nonchat.broadcast:
+    description: Allows /broadcast command
+    default: false
 
 commands:
   message:
@@ -28,4 +32,10 @@ commands:
     aliases: [msg, tell, w, m, whisper]
     usage: /message <player> <message>
     permission: nonchat.message
+    permission-message: You do not have <permission> to use this command!
+  broadcast:
+    description: Send a message to all players.
+    aliases: [bc, broadcast]
+    usage: /broadcast <message>
+    permission: nonchat.broadcast
     permission-message: You do not have <permission> to use this command!
