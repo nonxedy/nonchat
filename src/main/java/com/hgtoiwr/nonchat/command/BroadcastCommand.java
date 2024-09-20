@@ -1,7 +1,5 @@
 package com.hgtoiwr.nonchat.command;
 
-import java.util.logging.Logger;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,10 +7,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import net.md_5.bungee.api.ChatColor;
+
 
 public class BroadcastCommand implements CommandExecutor {
-
-    private Logger logger = Bukkit.getLogger();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
@@ -39,7 +37,7 @@ public class BroadcastCommand implements CommandExecutor {
                 player.sendMessage("§x§E§0§8§8§F§F{ Оповещение§f: " + message.toString().trim());
                 player.sendMessage("§x§E§0§8§8§F§F{");
 
-                logger.info("{ Оповещение: " + message.toString().trim() + "}");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat] " + ChatColor.GRAY + "Оповещение: " + ChatColor.LIGHT_PURPLE + message.toString().trim() + ChatColor.GRAY + "");
             }
 
             return true;

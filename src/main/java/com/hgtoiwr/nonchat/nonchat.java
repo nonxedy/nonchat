@@ -1,25 +1,37 @@
 package com.hgtoiwr.nonchat;
 
-import java.util.logging.Logger;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class nonchat extends JavaPlugin {
-  private static final Logger LOGGER = Bukkit.getLogger();
+
+  private ChatFormatListener chatFormatListener;
 
   public void onEnable() {
-    getCommand("message").setExecutor(new MessageCommand());
+    registerCommands();
+    registerListeners();
 
-    getCommand("broadcast").setExecutor(new BroadcastCommand());
-
-    LOGGER.info("nonchat enabled");
+    Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat]" + ChatColor.GREEN + " nonchat enabled");
   }
 
   public void onDisable() {
-    LOGGER.info("nonchat disabled");
+    Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat]" + ChatColor.RED + " nonchat disabled");
+  }
+
+  public void registerCommands() {
+    getCommand("message").setExecutor(new MessageCommand());
+    getCommand("broadcast").setExecutor(new BroadcastCommand());
+  }
+
+  public void registerListeners() {
+    chatFormatListener = new ChatFormatListener();
+
+    Bukkit.getPluginManager().registerEvents(chatFormatListener, this);
   }
 }

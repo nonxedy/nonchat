@@ -1,6 +1,5 @@
 package com.hgtoiwr.nonchat.command;
 
-import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -9,9 +8,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class MessageCommand implements CommandExecutor {
+import net.md_5.bungee.api.ChatColor;
 
-    private Logger logger = Bukkit.getLogger();
+public class MessageCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
@@ -46,11 +45,11 @@ public class MessageCommand implements CommandExecutor {
             if (sender instanceof Player) {
                 Player senderPlayer = (Player) sender;
                 senderPlayer.sendMessage("§x§E§0§8§8§F§FВы -> " + target.getName() + "§x§E§0§8§8§F§F: " + message.toString().trim());
-                logger.info("§x§E§0§8§8§F§F" + sender.getName() + "§x§E§0§8§8§F§F -> " + target.getName() + "§x§E§0§8§8§F§F: " + message.toString().trim());
+                Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat] " + ChatColor.DARK_PURPLE + sender.getName() + ChatColor.GRAY + " -> " + ChatColor.DARK_PURPLE + target.getName() + ChatColor.GRAY + ": " + ChatColor.WHITE + message.toString().trim());
             }
 
             target.sendMessage("§x§E§0§8§8§F§F" + sender.getName() + "§x§E§0§8§8§F§F -> Вы: " + message.toString().trim());
-            logger.info(sender.getName() + "-> " + target.getName() + ": " + message.toString().trim());
+            Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat] " + ChatColor.DARK_PURPLE + sender.getName() + ChatColor.GRAY + " -> " + ChatColor.DARK_PURPLE + target.getName() + ChatColor.GRAY + ": " + ChatColor.WHITE + message.toString().trim());
             return true;
         }
         return false;

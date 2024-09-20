@@ -7,7 +7,7 @@
 
 	<groupId>com.hgtoiwr.nonchat</groupId>
 	<artifactId>nonchat</artifactId>
-	<version>0sshot.3t</version>
+	<version>0sshot.4t</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -38,6 +38,12 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>33.3.0-jre</version>
+		</dependency>
+		<dependency>
+			<groupId>net.luckperms</groupId>
+			<artifactId>api</artifactId>
+			<version>5.4</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
