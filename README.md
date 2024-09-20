@@ -3,7 +3,7 @@
 
 
 TODO:
-[X] Add custom chat. Like: <prefix> <username> <suffix>: <message>
+[] Add custom chat. Like: prefix username suffix: message
 [] Add HEX support.
 [] Add config.yml
 [] Add reload command.
