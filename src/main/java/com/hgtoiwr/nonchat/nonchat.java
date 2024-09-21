@@ -7,7 +7,8 @@ import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
 
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 public class nonchat extends JavaPlugin {
 
@@ -17,11 +18,15 @@ public class nonchat extends JavaPlugin {
     registerCommands();
     registerListeners();
 
-    Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat]" + ChatColor.GREEN + " nonchat enabled");
+    Bukkit.getConsoleSender().sendMessage(Component.text()
+        .append(Component.text("nonchat ", TextColor.fromHexString("#E088FF")))
+        .append(Component.text("plugin enabled", TextColor.fromHexString("#52FFA6"))));
   }
 
   public void onDisable() {
-    Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat]" + ChatColor.RED + " nonchat disabled");
+    Bukkit.getConsoleSender().sendMessage(Component.text()
+        .append(Component.text("nonchat ", TextColor.fromHexString("#E088FF")))
+        .append(Component.text("nonchat disabled", TextColor.fromHexString("#FF5252"))));
   }
 
   public void registerCommands() {

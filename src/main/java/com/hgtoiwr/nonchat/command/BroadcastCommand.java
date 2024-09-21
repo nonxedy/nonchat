@@ -7,8 +7,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import net.md_5.bungee.api.ChatColor;
-
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 public class BroadcastCommand implements CommandExecutor {
 
@@ -18,12 +18,16 @@ public class BroadcastCommand implements CommandExecutor {
             command.getName().equalsIgnoreCase("bc")) {
 
             if (!sender.hasPermission("nonchat.broadcast")) {
-                sender.sendMessage("§x§A§D§F§3§F§DНедостаточно прав.");
+                sender.sendMessage(Component.text()
+                        .append(Component.text("Недостаточно прав", TextColor.fromHexString("#ADF3FD")))
+                        .build());
                 return true;
             }
 
             if (args.length == 0) {
-                sender.sendMessage("§x§A§D§F§3§F§DИспользуйте: /bc <сообщение>");
+                sender.sendMessage(Component.text()
+                        .append(Component.text("Используйте: /bc <сообщение>", TextColor.fromHexString("#ADF3FD")))
+                        .build());
                 return true;
             }
 
@@ -33,18 +37,20 @@ public class BroadcastCommand implements CommandExecutor {
             }
 
             for (Player player : Bukkit.getOnlinePlayers()) {
-                player.sendMessage("§x§E§0§8§8§F§F{");
-                player.sendMessage("§x§E§0§8§8§F§F{ Оповещение§f: " + message.toString().trim());
-                player.sendMessage("§x§E§0§8§8§F§F{");
+                player.sendMessage(" ");
+                player.sendMessage(Component.text()
+                        .append(Component.text("Оповещение: ", TextColor.fromHexString("#E088FF")))
+                        .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                        .build());
+                player.sendMessage(" ");
 
-                Bukkit.getConsoleSender().sendMessage(ChatColor.LIGHT_PURPLE + "[nonchat] " + ChatColor.GRAY + "Оповещение: " + ChatColor.LIGHT_PURPLE + message.toString().trim() + ChatColor.GRAY + "");
+                Bukkit.getConsoleSender().sendMessage(Component.text()
+                        .append(Component.text("Оповещение: ", TextColor.fromHexString("#E088FF")))
+                        .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                        .build());
             }
-
             return true;
         }
-
         return false;
-
     }
-
 }

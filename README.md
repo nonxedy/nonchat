@@ -4,9 +4,10 @@
 
 TODO:
 - [X] Add custom chat. Like: prefix username suffix: message
-- [ ] Add HEX support.
+- [X] Add HEX support.
 - [ ] Add config.yml
 - [ ] Add reload command.
 - [ ] Add bubble chat.
 - [ ] Add x-y-z chat.
 - [ ] Add auto broadcast.
+- [ ] Add death prefixes and suffixes.
