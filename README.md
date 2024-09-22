@@ -3,7 +3,7 @@
 
 The plugin supports only Bukkit cores and 1.20.6 version.
 That plugin have custom format for chat. Luckperms prefix and suffix.
-nonchat also have HEX support and 2 commands: broadcast and msg.
+nonchat also have HEX support and 3 commands: broadcast, msg and server.
 
 TODO:
 - [X] Add custom chat. Like: prefix username suffix: message
