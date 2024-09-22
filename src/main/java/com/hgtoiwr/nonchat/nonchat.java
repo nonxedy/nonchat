@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
+import com.hgtoiwr.nonchat.command.ServerCommand;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -32,6 +33,7 @@ public class nonchat extends JavaPlugin {
   public void registerCommands() {
     getCommand("message").setExecutor(new MessageCommand());
     getCommand("broadcast").setExecutor(new BroadcastCommand());
+    getCommand("server").setExecutor(new ServerCommand());
   }
 
   public void registerListeners() {

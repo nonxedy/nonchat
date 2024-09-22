@@ -14,3 +14,4 @@ TODO:
 - [ ] Add x-y-z chat.
 - [ ] Add auto broadcast.
 - [ ] Add death prefixes and suffixes.
+- [X] Add some commands.

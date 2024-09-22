@@ -56,6 +56,7 @@ public class MessageCommand implements CommandExecutor {
                         .append(Component.text(": ", TextColor.fromHexString("#E088FF")))
                         .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
                         .build());
+                        
                 Bukkit.getConsoleSender().sendMessage(Component.text()
                         .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
                         .append(Component.text(sender.getName(), TextColor.fromHexString("#FFFFFF")))
@@ -70,6 +71,7 @@ public class MessageCommand implements CommandExecutor {
                     .append(Component.text(sender.getName() + " -> Вы: ", TextColor.fromHexString("#E088FF")))
                     .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
                     .build());
+
             Bukkit.getConsoleSender().sendMessage(Component.text()
                     .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
                     .append(Component.text(sender.getName(), TextColor.fromHexString("#FFFFFF")))

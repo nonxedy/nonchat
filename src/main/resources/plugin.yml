@@ -2,7 +2,7 @@ name: nonchat
 author: hgtoiwr
 main: com.hgtoiwr.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 0sshot.5t
+version: 0sshot.6t
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -19,11 +19,15 @@ permissions:
     children:
       - nonchat.message
       - nonchat.broadcast
+      - nonchat.server
   nonchat.message:
     description: Allows /message command
     default: true
   nonchat.broadcast:
     description: Allows /broadcast command
+    default: false
+  nonchat.server:
+    description: Allows /server command
     default: false
 
 commands:
@@ -38,4 +42,9 @@ commands:
     aliases: [bc, broadcast]
     usage: /broadcast <message>
     permission: nonchat.broadcast
+    permission-message: You do not have <permission> to use this command!
+  server:
+    description: Show info of server.
+    usage: /server
+    permission: nonchat.server
     permission-message: You do not have <permission> to use this command!
