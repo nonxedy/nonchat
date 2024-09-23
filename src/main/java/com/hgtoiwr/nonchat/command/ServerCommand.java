@@ -48,5 +48,4 @@ public class ServerCommand implements CommandExecutor {
 
             return true;
     }
-    
 }

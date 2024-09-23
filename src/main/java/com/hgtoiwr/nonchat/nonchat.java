@@ -1,8 +1,11 @@
 package com.hgtoiwr.nonchat;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.hgtoiwr.config.PluginConfig;
 import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
@@ -14,8 +17,12 @@ import net.kyori.adventure.text.format.TextColor;
 public class nonchat extends JavaPlugin {
 
   private ChatFormatListener chatFormatListener;
+  private PluginConfig pluginConfig;
+  
+  File plugin_directory = new File("plugins/nonchat");
 
   public void onEnable() {
+    registerConfigs();
     registerCommands();
     registerListeners();
 
@@ -37,8 +44,16 @@ public class nonchat extends JavaPlugin {
   }
 
   public void registerListeners() {
-    chatFormatListener = new ChatFormatListener();
+    chatFormatListener = new ChatFormatListener(pluginConfig);
 
     Bukkit.getPluginManager().registerEvents(chatFormatListener, this);
+  }
+
+  public void registerConfigs() {
+    pluginConfig = new PluginConfig();
+  }
+
+  public File get_plugin_directory() {
+    return plugin_directory;
   }
 }

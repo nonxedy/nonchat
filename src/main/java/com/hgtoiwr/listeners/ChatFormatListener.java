@@ -3,11 +3,12 @@ package com.hgtoiwr.listeners;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+
+import com.hgtoiwr.config.PluginConfig;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -15,7 +16,12 @@ import net.md_5.bungee.api.ChatColor;
 
 @SuppressWarnings("deprecation")
 public class ChatFormatListener implements Listener {
-    
+    private PluginConfig config;
+
+    public ChatFormatListener(PluginConfig config) {
+        this.config = config;
+    }
+
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
@@ -24,8 +30,13 @@ public class ChatFormatListener implements Listener {
         String suffix = user.getCachedData().getMetaData().getSuffix();
         String message = event.getMessage();
 
-        event.setFormat(prefix + ChatColor.WHITE + player.getName() + ChatColor.RESET + suffix + "§7: §f" + hex(message));
-        Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.WHITE + player.getName() + ChatColor.RESET + suffix + ChatColor.GRAY + ": " + ChatColor.WHITE + hex(message));
+        String chatFormat = config.getChatFormat();
+        chatFormat = chatFormat.replace("{prefix}", prefix);
+        chatFormat = chatFormat.replace("{suffix}", suffix);
+        chatFormat = chatFormat.replace("{sender}", player.getName());
+        chatFormat = chatFormat.replace("{message}", hex(message));
+
+        event.setFormat(chatFormat);
     }
 
     private String hex(String message) {
