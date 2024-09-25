@@ -44,4 +44,8 @@ public class PluginConfig {
             e.printStackTrace();
         }
     }
+
+    public void reloadConfig() {
+        config = YamlConfiguration.loadConfiguration(file);
+    }
 }

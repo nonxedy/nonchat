@@ -9,6 +9,7 @@ import com.hgtoiwr.config.PluginConfig;
 import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
+import com.hgtoiwr.nonchat.command.NreloadCommand;
 import com.hgtoiwr.nonchat.command.ServerCommand;
 
 import net.kyori.adventure.text.Component;
@@ -27,13 +28,13 @@ public class nonchat extends JavaPlugin {
     registerListeners();
 
     Bukkit.getConsoleSender().sendMessage(Component.text()
-        .append(Component.text("nonchat ", TextColor.fromHexString("#E088FF")))
+        .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
         .append(Component.text("plugin enabled", TextColor.fromHexString("#52FFA6"))));
   }
 
   public void onDisable() {
     Bukkit.getConsoleSender().sendMessage(Component.text()
-        .append(Component.text("nonchat ", TextColor.fromHexString("#E088FF")))
+        .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
         .append(Component.text("nonchat disabled", TextColor.fromHexString("#FF5252"))));
   }
 
@@ -41,6 +42,7 @@ public class nonchat extends JavaPlugin {
     getCommand("message").setExecutor(new MessageCommand());
     getCommand("broadcast").setExecutor(new BroadcastCommand());
     getCommand("server").setExecutor(new ServerCommand());
+    getCommand("nreload").setExecutor(new NreloadCommand(this));
   }
 
   public void registerListeners() {
@@ -53,7 +55,7 @@ public class nonchat extends JavaPlugin {
     pluginConfig = new PluginConfig();
   }
 
-  public File get_plugin_directory() {
-    return plugin_directory;
+  public void reloadConfig() {
+    pluginConfig.reloadConfig();
   }
 }

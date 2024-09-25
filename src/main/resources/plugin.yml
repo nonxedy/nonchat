@@ -2,7 +2,7 @@ name: nonchat
 author: hgtoiwr
 main: com.hgtoiwr.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 0sshot.7t
+version: 0sshot.8t
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -20,6 +20,7 @@ permissions:
       - nonchat.message
       - nonchat.broadcast
       - nonchat.server
+      - nonchat.nreload
   nonchat.message:
     description: Allows /message command
     default: true
@@ -28,6 +29,9 @@ permissions:
     default: false
   nonchat.server:
     description: Allows /server command
+    default: false
+  nonchat.nreload:
+    description: Allows /nreload command
     default: false
 
 commands:
@@ -47,4 +51,9 @@ commands:
     description: Show info of server.
     usage: /server
     permission: nonchat.server
+    permission-message: You do not have <permission> to use this command!
+  nreload:
+    description: Reload a plugin.
+    usage: /nreload
+    permission: nonchat.nreload
     permission-message: You do not have <permission> to use this command!
