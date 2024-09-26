@@ -16,6 +16,7 @@ import net.md_5.bungee.api.ChatColor;
 
 @SuppressWarnings("deprecation")
 public class ChatFormatListener implements Listener {
+    
     private PluginConfig config;
 
     public ChatFormatListener(PluginConfig config) {

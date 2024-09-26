@@ -26,6 +26,7 @@ public class PluginConfig {
     
             config = new YamlConfiguration();
             config.set("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
+            config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
             
             config.save(file);
         } catch (IOException e) {
@@ -35,6 +36,10 @@ public class PluginConfig {
     
     public String getChatFormat() {
         return config.getString("chat-format");
+    }
+
+    public String getDeathFormat() {
+        return config.getString("death-format");
     }
     
     public void saveConfig() {
