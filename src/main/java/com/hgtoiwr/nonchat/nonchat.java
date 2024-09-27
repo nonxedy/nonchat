@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.hgtoiwr.config.PluginConfig;
 import com.hgtoiwr.listeners.ChatFormatListener;
+import com.hgtoiwr.listeners.DeathCoordinates;
 import com.hgtoiwr.listeners.DeathListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
@@ -20,6 +21,7 @@ public class nonchat extends JavaPlugin {
 
   private ChatFormatListener chatFormatListener;
   private DeathListener deathListener;
+  private DeathCoordinates deathCoordinates;
   private PluginConfig pluginConfig;
   
   File plugin_directory = new File("plugins/nonchat");
@@ -50,9 +52,11 @@ public class nonchat extends JavaPlugin {
   public void registerListeners() {
     chatFormatListener = new ChatFormatListener(pluginConfig);
     deathListener = new DeathListener(pluginConfig);
+    deathCoordinates = new DeathCoordinates();
 
     Bukkit.getPluginManager().registerEvents(chatFormatListener, this);
     Bukkit.getPluginManager().registerEvents(deathListener, this);
+    Bukkit.getPluginManager().registerEvents(deathCoordinates, this);
   }
 
   public void registerConfigs() {

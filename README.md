@@ -11,7 +11,7 @@ TODO:
 - [X] Add config.yml
 - [X] Add reload command.
 - [ ] Add bubble chat.
-- [ ] Add x-y-z chat.
+- [X] Add x-y-z chat.
 - [ ] Add auto broadcast.
 - [X] Add death prefixes and suffixes.
 - [X] Add some commands.
