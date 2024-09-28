@@ -13,6 +13,7 @@ import com.hgtoiwr.nonchat.command.BroadcastCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
 import com.hgtoiwr.nonchat.command.NreloadCommand;
 import com.hgtoiwr.nonchat.command.ServerCommand;
+import com.hgtoiwr.utils.AutoBroadcastSender;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -22,6 +23,7 @@ public class nonchat extends JavaPlugin {
   private ChatFormatListener chatFormatListener;
   private DeathListener deathListener;
   private DeathCoordinates deathCoordinates;
+  private AutoBroadcastSender autoBroadcastSender;
   private PluginConfig pluginConfig;
   
   File plugin_directory = new File("plugins/nonchat");
@@ -30,6 +32,7 @@ public class nonchat extends JavaPlugin {
     registerConfigs();
     registerCommands();
     registerListeners();
+    registerUtils();
 
     Bukkit.getConsoleSender().sendMessage(Component.text()
         .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
@@ -54,9 +57,17 @@ public class nonchat extends JavaPlugin {
     deathListener = new DeathListener(pluginConfig);
     deathCoordinates = new DeathCoordinates();
 
+    // Register listeners
     Bukkit.getPluginManager().registerEvents(chatFormatListener, this);
     Bukkit.getPluginManager().registerEvents(deathListener, this);
     Bukkit.getPluginManager().registerEvents(deathCoordinates, this);
+  }
+
+  public void registerUtils() {
+    autoBroadcastSender = new AutoBroadcastSender();
+
+    // Register utils
+    autoBroadcastSender.start();
   }
 
   public void registerConfigs() {
