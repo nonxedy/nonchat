@@ -10,6 +10,7 @@ import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.listeners.DeathCoordinates;
 import com.hgtoiwr.listeners.DeathListener;
 import com.hgtoiwr.nonchat.command.BroadcastCommand;
+import com.hgtoiwr.nonchat.command.HelpCommand;
 import com.hgtoiwr.nonchat.command.MessageCommand;
 import com.hgtoiwr.nonchat.command.NreloadCommand;
 import com.hgtoiwr.nonchat.command.ServerCommand;
@@ -49,6 +50,7 @@ public class nonchat extends JavaPlugin {
     getCommand("message").setExecutor(new MessageCommand());
     getCommand("broadcast").setExecutor(new BroadcastCommand());
     getCommand("server").setExecutor(new ServerCommand());
+    getCommand("help").setExecutor(new HelpCommand());
     getCommand("nreload").setExecutor(new NreloadCommand(this));
   }
 
