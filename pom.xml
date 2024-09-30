@@ -7,7 +7,7 @@
 
 	<groupId>com.hgtoiwr.nonchat</groupId>
 	<artifactId>nonchat</artifactId>
-	<version>3bt</version>
+	<version>4bt</version>
 	<packaging>jar</packaging>
 
 	<properties>
