@@ -33,6 +33,8 @@ public class NreloadCommand implements CommandExecutor {
 
         try {
             nonchat.reloadConfig();
+            nonchat.stopAutoBroadcastSender();
+            nonchat.registerUtils();
             sender.sendMessage(Component.text()
                 .append(Component.text("Плагин перезагружен!", TextColor.fromHexString("#52FFA6")))
                 .build());

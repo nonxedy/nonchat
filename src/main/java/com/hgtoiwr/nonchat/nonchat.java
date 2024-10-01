@@ -68,17 +68,20 @@ public class nonchat extends JavaPlugin {
   }
 
   public void registerUtils() {
-    autoBroadcastSender = new AutoBroadcastSender();
+    autoBroadcastSender = new AutoBroadcastSender(pluginConfig);
 
     // Register utils
     autoBroadcastSender.start();
   }
-
   public void registerConfigs() {
     pluginConfig = new PluginConfig();
   }
 
   public void reloadConfig() {
     pluginConfig.reloadConfig();
+  }
+
+  public void stopAutoBroadcastSender() {
+    autoBroadcastSender.stop();
   }
 }

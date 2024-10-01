@@ -27,6 +27,9 @@ public class PluginConfig {
             config = new YamlConfiguration();
             config.set("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
             config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
+            config.set("broadcast.enabled", true);
+            config.set("broadcast.message", "This message will be sent every 60 seconds");
+            config.set("broadcast.interval", 60);
             
             config.save(file);
         } catch (IOException e) {
@@ -40,6 +43,18 @@ public class PluginConfig {
 
     public String getDeathFormat() {
         return config.getString("death-format");
+    }
+    
+    public boolean isBroadcastEnabled() {
+        return config.getBoolean("broadcast.enabled");
+    }
+
+    public String getBroadcastMessage() {
+        return config.getString("broadcast.message");
+    }
+
+    public int getBroadcastInterval() {
+        return config.getInt("broadcast.interval");
     }
     
     public void saveConfig() {
