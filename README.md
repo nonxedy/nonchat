@@ -16,4 +16,4 @@ TODO:
 - [X] Add death prefixes and suffixes.
 - [X] Add some commands.
 
-- [] Add comments in config.
+- [ ] Add comments in config.
