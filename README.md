@@ -6,13 +6,6 @@ That plugin have custom format for chat messages and death messages. Also plugin
 nonchat also have HEX support, config and 4 commands: broadcast, msg, clear, server, help and nreload.
 
 TODO:
-- [X] Add custom chat. Like: prefix username suffix: message
-- [X] Add HEX support.
-- [X] Add config.yml
-- [X] Add reload command.
 - [ ] Add bubble chat.
-- [X] Add x-y-z chat.
-- [X] Add auto broadcast.
-- [X] Add death prefixes and suffixes.
-- [X] Add some commands.
-- [X] Add comments in config.
+- [ ] Add messages.yml
+- [ ] Add custom format for /msg in config.yml
