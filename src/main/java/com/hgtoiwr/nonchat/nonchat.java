@@ -31,6 +31,8 @@ public class nonchat extends JavaPlugin {
   File plugin_directory = new File("plugins/nonchat");
 
   public void onEnable() {
+    saveDefaultConfig();
+
     registerConfigs();
     registerCommands();
     registerListeners();

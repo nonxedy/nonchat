@@ -15,5 +15,4 @@ TODO:
 - [X] Add auto broadcast.
 - [X] Add death prefixes and suffixes.
 - [X] Add some commands.
-
-- [ ] Add comments in config.
+- [X] Add comments in config.
