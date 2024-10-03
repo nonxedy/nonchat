@@ -31,6 +31,9 @@ public class ChatFormatListener implements Listener {
         String suffix = user.getCachedData().getMetaData().getSuffix();
         String message = event.getMessage();
 
+        prefix = prefix == null ? "" : prefix;
+        suffix = suffix == null ? "" : suffix;
+
         String chatFormat = config.getChatFormat();
         chatFormat = chatFormat.replace("{prefix}", prefix);
         chatFormat = chatFormat.replace("{suffix}", suffix);
