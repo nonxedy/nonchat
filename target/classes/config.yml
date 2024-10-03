@@ -1,5 +1,5 @@
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 5.0.1-sbt
+# Version of the plugin: 5.1.1-pt
 
 # Permissions for commands:
 # nonchat.*: Give access to all nonchat commands
@@ -12,6 +12,7 @@
 
 chat-format: "{prefix} §f{sender}§r {suffix}§7: §f{message}" # Like: Admin nonxedy vip: Hello!
 death-format: "{prefix} §f{player}§r {suffix}§f died" # Like: Admin nonxedy vip died
+private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # Like: nonxedy -> Admin: Hello!
 broadcast:
   enabled: true
   message: "This message will be sent every 60 seconds"

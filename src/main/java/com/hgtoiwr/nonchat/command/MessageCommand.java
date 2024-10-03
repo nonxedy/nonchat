@@ -7,10 +7,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import com.hgtoiwr.config.PluginConfig;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
 public class MessageCommand implements CommandExecutor {
+
+
+    private PluginConfig pluginConfig;
+
+    public MessageCommand(PluginConfig pluginConfig) {
+        this.pluginConfig = pluginConfig;
+    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
@@ -48,38 +57,17 @@ public class MessageCommand implements CommandExecutor {
                 message.append(args[i]).append(" ");
             }
 
-            if (sender instanceof Player) {
-                Player senderPlayer = (Player) sender;
-                senderPlayer.sendMessage(Component.text()
-                        .append(Component.text("Вы -> ", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(target.getName(), TextColor.fromHexString("#FFFFFF")))
-                        .append(Component.text(": ", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                String privateChatFormat = pluginConfig.getPrivateChatFormat();
+                if (sender instanceof Player) {
+                    Player senderPlayer = (Player) sender;
+                    senderPlayer.sendMessage(Component.text()
+                            .append(Component.text(privateChatFormat.replace("{sender}", sender.getName()).replace("{target}", target.getName()).replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
+                            .build());
+                }
+        
+                target.sendMessage(Component.text()
+                        .append(Component.text(privateChatFormat.replace("{sender}", sender.getName()).replace("{target}", "Вы").replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
                         .build());
-                        
-                Bukkit.getConsoleSender().sendMessage(Component.text()
-                        .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(sender.getName(), TextColor.fromHexString("#FFFFFF")))
-                        .append(Component.text(" -> ", TextColor.fromHexString("#333333")))
-                        .append(Component.text(target.getName(), TextColor.fromHexString("#FFFFFF")))
-                        .append(Component.text(": ", TextColor.fromHexString("#333333")))
-                        .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
-                        .build());
-            }
-
-            target.sendMessage(Component.text()
-                    .append(Component.text(sender.getName() + " -> Вы: ", TextColor.fromHexString("#E088FF")))
-                    .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
-                    .build());
-
-            Bukkit.getConsoleSender().sendMessage(Component.text()
-                    .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
-                    .append(Component.text(sender.getName(), TextColor.fromHexString("#FFFFFF")))
-                    .append(Component.text(" -> ", TextColor.fromHexString("#E088FF")))
-                    .append(Component.text(target.getName(), TextColor.fromHexString("#FFFFFF")))
-                    .append(Component.text(": ", TextColor.fromHexString("#E088FF")))
-                    .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
-                    .build());
             return true;
         }
         return false;

@@ -50,7 +50,7 @@ public class nonchat extends JavaPlugin {
   }
 
   public void registerCommands() {
-    getCommand("message").setExecutor(new MessageCommand());
+    getCommand("message").setExecutor(new MessageCommand(pluginConfig));
     getCommand("broadcast").setExecutor(new BroadcastCommand());
     getCommand("server").setExecutor(new ServerCommand());
     getCommand("help").setExecutor(new HelpCommand());
