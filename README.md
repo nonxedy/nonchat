@@ -8,4 +8,4 @@ nonchat also have HEX support, config and 4 commands: broadcast, msg, clear, ser
 TODO:
 - [ ] Add bubble chat.
 - [ ] Add messages.yml
-- [ ] Add custom format for /msg in config.yml
+- [X] Add custom format for /msg in config.yml
