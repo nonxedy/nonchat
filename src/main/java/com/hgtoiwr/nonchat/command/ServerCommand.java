@@ -6,16 +6,24 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import com.hgtoiwr.config.PluginMessages;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
 public class ServerCommand implements CommandExecutor {
 
+        private PluginMessages messages;
+        
+        public ServerCommand(PluginMessages messages) {
+            this.messages = messages;
+        }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         if (!sender.hasPermission("nonchat.server")) {
             sender.sendMessage(Component.text()
-                    .append(Component.text("Недостаточно прав", TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                     .build());
             return true;
         }
@@ -31,16 +39,16 @@ public class ServerCommand implements CommandExecutor {
             int numPlugins = Bukkit.getServer().getPluginManager().getPlugins().length;
             int numWorlds = Bukkit.getServer().getWorlds().size();
     
-            String infoMessage = "Server Information:\n" +
-                    "Java Version: " + javaVersion + "\n" +
-                    "Port: " + port + "\n" +
-                    "Version: " + version + "\n" +
-                    "OS Name: " + osN + "\n" +
-                    "OS Version: " + osV + "\n" +
-                    "CPU Cores: " + cpu + "\n" +
-                    "CPU Family: " + cpuFamily + "\n" +
-                    "Number of Plugins: " + numPlugins + "\n" +
-                    "Number of Worlds: " + numWorlds;
+            String infoMessage = messages.getServerInfo() + "\n" +
+                    messages.getJavaVersion() + javaVersion + "\n" +
+                    messages.getPort() + port + "\n" +
+                    messages.getVersion() + version + "\n" +
+                    messages.getOsName() + osN + "\n" +
+                    messages.getOsVersion() + osV + "\n" +
+                    messages.getCpuCores() + cpu + "\n" +
+                    messages.getCpuFamily() + cpuFamily + "\n" +
+                    messages.getNumberOfPlugins() + numPlugins + "\n" +
+                    messages.getNumberOfWorlds() + numWorlds;
 
             sender.sendMessage(Component.text()
                     .append(Component.text(infoMessage, TextColor.fromHexString("#E088FF")))

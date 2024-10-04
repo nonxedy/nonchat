@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.hgtoiwr.config.PluginConfig;
+import com.hgtoiwr.config.PluginMessages;
 import com.hgtoiwr.listeners.ChatFormatListener;
 import com.hgtoiwr.listeners.DeathCoordinates;
 import com.hgtoiwr.listeners.DeathListener;
@@ -27,6 +28,7 @@ public class nonchat extends JavaPlugin {
   private DeathCoordinates deathCoordinates;
   private AutoBroadcastSender autoBroadcastSender;
   private PluginConfig pluginConfig;
+  private PluginMessages pluginMessages;
   
   File plugin_directory = new File("plugins/nonchat");
 
@@ -50,12 +52,12 @@ public class nonchat extends JavaPlugin {
   }
 
   public void registerCommands() {
-    getCommand("message").setExecutor(new MessageCommand(pluginConfig));
-    getCommand("broadcast").setExecutor(new BroadcastCommand());
-    getCommand("server").setExecutor(new ServerCommand());
-    getCommand("help").setExecutor(new HelpCommand());
-    getCommand("nreload").setExecutor(new NreloadCommand(this));
-    getCommand("clear").setExecutor(new ClearCommand());
+    getCommand("message").setExecutor(new MessageCommand(pluginConfig, pluginMessages));
+    getCommand("broadcast").setExecutor(new BroadcastCommand(pluginMessages));
+    getCommand("server").setExecutor(new ServerCommand(pluginMessages));
+    getCommand("help").setExecutor(new HelpCommand(pluginMessages));
+    getCommand("nreload").setExecutor(new NreloadCommand(this, pluginMessages));
+    getCommand("clear").setExecutor(new ClearCommand(pluginMessages));
   }
 
   public void registerListeners() {
@@ -77,10 +79,12 @@ public class nonchat extends JavaPlugin {
   }
   public void registerConfigs() {
     pluginConfig = new PluginConfig();
+    pluginMessages = new PluginMessages();
   }
 
   public void reloadConfig() {
     pluginConfig.reloadConfig();
+    pluginMessages.reloadConfig();
   }
 
   public void stopAutoBroadcastSender() {

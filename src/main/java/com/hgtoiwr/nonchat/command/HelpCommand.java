@@ -5,35 +5,38 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import com.hgtoiwr.config.PluginMessages;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
 public class HelpCommand implements CommandExecutor {
 
+    private PluginMessages messages;
+
+    public HelpCommand(PluginMessages messages) {
+        this.messages = messages;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         if (!sender.hasPermission("nonchat.help")) {
             sender.sendMessage(Component.text()
-                    .append(Component.text("Недостаточно прав", TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                     .build());
             return true;
         }
 
         sender.sendMessage(Component.text()
-                .append(Component.text("nonchat | Команды плагина:\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getHelp() + "\n", TextColor.fromHexString("#E088FF")))
                 .build());
 
         sender.sendMessage(Component.text()
-                .append(Component.text("/nreload ", TextColor.fromHexString("#E088FF")))
-                .append(Component.text("- перезагрузка плагина\n", TextColor.fromHexString("#FFFFFF")))
-                .append(Component.text("/help ", TextColor.fromHexString("#E088FF")))
-                .append(Component.text("- список команд\n", TextColor.fromHexString("#FFFFFF")))
-                .append(Component.text("/server ", TextColor.fromHexString("#E088FF")))
-                .append(Component.text("- информация о сервере\n", TextColor.fromHexString("#FFFFFF")))
-                .append(Component.text("/m <игрок> <сообщение> (msg, w, whisper, message) ", TextColor.fromHexString("#E088FF")))
-                .append(Component.text("- отправка личных сообщений\n", TextColor.fromHexString("#FFFFFF")))
-                .append(Component.text("/bc <сообщение> (broadcast) ", TextColor.fromHexString("#E088FF")))
-                .append(Component.text("- отправка сообщений всем игрокам", TextColor.fromHexString("#FFFFFF")))
+                .append(Component.text(messages.getNreload() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getHelpCommand() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getServerCommand() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getMessageCommand() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getBroadcastCommand() + "\n", TextColor.fromHexString("#E088FF")))
                 .build());
 
         return true;

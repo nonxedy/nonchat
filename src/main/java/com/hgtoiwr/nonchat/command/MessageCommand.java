@@ -8,17 +8,19 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import com.hgtoiwr.config.PluginConfig;
+import com.hgtoiwr.config.PluginMessages;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
 public class MessageCommand implements CommandExecutor {
 
-
     private PluginConfig pluginConfig;
+    private PluginMessages messages;
 
-    public MessageCommand(PluginConfig pluginConfig) {
+    public MessageCommand(PluginConfig pluginConfig, PluginMessages messages) {
         this.pluginConfig = pluginConfig;
+        this.messages = messages;
     }
 
     @Override
@@ -32,14 +34,14 @@ public class MessageCommand implements CommandExecutor {
             
             if (!sender.hasPermission("nonchat.message")) {
                 sender.sendMessage(Component.text()
-                        .append(Component.text("Недостаточно прав", TextColor.fromHexString("#ADF3FD")))
+                        .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                         .build());
                 return true;
             }
             
             if (args.length < 2) {
                 sender.sendMessage(Component.text()
-                        .append(Component.text("Используйте: /msg <игрок> <сообщение>", TextColor.fromHexString("#ADF3FD")))
+                        .append(Component.text(messages.getInvalidUsageMessage(), TextColor.fromHexString("#ADF3FD")))
                         .build());
                 return true;
             }
@@ -47,7 +49,7 @@ public class MessageCommand implements CommandExecutor {
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null) {
                 sender.sendMessage(Component.text()
-                        .append(Component.text("Игрок не найден.", TextColor.fromHexString("#ADF3FD")))
+                        .append(Component.text(messages.getPlayerNotFound(), TextColor.fromHexString("#ADF3FD")))
                         .build());
                 return true;
             }
