@@ -2,7 +2,7 @@ name: nonchat
 author: hgtoiwr
 main: com.hgtoiwr.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 5.2.2-pt
+version: 5.2.3-pt
 prefix: nonchat
 api-version: 1.20
 load: STARTUP

@@ -34,6 +34,7 @@ public class nonchat extends JavaPlugin {
 
   public void onEnable() {
     saveDefaultConfig();
+    saveResource("messages.yml", false);
 
     registerConfigs();
     registerCommands();

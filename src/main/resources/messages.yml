@@ -1,0 +1,41 @@
+# Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
+# Version of the plugin: 5.2.3-pt
+
+no-permission: Недостаточно прав
+
+# Server Information: /server
+server-info: 'Server Information:'
+java-version: 'Java Version: '
+port: 'Port: '
+version: 'Version: '
+os-name: 'OS Name: '
+os-version: 'OS Version: '
+cpu-cores: 'CPU Cores: '
+cpu-family: 'CPU Family: '
+number-of-plugins: 'Number of Plugins: '
+number-of-worlds: 'Number of Worlds: '
+
+# Reload: /nreload
+reloading: Перезагрузка...
+reloaded: Плагин перезагружен!
+reload-failed: Не удалось перезагрузить плагин!
+
+#Help: /help
+help: 'nonchat | Команды плагина:'
+nreload: /nreload - перезагрузка плагина
+help-command: /help - список команд
+server-command: /server - информация о сервере
+message-command: /m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных
+  сообщений
+broadcast-command: /bc <сообщение> (broadcast) - отправка сообщений всем игрокам
+
+# Clear Chat: /clear
+clear-chat: Очистка чата...
+chat-cleared: Чат очищен
+
+# Broadcast: /bc
+broadcast: 'Оповещение: '
+
+# Message: /m
+player-not-found: Игрок не найден.
+invalid-usage-message: 'Используйте: /m <игрок> <сообщение>'
