@@ -39,19 +39,17 @@ public class ServerCommand implements CommandExecutor {
             int numPlugins = Bukkit.getServer().getPluginManager().getPlugins().length;
             int numWorlds = Bukkit.getServer().getWorlds().size();
     
-            String infoMessage = messages.getServerInfo() + "\n" +
-                    messages.getJavaVersion() + javaVersion + "\n" +
-                    messages.getPort() + port + "\n" +
-                    messages.getVersion() + version + "\n" +
-                    messages.getOsName() + osN + "\n" +
-                    messages.getOsVersion() + osV + "\n" +
-                    messages.getCpuCores() + cpu + "\n" +
-                    messages.getCpuFamily() + cpuFamily + "\n" +
-                    messages.getNumberOfPlugins() + numPlugins + "\n" +
-                    messages.getNumberOfWorlds() + numWorlds;
-
             sender.sendMessage(Component.text()
-                    .append(Component.text(infoMessage, TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getServerInfo() + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getJavaVersion() + javaVersion + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getPort() + port + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getVersion() + version + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getOsName() + osN + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getOsVersion() + osV + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getCpuCores() + cpu + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getCpuFamily() + cpuFamily + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getNumberOfPlugins() + numPlugins + "\n", TextColor.fromHexString("#E088FF")))
+                    .append(Component.text(messages.getNumberOfWorlds() + numWorlds, TextColor.fromHexString("#E088FF")))
                     .build());
 
             return true;

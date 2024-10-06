@@ -12,3 +12,4 @@ TODO:
 - [X] Add messages.yml
 - [ ] Add HEX support in messages.yml
 - [X] Add custom format for /msg in config.yml
+- [ ] Add placeholders.

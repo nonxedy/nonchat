@@ -25,7 +25,7 @@ public class NreloadCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         if (!sender.hasPermission("nonchat.nreload")) {
             sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNreload(), TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                     .build());
             return true;
         }
