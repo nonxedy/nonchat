@@ -17,6 +17,7 @@ import com.hgtoiwr.nonchat.command.MessageCommand;
 import com.hgtoiwr.nonchat.command.NreloadCommand;
 import com.hgtoiwr.nonchat.command.ServerCommand;
 import com.hgtoiwr.utils.AutoBroadcastSender;
+import com.hgtoiwr.utils.BroadcastMessage;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -29,6 +30,7 @@ public class nonchat extends JavaPlugin {
   private AutoBroadcastSender autoBroadcastSender;
   private PluginConfig pluginConfig;
   private PluginMessages pluginMessages;
+  private BroadcastMessage broadcastMessage;
   
   File plugin_directory = new File("plugins/nonchat");
 
@@ -79,7 +81,7 @@ public class nonchat extends JavaPlugin {
     autoBroadcastSender.start();
   }
   public void registerConfigs() {
-    pluginConfig = new PluginConfig();
+    pluginConfig = new PluginConfig(broadcastMessage);
     pluginMessages = new PluginMessages();
   }
 

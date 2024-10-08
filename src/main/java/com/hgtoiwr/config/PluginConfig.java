@@ -2,21 +2,28 @@ package com.hgtoiwr.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import com.hgtoiwr.utils.BroadcastMessage;
 
 public class PluginConfig {
 
     private File file;
     private FileConfiguration config;
+    private BroadcastMessage broadcastMessage;
 
-    public PluginConfig() {
+    public PluginConfig(BroadcastMessage broadcastMessage) {
         file = new File("plugins/nonchat", "config.yml");
         if (!file.exists()) {
             createDefaultConfig();
         }
         config = YamlConfiguration.loadConfiguration(file);
+        this.broadcastMessage = broadcastMessage;
     }
     
     private void createDefaultConfig() {
@@ -72,5 +79,19 @@ public class PluginConfig {
 
     public void reloadConfig() {
         config = YamlConfiguration.loadConfiguration(file);
+    }
+
+    public Map<String, BroadcastMessage> getBroadcastMessages() {
+        Map<String, BroadcastMessage> messages = new HashMap<>();
+        ConfigurationSection section = config.getConfigurationSection("broadcast");
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection messageSection = section.getConfigurationSection(key);
+            messages.put(key, new BroadcastMessage(
+                    messageSection.getBoolean("enabled"),
+                    messageSection.getString("message"),
+                    messageSection.getInt("interval")
+            ));
+        }
+        return messages;
     }
 }
