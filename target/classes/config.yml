@@ -1,5 +1,5 @@
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 5.2.4-pt
+# Version of the plugin: 5.4.4-pt
 
 # Permissions for commands:
 # nonchat.*: Give access to all nonchat commands
@@ -17,6 +17,9 @@ death-format: "{prefix} §f{player}§r {suffix}§f died" # Like: Admin nonxedy v
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # Like: nonxedy -> Admin: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
 
 broadcast:
+
+  random: true # Enable random auto broadcast messages.
+
   example:
     enabled: true
     message: "This message will be sent every 60 seconds"

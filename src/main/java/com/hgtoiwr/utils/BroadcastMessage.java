@@ -23,4 +23,3 @@ public class BroadcastMessage {
         return interval;
     }
 }
-

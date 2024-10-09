@@ -81,10 +81,17 @@ public class PluginConfig {
         config = YamlConfiguration.loadConfiguration(file);
     }
 
+    public boolean isRandomBroadcastEnabled() {
+        return config.getBoolean("broadcast.random");
+    }
+
     public Map<String, BroadcastMessage> getBroadcastMessages() {
         Map<String, BroadcastMessage> messages = new HashMap<>();
         ConfigurationSection section = config.getConfigurationSection("broadcast");
         for (String key : section.getKeys(false)) {
+            if (key.equals("random")) {
+                continue;
+            }
             ConfigurationSection messageSection = section.getConfigurationSection(key);
             messages.put(key, new BroadcastMessage(
                     messageSection.getBoolean("enabled"),

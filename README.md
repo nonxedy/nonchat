@@ -14,4 +14,5 @@ TODO:
 - [X] Add custom format for /msg in config.yml
 - [ ] Add placeholders.
 - [X] Add support for more auto broadcast messages.
-- [ ] Add shuffle for auto broadcast messages.
+- [X] Add shuffle for auto broadcast messages.
+- [ ] Add debugger.
