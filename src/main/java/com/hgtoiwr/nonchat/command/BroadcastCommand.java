@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import com.hgtoiwr.config.PluginMessages;
+import com.hgtoiwr.nonchat.nonchat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -22,6 +23,9 @@ public class BroadcastCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+        nonchat plugin = (nonchat) Bukkit.getPluginManager().getPlugin("nonchat");
+        plugin.logCommand(command.getName(), args);
+        
         if (command.getName().equalsIgnoreCase("broadcast") ||
             command.getName().equalsIgnoreCase("bc")) {
 
@@ -44,18 +48,24 @@ public class BroadcastCommand implements CommandExecutor {
                 message.append(arg).append(" ");
             }
 
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                player.sendMessage(" ");
-                player.sendMessage(Component.text()
-                        .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
-                        .build());
-                player.sendMessage(" ");
+            try {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    player.sendMessage(" ");
+                    player.sendMessage(Component.text()
+                            .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
+                            .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                            .build());
+                    player.sendMessage(" ");
 
-                Bukkit.getConsoleSender().sendMessage(Component.text()
-                        .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
-                        .build());
+                    plugin.logResponse("Сообщение разослано");
+
+                    Bukkit.getConsoleSender().sendMessage(Component.text()
+                            .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
+                            .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                            .build());
+                }
+            } catch (Exception e) {
+                plugin.logError("Ошибка разослания сообщения: " + e.getMessage());
             }
             return true;
         }

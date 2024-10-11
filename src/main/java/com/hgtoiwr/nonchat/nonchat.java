@@ -18,6 +18,7 @@ import com.hgtoiwr.nonchat.command.NreloadCommand;
 import com.hgtoiwr.nonchat.command.ServerCommand;
 import com.hgtoiwr.utils.AutoBroadcastSender;
 import com.hgtoiwr.utils.BroadcastMessage;
+import com.hgtoiwr.utils.Debugger;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -31,6 +32,7 @@ public class nonchat extends JavaPlugin {
   private PluginConfig pluginConfig;
   private PluginMessages pluginMessages;
   private BroadcastMessage broadcastMessage;
+  private Debugger debugger;
   
   File plugin_directory = new File("plugins/nonchat");
 
@@ -79,6 +81,10 @@ public class nonchat extends JavaPlugin {
 
     // Register utils
     autoBroadcastSender.start();
+    
+    if (pluginConfig.isDebug()) {
+      debugger = new Debugger();
+    }
   }
   public void registerConfigs() {
     pluginConfig = new PluginConfig(broadcastMessage);
@@ -92,5 +98,39 @@ public class nonchat extends JavaPlugin {
 
   public void stopAutoBroadcastSender() {
     autoBroadcastSender.stop();
+  }
+
+  public void log(String message) {
+    if (debugger != null) {
+        debugger.log(message);
+    }
+  } 
+
+  public void logCommand(String command, String[] args) {
+    if (debugger != null) {
+      debugger.log("Команда: " + command + " Аргументы: " + java.util.Arrays.toString(args));
+    }
+  }
+
+  public void logResponse(String response) {
+    if (debugger != null) {
+      debugger.log("Ответ: " + response);
+    }
+  }
+
+  public void logError(String error) {
+    if (debugger != null) {
+        debugger.log("Ошибка: " + error);
+    }
+  }
+
+  public void reloadDebugger() {
+    if (pluginConfig.isDebug()) {
+        if (debugger == null) {
+            debugger = new Debugger();
+        }
+    } else {
+        debugger = null;
+    }
   }
 }

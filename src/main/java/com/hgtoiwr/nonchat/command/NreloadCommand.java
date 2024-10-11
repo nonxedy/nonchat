@@ -36,6 +36,7 @@ public class NreloadCommand implements CommandExecutor {
 
         try {
             nonchat.reloadConfig();
+            nonchat.reloadDebugger();
             nonchat.stopAutoBroadcastSender();
             nonchat.registerUtils();
             sender.sendMessage(Component.text()

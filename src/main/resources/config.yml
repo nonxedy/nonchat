@@ -1,5 +1,5 @@
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 5.4.4-pt
+# Version of the plugin: 5.5.4-pt
 
 # Permissions for commands:
 # nonchat.*: Give access to all nonchat commands
@@ -10,15 +10,21 @@
 # nonchat.help: Allows /help command
 # nonchat.clear: Allows /clear command
 
-chat-format: "{prefix} §f{sender}§r {suffix}§7: §f{message}" # Like: Admin nonxedy vip: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
+debug: false
 
-death-format: "{prefix} §f{player}§r {suffix}§f died" # Like: Admin nonxedy vip died
+# Like: Admin nonxedy vip: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
+chat-format: "{prefix} §f{sender}§r {suffix}§7: §f{message}"
 
-private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # Like: nonxedy -> Admin: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
+# Like: Admin nonxedy vip died
+death-format: "{prefix} §f{player}§r {suffix}§f died"
+
+# Like: nonxedy -> Admin: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
+private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}"
 
 broadcast:
 
-  random: true # Enable random auto broadcast messages.
+  # Enable random auto broadcast messages.
+  random: true
 
   example:
     enabled: true

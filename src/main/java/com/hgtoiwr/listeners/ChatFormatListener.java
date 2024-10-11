@@ -3,12 +3,14 @@ package com.hgtoiwr.listeners;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.hgtoiwr.config.PluginConfig;
+import com.hgtoiwr.nonchat.nonchat;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -39,6 +41,9 @@ public class ChatFormatListener implements Listener {
         chatFormat = chatFormat.replace("{suffix}", suffix);
         chatFormat = chatFormat.replace("{sender}", player.getName());
         chatFormat = chatFormat.replace("{message}", hex(message));
+
+        nonchat plugin = (nonchat) Bukkit.getPluginManager().getPlugin("nonchat");
+        plugin.log("Player " + event.getPlayer().getName() + " sent message: " + event.getMessage());
 
         event.setFormat(chatFormat);
     }

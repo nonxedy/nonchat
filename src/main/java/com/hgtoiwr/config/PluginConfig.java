@@ -16,6 +16,7 @@ public class PluginConfig {
     private File file;
     private FileConfiguration config;
     private BroadcastMessage broadcastMessage;
+    private boolean debug;
 
     public PluginConfig(BroadcastMessage broadcastMessage) {
         file = new File("plugins/nonchat", "config.yml");
@@ -24,6 +25,7 @@ public class PluginConfig {
         }
         config = YamlConfiguration.loadConfiguration(file);
         this.broadcastMessage = broadcastMessage;
+        debug = config.getBoolean("debug");
     }
     
     private void createDefaultConfig() {
@@ -67,6 +69,14 @@ public class PluginConfig {
 
     public String getPrivateChatFormat() {
         return config.getString("private-chat-format");
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
     
     public void saveConfig() {
