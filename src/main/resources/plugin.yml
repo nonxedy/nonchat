@@ -2,7 +2,7 @@ name: nonchat
 author: hgtoiwr
 main: com.hgtoiwr.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 5.5.4-pt
+version: 5.6.4-pt
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -23,6 +23,7 @@ permissions:
       - nonchat.nreload
       - nonchat.help
       - nonchat.clear
+      - nonchat.ignore
   nonchat.message:
     description: Allows /message command
     default: true
@@ -41,6 +42,9 @@ permissions:
   nonchat.clear:
     description: Allows /clear command
     default: false
+  nonchat.ignore:
+    description: Allows /ignore command
+    default: true
 
 commands:
   message:
@@ -74,4 +78,9 @@ commands:
     description: Clear chat.
     usage: /clear
     permission: nonchat.clear
+    permission-message: You do not have <permission> to use this command!
+  ignore:
+    description: Ignore a player.
+    usage: /ignore <player>
+    permission: nonchat.ignore
     permission-message: You do not have <permission> to use this command!

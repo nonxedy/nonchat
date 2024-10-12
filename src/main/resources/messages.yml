@@ -1,5 +1,5 @@
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 5.5.4-pt
+# Version of the plugin: 5.6.4-pt
 
 no-permission: Недостаточно прав
 
@@ -28,6 +28,7 @@ server-command: /server - информация о сервере
 message-command: /m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных
   сообщений
 broadcast-command: /bc <сообщение> (broadcast) - отправка сообщений всем игрокам
+ignore-command: /ignore <игрок> - игнорировать игрока
 
 # Clear Chat: /clear
 clear-chat: Очистка чата...
@@ -39,3 +40,9 @@ broadcast: 'Оповещение: '
 # Message: /m
 player-not-found: Игрок не найден.
 invalid-usage-message: 'Используйте: /m <игрок> <сообщение>'
+
+# Ignore: /ignore
+ignored-player: Вы начали игнорировать игрока {player}.
+unignored-player: Вы больше не игнорируете игрока {player}.
+ignored-by-target: Этот игрок игнорирует вас и не может отправить ему сообщение.
+invalid-usage-ignore: 'Используйте: /ignore <игрок>'

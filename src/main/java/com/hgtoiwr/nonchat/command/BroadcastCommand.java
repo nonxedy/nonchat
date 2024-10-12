@@ -16,14 +16,15 @@ import net.kyori.adventure.text.format.TextColor;
 public class BroadcastCommand implements CommandExecutor {
 
     private PluginMessages messages;
+    private nonchat plugin;
 
-    public BroadcastCommand(PluginMessages messages) {
+    public BroadcastCommand(PluginMessages messages, nonchat plugin) {
         this.messages = messages;
+        this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
-        nonchat plugin = (nonchat) Bukkit.getPluginManager().getPlugin("nonchat");
         plugin.logCommand(command.getName(), args);
         
         if (command.getName().equalsIgnoreCase("broadcast") ||
@@ -33,6 +34,7 @@ public class BroadcastCommand implements CommandExecutor {
                 sender.sendMessage(Component.text()
                         .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                         .build());
+                plugin.logError("You don't have permission to send broadcast.");
                 return true;
             }
 
@@ -40,6 +42,7 @@ public class BroadcastCommand implements CommandExecutor {
                 sender.sendMessage(Component.text()
                         .append(Component.text(messages.getBroadcastCommand(), TextColor.fromHexString("#ADF3FD")))
                         .build());
+                plugin.logError("Invalid usage: /broadcast <message>");
                 return true;
             }
 
@@ -57,7 +60,7 @@ public class BroadcastCommand implements CommandExecutor {
                             .build());
                     player.sendMessage(" ");
 
-                    plugin.logResponse("Сообщение разослано");
+                    plugin.logResponse("Broadcast sent.");
 
                     Bukkit.getConsoleSender().sendMessage(Component.text()
                             .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
@@ -65,7 +68,7 @@ public class BroadcastCommand implements CommandExecutor {
                             .build());
                 }
             } catch (Exception e) {
-                plugin.logError("Ошибка разослания сообщения: " + e.getMessage());
+                plugin.logError("There was an error sending broadcast: " + e.getMessage());
             }
             return true;
         }

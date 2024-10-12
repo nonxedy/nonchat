@@ -15,20 +15,22 @@ import net.kyori.adventure.text.format.TextColor;
 public class ServerCommand implements CommandExecutor {
 
         private PluginMessages messages;
+        private nonchat plugin;
         
-        public ServerCommand(PluginMessages messages) {
+        public ServerCommand(PluginMessages messages, nonchat plugin) {
             this.messages = messages;
+            this.plugin = plugin;
         }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
-        nonchat plugin = (nonchat) Bukkit.getPluginManager().getPlugin("nonchat");
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.server")) {
             sender.sendMessage(Component.text()
                     .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                     .build());
+            plugin.logError("You don't have permission to show server info.");
             return true;
         }
 
@@ -56,8 +58,10 @@ public class ServerCommand implements CommandExecutor {
                         .append(Component.text(messages.getNumberOfPlugins() + numPlugins + "\n", TextColor.fromHexString("#E088FF")))
                         .append(Component.text(messages.getNumberOfWorlds() + numWorlds, TextColor.fromHexString("#E088FF")))
                         .build());
+
+                plugin.logResponse("Server info shown.");
             } catch (Exception e) {
-                plugin.logError("Ошибка отправки информации о сервере: " + e.getMessage());
+                plugin.logError("There was an error showing server info: " + e.getMessage());
             }
             return true;
     }

@@ -45,11 +45,16 @@ public class PluginMessages {
             messages.set("server-command", "/server - информация о сервере");
             messages.set("message-command", "/m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных сообщений");
             messages.set("broadcast-command", "/bc <сообщение> (broadcast) - отправка сообщений всем игрокам");
+            messages.set("ignore-command", "/ignore <игрок> - игнорировать игрока");
             messages.set("clear-chat", "Очистка чата...");
             messages.set("chat-cleared", "Чат очищен");
             messages.set("broadcast", "Оповещение: ");
             messages.set("player-not-found", "Игрок не найден.");
             messages.set("invalid-usage-message", "Используйте: /m <игрок> <сообщение>");
+            messages.set("invalid-usage-ignore", "Используйте: /ignore <игрок>");
+            messages.set("ignored-player", "Вы начали игнорировать игрока {player}.");
+            messages.set("unignored-player", "Вы больше не игнорируете игрока {player}.");
+            messages.set("ignored-by-target", "Этот игрок игнорирует вас и вы не можете отправить ему сообщение.");
             
             messages.save(file);
         } catch (IOException e) {
@@ -155,6 +160,26 @@ public class PluginMessages {
     
     public String getInvalidUsageMessage() {
         return messages.getString("invalid-usage-message");
+    }
+
+    public String getIgnoreCommand() {
+        return messages.getString("ignore-command");
+    }
+
+    public String getInvalidUsageIgnore() {
+        return messages.getString("invalid-usage-ignore");
+    }
+
+    public String getIgnoredPlayer(String player) {
+        return messages.getString("ignored-player").replace("{player}", player);
+    }
+
+    public String getUnignoredPlayer(String player) {
+        return messages.getString("unignored-player").replace("{player}", player);
+    }
+
+    public String getIgnoredByTarget() {
+        return messages.getString("ignored-by-target");
     }
 
     public void saveConfig() {

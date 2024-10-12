@@ -27,12 +27,14 @@ public class NreloadCommand implements CommandExecutor {
             sender.sendMessage(Component.text()
                     .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                     .build());
+            nonchat.logError("You don't have permission to reload the config.");
             return true;
         }
 
         sender.sendMessage(Component.text()
                 .append(Component.text(messages.getReloading(), TextColor.fromHexString("#E088FF")))
                 .build());
+        nonchat.logResponse("Reloading...");
 
         try {
             nonchat.reloadConfig();
@@ -42,10 +44,14 @@ public class NreloadCommand implements CommandExecutor {
             sender.sendMessage(Component.text()
                 .append(Component.text(messages.getReloaded(), TextColor.fromHexString("#52FFA6")))
                 .build());
+
+            nonchat.logResponse("Config reloaded.");
         } catch (Exception e) {
             sender.sendMessage(Component.text()
                 .append(Component.text(messages.getReloadFailed(), TextColor.fromHexString("#FF5252")))
                 .build());
+
+            nonchat.logError("There was an error reloading the config: " + e.getMessage());
         }
         return true;
     }
