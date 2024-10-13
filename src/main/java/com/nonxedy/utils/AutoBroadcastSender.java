@@ -1,4 +1,4 @@
-package com.hgtoiwr.utils;
+package com.nonxedy.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.hgtoiwr.config.PluginConfig;
+import com.nonxedy.config.PluginConfig;
 
 @SuppressWarnings("deprecation")
 public class AutoBroadcastSender {

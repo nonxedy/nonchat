@@ -1,4 +1,4 @@
-package com.hgtoiwr.config;
+package com.nonxedy.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.hgtoiwr.utils.BroadcastMessage;
+import com.nonxedy.utils.BroadcastMessage;
 
 public class PluginConfig {
 

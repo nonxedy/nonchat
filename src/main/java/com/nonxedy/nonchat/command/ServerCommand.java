@@ -1,4 +1,4 @@
-package com.hgtoiwr.nonchat.command;
+package com.nonxedy.nonchat.command;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -6,8 +6,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import com.hgtoiwr.config.PluginMessages;
-import com.hgtoiwr.nonchat.nonchat;
+import com.nonxedy.config.PluginMessages;
+import com.nonxedy.nonchat.nonchat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

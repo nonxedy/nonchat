@@ -1,4 +1,4 @@
-package com.hgtoiwr.listeners;
+package com.nonxedy.listeners;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,8 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import com.hgtoiwr.config.PluginConfig;
-import com.hgtoiwr.nonchat.nonchat;
+import com.nonxedy.config.PluginConfig;
+import com.nonxedy.nonchat.nonchat;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;

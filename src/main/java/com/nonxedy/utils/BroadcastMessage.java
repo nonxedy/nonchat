@@ -1,4 +1,4 @@
-package com.hgtoiwr.utils;
+package com.nonxedy.utils;
 
 public class BroadcastMessage {
     private boolean enabled;

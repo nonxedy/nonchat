@@ -1,4 +1,4 @@
-package com.hgtoiwr.listeners;
+package com.nonxedy.listeners;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

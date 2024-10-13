@@ -1,11 +1,11 @@
-package com.hgtoiwr.listeners;
+package com.nonxedy.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import com.hgtoiwr.config.PluginConfig;
+import com.nonxedy.config.PluginConfig;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -21,8 +21,7 @@ public class DeathListener implements Listener {
     
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity
-        ();
+        Player player = event.getEntity();
         User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
         String prefix = user.getCachedData().getMetaData().getPrefix();
         String suffix = user.getCachedData().getMetaData().getSuffix();

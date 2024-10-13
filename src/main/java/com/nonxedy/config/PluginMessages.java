@@ -1,4 +1,4 @@
-package com.hgtoiwr.config;
+package com.nonxedy.config;
 
 import java.io.File;
 import java.io.IOException;

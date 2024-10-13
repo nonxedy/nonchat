@@ -1,4 +1,4 @@
-package com.hgtoiwr.nonchat;
+package com.nonxedy.nonchat;
 
 import java.io.File;
 import java.util.HashMap;
@@ -9,21 +9,21 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.hgtoiwr.config.PluginConfig;
-import com.hgtoiwr.config.PluginMessages;
-import com.hgtoiwr.listeners.ChatFormatListener;
-import com.hgtoiwr.listeners.DeathCoordinates;
-import com.hgtoiwr.listeners.DeathListener;
-import com.hgtoiwr.nonchat.command.BroadcastCommand;
-import com.hgtoiwr.nonchat.command.ClearCommand;
-import com.hgtoiwr.nonchat.command.HelpCommand;
-import com.hgtoiwr.nonchat.command.IgnoreCommand;
-import com.hgtoiwr.nonchat.command.MessageCommand;
-import com.hgtoiwr.nonchat.command.NreloadCommand;
-import com.hgtoiwr.nonchat.command.ServerCommand;
-import com.hgtoiwr.utils.AutoBroadcastSender;
-import com.hgtoiwr.utils.BroadcastMessage;
-import com.hgtoiwr.utils.Debugger;
+import com.nonxedy.config.PluginConfig;
+import com.nonxedy.config.PluginMessages;
+import com.nonxedy.listeners.ChatFormatListener;
+import com.nonxedy.listeners.DeathCoordinates;
+import com.nonxedy.listeners.DeathListener;
+import com.nonxedy.nonchat.command.BroadcastCommand;
+import com.nonxedy.nonchat.command.ClearCommand;
+import com.nonxedy.nonchat.command.HelpCommand;
+import com.nonxedy.nonchat.command.IgnoreCommand;
+import com.nonxedy.nonchat.command.MessageCommand;
+import com.nonxedy.nonchat.command.NreloadCommand;
+import com.nonxedy.nonchat.command.ServerCommand;
+import com.nonxedy.utils.AutoBroadcastSender;
+import com.nonxedy.utils.BroadcastMessage;
+import com.nonxedy.utils.Debugger;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
