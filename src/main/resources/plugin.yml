@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 5.6.5-pt
+version: 5.7.5-pt
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -24,6 +24,7 @@ permissions:
       - nonchat.help
       - nonchat.clear
       - nonchat.ignore
+      - nonchat.sc
   nonchat.message:
     description: Allows /message command
     default: true
@@ -44,6 +45,9 @@ permissions:
     default: false
   nonchat.ignore:
     description: Allows /ignore command
+    default: true
+  nonchat.sc:
+    description: Allows /sc command
     default: true
 
 commands:
@@ -83,4 +87,9 @@ commands:
     description: Ignore a player.
     usage: /ignore <player>
     permission: nonchat.ignore
+    permission-message: You do not have <permission> to use this command!
+  sc:
+    description: Staff chat.
+    usage: /sc
+    permission: nonchat.sc
     permission-message: You do not have <permission> to use this command!

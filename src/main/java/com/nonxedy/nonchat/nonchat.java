@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.command.IgnoreCommand;
 import com.nonxedy.nonchat.command.MessageCommand;
 import com.nonxedy.nonchat.command.NreloadCommand;
 import com.nonxedy.nonchat.command.ServerCommand;
+import com.nonxedy.nonchat.command.StaffChatCommand;
 import com.nonxedy.utils.AutoBroadcastSender;
 import com.nonxedy.utils.BroadcastMessage;
 import com.nonxedy.utils.Debugger;
@@ -73,6 +74,7 @@ public class nonchat extends JavaPlugin {
         getCommand("nreload").setExecutor(new NreloadCommand(this, pluginMessages));
         getCommand("clear").setExecutor(new ClearCommand(pluginMessages, this));
         getCommand("ignore").setExecutor(new IgnoreCommand(this, pluginMessages));
+        getCommand("sc").setExecutor(new StaffChatCommand(this, pluginMessages));
     }
 
     public void registerListeners() {
