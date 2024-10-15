@@ -1,5 +1,5 @@
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 5.7.5-pt
+# Version of the plugin: 5.8.5-pt
 
 # Permissions for commands:
 # nonchat.*: Give access to all nonchat commands
@@ -22,6 +22,9 @@ death-format: "{prefix} §f{player}§r {suffix}§f died"
 
 # Like: nonxedy -> Admin: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}"
+
+#Like: [STAFFCHAT] Admin nonxedy vip: Hello! (Only staff can see this message)
+sc-format: "{prefix} §f{sender}§r {suffix}§7: §7{message}"
 
 broadcast:
 

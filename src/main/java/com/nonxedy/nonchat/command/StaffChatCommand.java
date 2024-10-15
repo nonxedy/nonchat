@@ -3,22 +3,28 @@ package com.nonxedy.nonchat.command;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import com.nonxedy.config.PluginConfig;
 import com.nonxedy.config.PluginMessages;
 import com.nonxedy.nonchat.nonchat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.User;
 
 public class StaffChatCommand implements CommandExecutor {
 
     private nonchat plugin;
     private PluginMessages messages;
+    private PluginConfig config;
 
-    public StaffChatCommand(nonchat plugin, PluginMessages messages) {
+    public StaffChatCommand(nonchat plugin, PluginMessages messages, PluginConfig config) {
         this.plugin = plugin;
         this.messages = messages;
+        this.config = config;
     }
 
     @Override
@@ -42,17 +48,45 @@ public class StaffChatCommand implements CommandExecutor {
         }
         
         String message = String.join(" ", args);
+        String staffchat = config.getScFormat();
 
-        try {
-            plugin.getServer().getOnlinePlayers().stream()
-                .filter(player -> player.hasPermission("nonchat.sc"))
-                .forEach(player -> player.sendMessage(Component.text()
-                .append(Component.text("[STAFF CHAT] ", TextColor.fromHexString("#ADF3FD")))
-                .append(Component.text(sender.getName() + ": ", TextColor.fromHexString("#84B8FF ")))
-                .append(Component.text(message, TextColor.fromHexString("#FFFFFF")))
-                .build()));
-        } catch (Exception e) {
-            plugin.logError("There was an error sending message in staff chat: " + e.getMessage());
+
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
+            String prefix = user.getCachedData().getMetaData().getPrefix();
+            String suffix = user.getCachedData().getMetaData().getSuffix();
+    
+            final String finalPrefix = prefix == null ? "" : prefix;
+            final String finalSuffix = suffix == null ? "" : suffix;
+    
+            try {
+                plugin.getServer().getOnlinePlayers().stream()
+                    .filter(p -> p.hasPermission("nonchat.sc"))
+                    .forEach(p -> p.sendMessage(Component.text()
+                    .append(Component.text("[STAFF CHAT] ", TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(staffchat. replace("{sender}", sender.getName())
+                            .replace("{prefix}", finalPrefix)
+                            .replace("{suffix}", finalSuffix)
+                            .replace("{message}", message), TextColor.fromHexString("#FFFFFF")))
+                    .build()));
+            } catch (Exception e) {
+                plugin.logError("There was an error sending message in staff chat: " + e.getMessage());
+            }
+        } else {
+            try {
+                plugin.getServer().getOnlinePlayers().stream()
+                    .filter(p -> p.hasPermission("nonchat.sc"))
+                    .forEach(p -> p.sendMessage(Component.text()
+                    .append(Component.text("[STAFF CHAT] ", TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(staffchat.replace("{sender}", "Console")
+                            .replace("{prefix}", "")
+                            .replace("{suffix}", "")
+                            .replace("{message}", message), TextColor.fromHexString("#FFFFFF")))
+                    .build()));
+            } catch (Exception e) {
+                plugin.logError("There was an error sending message in staff chat: " + e.getMessage());
+            }
         }
         return true;
     }

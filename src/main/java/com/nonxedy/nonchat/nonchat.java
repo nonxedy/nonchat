@@ -74,7 +74,7 @@ public class nonchat extends JavaPlugin {
         getCommand("nreload").setExecutor(new NreloadCommand(this, pluginMessages));
         getCommand("clear").setExecutor(new ClearCommand(pluginMessages, this));
         getCommand("ignore").setExecutor(new IgnoreCommand(this, pluginMessages));
-        getCommand("sc").setExecutor(new StaffChatCommand(this, pluginMessages));
+        getCommand("sc").setExecutor(new StaffChatCommand(this, pluginMessages, pluginConfig));
     }
 
     public void registerListeners() {

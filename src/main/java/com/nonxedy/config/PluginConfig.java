@@ -37,6 +37,7 @@ public class PluginConfig {
             config.set("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
             config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
             config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+            config.set("sc-format", "{prefix} §f{sender}§r {suffix}§7: §7{message}");
             config.set("broadcast.enabled", true);
             config.set("broadcast.message", "This message will be sent every 60 seconds");
             config.set("broadcast.interval", 60);
@@ -69,6 +70,10 @@ public class PluginConfig {
 
     public String getPrivateChatFormat() {
         return config.getString("private-chat-format");
+    }
+
+    public String getScFormat() {
+        return config.getString("sc-format");
     }
 
     public boolean isDebug() {
