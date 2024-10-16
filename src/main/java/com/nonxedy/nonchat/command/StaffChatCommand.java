@@ -38,7 +38,6 @@ public class StaffChatCommand implements CommandExecutor {
             plugin.logError("You don't have permission to send broadcast.");
             return true;
         }
-
         if (args.length < 1) {
             sender.sendMessage(Component.text()
                     .append(Component.text(messages.getInvalidUsageSc(), TextColor.fromHexString("#ADF3FD")))
@@ -49,11 +48,11 @@ public class StaffChatCommand implements CommandExecutor {
         
         String message = String.join(" ", args);
         String staffchat = config.getScFormat();
-
+        String staffChatName = config.getStaffChatName();
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
+            User user = LuckPermsProvider.get().getUserManager().getUser (player.getUniqueId());
             String prefix = user.getCachedData().getMetaData().getPrefix();
             String suffix = user.getCachedData().getMetaData().getSuffix();
     
@@ -64,8 +63,8 @@ public class StaffChatCommand implements CommandExecutor {
                 plugin.getServer().getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("nonchat.sc"))
                     .forEach(p -> p.sendMessage(Component.text()
-                    .append(Component.text("[STAFF CHAT] ", TextColor.fromHexString("#ADF3FD")))
-                    .append(Component.text(staffchat. replace("{sender}", sender.getName())
+                    .append(Component.text(staffChatName + " ", TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(staffchat.replace("{sender}", sender.getName())
                             .replace("{prefix}", finalPrefix)
                             .replace("{suffix}", finalSuffix)
                             .replace("{message}", message), TextColor.fromHexString("#FFFFFF")))
@@ -78,7 +77,7 @@ public class StaffChatCommand implements CommandExecutor {
                 plugin.getServer().getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("nonchat.sc"))
                     .forEach(p -> p.sendMessage(Component.text()
-                    .append(Component.text("[STAFF CHAT] ", TextColor.fromHexString("#ADF3FD")))
+                    .append(Component.text(staffChatName + " ", TextColor.fromHexString("#ADF3FD")))
                     .append(Component.text(staffchat.replace("{sender}", "Console")
                             .replace("{prefix}", "")
                             .replace("{suffix}", "")

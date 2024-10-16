@@ -24,6 +24,7 @@ death-format: "{prefix} §f{player}§r {suffix}§f died"
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}"
 
 #Like: [STAFFCHAT] Admin nonxedy vip: Hello! (Only staff can see this message)
+staff-chat-name: "[STAFFCHAT]"
 sc-format: "{prefix} §f{sender}§r {suffix}§7: §7{message}"
 
 broadcast:
