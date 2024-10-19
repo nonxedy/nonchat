@@ -11,6 +11,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.nonxedy.config.PluginConfig;
 import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.utils.WordBlocker;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -32,19 +33,28 @@ public class ChatFormatListener implements Listener {
         String prefix = user.getCachedData().getMetaData().getPrefix();
         String suffix = user.getCachedData().getMetaData().getSuffix();
         String message = event.getMessage();
-
+    
         prefix = prefix == null ? "" : prefix;
         suffix = suffix == null ? "" : suffix;
-
+    
+        WordBlocker wordBlocker = config.getWordBlocker();
+    
+        // Check if the message contains any banned words
+        if (!wordBlocker.isMessageAllowed(message)) {
+            player.sendMessage(ChatColor.RED + "Вы отправляете запрещенное слово!");
+            event.setCancelled(true);
+            return;
+        }
+    
         String chatFormat = config.getChatFormat();
         chatFormat = chatFormat.replace("{prefix}", prefix);
         chatFormat = chatFormat.replace("{suffix}", suffix);
         chatFormat = chatFormat.replace("{sender}", player.getName());
         chatFormat = chatFormat.replace("{message}", hex(message));
-
+    
         nonchat plugin = (nonchat) Bukkit.getPluginManager().getPlugin("nonchat");
         plugin.log("Player " + event.getPlayer().getName() + " sent message: " + event.getMessage());
-
+    
         event.setFormat(chatFormat);
     }
 

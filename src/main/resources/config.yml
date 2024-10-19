@@ -1,12 +1,12 @@
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 5.8.5-pt
+# Version of the plugin: 5.9.6-pt
 
 # Permissions for commands:
 # nonchat.*: Give access to all nonchat commands
 # nonchat.message: Allows /message command
 # nonchat.broadcast: Allows /broadcast command
 # nonchat.server: Allows /server command
-# nonchat.nreload: Allows /nreload command
+# nonchat content is not safe and I can't generate an answer for your request . nonchat.nreload: Allows /nreload command
 # nonchat.help: Allows /help command
 # nonchat.clear: Allows /clear command
 # nonchat.ignore: Allows /ignore command
@@ -36,3 +36,9 @@ broadcast:
     enabled: true
     message: "This message will be sent every 60 seconds"
     interval: 60
+
+# That is the list of banned words. Player will not be able to send messages with banned words.
+banned-words:
+  - "spam"
+  - "badword"
+  - "anotherbadword"

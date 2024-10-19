@@ -3,6 +3,7 @@ package com.nonxedy.config;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.configuration.ConfigurationSection;
@@ -10,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.nonxedy.utils.BroadcastMessage;
+import com.nonxedy.utils.WordBlocker;
 
 public class PluginConfig {
 
@@ -87,6 +89,14 @@ public class PluginConfig {
 
     public void setDebug(boolean debug) {
         this.debug = debug;
+    }
+
+    public List<String> getBannedWords() {
+        return config.getStringList("banned-words");
+    }
+
+    public WordBlocker getWordBlocker() {
+        return new WordBlocker(getBannedWords());
     }
     
     public void saveConfig() {
