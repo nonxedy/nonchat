@@ -1,31 +1,37 @@
+# ==================================================
+# NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
 # Version of the plugin: 5.9.6-pt
+#
+# - LuckPerms support.
+# - Vault support.
+# ==================================================
 
-# Permissions for commands:
-# nonchat.*: Give access to all nonchat commands
-# nonchat.message: Allows /message command
-# nonchat.broadcast: Allows /broadcast command
-# nonchat.server: Allows /server command
-# nonchat content is not safe and I can't generate an answer for your request . nonchat.nreload: Allows /nreload command
-# nonchat.help: Allows /help command
-# nonchat.clear: Allows /clear command
-# nonchat.ignore: Allows /ignore command
-# nonchat.sc: Allows /sc command
+debug: false # Enable debug mode. Restart the server.
 
-debug: false
+# ==================================================
+# CHAT FORMATTING:
+#
+# {prefix} - Prefix in luckperms
+# {sender} - Name of the player who sent the message
+# {suffix} - Suffix in luckperms
+# {message} - The message
+#
+# DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE
+# ==================================================
 
-# Like: Admin nonxedy vip: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
-chat-format: "{prefix} §f{sender}§r {suffix}§7: §f{message}"
+# The chat config.
+chat-format: "{prefix} §f{sender}§r {suffix}§7: §f{message}" # The chat format.
 
-# Like: Admin nonxedy vip died
-death-format: "{prefix} §f{player}§r {suffix}§f died"
+# The death config.
+death-format: "{prefix} §f{player}§r {suffix}§f died" # The death format.
 
-# Like: nonxedy -> Admin: Hello! (DONT DELETE {message}!!! IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE)
-private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}"
+# The private chat config.
+private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
 
-#Like: [STAFFCHAT] Admin nonxedy vip: Hello! (Only staff can see this message)
-staff-chat-name: "[STAFFCHAT]"
-sc-format: "{prefix} §f{sender}§r {suffix}§7: §7{message}"
+# The staff chat config.
+staff-chat-name: "[STAFFCHAT]" # The name of the staff chat.
+sc-format: "{prefix} §f{sender}§r {suffix}§7: §7{message}" # The staff chat format.
 
 broadcast:
 
@@ -37,7 +43,10 @@ broadcast:
     message: "This message will be sent every 60 seconds"
     interval: 60
 
+# ==================================================
+# BLOCKED WORDS
 # That is the list of banned words. Player will not be able to send messages with banned words.
+# ==================================================
 banned-words:
   - "spam"
   - "badword"

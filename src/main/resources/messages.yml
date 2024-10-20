@@ -1,9 +1,15 @@
+# ==================================================
+# NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
 # Version of the plugin: 5.9.6-pt
+#
+# - LuckPerms support.
+# - Vault support.
+# ==================================================
 
 no-permission: Недостаточно прав
 
-# Server Information: /server
+# Server Information.
 server-info: 'Server Information:'
 java-version: 'Java Version: '
 port: 'Port: '
@@ -15,12 +21,12 @@ cpu-family: 'CPU Family: '
 number-of-plugins: 'Number of Plugins: '
 number-of-worlds: 'Number of Worlds: '
 
-# Reload: /nreload
+# Reload.
 reloading: Перезагрузка...
 reloaded: Плагин перезагружен!
 reload-failed: Не удалось перезагрузить плагин!
 
-#Help: /help
+#Help.
 help: 'nonchat | Команды плагина:'
 nreload: /nreload - перезагрузка плагина
 help-command: /help - список команд
@@ -31,22 +37,22 @@ broadcast-command: /bc <сообщение> (broadcast) - отправка со�
 ignore-command: /ignore <игрок> - игнорировать игрока
 sc-command: /sc <сообщение> - отправка сообщений всему персоналу
 
-# Clear Chat: /clear
+# Clear Chat.
 clear-chat: Очистка чата...
 chat-cleared: Чат очищен
 
-# Broadcast: /bc
+# Broadcast.
 broadcast: 'Оповещение: '
 
-# Message: /m
+# Message.
 player-not-found: Игрок не найден.
 invalid-usage-message: 'Используйте: /m <игрок> <сообщение>'
 
-# Ignore: /ignore
+# Ignore.
 ignored-player: Вы начали игнорировать игрока {player}.
 unignored-player: Вы больше не игнорируете игрока {player}.
 ignored-by-target: Этот игрок игнорирует вас и не может отправить ему сообщение.
 invalid-usage-ignore: 'Используйте: /ignore <игрок>'
 
-# Staff Chat: /sc
+# Staff Chat.
 invalid-usage-sc: 'Используйте: /sc <сообщение>'
