@@ -20,12 +20,14 @@ public class MessageCommand implements CommandExecutor {
 
     private PluginConfig pluginConfig;
     private PluginMessages messages;
+    private SpyCommand spyCommand;
     private nonchat plugin;
 
-    public MessageCommand(nonchat plugin, PluginConfig pluginConfig, PluginMessages messages) {
+    public MessageCommand(nonchat plugin, PluginConfig pluginConfig, PluginMessages messages, SpyCommand spyCommand) {
         this.plugin = plugin;
         this.pluginConfig = pluginConfig;
         this.messages = messages;
+        this.spyCommand = spyCommand;
     }
 
     @Override
@@ -87,7 +89,12 @@ public class MessageCommand implements CommandExecutor {
                     senderPlayer.sendMessage(Component.text()
                             .append(Component.text(privateChatFormat.replace("{sender}", sender.getName()).replace("{target}", target.getName()).replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
                             .build());
-                    plugin.logResponse("Message sent");
+                    if (spyCommand != null) {
+                        spyCommand.onPrivateMessage(senderPlayer, target, message.toString().trim());
+                        plugin.logResponse("Message sent to spy players");
+                    } else {
+                        plugin.logError("spyCommand is null");
+                    }
                 }
             } catch (Exception e) {
                 plugin.logError("Error sending message: " + e.getMessage());

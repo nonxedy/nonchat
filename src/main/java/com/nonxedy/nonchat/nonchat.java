@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.command.IgnoreCommand;
 import com.nonxedy.nonchat.command.MessageCommand;
 import com.nonxedy.nonchat.command.NreloadCommand;
 import com.nonxedy.nonchat.command.ServerCommand;
+import com.nonxedy.nonchat.command.SpyCommand;
 import com.nonxedy.nonchat.command.StaffChatCommand;
 import com.nonxedy.utils.AutoBroadcastSender;
 import com.nonxedy.utils.BroadcastMessage;
@@ -38,6 +39,7 @@ public class nonchat extends JavaPlugin {
     private PluginConfig pluginConfig;
     private PluginMessages pluginMessages;
     private BroadcastMessage broadcastMessage;
+    private SpyCommand spyCommand;
     private Debugger debugger;
 
     public Map<UUID, Set<UUID>> ignoredPlayers = new HashMap<>();
@@ -67,7 +69,7 @@ public class nonchat extends JavaPlugin {
     }
 
     public void registerCommands() {
-        getCommand("message").setExecutor(new MessageCommand(this, pluginConfig, pluginMessages));
+        getCommand("message").setExecutor(new MessageCommand(this, pluginConfig, pluginMessages, spyCommand));
         getCommand("broadcast").setExecutor(new BroadcastCommand(pluginMessages, this));
         getCommand("server").setExecutor(new ServerCommand(pluginMessages, this));
         getCommand("help").setExecutor(new HelpCommand(pluginMessages, this));
@@ -75,6 +77,7 @@ public class nonchat extends JavaPlugin {
         getCommand("clear").setExecutor(new ClearCommand(pluginMessages, this));
         getCommand("ignore").setExecutor(new IgnoreCommand(this, pluginMessages));
         getCommand("sc").setExecutor(new StaffChatCommand(this, pluginMessages, pluginConfig));
+        getCommand("spy").setExecutor(new SpyCommand(this, pluginMessages));
     }
 
     public void registerListeners() {

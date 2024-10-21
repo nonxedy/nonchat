@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 5.9.7-pt
+version: 6.0.7-pt
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -25,6 +25,7 @@ permissions:
       - nonchat.clear
       - nonchat.ignore
       - nonchat.sc
+      - nonchat.spy
   nonchat.message:
     description: Allows /message command
     default: true
@@ -49,6 +50,9 @@ permissions:
   nonchat.sc:
     description: Allows /sc command
     default: true
+  nonchat.spy:
+    description: Allows /spy command
+    default: false
 
 commands:
   message:
@@ -92,4 +96,9 @@ commands:
     description: Staff chat.
     usage: /sc
     permission: nonchat.sc
+    permission-message: You do not have <permission> to use this command!
+  spy:
+    description: Spy on a player.
+    usage: /spy
+    permission: nonchat.spy
     permission-message: You do not have <permission> to use this command!
