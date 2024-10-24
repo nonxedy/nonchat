@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.0.7-pt
+# Version of the plugin: 6.1.7-pt
 #
 # - LuckPerms support.
 # - Vault support.
@@ -36,6 +36,7 @@ message-command: /m <игрок> <сообщение> (msg, w, whisper, message)
 broadcast-command: /bc <сообщение> (broadcast) - отправка сообщений всем игрокам
 ignore-command: /ignore <игрок> - игнорировать игрока
 sc-command: /sc <сообщение> - отправка сообщений всему персоналу
+spy-command: /spy - активация режима шпиона
 
 # Clear Chat.
 clear-chat: Очистка чата...
@@ -56,3 +57,8 @@ invalid-usage-ignore: 'Используйте: /ignore <игрок>'
 
 # Staff Chat.
 invalid-usage-sc: 'Используйте: /sc <сообщение>'
+
+# Spy.
+spy-mode-enabled: Режим шпиона включен
+spy-mode-disabled: Режим шпиона выключен
+invalid-usage-spy: 'Используйте: /spy'

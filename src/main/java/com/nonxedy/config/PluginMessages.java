@@ -47,6 +47,7 @@ public class PluginMessages {
             messages.set("broadcast-command", "/bc <сообщение> (broadcast) - отправка сообщений всем игрокам");
             messages.set("ignore-command", "/ignore <игрок> - игнорировать игрока");
             messages.set("sc-command", "/sc <сообщение> - отправка сообщений всему персоналу");
+            messages.set("spy-command", "/spy - активация режима шпиона");
             messages.set("clear-chat", "Очистка чата...");
             messages.set("chat-cleared", "Чат очищен");
             messages.set("broadcast", "Оповещение: ");
@@ -54,9 +55,12 @@ public class PluginMessages {
             messages.set("invalid-usage-message", "Используйте: /m <игрок> <сообщение>");
             messages.set("invalid-usage-ignore", "Используйте: /ignore <игрок>");
             messages.set("invalid-usage-sc", "Используйте: /sc <сообщение>");
+            messages.set("invalid-usage-spy", "Используйте: /spy");
             messages.set("ignored-player", "Вы начали игнорировать игрока {player}.");
             messages.set("unignored-player", "Вы больше не игнорируете игрока {player}.");
             messages.set("ignored-by-target", "Этот игрок игнорирует вас и вы не можете отправить ему сообщение.");
+            messages.set("spy-mode-enabled", "Режим шпиона активирован.");
+            messages.set("spy-mode-disabled", "Режим шпиона отключен.");
             
             messages.save(file);
         } catch (IOException e) {
@@ -186,6 +190,22 @@ public class PluginMessages {
 
     public String getInvalidUsageSc() {
         return messages.getString("invalid-usage-sc");
+    }
+
+    public String getSpyCommand() {
+        return messages.getString("spy-command");
+    }
+
+    public String getInvalidUsageSpy() {
+        return messages.getString("invalid-usage-spy");
+    }
+
+    public String getSpyModeEnabled() {
+        return messages.getString("spy-mode-enabled");
+    }
+
+    public String getSpyModeDisabled() {
+        return messages.getString("spy-mode-disabled");
     }
 
     public void saveConfig() {
