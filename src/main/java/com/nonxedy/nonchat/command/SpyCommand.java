@@ -45,7 +45,7 @@ public class SpyCommand implements CommandExecutor {
                 isSpying = false;
                 spyPlayers.remove(player);
                 player.sendMessage(Component.text()
-                        .append(Component.text("Spy mode disabled.", TextColor.fromHexString("#FF5252")))
+                        .append(Component.text(messages.getSpyModeDisabled(), TextColor.fromHexString("#FF5252")))
                         .build());
                 plugin.logResponse("Spy mode disabled.");
             } else {
@@ -53,7 +53,7 @@ public class SpyCommand implements CommandExecutor {
                 isSpying = true;
                 spyPlayers.add(player);
                 player.sendMessage(Component.text()
-                        .append(Component.text("Spy mode enabled.", TextColor.fromHexString("#52FFA6")))
+                        .append(Component.text(messages.getSpyModeEnabled(), TextColor.fromHexString("#52FFA6")))
                         .build());
                 plugin.logResponse("Spy mode enabled.");
             }

@@ -59,8 +59,8 @@ public class PluginMessages {
             messages.set("ignored-player", "Вы начали игнорировать игрока {player}.");
             messages.set("unignored-player", "Вы больше не игнорируете игрока {player}.");
             messages.set("ignored-by-target", "Этот игрок игнорирует вас и вы не можете отправить ему сообщение.");
-            messages.set("spy-mode-enabled", "Режим шпиона активирован.");
-            messages.set("spy-mode-disabled", "Режим шпиона отключен.");
+            messages.set("spy-mode-enabled", "Режим шпиона включен.");
+            messages.set("spy-mode-disabled", "Режим шпиона выключен.");
             
             messages.save(file);
         } catch (IOException e) {
