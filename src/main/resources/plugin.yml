@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 6.1.8-pt
+version: 6.1.9-pt
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -21,7 +21,7 @@ permissions:
       - nonchat.broadcast
       - nonchat.server
       - nonchat.nreload
-      - nonchat.help
+      - nonchat.nhelp
       - nonchat.clear
       - nonchat.ignore
       - nonchat.sc
@@ -38,8 +38,8 @@ permissions:
   nonchat.nreload:
     description: Allows /nreload command
     default: false
-  nonchat.help:
-    description: Allows /help command
+  nonchat.nhelp:
+    description: Allows /nhelp command
     default: true
   nonchat.clear:
     description: Allows /clear command
@@ -77,10 +77,10 @@ commands:
     usage: /nreload
     permission: nonchat.nreload
     permission-message: You do not have <permission> to use this command!
-  help:
+  nhelp:
     description: Show plugin info.
-    usage: /help
-    permission: nonchat.help
+    usage: /nhelp
+    permission: nonchat.nhelp
     permission-message: You do not have <permission> to use this command!
   clear:
     description: Clear chat.

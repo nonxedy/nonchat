@@ -148,6 +148,10 @@ public class PluginMessages {
         return messages.getString("broadcast-command");
     }
     
+    public String getScCommand() {
+        return messages.getString("sc-command");
+    }
+    
     public String getClearChat() {
         return messages.getString("clear-chat");
     }

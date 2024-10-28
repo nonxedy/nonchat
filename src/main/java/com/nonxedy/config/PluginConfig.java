@@ -17,7 +17,6 @@ public class PluginConfig {
 
     private File file;
     private FileConfiguration config;
-    private BroadcastMessage broadcastMessage;
     private boolean debug;
 
     public PluginConfig(BroadcastMessage broadcastMessage) {
@@ -26,7 +25,6 @@ public class PluginConfig {
             createDefaultConfig();
         }
         config = YamlConfiguration.loadConfiguration(file);
-        this.broadcastMessage = broadcastMessage;
         debug = config.getBoolean("debug");
     }
     

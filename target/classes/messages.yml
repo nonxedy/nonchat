@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.1.8-pt
+# Version of the plugin: 6.1.9-pt
 #
 # - LuckPerms support.
 # - Vault support.
@@ -26,10 +26,10 @@ reloading: Перезагрузка...
 reloaded: Плагин перезагружен!
 reload-failed: Не удалось перезагрузить плагин!
 
-#Help.
+#Nhelp.
 help: 'nonchat | Команды плагина:'
 nreload: /nreload - перезагрузка плагина
-help-command: /help - список команд
+help-command: /nhelp - список команд
 server-command: /server - информация о сервере
 message-command: /m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных
   сообщений

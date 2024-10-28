@@ -11,12 +11,12 @@ import com.nonxedy.nonchat.nonchat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
-public class HelpCommand implements CommandExecutor {
+public class NhelpCommand implements CommandExecutor {
 
     private PluginMessages messages;
     private nonchat plugin;
 
-    public HelpCommand(PluginMessages messages, nonchat plugin) {
+    public NhelpCommand(PluginMessages messages, nonchat plugin) {
         this.messages = messages;
         this.plugin = plugin;
     }
@@ -25,7 +25,7 @@ public class HelpCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
-        if (!sender.hasPermission("nonchat.help")) {
+        if (!sender.hasPermission("nonchat.nhelp")) {
             sender.sendMessage(Component.text()
                     .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
                     .build());
@@ -45,6 +45,8 @@ public class HelpCommand implements CommandExecutor {
                 .append(Component.text(messages.getMessageCommand() + "\n", TextColor.fromHexString("#E088FF")))
                 .append(Component.text(messages.getBroadcastCommand() + "\n", TextColor.fromHexString("#E088FF")))
                 .append(Component.text(messages.getIgnoreCommand() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getScCommand() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(messages.getSpyCommand() + "\n", TextColor.fromHexString("#E088FF")))
                 .build());
             
         plugin.logResponse("Help shown.");

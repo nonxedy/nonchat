@@ -7,7 +7,7 @@
 
 	<groupId>com.nonxedy.nonchat</groupId>
 	<artifactId>nonchat</artifactId>
-	<version>6.1.8-pt</version>
+	<version>6.1.9-pt</version>
 	<packaging>jar</packaging>
 
 	<properties>
