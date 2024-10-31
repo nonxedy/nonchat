@@ -10,9 +10,5 @@ Buy me a coffee: https://boosty.to/nonxedy
 
 TODO:
 - [ ] Add bubble chat.
-- [X] Add messages.yml
 - [ ] Add HEX support in messages.yml
-- [X] Add custom format for /msg in config.yml
-- [X] Add support for more auto broadcast messages.
-- [X] Add shuffle for auto broadcast messages.
-- [X] Add debugger.
+- [ ] Add pings.

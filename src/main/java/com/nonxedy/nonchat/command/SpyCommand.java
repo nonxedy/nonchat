@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import com.nonxedy.config.PluginConfig;
 import com.nonxedy.config.PluginMessages;
 import com.nonxedy.nonchat.nonchat;
 
@@ -19,12 +20,14 @@ public class SpyCommand implements CommandExecutor {
 
     private nonchat plugin;
     private PluginMessages messages;
+    private PluginConfig pluginConfig;
     private boolean isSpying = false;
     private List<Player> spyPlayers = new ArrayList<>();
 
-    public SpyCommand(nonchat plugin, PluginMessages messages) {
+    public SpyCommand(nonchat plugin, PluginMessages messages, PluginConfig pluginConfig) {
         this.plugin = plugin;
         this.messages = messages;
+        this.pluginConfig = pluginConfig;
     }
 
     @Override
@@ -65,14 +68,12 @@ public class SpyCommand implements CommandExecutor {
     }
 
     public void onPrivateMessage(Player sender, Player recipient, String message) {
+        String spyCommand = pluginConfig.getSpyFormat();
         if (isSpying) {
             plugin.logResponse("Spy mode is active. Message from " + sender.getName() + " to " + recipient.getName() + ": " + message);
             for (Player spyPlayer : spyPlayers) {
                 spyPlayer.sendMessage(Component.text()
-                        .append(Component.text(sender.getName() + " ", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text("-> ", TextColor.fromHexString("#555555")))
-                        .append(Component.text(recipient.getName() + " ", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(message, TextColor.fromHexString("#E088FF")))
+                        .append(Component.text(spyCommand.replace("{sender}", sender.getName()).replace("{target}", recipient.getName()).replace("{message}", message)))
                         .build());
             }
         } else {

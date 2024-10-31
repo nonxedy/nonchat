@@ -39,6 +39,7 @@ public class PluginConfig {
             config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
             config.set("sc-format", "{prefix} §f{sender}§r {suffix}§7: §7{message}");
             config.set("staff-chat-name", "[STAFFCHAT]");
+            config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
             config.set("broadcast.enabled", true);
             config.set("broadcast.message", "This message will be sent every 60 seconds");
             config.set("broadcast.interval", 60);
@@ -79,6 +80,10 @@ public class PluginConfig {
 
     public String getStaffChatName() {
         return config.getString("staff-chat-name");
+    }
+
+    public String getSpyFormat() {
+        return config.getString("spy-format");
     }
 
     public boolean isDebug() {

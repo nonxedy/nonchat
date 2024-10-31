@@ -58,18 +58,23 @@ public class MessageCommand implements CommandExecutor {
             }
 
             Player target = Bukkit.getPlayer(args[0]);
-            if (target == null) {
+            if (target == null && !(sender instanceof Player)) {
                 sender.sendMessage(Component.text()
                         .append(Component.text(messages.getPlayerNotFound(), TextColor.fromHexString("#ADF3FD")))
                         .build());
                 plugin.logError("Player not found for message command");
                 return true;
+            } else if (target == null) {
+                sender.sendMessage(Component.text()
+                        .append(Component.text(messages.getPlayerNotFound(), TextColor.fromHexString("#ADF3FD")))
+                        .build());
+                return true;
             }
 
-            UUID senderUUID = ((Player) sender).getUniqueId();
+            UUID senderUUID = (sender instanceof Player) ? ((Player) sender).getUniqueId() : null;
             UUID targetUUID = target.getUniqueId();
 
-            if (plugin.ignoredPlayers.containsKey(targetUUID) && plugin.ignoredPlayers.get(targetUUID).contains(senderUUID)) {
+            if (senderUUID != null && plugin.ignoredPlayers.containsKey(targetUUID) && plugin.ignoredPlayers.get(targetUUID).contains(senderUUID)) {
                 sender.sendMessage(Component.text()
                         .append(Component.text(messages.getIgnoredByTarget(), TextColor.fromHexString("#FF5252")))
                         .build());
@@ -89,12 +94,20 @@ public class MessageCommand implements CommandExecutor {
                     senderPlayer.sendMessage(Component.text()
                             .append(Component.text(privateChatFormat.replace("{sender}", sender.getName()).replace("{target}", target.getName()).replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
                             .build());
-                    if (spyCommand != null) {
-                        spyCommand.onPrivateMessage(senderPlayer, target, message.toString().trim());
-                        plugin.logResponse("Message sent to spy players");
-                    } else {
-                        plugin.logError("spyCommand is null");
+                } else {
+                    // If command is executed from console
+                    sender.sendMessage(Component.text()
+                            .append(Component.text(privateChatFormat.replace("{sender}", "Консоль").replace("{target}", target.getName()).replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
+                            .build());
+                }
+
+                if (spyCommand != null) {
+                    if (sender instanceof Player) {
+                        spyCommand.onPrivateMessage((Player) sender, target, message.toString().trim());
                     }
+                    plugin.logResponse("Message sent to spy players");
+                } else {
+                    plugin.logError("spyCommand is null");
                 }
             } catch (Exception e) {
                 plugin.logError("Error sending message: " + e.getMessage());
