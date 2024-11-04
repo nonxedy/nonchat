@@ -33,28 +33,44 @@ public class ChatFormatListener implements Listener {
         String prefix = user.getCachedData().getMetaData().getPrefix();
         String suffix = user.getCachedData().getMetaData().getSuffix();
         String message = event.getMessage();
-    
+
         prefix = prefix == null ? "" : prefix;
         suffix = suffix == null ? "" : suffix;
-    
+
         WordBlocker wordBlocker = config.getWordBlocker();
-    
+
         // Check if the message contains any banned words
         if (!wordBlocker.isMessageAllowed(message)) {
             player.sendMessage(ChatColor.RED + "Вы отправляете запрещенное слово!");
             event.setCancelled(true);
             return;
         }
+
+        // Check for mentions
+        Pattern mentionPattern = Pattern.compile("@(\\w+)");
+        Matcher mentionMatcher = mentionPattern.matcher(message);
     
+        while (mentionMatcher.find()) {
+            String mentionedPlayerName = mentionMatcher.group(1);
+            Player mentionedPlayer = Bukkit.getPlayer(mentionedPlayerName);
+        
+            if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
+                // Send notification to the mentioned player
+                mentionedPlayer.sendMessage(ChatColor.GREEN + "Вы были упомянуты в чате " + player.getName() + "!");
+                // Send sound to the mentioned player
+                mentionedPlayer.playSound(mentionedPlayer.getLocation(), "minecraft:entity.experience_orb.pickup", 1.0F, 1.0F);
+            }
+        }
+
         String chatFormat = config.getChatFormat();
         chatFormat = chatFormat.replace("{prefix}", prefix);
         chatFormat = chatFormat.replace("{suffix}", suffix);
         chatFormat = chatFormat.replace("{sender}", player.getName());
         chatFormat = chatFormat.replace("{message}", hex(message));
-    
+
         nonchat plugin = (nonchat) Bukkit.getPluginManager().getPlugin("nonchat");
         plugin.log("Player " + event.getPlayer().getName() + " sent message: " + event.getMessage());
-    
+
         event.setFormat(chatFormat);
     }
 
