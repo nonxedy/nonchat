@@ -61,6 +61,7 @@ public class PluginMessages {
             messages.set("ignored-by-target", "Этот игрок игнорирует вас и вы не можете отправить ему сообщение.");
             messages.set("spy-mode-enabled", "Режим шпиона включен.");
             messages.set("spy-mode-disabled", "Режим шпиона выключен.");
+            messages.set("blocked-words", "Вы отправляете запрещенное слово!");
             
             messages.save(file);
         } catch (IOException e) {
@@ -210,6 +211,10 @@ public class PluginMessages {
 
     public String getSpyModeDisabled() {
         return messages.getString("spy-mode-disabled");
+    }
+
+    public String getBlockedWords() {
+        return messages.getString("blocked-words");
     }
 
     public void saveConfig() {

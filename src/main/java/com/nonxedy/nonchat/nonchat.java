@@ -81,7 +81,7 @@ public class nonchat extends JavaPlugin {
     }
 
     public void registerListeners() {
-        chatFormatListener = new ChatFormatListener(pluginConfig);
+        chatFormatListener = new ChatFormatListener(pluginConfig, pluginMessages);
         deathListener = new DeathListener(pluginConfig);
         deathCoordinates = new DeathCoordinates();
 

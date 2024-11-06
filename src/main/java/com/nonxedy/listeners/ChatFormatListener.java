@@ -10,9 +10,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.nonxedy.config.PluginConfig;
+import com.nonxedy.config.PluginMessages;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.utils.WordBlocker;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import net.md_5.bungee.api.ChatColor;
@@ -21,9 +24,11 @@ import net.md_5.bungee.api.ChatColor;
 public class ChatFormatListener implements Listener {
     
     private PluginConfig config;
+    private PluginMessages messages;
 
-    public ChatFormatListener(PluginConfig config) {
+    public ChatFormatListener(PluginConfig config, PluginMessages messages) {
         this.config = config;
+        this.messages = messages;
     }
 
     @EventHandler
@@ -41,7 +46,8 @@ public class ChatFormatListener implements Listener {
 
         // Check if the message contains any banned words
         if (!wordBlocker.isMessageAllowed(message)) {
-            player.sendMessage(ChatColor.RED + "Вы отправляете запрещенное слово!");
+            player.sendMessage(Component.text()
+                    .append(Component.text(messages.getBlockedWords(), TextColor.fromHexString("#ADF3FD"))));
             event.setCancelled(true);
             return;
         }
