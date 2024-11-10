@@ -59,10 +59,13 @@ public class ChatFormatListener implements Listener {
         while (mentionMatcher.find()) {
             String mentionedPlayerName = mentionMatcher.group(1);
             Player mentionedPlayer = Bukkit.getPlayer(mentionedPlayerName);
+            String mentionedMessages = messages.getMentioned();
         
             if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
                 // Send notification to the mentioned player
-                mentionedPlayer.sendMessage(ChatColor.GREEN + "Вы были упомянуты в чате " + player.getName() + "!");
+                mentionedPlayer.sendMessage(Component.text()
+                        .append(Component.text(mentionedMessages.replace("{player}", player.getName()), TextColor.fromHexString("#52FFA6")))
+                        .build());
                 // Send sound to the mentioned player
                 mentionedPlayer.playSound(mentionedPlayer.getLocation(), "minecraft:entity.experience_orb.pickup", 1.0F, 1.0F);
             }

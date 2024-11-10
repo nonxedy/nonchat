@@ -62,6 +62,7 @@ public class PluginMessages {
             messages.set("spy-mode-enabled", "Режим шпиона включен.");
             messages.set("spy-mode-disabled", "Режим шпиона выключен.");
             messages.set("blocked-words", "Вы отправляете запрещенное слово!");
+            messages.set("mentioned", "Вы были упомянуты в чате {player}!");
             
             messages.save(file);
         } catch (IOException e) {
@@ -215,6 +216,10 @@ public class PluginMessages {
 
     public String getBlockedWords() {
         return messages.getString("blocked-words");
+    }
+
+    public String getMentioned() {
+        return messages.getString("mentioned");
     }
 
     public void saveConfig() {
