@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 6.4.1-pt
+version: 6.4.2-pt
 prefix: nonchat
 api-version: 1.20
 load: STARTUP
@@ -26,6 +26,7 @@ permissions:
       - nonchat.ignore
       - nonchat.sc
       - nonchat.spy
+      - nonchat.antiblockedwords
   nonchat.message:
     description: Allows /message command
     default: true
@@ -52,6 +53,9 @@ permissions:
     default: true
   nonchat.spy:
     description: Allows /spy command
+    default: false
+  nonchat.antiblockedwords:
+    description: Allows to sent blocked words
     default: false
 
 commands:

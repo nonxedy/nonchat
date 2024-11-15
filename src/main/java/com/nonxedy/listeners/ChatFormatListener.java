@@ -44,12 +44,14 @@ public class ChatFormatListener implements Listener {
 
         WordBlocker wordBlocker = config.getWordBlocker();
 
-        // Check if the message contains any banned words
-        if (!wordBlocker.isMessageAllowed(message)) {
-            player.sendMessage(Component.text()
-                    .append(Component.text(messages.getBlockedWords(), TextColor.fromHexString("#ADF3FD"))));
-            event.setCancelled(true);
-            return;
+        if (!player.hasPermission("nonchat.antiblockedwords")) {
+            // Check if the message contains any banned words
+            if (!wordBlocker.isMessageAllowed(message)) {
+                player.sendMessage(Component.text()
+                        .append(Component.text(messages.getBlockedWords(), TextColor.fromHexString("#ADF3FD"))));
+                event.setCancelled(true);
+                return;
+            }
         }
 
         // Check for mentions
