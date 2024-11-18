@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.4.2-pt
+# Version of the plugin: 6.4.3-pt
 #
 # - LuckPerms support.
 # - Vault support.
@@ -35,6 +35,10 @@ sc-format: "{prefix} §f{sender}§r {suffix}§7: §7{message}" # The staff chat 
 
 # The spy command config.
 spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command format.
+
+# ==================================================
+# BROADCAST CONFIGURATION
+# ==================================================
 
 broadcast:
 
