@@ -36,6 +36,10 @@ sc-format: "{prefix} §f{sender}§r {suffix}§7: §7{message}" # The staff chat 
 # The spy command config.
 spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command format.
 
+# ==================================================
+# BROADCAST CONFIGURATION
+# ==================================================
+
 broadcast:
 
   # Enable random auto broadcast messages.
