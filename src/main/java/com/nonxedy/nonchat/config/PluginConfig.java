@@ -1,4 +1,4 @@
-package com.nonxedy.config;
+package com.nonxedy.nonchat.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,8 +10,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.nonxedy.utils.BroadcastMessage;
-import com.nonxedy.utils.WordBlocker;
+import com.nonxedy.nonchat.utils.BroadcastMessage;
+import com.nonxedy.nonchat.utils.WordBlocker;
 
 public class PluginConfig {
 

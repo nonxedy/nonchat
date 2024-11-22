@@ -1,4 +1,4 @@
-package com.nonxedy.utils;
+package com.nonxedy.nonchat.utils;
 
 import java.io.File;
 import java.io.IOException;

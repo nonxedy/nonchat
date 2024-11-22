@@ -1,4 +1,4 @@
-package com.nonxedy.listeners;
+package com.nonxedy.nonchat.listeners;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;

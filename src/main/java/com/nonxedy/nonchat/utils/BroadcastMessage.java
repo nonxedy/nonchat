@@ -1,4 +1,4 @@
-package com.nonxedy.utils;
+package com.nonxedy.nonchat.utils;
 
 public class BroadcastMessage {
     private boolean enabled;

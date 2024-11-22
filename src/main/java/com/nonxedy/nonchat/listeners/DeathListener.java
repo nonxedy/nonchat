@@ -1,11 +1,11 @@
-package com.nonxedy.listeners;
+package com.nonxedy.nonchat.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import com.nonxedy.config.PluginConfig;
+import com.nonxedy.nonchat.config.PluginConfig;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;

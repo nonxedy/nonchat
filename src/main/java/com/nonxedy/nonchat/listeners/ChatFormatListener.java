@@ -1,4 +1,4 @@
-package com.nonxedy.listeners;
+package com.nonxedy.nonchat.listeners;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,10 +9,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import com.nonxedy.config.PluginConfig;
-import com.nonxedy.config.PluginMessages;
 import com.nonxedy.nonchat.nonchat;
-import com.nonxedy.utils.WordBlocker;
+import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.WordBlocker;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

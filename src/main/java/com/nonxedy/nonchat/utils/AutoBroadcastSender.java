@@ -1,4 +1,4 @@
-package com.nonxedy.utils;
+package com.nonxedy.nonchat.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.nonxedy.config.PluginConfig;
+import com.nonxedy.nonchat.config.PluginConfig;
 
 @SuppressWarnings("deprecation")
 public class AutoBroadcastSender {
