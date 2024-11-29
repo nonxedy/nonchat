@@ -120,7 +120,7 @@ public class nonchat extends JavaPlugin {
         if (debugger != null) {
             debugger.log(message);
         }
-    } 
+    }
 
     public void logCommand(String command, String[] args) {
         if (debugger != null) {

@@ -1,68 +1,67 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.4.4-pt
+# Version of the plugin: 6.4.5-pt
 #
 # - LuckPerms support.
 # - Vault support.
 # ==================================================
 
-no-permission: Недостаточно прав
+# System messages.
+no-permission: "Недостаточно прав"
+blocked-words: "Вы отправляете запрещенное слово!"
+mentioned: "Вы были упомянуты в чате {player}!"
 
 # Server Information.
-server-info: 'Server Information:'
-java-version: 'Java Version: '
-port: 'Port: '
-version: 'Version: '
-os-name: 'OS Name: '
-os-version: 'OS Version: '
-cpu-cores: 'CPU Cores: '
-cpu-family: 'CPU Family: '
-number-of-plugins: 'Number of Plugins: '
-number-of-worlds: 'Number of Worlds: '
+server-info: "Server Information:"
+java-version: "Java Version: "
+port: "Port: "
+version: "Version: "
+os-name: "OS Name: "
+os-version: "OS Version: "
+cpu-cores: "CPU Cores: "
+cpu-family: "CPU Family: "
+number-of-plugins: "Number of Plugins: "
+number-of-worlds: "Number of Worlds: "
 
 # Reload.
-reloading: Перезагрузка...
-reloaded: Плагин перезагружен!
-reload-failed: Не удалось перезагрузить плагин!
+reloading: "Перезагрузка..."
+reloaded: "Плагин перезагружен!"
+reload-failed: "Не удалось перезагрузить плагин!"
 
 #Nhelp.
-help: 'nonchat | Команды плагина:'
-nreload: /nreload - перезагрузка плагина
-help-command: /nhelp - список команд
-server-command: /server - информация о сервере
-message-command: /m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных
-  сообщений
-broadcast-command: /bc <сообщение> (broadcast) - отправка сообщений всем игрокам
-ignore-command: /ignore <игрок> - игнорировать игрока
-sc-command: /sc <сообщение> - отправка сообщений всему персоналу
-spy-command: /spy - активация режима шпиона
+help: "nonchat | Команды плагина:"
+nreload: "/nreload - перезагрузка плагина"
+help-command: "/nhelp - список команд"
+server-command: "/server - информация о сервере"
+message-command: "/m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных
+  сообщений"
+broadcast-command: "/bc <сообщение> (broadcast) - отправка сообщений всем игрокам"
+ignore-command: "/ignore <игрок> - игнорировать игрока"
+sc-command: "/sc <сообщение> - отправка сообщений всему персоналу"
+spy-command: "/spy - активация режима шпиона"
 
 # Clear Chat.
-clear-chat: Очистка чата...
-chat-cleared: Чат очищен
+clear-chat: "Очистка чата..."
+chat-cleared: "Чат очищен"
 
 # Broadcast.
-broadcast: 'Оповещение: '
+broadcast: "Оповещение: "
 
 # Message.
-player-not-found: Игрок не найден.
-invalid-usage-message: 'Используйте: /m <игрок> <сообщение>'
+player-not-found: "Игрок не найден."
+invalid-usage-message: "Используйте: /m <игрок> <сообщение>"
 
 # Ignore.
-ignored-player: Вы начали игнорировать игрока {player}.
-unignored-player: Вы больше не игнорируете игрока {player}.
-ignored-by-target: Этот игрок игнорирует вас и не может отправить ему сообщение.
-invalid-usage-ignore: 'Используйте: /ignore <игрок>'
+ignored-player: "Вы начали игнорировать игрока {player}."
+unignored-player: "Вы больше не игнорируете игрока {player}."
+ignored-by-target: "Этот игрок игнорирует вас и не может отправить ему сообщение."
+invalid-usage-ignore: "Используйте: /ignore <игрок>"
 
 # Staff Chat.
-invalid-usage-sc: 'Используйте: /sc <сообщение>'
+invalid-usage-sc: "Используйте: /sc <сообщение>"
 
 # Spy.
-spy-mode-enabled: Режим шпиона включен
-spy-mode-disabled: Режим шпиона выключен
-invalid-usage-spy: 'Используйте: /spy'
-
-# System messages.
-blocked-words: Вы отправляете запрещенное слово!
-mentioned: 'Вы были упомянуты в чате {player}!'
+spy-mode-enabled: "Режим шпиона включен"
+spy-mode-disabled: "Режим шпиона выключен"
+invalid-usage-spy: "Используйте: /spy"

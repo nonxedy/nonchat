@@ -56,17 +56,14 @@ public class StaffChatCommand implements CommandExecutor {
             String prefix = user.getCachedData().getMetaData().getPrefix();
             String suffix = user.getCachedData().getMetaData().getSuffix();
     
-            final String finalPrefix = prefix == null ? "" : prefix;
-            final String finalSuffix = suffix == null ? "" : suffix;
-    
             try {
                 plugin.getServer().getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("nonchat.sc"))
                     .forEach(p -> p.sendMessage(Component.text()
                     .append(Component.text(staffChatName + " ", TextColor.fromHexString("#ADF3FD")))
                     .append(Component.text(staffchat.replace("{sender}", sender.getName())
-                            .replace("{prefix}", finalPrefix)
-                            .replace("{suffix}", finalSuffix)
+                            .replace("{prefix}", prefix != null ? prefix : "")
+                            .replace("{suffix}", suffix != null ? suffix : "")
                             .replace("{message}", message), TextColor.fromHexString("#FFFFFF")))
                     .build()));
             } catch (Exception e) {

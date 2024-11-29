@@ -33,6 +33,7 @@ public class SpyCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
+
         if (!sender.hasPermission("nonchat.spy")) {
             sender.sendMessage(Component.text()
                     .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
@@ -69,8 +70,10 @@ public class SpyCommand implements CommandExecutor {
 
     public void onPrivateMessage(Player sender, Player recipient, String message) {
         String spyCommand = pluginConfig.getSpyFormat();
+        Player player = (Player) sender;
+
         if (isSpying) {
-            plugin.logResponse("Spy mode is active. Message from " + sender.getName() + " to " + recipient.getName() + ": " + message);
+            plugin.logResponse(player + " has spy mode is active. Message from " + sender.getName() + " to " + recipient.getName() + ": " + message);
             for (Player spyPlayer : spyPlayers) {
                 spyPlayer.sendMessage(Component.text()
                         .append(Component.text(spyCommand.replace("{sender}", sender.getName()).replace("{target}", recipient.getName()).replace("{message}", message)))
