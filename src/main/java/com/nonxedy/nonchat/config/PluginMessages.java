@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.nonxedy.nonchat.utils.ColorUtil;
+
 public class PluginMessages {
 
     private File file;
@@ -71,157 +73,160 @@ public class PluginMessages {
     }
     
     public String getNoPermission() {
-        return messages.getString("no-permission");
+        return getColoredString("no-permission");
     }
 
     public String getServerInfo() {
-        return messages.getString("server-info");
+        return getColoredString("server-info");
     }
 
     public String getJavaVersion() {
-        return messages.getString("java-version");
+        return getColoredString("java-version");
     }
 
     public String getPort() {
-        return messages.getString("port");
+        return getColoredString("port");
     }
 
     public String getVersion() {
-        return messages.getString("version");
+        return getColoredString("version");
     }
 
     public String getOsName() {
-        return messages.getString("os-name");
+        return getColoredString("os-name");
     }
 
     public String getOsVersion() {
-        return messages.getString("os-version");
+        return getColoredString("os-version");
     }
 
     public String getCpuCores() {
-        return messages.getString("cpu-cores");
+        return getColoredString("cpu-cores");
     }
 
     public String getCpuFamily() {
-        return messages.getString("cpu-family");
+        return getColoredString("cpu-family");
     }
 
     public String getNumberOfPlugins() {
-        return messages.getString("number-of-plugins");
+        return getColoredString("number-of-plugins");
     }
 
     public String getNumberOfWorlds() {
-        return messages.getString("number-of-worlds");
+        return getColoredString("number-of-worlds");
     }
     
     public String getReloading() {
-        return messages.getString("reloading");
+        return getColoredString("reloading");
     }
     
     public String getReloaded() {
-        return messages.getString("reloaded");
+        return getColoredString("reloaded");
     }
     
     public String getReloadFailed() {
-        return messages.getString("reload-failed");
+        return getColoredString("reload-failed");
     }
     
     public String getHelp() {
-        return messages.getString("help");
+        return getColoredString("help");
     }
 
     public String getNreload() {
-        return messages.getString("nreload");
+        return getColoredString("nreload");
     }
     
     public String getHelpCommand() {
-        return messages.getString("help-command");
+        return getColoredString("help-command");
     }
     
     public String getServerCommand() {
-        return messages.getString("server-command");
+        return getColoredString("server-command");
     }
     
     public String getMessageCommand() {
-        return messages.getString("message-command");
+        return getColoredString("message-command");
     }
     
     public String getBroadcastCommand() {
-        return messages.getString("broadcast-command");
+        return getColoredString("broadcast-command");
     }
     
     public String getScCommand() {
-        return messages.getString("sc-command");
+        return getColoredString("sc-command");
     }
     
     public String getClearChat() {
-        return messages.getString("clear-chat");
+        return getColoredString("clear-chat");
     }
     
     public String getChatCleared() {
-        return messages.getString("chat-cleared");
+        return getColoredString("chat-cleared");
     }
     
     public String getBroadcast() {
-        return messages.getString("broadcast");
+        return getColoredString("broadcast");
     }
     
     public String getPlayerNotFound() {
-        return messages.getString("player-not-found");
+        return getColoredString("player-not-found");
     }
     
     public String getInvalidUsageMessage() {
-        return messages.getString("invalid-usage-message");
+        return getColoredString("invalid-usage-message");
     }
 
     public String getIgnoreCommand() {
-        return messages.getString("ignore-command");
+        return getColoredString("ignore-command");
     }
 
     public String getInvalidUsageIgnore() {
-        return messages.getString("invalid-usage-ignore");
+        return getColoredString("invalid-usage-ignore");
     }
 
     public String getIgnoredPlayer(String player) {
-        return messages.getString("ignored-player").replace("{player}", player);
+        return getColoredString("ignored-player").replace("{player}", player);
     }
 
     public String getUnignoredPlayer(String player) {
-        return messages.getString("unignored-player").replace("{player}", player);
+        return getColoredString("unignored-player").replace("{player}", player);
     }
 
     public String getIgnoredByTarget() {
-        return messages.getString("ignored-by-target");
+        return getColoredString("ignored-by-target");
     }
 
     public String getInvalidUsageSc() {
-        return messages.getString("invalid-usage-sc");
+        return getColoredString("invalid-usage-sc");
     }
 
     public String getSpyCommand() {
-        return messages.getString("spy-command");
+        return getColoredString("spy-command");
     }
 
     public String getInvalidUsageSpy() {
-        return messages.getString("invalid-usage-spy");
+        return getColoredString("invalid-usage-spy");
     }
 
     public String getSpyModeEnabled() {
-        return messages.getString("spy-mode-enabled");
+        return getColoredString("spy-mode-enabled");
     }
 
     public String getSpyModeDisabled() {
-        return messages.getString("spy-mode-disabled");
+        return getColoredString("spy-mode-disabled");
     }
 
     public String getBlockedWords() {
-        return messages.getString("blocked-words");
+        return getColoredString("blocked-words");
     }
 
     public String getMentioned() {
-        return messages.getString("mentioned");
+        return getColoredString("mentioned");
     }
 
+    private String getColoredString(String key) {
+        return ColorUtil.parseColor(messages.getString(key, ""));
+    }
     public void saveConfig() {
         try {
             messages.save(file);

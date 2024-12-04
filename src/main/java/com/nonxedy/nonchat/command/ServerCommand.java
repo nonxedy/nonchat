@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class ServerCommand implements CommandExecutor {
 
@@ -27,9 +27,7 @@ public class ServerCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.server")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("You don't have permission to show server info.");
             return true;
         }
@@ -47,16 +45,16 @@ public class ServerCommand implements CommandExecutor {
 
             try {
                 sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getServerInfo() + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getJavaVersion() + javaVersion + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getPort() + port + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getVersion() + version + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getOsName() + osN + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getOsVersion() + osV + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getCpuCores() + cpu + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getCpuFamily() + cpuFamily + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getNumberOfPlugins() + numPlugins + "\n", TextColor.fromHexString("#E088FF")))
-                        .append(Component.text(messages.getNumberOfWorlds() + numWorlds, TextColor.fromHexString("#E088FF")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getServerInfo() + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getJavaVersion() + javaVersion + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getPort() + port + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getVersion() + version + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getOsName() + osN + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getOsVersion() + osV + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getCpuCores() + cpu + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getCpuFamily() + cpuFamily + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getNumberOfPlugins() + numPlugins + "\n")))
+                        .append(Component.text(ColorUtil.parseColor(messages.getNumberOfWorlds() + numWorlds)))
                         .build());
 
                 plugin.logResponse("Server info shown.");

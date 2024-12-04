@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class ClearCommand implements CommandExecutor {
     
@@ -27,16 +27,12 @@ public class ClearCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.clear")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("You don't have permission to clear the chat.");
             return true;
         }
 
-        sender.sendMessage(Component.text()
-                .append(Component.text(messages.getClearChat(), TextColor.fromHexString("#E088FF")))
-                .build());
+        sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getClearChat())));
         plugin.logResponse("Clearing chat...");
         
         try {
@@ -46,9 +42,7 @@ public class ClearCommand implements CommandExecutor {
 
         plugin.logResponse("Chat cleared.");
 
-        Bukkit.broadcast(Component.text()
-                .append(Component.text(messages.getChatCleared(), TextColor.fromHexString("#52FFA6")))
-                .build());
+        Bukkit.broadcast(Component.text(ColorUtil.parseColor(messages.getChatCleared())));
         } catch (Exception e) {
             plugin.logError("There was an error clearing the chat: " + e.getMessage());
         }

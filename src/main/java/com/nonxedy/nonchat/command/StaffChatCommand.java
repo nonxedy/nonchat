@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -32,16 +33,12 @@ public class StaffChatCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.staffchat")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("You don't have permission to send broadcast.");
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getInvalidUsageSc(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getInvalidUsageSc())));
             plugin.logError("Invalid usage for staffchat command");
             return true;
         }

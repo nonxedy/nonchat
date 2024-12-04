@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class NreloadCommand implements CommandExecutor {
 
@@ -26,16 +26,12 @@ public class NreloadCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.nreload")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("You don't have permission to reload the config.");
             return true;
         }
 
-        sender.sendMessage(Component.text()
-                .append(Component.text(messages.getReloading(), TextColor.fromHexString("#E088FF")))
-                .build());
+        sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getReloading())));
         plugin.logResponse("Reloading...");
 
         try {
@@ -43,15 +39,11 @@ public class NreloadCommand implements CommandExecutor {
             plugin.reloadDebugger();
             plugin.stopAutoBroadcastSender();
             plugin.registerUtils();
-            sender.sendMessage(Component.text()
-                .append(Component.text(messages.getReloaded(), TextColor.fromHexString("#52FFA6")))
-                .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getReloaded())));
 
             plugin.logResponse("Config reloaded.");
         } catch (Exception e) {
-            sender.sendMessage(Component.text()
-                .append(Component.text(messages.getReloadFailed(), TextColor.fromHexString("#FF5252")))
-                .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getReloadFailed())));
 
             plugin.logError("There was an error reloading the config: " + e.getMessage());
         }

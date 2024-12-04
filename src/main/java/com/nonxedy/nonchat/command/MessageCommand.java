@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -42,32 +43,24 @@ public class MessageCommand implements CommandExecutor {
             command.getName().equalsIgnoreCase("whisper")) {
             
             if (!sender.hasPermission("nonchat.message")) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
                 plugin.logError("No permission for message command");
                 return true;
             }
             
             if (args.length < 2) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getInvalidUsageMessage(), TextColor.fromHexString("#ADF3FD")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getInvalidUsageMessage())));
                 plugin.logError("Invalid usage for message command");
                 return true;
             }
 
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null && !(sender instanceof Player)) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getPlayerNotFound(), TextColor.fromHexString("#ADF3FD")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getPlayerNotFound())));
                 plugin.logError("Player not found for message command");
                 return true;
             } else if (target == null) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getPlayerNotFound(), TextColor.fromHexString("#ADF3FD")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getPlayerNotFound())));
                 return true;
             }
 
@@ -75,9 +68,7 @@ public class MessageCommand implements CommandExecutor {
             UUID targetUUID = target.getUniqueId();
 
             if (senderUUID != null && plugin.ignoredPlayers.containsKey(targetUUID) && plugin.ignoredPlayers.get(targetUUID).contains(senderUUID)) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getIgnoredByTarget(), TextColor.fromHexString("#FF5252")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getIgnoredByTarget())));
                 plugin.logError("Target is ignoring sender");
                 return true;
             }
@@ -103,7 +94,7 @@ public class MessageCommand implements CommandExecutor {
 
                 if (spyCommand != null) {
                     if (sender instanceof Player) {
-                        spyCommand.onPrivateMessage((Player) sender, target, message.toString().trim());
+                        spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseColor(message.toString().trim()));
                     }
                     plugin.logResponse("Message sent to spy players");
                 } else {

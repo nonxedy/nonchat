@@ -13,9 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class IgnoreCommand implements CommandExecutor {
 
@@ -32,17 +32,13 @@ public class IgnoreCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.ignore")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("No permission for ignore command");
             return true;
         }
 
         if (args.length != 1) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getInvalidUsageIgnore(), TextColor.fromHexString("#FF5252")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getInvalidUsageIgnore())));
             plugin.logError("Invalid arguments for ignore command");
             return true;
         }
@@ -51,9 +47,7 @@ public class IgnoreCommand implements CommandExecutor {
         Player targetPlayer = Bukkit.getPlayer(args[0]);
 
         if (targetPlayer == null) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getPlayerNotFound(), TextColor.fromHexString("#FF5252")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getPlayerNotFound())));
             plugin.logError("Player not found for ignore command");
             return true;
         }
@@ -65,24 +59,18 @@ public class IgnoreCommand implements CommandExecutor {
                 Set<UUID> ignored = plugin.ignoredPlayers.get(senderUUID);
                 if (ignored.contains(targetUUID)) {
                     ignored.remove(targetUUID);
-                    sender.sendMessage(Component.text()
-                            .append(Component.text(messages.getUnignoredPlayer(args[0]), TextColor.fromHexString("#52FFA6")))
-                            .build());
+                    sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getUnignoredPlayer(args[0]))));
                     plugin.logResponse("Player unignored");
                 } else {
                     ignored.add(targetUUID);
-                    sender.sendMessage(Component.text()
-                            .append(Component.text(messages.getIgnoredPlayer(args[0]), TextColor.fromHexString("#E088FF")))
-                            .build());
+                    sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getIgnoredPlayer(args[0]))));
                     plugin.logResponse("Player ignored");
                 }
             } else {
                 Set<UUID> ignored = new HashSet<>();
                 ignored.add(targetUUID);
                 plugin.ignoredPlayers.put(senderUUID, ignored);
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getIgnoredPlayer(args[0]), TextColor.fromHexString("#E088FF")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getIgnoredPlayer(args[0]))));
                 plugin.logResponse("Player ignored");
             }
         } catch (Exception e) {

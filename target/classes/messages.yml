@@ -1,67 +1,67 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.4.5-pt
+# Version of the plugin: 6.5.5-pt
 #
 # - LuckPerms support.
 # - Vault support.
 # ==================================================
 
 # System messages.
-no-permission: "Недостаточно прав"
-blocked-words: "Вы отправляете запрещенное слово!"
-mentioned: "Вы были упомянуты в чате {player}!"
+no-permission: "&cНедостаточно прав"
+blocked-words: "&cВы отправляете запрещенное слово!"
+mentioned: "&fВы были упомянуты в чате &a{player}!"
 
 # Server Information.
-server-info: "Server Information:"
-java-version: "Java Version: "
-port: "Port: "
-version: "Version: "
-os-name: "OS Name: "
-os-version: "OS Version: "
-cpu-cores: "CPU Cores: "
-cpu-family: "CPU Family: "
-number-of-plugins: "Number of Plugins: "
-number-of-worlds: "Number of Worlds: "
+server-info: "&dServer Information:&f"
+java-version: "&dJava Version:&f "
+port: "&dPort:&f "
+version: "&dVersion:&f "
+os-name: "&dOS Name:&f "
+os-version: "&dOS Version:&f "
+cpu-cores: "&dCPU Cores:&f "
+cpu-family: "&dCPU Family:&f "
+number-of-plugins: "&dNumber of Plugins:&f "
+number-of-worlds: "&dNumber of Worlds:&f "
 
 # Reload.
-reloading: "Перезагрузка..."
-reloaded: "Плагин перезагружен!"
-reload-failed: "Не удалось перезагрузить плагин!"
+reloading: "&dПерезагрузка..."
+reloaded: "&aПлагин перезагружен!"
+reload-failed: "&cНе удалось перезагрузить плагин!"
 
 #Nhelp.
-help: "nonchat | Команды плагина:"
-nreload: "/nreload - перезагрузка плагина"
-help-command: "/nhelp - список команд"
-server-command: "/server - информация о сервере"
-message-command: "/m <игрок> <сообщение> (msg, w, whisper, message) - отправка личных
+help: "&dnonchat | Команды плагина:"
+nreload: "&d/nreload&f - перезагрузка плагина"
+help-command: "&d/nhelp&f - список команд"
+server-command: "&d/server&f - информация о сервере"
+message-command: "&d/m <игрок> <сообщение>&f - отправка личных
   сообщений"
-broadcast-command: "/bc <сообщение> (broadcast) - отправка сообщений всем игрокам"
-ignore-command: "/ignore <игрок> - игнорировать игрока"
-sc-command: "/sc <сообщение> - отправка сообщений всему персоналу"
-spy-command: "/spy - активация режима шпиона"
+broadcast-command: "&d/bc <сообщение>&f - отправка сообщений всем игрокам"
+ignore-command: "&d/ignore <игрок>&f - игнорировать игрока"
+sc-command: "&d/sc <сообщение>&f - отправка сообщений всему персоналу"
+spy-command: "&d/spy&f - активация режима шпиона"
 
 # Clear Chat.
-clear-chat: "Очистка чата..."
-chat-cleared: "Чат очищен"
+clear-chat: "&dОчистка чата..."
+chat-cleared: "&aЧат очищен"
 
 # Broadcast.
-broadcast: "Оповещение: "
+broadcast: "&dОповещение: &f"
 
 # Message.
-player-not-found: "Игрок не найден."
-invalid-usage-message: "Используйте: /m <игрок> <сообщение>"
+player-not-found: "&cИгрок не найден."
+invalid-usage-message: "&fИспользуйте: &d/m <игрок> <сообщение>"
 
 # Ignore.
-ignored-player: "Вы начали игнорировать игрока {player}."
-unignored-player: "Вы больше не игнорируете игрока {player}."
-ignored-by-target: "Этот игрок игнорирует вас и не может отправить ему сообщение."
-invalid-usage-ignore: "Используйте: /ignore <игрок>"
+ignored-player: "&aВы начали игнорировать игрока {player}."
+unignored-player: "&cВы больше не игнорируете игрока {player}."
+ignored-by-target: "&dЭтот игрок игнорирует вас и не может отправить ему сообщение."
+invalid-usage-ignore: "&fИспользуйте: &d/ignore <игрок>"
 
 # Staff Chat.
-invalid-usage-sc: "Используйте: /sc <сообщение>"
+invalid-usage-sc: "&fИспользуйте: &d/sc <сообщение>"
 
 # Spy.
-spy-mode-enabled: "Режим шпиона включен"
-spy-mode-disabled: "Режим шпиона выключен"
-invalid-usage-spy: "Используйте: /spy"
+spy-mode-enabled: "&aРежим шпиона включен"
+spy-mode-disabled: "&cРежим шпиона выключен"
+invalid-usage-spy: "&fИспользуйте: &d/spy"

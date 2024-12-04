@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class NhelpCommand implements CommandExecutor {
 
@@ -26,27 +26,23 @@ public class NhelpCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.nhelp")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("You don't have permission to show help.");
             return true;
         }
 
         try {
-        sender.sendMessage(Component.text()
-                .append(Component.text(messages.getHelp() + "\n", TextColor.fromHexString("#E088FF")))
-                .build());
+        sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getHelp())));
 
         sender.sendMessage(Component.text()
-                .append(Component.text(messages.getNreload() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getHelpCommand() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getServerCommand() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getMessageCommand() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getBroadcastCommand() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getIgnoreCommand() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getScCommand() + "\n", TextColor.fromHexString("#E088FF")))
-                .append(Component.text(messages.getSpyCommand() + "\n", TextColor.fromHexString("#E088FF")))
+                .append(Component.text(ColorUtil.parseColor(messages.getNreload() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getHelpCommand() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getServerCommand() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getMessageCommand() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getBroadcastCommand() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getIgnoreCommand() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getScCommand() + "\n")))
+                .append(Component.text(ColorUtil.parseColor(messages.getSpyCommand() + "\n")))
                 .build());
             
         plugin.logResponse("Help shown.");

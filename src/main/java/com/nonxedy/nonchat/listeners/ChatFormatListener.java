@@ -12,6 +12,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
 import net.kyori.adventure.text.Component;
@@ -47,8 +48,7 @@ public class ChatFormatListener implements Listener {
         if (!player.hasPermission("nonchat.antiblockedwords")) {
             // Check if the message contains any banned words
             if (!wordBlocker.isMessageAllowed(message)) {
-                player.sendMessage(Component.text()
-                        .append(Component.text(messages.getBlockedWords(), TextColor.fromHexString("#ADF3FD"))));
+                player.sendMessage(Component.text(ColorUtil.parseColor(messages.getBlockedWords())));
                 event.setCancelled(true);
                 return;
             }
@@ -61,7 +61,7 @@ public class ChatFormatListener implements Listener {
         while (mentionMatcher.find()) {
             String mentionedPlayerName = mentionMatcher.group(1);
             Player mentionedPlayer = Bukkit.getPlayer(mentionedPlayerName);
-            String mentionedMessages = messages.getMentioned();
+            String mentionedMessages = ColorUtil.parseColor(messages.getMentioned());
         
             if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
                 // Send notification to the mentioned player

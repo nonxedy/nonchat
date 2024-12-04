@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class SpyCommand implements CommandExecutor {
 
@@ -35,9 +35,7 @@ public class SpyCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.spy")) {
-            sender.sendMessage(Component.text()
-                    .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                    .build());
+            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
             plugin.logError("You don't have permission to send broadcast.");
             return true;
         }
@@ -48,17 +46,13 @@ public class SpyCommand implements CommandExecutor {
                 // Disable spy mode
                 isSpying = false;
                 spyPlayers.remove(player);
-                player.sendMessage(Component.text()
-                        .append(Component.text(messages.getSpyModeDisabled(), TextColor.fromHexString("#FF5252")))
-                        .build());
+                player.sendMessage(Component.text(ColorUtil.parseColor(messages.getSpyModeDisabled())));
                 plugin.logResponse("Spy mode disabled.");
             } else {
                 // Enable spy mode
                 isSpying = true;
                 spyPlayers.add(player);
-                player.sendMessage(Component.text()
-                        .append(Component.text(messages.getSpyModeEnabled(), TextColor.fromHexString("#52FFA6")))
-                        .build());
+                player.sendMessage(Component.text(ColorUtil.parseColor(messages.getSpyModeEnabled())));
                 plugin.logResponse("Spy mode enabled.");
             }
         } catch (Exception e) {

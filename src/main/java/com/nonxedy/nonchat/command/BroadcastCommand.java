@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class BroadcastCommand implements CommandExecutor {
 
@@ -31,17 +31,13 @@ public class BroadcastCommand implements CommandExecutor {
             command.getName().equalsIgnoreCase("bc")) {
 
             if (!sender.hasPermission("nonchat.broadcast")) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getNoPermission(), TextColor.fromHexString("#ADF3FD")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
                 plugin.logError("You don't have permission to send broadcast.");
                 return true;
             }
 
             if (args.length == 0) {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(messages.getBroadcastCommand(), TextColor.fromHexString("#ADF3FD")))
-                        .build());
+                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getBroadcastCommand())));
                 plugin.logError("Invalid usage: /broadcast <message>");
                 return true;
             }
@@ -55,16 +51,16 @@ public class BroadcastCommand implements CommandExecutor {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     player.sendMessage(" ");
                     player.sendMessage(Component.text()
-                            .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
-                            .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                            .append(Component.text(ColorUtil.parseColor(messages.getBroadcast())))
+                            .append(Component.text(ColorUtil.parseColor(message.toString().trim())))
                             .build());
                     player.sendMessage(" ");
 
                     plugin.logResponse("Broadcast sent.");
 
                     Bukkit.getConsoleSender().sendMessage(Component.text()
-                            .append(Component.text(messages.getBroadcast(), TextColor.fromHexString("#E088FF")))
-                            .append(Component.text(message.toString().trim(), TextColor.fromHexString("#FFFFFF")))
+                            .append(Component.text(ColorUtil.parseColor(messages.getBroadcast())))
+                            .append(Component.text(ColorUtil.parseColor(message.toString().trim())))
                             .build());
                 }
             } catch (Exception e) {
