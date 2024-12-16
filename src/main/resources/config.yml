@@ -52,6 +52,16 @@ broadcast:
     interval: 60 # Interval in seconds! Message will sent after X seconds.
 
 # ==================================================
+# CHAT BUBBLE CONFIGURATION
+# Chat bubbles are small messages that appear above the player's head when they speak.
+# ==================================================
+
+chat-bubbles:
+  enabled: true # Enable chat bubbles
+  duration: 5 # Duration of the bubble in seconds.
+  height: 2.5 # Height of the bubble in blocks.
+
+# ==================================================
 # BLOCKED WORDS
 # That is the list of banned words. Player will not be able to send messages with banned words.
 # ==================================================

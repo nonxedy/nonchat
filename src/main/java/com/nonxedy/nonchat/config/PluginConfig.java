@@ -43,6 +43,9 @@ public class PluginConfig {
             config.set("broadcast.enabled", true);
             config.set("broadcast.message", "This message will be sent every 60 seconds");
             config.set("broadcast.interval", 60);
+            config.set("chat-bubbles.enabled", true);
+            config.set("chat-bubbles.duration", 5);
+            config.set("chat-bubbles.height", 2.5);
             
             config.save(file);
         } catch (IOException e) {
@@ -133,5 +136,17 @@ public class PluginConfig {
             ));
         }
         return messages;
+    }
+
+    public boolean isChatBubblesEnabled() {
+        return config.getBoolean("chat-bubbles.enabled");
+    }
+
+    public int getChatBubblesDuration() {
+        return config.getInt("chat-bubbles.duration");
+    }
+
+    public double getChatBubblesHeight() {
+        return config.getDouble("chat-bubbles.height");
     }
 }

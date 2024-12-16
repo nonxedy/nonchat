@@ -20,6 +20,7 @@ import com.nonxedy.nonchat.command.SpyCommand;
 import com.nonxedy.nonchat.command.StaffChatCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.listeners.ChatBubbleListener;
 import com.nonxedy.nonchat.listeners.ChatFormatListener;
 import com.nonxedy.nonchat.listeners.DeathCoordinates;
 import com.nonxedy.nonchat.listeners.DeathListener;
@@ -41,6 +42,7 @@ public class nonchat extends JavaPlugin {
     private BroadcastMessage broadcastMessage;
     private SpyCommand spyCommand;
     private Debugger debugger;
+    private ChatBubbleListener chatBubbleListener;
 
     public Map<UUID, Set<UUID>> ignoredPlayers = new HashMap<>();
 
@@ -84,11 +86,13 @@ public class nonchat extends JavaPlugin {
         chatFormatListener = new ChatFormatListener(pluginConfig, pluginMessages);
         deathListener = new DeathListener(pluginConfig);
         deathCoordinates = new DeathCoordinates();
+        chatBubbleListener = new ChatBubbleListener(this, pluginConfig);
 
         // Register listeners
         Bukkit.getPluginManager().registerEvents(chatFormatListener, this);
         Bukkit.getPluginManager().registerEvents(deathListener, this);
         Bukkit.getPluginManager().registerEvents(deathCoordinates, this);
+        Bukkit.getPluginManager().registerEvents(chatBubbleListener, this);
     }
 
     public void registerUtils() {
