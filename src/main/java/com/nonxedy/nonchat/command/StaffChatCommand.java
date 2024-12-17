@@ -33,12 +33,12 @@ public class StaffChatCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.staffchat")) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("You don't have permission to send broadcast.");
             return true;
         }
         if (args.length < 1) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getInvalidUsageSc())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-sc")));
             plugin.logError("Invalid usage for staffchat command");
             return true;
         }

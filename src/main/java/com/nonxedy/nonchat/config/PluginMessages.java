@@ -7,14 +7,19 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.nonxedy.nonchat.utils.ColorUtil;
+import com.nonxedy.nonchat.utils.MessageFormatter;
+
+import net.kyori.adventure.text.Component;
 
 public class PluginMessages {
 
     private File file;
     private FileConfiguration messages;
+    private final MessageFormatter formatter;
 
     public PluginMessages() {
         file = new File("plugins/nonchat", "messages.yml");
+        this.formatter = new MessageFormatter(this);
         if (!file.exists()) {
             createDefaultConfig();
         }
@@ -28,6 +33,7 @@ public class PluginMessages {
     
             messages = new YamlConfiguration();
             messages.set("no-permission", "Недостаточно прав");
+            messages.set("player-only", "Только игроки могут использовать эту команду");
             messages.set("server-info", "Server Information:");
             messages.set("java-version", "Java Version: ");
             messages.set("port", "Port: ");
@@ -52,7 +58,7 @@ public class PluginMessages {
             messages.set("spy-command", "/spy - активация режима шпиона");
             messages.set("clear-chat", "Очистка чата...");
             messages.set("chat-cleared", "Чат очищен");
-            messages.set("broadcast", "Оповещение: ");
+            messages.set("broadcast", "Оповещение: {message}");
             messages.set("player-not-found", "Игрок не найден.");
             messages.set("invalid-usage-message", "Используйте: /m <игрок> <сообщение>");
             messages.set("invalid-usage-ignore", "Используйте: /ignore <игрок>");
@@ -74,6 +80,10 @@ public class PluginMessages {
     
     public String getNoPermission() {
         return getColoredString("no-permission");
+    }
+
+    public String getPlayerOnly() {
+        return getColoredString("player-only");
     }
 
     public String getServerInfo() {
@@ -237,5 +247,13 @@ public class PluginMessages {
 
     public void reloadConfig() {
         messages = YamlConfiguration.loadConfiguration(file);
+    }
+
+    public String getString(String path) {
+        return messages.getString(path);
+    }
+
+    public Component getFormatted(String path, Object... args) {
+        return formatter.format(path, args);
     }
 }

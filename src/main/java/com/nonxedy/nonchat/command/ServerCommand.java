@@ -27,7 +27,7 @@ public class ServerCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.server")) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("You don't have permission to show server info.");
             return true;
         }
@@ -43,20 +43,19 @@ public class ServerCommand implements CommandExecutor {
             int numPlugins = Bukkit.getServer().getPluginManager().getPlugins().length;
             int numWorlds = Bukkit.getServer().getWorlds().size();
 
-            try {
-                sender.sendMessage(Component.text()
-                        .append(Component.text(ColorUtil.parseColor(messages.getServerInfo() + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getJavaVersion() + javaVersion + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getPort() + port + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getVersion() + version + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getOsName() + osN + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getOsVersion() + osV + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getCpuCores() + cpu + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getCpuFamily() + cpuFamily + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getNumberOfPlugins() + numPlugins + "\n")))
-                        .append(Component.text(ColorUtil.parseColor(messages.getNumberOfWorlds() + numWorlds)))
-                        .build());
+            Component serverInfo = Component.empty()
+                .append(ColorUtil.parseComponent(messages.getString("server-info") + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("java-version") + javaVersion + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("port") + port + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("os-name") + osN + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("os-version") + osV + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("cpu-cores") + cpu + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("cpu-family") + cpuFamily + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("number-of-plugins") + numPlugins + "\n"))
+                .append(ColorUtil.parseComponent(messages.getString("number-of-worlds") + numWorlds));
 
+            try {
+                sender.sendMessage(serverInfo);
                 plugin.logResponse("Server info shown.");
             } catch (Exception e) {
                 plugin.logError("There was an error showing server info: " + e.getMessage());

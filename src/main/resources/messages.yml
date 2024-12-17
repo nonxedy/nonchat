@@ -1,67 +1,68 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.5.5-pt
+# Version of the plugin: 6.6.6-pt
 #
 # - LuckPerms support.
 # - Vault support.
 # ==================================================
 
 # System messages.
-no-permission: "&cНедостаточно прав"
-blocked-words: "&cВы отправляете запрещенное слово!"
-mentioned: "&fВы были упомянуты в чате &a{player}!"
+no-permission: "&#ff0000Недостаточно прав"
+player-only: "&#ff0000Только игроки могут использовать эту команду"
+blocked-words: "&#ff0000Вы отправляете запрещенное слово!"
+mentioned: "&#ffffffВы были упомянуты в чате &#84FFB8{player}!"
 
 # Server Information.
-server-info: "&dServer Information:&f"
-java-version: "&dJava Version:&f "
-port: "&dPort:&f "
-version: "&dVersion:&f "
-os-name: "&dOS Name:&f "
-os-version: "&dOS Version:&f "
-cpu-cores: "&dCPU Cores:&f "
-cpu-family: "&dCPU Family:&f "
-number-of-plugins: "&dNumber of Plugins:&f "
-number-of-worlds: "&dNumber of Worlds:&f "
+server-info: "&#FFAFFBServer Information:&#ffffff"
+java-version: "&#FFAFFBJava Version:&#ffffff "
+port: "&#FFAFFBPort:&#ffffff "
+version: "&#FFAFFBVersion:&#ffffff "
+os-name: "&#FFAFFBOS Name:&#ffffff "
+os-version: "&#FFAFFBOS Version:&#ffffff "
+cpu-cores: "&#FFAFFBCPU Cores:&#ffffff "
+cpu-family: "&#FFAFFBCPU Family:&#ffffff "
+number-of-plugins: "&#FFAFFBNumber of Plugins:&#ffffff "
+number-of-worlds: "&#FFAFFBNumber of Worlds:&#ffffff "
 
 # Reload.
-reloading: "&dПерезагрузка..."
-reloaded: "&aПлагин перезагружен!"
-reload-failed: "&cНе удалось перезагрузить плагин!"
+reloading: "&#FFAFFBПерезагрузка..."
+reloaded: "&#84FFB8Плагин перезагружен!"
+reload-failed: "&#ff0000Не удалось перезагрузить плагин!"
 
 #Nhelp.
-help: "&dnonchat | Команды плагина:"
-nreload: "&d/nreload&f - перезагрузка плагина"
-help-command: "&d/nhelp&f - список команд"
-server-command: "&d/server&f - информация о сервере"
-message-command: "&d/m <игрок> <сообщение>&f - отправка личных
+help: "&#FFAFFBnonchat | Команды плагина:"
+nreload: "&#FFAFFB/nreload&#ffffff - перезагрузка плагина"
+help-command: "&#FFAFFB/nhelp&#ffffff - список команд"
+server-command: "&#FFAFFB/server&#ffffff - информация о сервере"
+message-command: "&#FFAFFB/m <игрок> <сообщение>&#ffffff - отправка личных
   сообщений"
-broadcast-command: "&d/bc <сообщение>&f - отправка сообщений всем игрокам"
-ignore-command: "&d/ignore <игрок>&f - игнорировать игрока"
-sc-command: "&d/sc <сообщение>&f - отправка сообщений всему персоналу"
-spy-command: "&d/spy&f - активация режима шпиона"
+broadcast-command: "&#FFAFFB/bc <сообщение>&#ffffff - отправка сообщений всем игрокам"
+ignore-command: "&#FFAFFB/ignore <игрок>&#ffffff - игнорировать игрока"
+sc-command: "&#FFAFFB/sc <сообщение>&#ffffff - отправка сообщений всему персоналу"
+spy-command: "&#FFAFFB/spy&#ffffff - активация режима шпиона"
 
 # Clear Chat.
-clear-chat: "&dОчистка чата..."
-chat-cleared: "&aЧат очищен"
+clear-chat: "&#FFAFFBОчистка чата..."
+chat-cleared: "&#84FFB8Чат очищен"
 
 # Broadcast.
-broadcast: "&dОповещение: &f"
+broadcast: "&#FFAFFBОповещение: &#ffffff{message}"
 
 # Message.
-player-not-found: "&cИгрок не найден."
-invalid-usage-message: "&fИспользуйте: &d/m <игрок> <сообщение>"
+player-not-found: "&#ff0000Игрок не найден."
+invalid-usage-message: "&#ffffffИспользуйте: &#FFAFFB/m <игрок> <сообщение>"
 
 # Ignore.
-ignored-player: "&aВы начали игнорировать игрока {player}."
-unignored-player: "&cВы больше не игнорируете игрока {player}."
-ignored-by-target: "&dЭтот игрок игнорирует вас и не может отправить ему сообщение."
-invalid-usage-ignore: "&fИспользуйте: &d/ignore <игрок>"
+ignored-player: "&#84FFB8Вы начали игнорировать игрока {player}."
+unignored-player: "&#ff0000Вы больше не игнорируете игрока {player}."
+ignored-by-target: "&#FFAFFBЭтот игрок игнорирует вас и не может отправить ему сообщение."
+invalid-usage-ignore: "&#ffffffИспользуйте: &#FFAFFB/ignore <игрок>"
 
 # Staff Chat.
-invalid-usage-sc: "&fИспользуйте: &d/sc <сообщение>"
+invalid-usage-sc: "&#ffffffИспользуйте: &#FFAFFB/sc <сообщение>"
 
 # Spy.
-spy-mode-enabled: "&aРежим шпиона включен"
-spy-mode-disabled: "&cРежим шпиона выключен"
-invalid-usage-spy: "&fИспользуйте: &d/spy"
+spy-mode-enabled: "&#84FFB8Режим шпиона включен"
+spy-mode-disabled: "&#ff0000Режим шпиона выключен"
+invalid-usage-spy: "&#ffffffИспользуйте: &#FFAFFB/spy"

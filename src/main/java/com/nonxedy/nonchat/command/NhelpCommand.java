@@ -26,25 +26,24 @@ public class NhelpCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.nhelp")) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("You don't have permission to show help.");
             return true;
         }
 
-        try {
-        sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getHelp())));
+        Component helpMessage = Component.empty()
+            .append(ColorUtil.parseComponent(messages.getString("nreload") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("help-command") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("server-command") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("message-command") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("broadcast-command") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("ignore-command") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("sc-command") + "\n"))
+            .append(ColorUtil.parseComponent(messages.getString("spy-command")));
 
-        sender.sendMessage(Component.text()
-                .append(Component.text(ColorUtil.parseColor(messages.getNreload() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getHelpCommand() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getServerCommand() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getMessageCommand() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getBroadcastCommand() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getIgnoreCommand() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getScCommand() + "\n")))
-                .append(Component.text(ColorUtil.parseColor(messages.getSpyCommand() + "\n")))
-                .build());
-            
+        try {
+        sender.sendMessage(ColorUtil.parseComponent(messages.getString("help")));
+        sender.sendMessage(helpMessage);
         plugin.logResponse("Help shown.");
         } catch (Exception e) {
             plugin.logError("There was an error showing help: " + e.getMessage());

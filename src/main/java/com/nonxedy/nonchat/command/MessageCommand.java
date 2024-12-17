@@ -43,24 +43,24 @@ public class MessageCommand implements CommandExecutor {
             command.getName().equalsIgnoreCase("whisper")) {
             
             if (!sender.hasPermission("nonchat.message")) {
-                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
+                sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
                 plugin.logError("No permission for message command");
                 return true;
             }
             
             if (args.length < 2) {
-                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getInvalidUsageMessage())));
+                sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-message")));
                 plugin.logError("Invalid usage for message command");
                 return true;
             }
 
             Player target = Bukkit.getPlayer(args[0]);
             if (target == null && !(sender instanceof Player)) {
-                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getPlayerNotFound())));
+                sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
                 plugin.logError("Player not found for message command");
                 return true;
             } else if (target == null) {
-                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getPlayerNotFound())));
+                sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
                 return true;
             }
 
@@ -68,7 +68,7 @@ public class MessageCommand implements CommandExecutor {
             UUID targetUUID = target.getUniqueId();
 
             if (senderUUID != null && plugin.ignoredPlayers.containsKey(targetUUID) && plugin.ignoredPlayers.get(targetUUID).contains(senderUUID)) {
-                sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getIgnoredByTarget())));
+                sender.sendMessage(ColorUtil.parseColor(messages.getString("ignored-by-target")));
                 plugin.logError("Target is ignoring sender");
                 return true;
             }
@@ -94,7 +94,7 @@ public class MessageCommand implements CommandExecutor {
 
                 if (spyCommand != null) {
                     if (sender instanceof Player) {
-                        spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseColor(message.toString().trim()));
+                        spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message.toString().trim()));
                     }
                     plugin.logResponse("Message sent to spy players");
                 } else {

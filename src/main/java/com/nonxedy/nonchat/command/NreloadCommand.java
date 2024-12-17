@@ -9,8 +9,6 @@ import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
-import net.kyori.adventure.text.Component;
-
 public class NreloadCommand implements CommandExecutor {
 
     private nonchat plugin;
@@ -26,12 +24,12 @@ public class NreloadCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.nreload")) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("You don't have permission to reload the config.");
             return true;
         }
 
-        sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getReloading())));
+        sender.sendMessage(ColorUtil.parseComponent(messages.getString("reloading")));
         plugin.logResponse("Reloading...");
 
         try {
@@ -39,11 +37,11 @@ public class NreloadCommand implements CommandExecutor {
             plugin.reloadDebugger();
             plugin.stopAutoBroadcastSender();
             plugin.registerUtils();
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getReloaded())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("reloaded")));
 
             plugin.logResponse("Config reloaded.");
         } catch (Exception e) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getReloadFailed())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("reload-failed")));
 
             plugin.logError("There was an error reloading the config: " + e.getMessage());
         }

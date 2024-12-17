@@ -15,8 +15,6 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 import net.md_5.bungee.api.ChatColor;
@@ -48,7 +46,7 @@ public class ChatFormatListener implements Listener {
         if (!player.hasPermission("nonchat.antiblockedwords")) {
             // Check if the message contains any banned words
             if (!wordBlocker.isMessageAllowed(message)) {
-                player.sendMessage(Component.text(ColorUtil.parseColor(messages.getBlockedWords())));
+                player.sendMessage(ColorUtil.parseComponent(messages.getString("blocked-words")));
                 event.setCancelled(true);
                 return;
             }
@@ -65,9 +63,10 @@ public class ChatFormatListener implements Listener {
         
             if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
                 // Send notification to the mentioned player
-                mentionedPlayer.sendMessage(Component.text()
-                        .append(Component.text(mentionedMessages.replace("{player}", player.getName()), TextColor.fromHexString("#52FFA6")))
-                        .build());
+                mentionedPlayer.sendMessage(ColorUtil.parseComponent(
+                    messages.getString("mentioned")
+                        .replace("{player}", player.getName())
+                ));
                 // Send sound to the mentioned player
                 mentionedPlayer.playSound(mentionedPlayer.getLocation(), "minecraft:entity.experience_orb.pickup", 1.0F, 1.0F);
             }

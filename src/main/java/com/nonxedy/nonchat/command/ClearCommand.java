@@ -27,12 +27,12 @@ public class ClearCommand implements CommandExecutor {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.clear")) {
-            sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getNoPermission())));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("You don't have permission to clear the chat.");
             return true;
         }
 
-        sender.sendMessage(Component.text(ColorUtil.parseColor(messages.getClearChat())));
+        sender.sendMessage(ColorUtil.parseComponent(messages.getString("clear-chat")));
         plugin.logResponse("Clearing chat...");
         
         try {
@@ -42,7 +42,7 @@ public class ClearCommand implements CommandExecutor {
 
         plugin.logResponse("Chat cleared.");
 
-        Bukkit.broadcast(Component.text(ColorUtil.parseColor(messages.getChatCleared())));
+        Bukkit.broadcast(ColorUtil.parseComponent(messages.getString("chat-cleared")));
         } catch (Exception e) {
             plugin.logError("There was an error clearing the chat: " + e.getMessage());
         }
