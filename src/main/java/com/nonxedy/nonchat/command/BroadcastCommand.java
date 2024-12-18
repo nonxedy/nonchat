@@ -1,10 +1,12 @@
 package com.nonxedy.nonchat.command;
 
-import org.bukkit.Bukkit;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.nonchat;
@@ -13,10 +15,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
-public class BroadcastCommand implements CommandExecutor {
+public class BroadcastCommand implements CommandExecutor, TabCompleter {
 
-    private PluginMessages messages;
-    private nonchat plugin;
+    private final PluginMessages messages;
+    private final nonchat plugin;
 
     public BroadcastCommand(PluginMessages messages, nonchat plugin) {
         this.messages = messages;
@@ -24,49 +26,57 @@ public class BroadcastCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+                    @NotNull String label, @NotNull String[] args) {
         plugin.logCommand(command.getName(), args);
-        
-        if (command.getName().equalsIgnoreCase("broadcast") ||
-            command.getName().equalsIgnoreCase("bc")) {
 
-            if (!sender.hasPermission("nonchat.broadcast")) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-                plugin.logError("You don't have permission to send broadcast.");
-                return true;
-            }
-
-            if (args.length == 0) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("broadcast-command")));
-                plugin.logError("Invalid usage: /broadcast <message>");
-                return true;
-            }
-
-            StringBuilder message = new StringBuilder();
-            for (String arg : args) {
-                message.append(arg).append(" ");
-            }
-
-            try {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    Component broadcastMessage = ColorUtil.parseComponent(
-                        messages.getString("broadcast")
-                            .replace("{message}", message)
-                    );
-
-                    player.sendMessage(" ");
-                    player.sendMessage(broadcastMessage);
-                    player.sendMessage(" ");
-
-                    plugin.logResponse("Broadcast sent.");
-
-                    Bukkit.getConsoleSender().sendMessage(broadcastMessage);
-                }
-            } catch (Exception e) {
-                plugin.logError("There was an error sending broadcast: " + e.getMessage());
-            }
+        if (!sender.hasPermission("nonchat.broadcast")) {
+            sendNoPermissionMessage(sender);
             return true;
         }
-        return false;
+
+        if (args.length == 0) {
+            sendUsageMessage(sender);
+            return true;
+        }
+
+        broadcastMessage(String.join(" ", args));
+        return true;
+    }
+
+    private void sendNoPermissionMessage(CommandSender sender) {
+        sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+        plugin.logError("Sender doesn't have broadcast permission");
+    }
+
+    private void sendUsageMessage(CommandSender sender) {
+        sender.sendMessage(ColorUtil.parseComponent(messages.getString("broadcast-command")));
+        plugin.logError("Invalid usage: /bc <message>");
+    }
+
+    private void broadcastMessage(String message) {
+        try {
+            Component broadcastComponent = ColorUtil.parseComponent(
+                messages.getString("broadcast")
+                    .replace("{message}", message)
+            );
+
+            plugin.getServer().getOnlinePlayers().forEach(player -> {
+                player.sendMessage(Component.empty());
+                player.sendMessage(broadcastComponent);
+                player.sendMessage(Component.empty());
+            });
+
+            plugin.getServer().getConsoleSender().sendMessage(broadcastComponent);
+            plugin.logResponse("Broadcast sent successfully");
+        } catch (Exception e) {
+            plugin.logError("Failed to send broadcast: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, 
+                        @NotNull String label, @NotNull String[] args) {
+        return Collections.emptyList();
     }
 }

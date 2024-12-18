@@ -10,5 +10,5 @@ Buy me a coffee: https://boosty.to/nonxedy
 
 TODO:
 - [X] Add bubble chat.
-- [ ] Add HEX support in messages.yml
+- [X] Add HEX support in messages.yml
 - [X] Add pings.
