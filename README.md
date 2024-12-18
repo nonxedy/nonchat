@@ -9,6 +9,8 @@ nonchat also have HEX support, config, you can translate it in messages.yml
 Buy me a coffee: https://boosty.to/nonxedy
 
 TODO:
-- [X] Add bubble chat.
-- [X] Add HEX support in messages.yml
-- [X] Add pings.
+- [ ] Add documentation for code
+- [ ] Add documentation for plugin
+- [ ] Add description for plugin
+- [ ] Add PlacheHolderAPI support
+- [ ] Improve YOUR CODE!!!
