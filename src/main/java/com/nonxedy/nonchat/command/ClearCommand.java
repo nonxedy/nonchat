@@ -11,11 +11,13 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class ClearCommand implements CommandExecutor {
     
-    private PluginMessages messages;
-    private nonchat plugin;
+    private final PluginMessages messages;
+    private final nonchat plugin;
+    private static final int CLEAR_LINES = 100;
 
     public ClearCommand(PluginMessages messages, nonchat plugin) {
         this.messages = messages;
@@ -23,29 +25,44 @@ public class ClearCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, 
+                        @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
-        if (!sender.hasPermission("nonchat.clear")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-            plugin.logError("You don't have permission to clear the chat.");
+        if (!hasPermission(sender)) {
             return true;
         }
 
-        sender.sendMessage(ColorUtil.parseComponent(messages.getString("clear-chat")));
-        plugin.logResponse("Clearing chat...");
+        clearChat();
+        sendClearNotification();
         
-        try {
-            for (int i = 0; i < 100; i++) {
-                Bukkit.broadcast(Component.empty());
-            }
+        return true;
+    }
 
-        plugin.logResponse("Chat cleared.");
-
-        Bukkit.broadcast(ColorUtil.parseComponent(messages.getString("chat-cleared")));
-        } catch (Exception e) {
-            plugin.logError("There was an error clearing the chat: " + e.getMessage());
+    private boolean hasPermission(CommandSender sender) {
+        if (!sender.hasPermission("nonchat.clear")) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            plugin.logError("Player attempted to clear chat without permission");
+            return false;
         }
         return true;
+    }
+
+    private void clearChat() {
+        try {
+            Component emptyLine = Component.empty();
+            for (int i = 0; i < CLEAR_LINES; i++) {
+                Bukkit.broadcast(emptyLine);
+            }
+            plugin.logResponse("Chat cleared successfully");
+        } catch (Exception e) {
+            plugin.logError("Failed to clear chat: " + e.getMessage());
+            Bukkit.broadcast(Component.text("Failed to clear chat")
+                    .color(NamedTextColor.RED));
+        }
+    }
+
+    private void sendClearNotification() {
+        Bukkit.broadcast(ColorUtil.parseComponent(messages.getString("chat-cleared")));
     }
 }
