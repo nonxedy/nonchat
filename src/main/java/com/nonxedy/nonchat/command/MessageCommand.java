@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat.command;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -15,100 +16,102 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 
 public class MessageCommand implements CommandExecutor {
 
-    private PluginConfig pluginConfig;
-    private PluginMessages messages;
-    private SpyCommand spyCommand;
-    private nonchat plugin;
+    private final nonchat plugin;
+    private final PluginConfig config;
+    private final PluginMessages messages;
+    private final SpyCommand spyCommand;
 
-    public MessageCommand(nonchat plugin, PluginConfig pluginConfig, PluginMessages messages, SpyCommand spyCommand) {
+    public MessageCommand(nonchat plugin, PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
         this.plugin = plugin;
-        this.pluginConfig = pluginConfig;
+        this.config = config;
         this.messages = messages;
         this.spyCommand = spyCommand;
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
-        if (command.getName().equalsIgnoreCase("message") ||
-            command.getName().equalsIgnoreCase("msg") ||
-            command.getName().equalsIgnoreCase("tell") ||
-            command.getName().equalsIgnoreCase("w") ||
-            command.getName().equalsIgnoreCase("m") ||
-            command.getName().equalsIgnoreCase("whisper")) {
-            
-            if (!sender.hasPermission("nonchat.message")) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-                plugin.logError("No permission for message command");
-                return true;
-            }
-            
-            if (args.length < 2) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-message")));
-                plugin.logError("Invalid usage for message command");
-                return true;
-            }
+        if (!isMessageCommand(command.getName())) {
+            plugin.logError("Invalid command: " + command.getName());
+            return false;
+        }
 
-            Player target = Bukkit.getPlayer(args[0]);
-            if (target == null && !(sender instanceof Player)) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
-                plugin.logError("Player not found for message command");
-                return true;
-            } else if (target == null) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
-                return true;
-            }
-
-            UUID senderUUID = (sender instanceof Player) ? ((Player) sender).getUniqueId() : null;
-            UUID targetUUID = target.getUniqueId();
-
-            if (senderUUID != null && plugin.ignoredPlayers.containsKey(targetUUID) && plugin.ignoredPlayers.get(targetUUID).contains(senderUUID)) {
-                sender.sendMessage(ColorUtil.parseColor(messages.getString("ignored-by-target")));
-                plugin.logError("Target is ignoring sender");
-                return true;
-            }
-
-            StringBuilder message = new StringBuilder();
-            for (int i =  1; i < args.length; i++) {
-                message.append(args[i]).append(" ");
-            }
-
-            String privateChatFormat = pluginConfig.getPrivateChatFormat();
-            try {
-                if (sender instanceof Player) {
-                    Player senderPlayer = (Player) sender;
-                    senderPlayer.sendMessage(Component.text()
-                            .append(Component.text(privateChatFormat.replace("{sender}", sender.getName()).replace("{target}", target.getName()).replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
-                            .build());
-                } else {
-                    // If command is executed from console
-                    sender.sendMessage(Component.text()
-                            .append(Component.text(privateChatFormat.replace("{sender}", "Консоль").replace("{target}", target.getName()).replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
-                            .build());
-                }
-
-                if (spyCommand != null) {
-                    if (sender instanceof Player) {
-                        spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message.toString().trim()));
-                    }
-                    plugin.logResponse("Message sent to spy players");
-                } else {
-                    plugin.logError("spyCommand is null");
-                }
-            } catch (Exception e) {
-                plugin.logError("Error sending message: " + e.getMessage());
-            }
-        
-            target.sendMessage(Component.text()
-                    .append(Component.text(privateChatFormat.replace("{sender}", sender.getName()).replace("{target}", "Вы").replace("{message}", message.toString().trim()), TextColor.fromHexString("#FFFFFF")))
-                    .build());
+        if (!sender.hasPermission("nonchat.message")) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             return true;
         }
-        return false;
+
+        if (args.length < 2) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-message")));
+            plugin.logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
+            return true;
+        }
+
+        Player target = Bukkit.getPlayer(args[0]);
+        if (target == null) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
+            plugin.logError("Player " + sender.getName() + " tried to message a player that is not online.");
+            return true;
+        }
+
+        if (isIgnored(sender, target)) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
+            plugin.logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
+            return true;
+        }
+
+        String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+        sendPrivateMessage(sender, target, message);
+        
+        return true;
+    }
+
+    private boolean isMessageCommand(String commandName) {
+        return commandName.equalsIgnoreCase("message") ||
+            commandName.equalsIgnoreCase("msg") ||
+            commandName.equalsIgnoreCase("tell") ||
+            commandName.equalsIgnoreCase("w") ||
+            commandName.equalsIgnoreCase("m") ||
+            commandName.equalsIgnoreCase("whisper");
+    }
+
+    private boolean isIgnored(CommandSender sender, Player target) {
+        if (!(sender instanceof Player)) {
+            return false;
+        }
+        UUID senderUUID = ((Player) sender).getUniqueId();
+        return plugin.ignoredPlayers.containsKey(target.getUniqueId()) &&
+            plugin.ignoredPlayers.get(target.getUniqueId()).contains(senderUUID);
+    }
+
+    private void sendPrivateMessage(CommandSender sender, Player target, String message) {
+        String format = config.getPrivateChatFormat();
+        String senderName = sender instanceof Player ? sender.getName() : "Console";
+    
+        Component senderMessage = ColorUtil.parseComponent(
+            format.replace("{sender}", senderName)
+                .replace("{target}", target.getName())
+                .replace("{message}", message)
+        );
+        sender.sendMessage(senderMessage);
+        plugin.logResponse("Message sent to " + sender.getName());
+    
+        Component targetMessage = ColorUtil.parseComponent(
+            format.replace("{sender}", senderName)
+                .replace("{target}", "You")
+                .replace("{message}", message)
+        );
+        target.sendMessage(targetMessage);
+        plugin.logResponse("Message sent to " + target.getName());
+    
+        if (spyCommand != null && sender instanceof Player) {
+            spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message));
+            plugin.logResponse("Message sent to spy players");
+        }
     }
 }
