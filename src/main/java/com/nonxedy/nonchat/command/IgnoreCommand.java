@@ -1,8 +1,8 @@
 package com.nonxedy.nonchat.command;
 
 import java.util.HashSet;
+import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,8 +15,8 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 
 public class IgnoreCommand implements CommandExecutor {
 
-    private PluginMessages messages;
-    private nonchat plugin;
+    private final nonchat plugin;
+    private final PluginMessages messages;
 
     public IgnoreCommand(nonchat plugin, PluginMessages messages) {
         this.plugin = plugin;
@@ -24,16 +24,17 @@ public class IgnoreCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         plugin.logCommand(command.getName(), args);
 
+        Player player = (Player) sender;
         if (!(sender instanceof Player)) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-only")));
             plugin.logError("Ignore command can only be used by players");
             return true;
         }
 
-        if (!sender.hasPermission("nonchat.ignore")) {
+        if (!player.hasPermission("nonchat.ignore")) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("No permission for ignore command");
             return true;
@@ -45,9 +46,7 @@ public class IgnoreCommand implements CommandExecutor {
             return true;
         }
 
-        Player player = (Player) sender;
-        Player target = Bukkit.getPlayer(args[0]);
-
+        Player target = plugin.getServer().getPlayer(args[0]);
         if (target == null) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
             plugin.logError("Player not found for ignore command");
@@ -55,37 +54,46 @@ public class IgnoreCommand implements CommandExecutor {
         }
 
         if (target == player) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("cannot-ignore-self")));
             plugin.logError("Cannot ignore self");
             return true;
         }
 
-        try {
-            if (plugin.ignoredPlayers.containsKey(player.getUniqueId()) &&
-                plugin.ignoredPlayers.get(player.getUniqueId()).contains(target.getUniqueId())) {
-                    plugin.ignoredPlayers.get(player.getUniqueId()).remove(target.getUniqueId());
-                    sender.sendMessage(ColorUtil.parseComponent(
-                        messages.getString("unignored-player")
-                            .replace("{player}", target.getName())
-                    ));
-                    plugin.logResponse("Player unignored");
-                } else {
-                    plugin.ignoredPlayers.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>())
-                        .add(target.getUniqueId());
-                    sender.sendMessage(ColorUtil.parseComponent(
-                        messages.getString("ignored-player")
-                            .replace("{player}", target.getName())
-                    ));
-                    plugin.logResponse("Player ignored");
-
-                    target.sendMessage(ColorUtil.parseComponent(
-                        messages.getString("ignored-by-target")
-                            .replace("{player}", player.getName())
-                    ));
-                }
-        } catch (Exception e) {
-            plugin.logError("There was an error ignoring player: " + e.getMessage());
-        }
+        handleIgnoreToggle(player, target);
         return true;
+    }
+
+    private void handleIgnoreToggle(Player player, Player target) {
+        try {
+            UUID playerUUID = player.getUniqueId();
+            UUID targetUUID = target.getUniqueId();
+
+            if (isIgnored(playerUUID, targetUUID)) {
+                removeIgnore(player, target);
+            } else {
+                addIgnore(player, target);
+            }
+        } catch (Exception e) {
+            plugin.logError("Error handling ignore toggle: " + e.getMessage());
+        }
+    }
+
+    private boolean isIgnored(UUID playerUUID, UUID targetUUID) {
+        return plugin.ignoredPlayers.containsKey(playerUUID) && 
+            plugin.ignoredPlayers.get(playerUUID).contains(targetUUID);
+    }
+
+    private void removeIgnore(Player player, Player target) {
+        plugin.ignoredPlayers.get(player.getUniqueId()).remove(target.getUniqueId());
+        player.sendMessage(ColorUtil.parseComponent(messages.getString("unignored-player").replace("{player}", target.getName())));
+        plugin.logResponse("Player unignored successfully");
+    }
+
+    private void addIgnore(Player player, Player target) {
+        plugin.ignoredPlayers.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>())
+            .add(target.getUniqueId());
+        player.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-player").replace("{player}", target.getName())));
+        target.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target").replace("{player}", player.getName())));
+        plugin.logResponse("Player ignored successfully");
     }
 }

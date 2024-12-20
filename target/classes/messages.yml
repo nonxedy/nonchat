@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 6.6.8-pt
+# Version of the plugin: 6.6.9-pt
 #
 # - LuckPerms support.
 # - Vault support.
@@ -12,6 +12,7 @@ no-permission: "&#ff0000Недостаточно прав"
 player-only: "&#ff0000Только игроки могут использовать эту команду"
 blocked-words: "&#ff0000Вы отправляете запрещенное слово!"
 mentioned: "&#ffffffВы были упомянуты в чате &#84FFB8{player}!"
+player-not-found: "&#ff0000Игрок не найден."
 
 # Server Information.
 server-info: "&#FFAFFBServer Information:&#ffffff"
@@ -50,7 +51,6 @@ chat-cleared: "&#84FFB8Чат очищен"
 broadcast: "&#FFAFFBОповещение: &#ffffff{message}"
 
 # Message.
-player-not-found: "&#ff0000Игрок не найден."
 invalid-usage-message: "&#ffffffИспользуйте: &#FFAFFB/m <игрок> <сообщение>"
 
 # Ignore.
@@ -58,6 +58,7 @@ ignored-player: "&#84FFB8Вы начали игнорировать игрока
 unignored-player: "&#ff0000Вы больше не игнорируете игрока {player}."
 ignored-by-target: "&#FFAFFBЭтот игрок игнорирует вас и не может отправить ему сообщение."
 invalid-usage-ignore: "&#ffffffИспользуйте: &#FFAFFB/ignore <игрок>"
+cannot-ignore-self: "&#ff0000Вы не можете игнорировать себя."
 
 # Staff Chat.
 invalid-usage-sc: "&#ffffffИспользуйте: &#FFAFFB/sc <сообщение>"

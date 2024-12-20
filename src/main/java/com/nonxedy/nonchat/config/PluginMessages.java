@@ -64,6 +64,7 @@ public class PluginMessages {
             messages.set("invalid-usage-ignore", "Используйте: /ignore <игрок>");
             messages.set("invalid-usage-sc", "Используйте: /sc <сообщение>");
             messages.set("invalid-usage-spy", "Используйте: /spy");
+            messages.set("cannot-ignore-self", "Вы не можете игнорировать себя.");
             messages.set("ignored-player", "Вы начали игнорировать игрока {player}.");
             messages.set("unignored-player", "Вы больше не игнорируете игрока {player}.");
             messages.set("ignored-by-target", "Этот игрок игнорирует вас и вы не можете отправить ему сообщение.");
@@ -204,6 +205,10 @@ public class PluginMessages {
 
     public String getIgnoredByTarget() {
         return getColoredString("ignored-by-target");
+    }
+
+    public String getCannotIgnoreSelf() {
+        return getColoredString("cannot-ignore-self");
     }
 
     public String getInvalidUsageSc() {
