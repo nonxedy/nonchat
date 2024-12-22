@@ -13,8 +13,8 @@ import net.kyori.adventure.text.Component;
 
 public class NhelpCommand implements CommandExecutor {
 
-    private PluginMessages messages;
-    private nonchat plugin;
+    private final PluginMessages messages;
+    private final nonchat plugin;
 
     public NhelpCommand(PluginMessages messages, nonchat plugin) {
         this.messages = messages;
@@ -22,32 +22,49 @@ public class NhelpCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
         if (!sender.hasPermission("nonchat.nhelp")) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-            plugin.logError("You don't have permission to show help.");
+            plugin.logError("Permission denied: nonchat.nhelp");
             return true;
         }
 
-        Component helpMessage = Component.empty()
-            .append(ColorUtil.parseComponent(messages.getString("nreload") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("help-command") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("server-command") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("message-command") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("broadcast-command") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("ignore-command") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("sc-command") + "\n"))
-            .append(ColorUtil.parseComponent(messages.getString("spy-command")));
-
-        try {
-        sender.sendMessage(ColorUtil.parseComponent(messages.getString("help")));
-        sender.sendMessage(helpMessage);
-        plugin.logResponse("Help shown.");
-        } catch (Exception e) {
-            plugin.logError("There was an error showing help: " + e.getMessage());
-        }
+        sendHelpMessage(sender);
         return true;
+    }
+
+    private void sendHelpMessage(CommandSender sender) {
+        try {
+            Component helpMessage = Component.empty()
+                .append(ColorUtil.parseComponent(messages.getString("help")))
+                .append(Component.newline())
+                .append(getCommandsList());
+
+            sender.sendMessage(helpMessage);
+            plugin.logResponse("Help message sent successfully");
+        } catch (Exception e) {
+            plugin.logError("Failed to send help message: " + e.getMessage());
+        }
+    }
+
+    private Component getCommandsList() {
+        return Component.empty()
+            .append(ColorUtil.parseComponent(messages.getString("nreload")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("help-command")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("server-command")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("message-command")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("broadcast-command")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("ignore-command")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("sc-command")))
+            .append(Component.newline())
+            .append(ColorUtil.parseComponent(messages.getString("spy-command")));
     }
 }
