@@ -11,55 +11,70 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent.Builder;
+import net.kyori.adventure.text.format.TextColor;
 
 public class ServerCommand implements CommandExecutor {
 
-        private PluginMessages messages;
-        private nonchat plugin;
-        
-        public ServerCommand(PluginMessages messages, nonchat plugin) {
-            this.messages = messages;
-            this.plugin = plugin;
-        }
+    private final PluginMessages messages;
+    private final nonchat plugin;
+    
+    public ServerCommand(PluginMessages messages, nonchat plugin) {
+        this.messages = messages;
+        this.plugin = plugin;
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
         
         if (!sender.hasPermission("nonchat.server")) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-            plugin.logError("You don't have permission to show server info.");
             return true;
         }
 
-            int port = Bukkit.getServer().getPort();
-            String version = Bukkit.getServer().getVersion();
-            String javaVersion = System.getProperty("java.version");
-            double cpu = Runtime.getRuntime().availableProcessors();
-            String osN = System.getProperty("os.name");
-            String osV = System.getProperty("os.version");
-            String cpuFamily = System.getenv("PROCESSOR_IDENTIFIER");
-            if (cpuFamily == null) { cpuFamily = "Unknown CPU Family"; }
-            int numPlugins = Bukkit.getServer().getPluginManager().getPlugins().length;
-            int numWorlds = Bukkit.getServer().getWorlds().size();
-
-            Component serverInfo = Component.empty()
-                .append(ColorUtil.parseComponent(messages.getString("server-info") + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("java-version") + javaVersion + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("port") + port + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("os-name") + osN + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("os-version") + osV + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("cpu-cores") + cpu + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("cpu-family") + cpuFamily + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("number-of-plugins") + numPlugins + "\n"))
-                .append(ColorUtil.parseComponent(messages.getString("number-of-worlds") + numWorlds));
-
-            try {
-                sender.sendMessage(serverInfo);
-                plugin.logResponse("Server info shown.");
-            } catch (Exception e) {
-                plugin.logError("There was an error showing server info: " + e.getMessage());
-            }
-            return true;
+        try {
+            sendServerInfo(sender);
+            plugin.logResponse("Server info shown successfully");
+        } catch (Exception e) {
+            plugin.logError("Failed to show server info: " + e.getMessage());
+            sender.sendMessage(Component.text("An error occurred while fetching server info")
+                .color(TextColor.color(255, 0, 0)));
+        }
+        
+        return true;
+    }
+    
+    private void sendServerInfo(CommandSender sender) {
+        ServerInfoBuilder info = new ServerInfoBuilder()
+            .addLine(messages.getString("server-info"))
+            .addInfo(messages.getString("java-version"), System.getProperty("java.version"))
+            .addInfo(messages.getString("port"), String.valueOf(Bukkit.getServer().getPort()))
+            .addInfo(messages.getString("os-name"), System.getProperty("os.name"))
+            .addInfo(messages.getString("os-version"), System.getProperty("os.version"))
+            .addInfo(messages.getString("cpu-cores"), String.valueOf(Runtime.getRuntime().availableProcessors()))
+            .addInfo(messages.getString("cpu-family"), System.getenv().getOrDefault("PROCESSOR_IDENTIFIER", "Unknown"))
+            .addInfo(messages.getString("number-of-plugins"), String.valueOf(Bukkit.getPluginManager().getPlugins().length))
+            .addInfo(messages.getString("number-of-worlds"), String.valueOf(Bukkit.getWorlds().size()));
+            
+        sender.sendMessage(info.build());
+    }
+    
+    private static class ServerInfoBuilder {
+        private final Builder builder = Component.text();
+        
+        public ServerInfoBuilder addLine(String message) {
+            builder.append(ColorUtil.parseComponent(message + "\n"));
+            return this;
+        }
+        
+        public ServerInfoBuilder addInfo(String label, String value) {
+            builder.append(ColorUtil.parseComponent(label + value + "\n"));
+            return this;
+        }
+        
+        public Component build() {
+            return builder.build();
+        }
     }
 }
