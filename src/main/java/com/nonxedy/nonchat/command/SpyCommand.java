@@ -37,7 +37,7 @@ public class SpyCommand implements CommandExecutor {
 
         Player player = (Player) sender;
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("only-player-command")));
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-only")));
             return true;
         }
 
@@ -64,7 +64,6 @@ public class SpyCommand implements CommandExecutor {
             }
         } catch (Exception e) {
             plugin.logError("Error toggling spy mode for " + player.getName() + ": " + e.getMessage());
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("error-occurred")));
         }
     }
 
