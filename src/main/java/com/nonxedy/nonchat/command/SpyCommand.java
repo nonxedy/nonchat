@@ -1,7 +1,7 @@
 package com.nonxedy.nonchat.command;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,61 +19,75 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public class SpyCommand implements CommandExecutor {
 
-    private nonchat plugin;
-    private PluginMessages messages;
-    private PluginConfig pluginConfig;
-    private boolean isSpying = false;
-    private List<Player> spyPlayers = new ArrayList<>();
+    private final nonchat plugin;
+    private final PluginMessages messages;
+    private final PluginConfig pluginConfig;
+    private final Set<Player> spyPlayers;
 
     public SpyCommand(nonchat plugin, PluginMessages messages, PluginConfig pluginConfig) {
         this.plugin = plugin;
         this.messages = messages;
         this.pluginConfig = pluginConfig;
+        this.spyPlayers = new HashSet<>();
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
-        if (!sender.hasPermission("nonchat.spy")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-            plugin.logError("You don't have permission to send broadcast.");
+        Player player = (Player) sender;
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("only-player-command")));
             return true;
         }
-        Player player = (Player) sender;
-        
-        try {
-            if (isSpying) {
-                // Disable spy mode
-                isSpying = false;
-                spyPlayers.remove(player);
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("spy-mode-disabled")));
-                plugin.logResponse("Spy mode disabled.");
-            } else {
-                // Enable spy mode
-                isSpying = true;
-                spyPlayers.add(player);
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("spy-mode-enabled")));
-                plugin.logResponse("Spy mode enabled.");
-            }
-        } catch (Exception e) {
-            plugin.logError("There was an error toggling spy mode: " + e.getMessage());
+
+        if (!player.hasPermission("nonchat.spy")) {
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            plugin.logError("Player " + player.getName() + " tried to use spy command without permission");
+            return true;
         }
 
+        toggleSpyMode(player);
         return true;
     }
 
-    public void onPrivateMessage(Player sender, Player target, Component message) {
-        for (Player player : spyPlayers) {
-            if (player != sender && player != target) {
-                String spyFormat = pluginConfig.getSpyFormat()
-                    .replace("{sender}", sender.getName())
-                    .replace("{target}", target.getName())
-                    .replace("{message}", PlainTextComponentSerializer.plainText().serialize(message));
-                    plugin.logResponse(player + " has spy mode is active. Message from " + sender.getName() + " to " + target.getName() + ": " + message);
+    private void toggleSpyMode(Player player) {
+        try {
+            if (spyPlayers.contains(player)) {
+                spyPlayers.remove(player);
+                player.sendMessage(ColorUtil.parseComponent(messages.getString("spy-mode-disabled")));
+                plugin.logResponse("Spy mode disabled for " + player.getName());
             } else {
-                plugin.logResponse("Spy mode is not active.");
+                spyPlayers.add(player);
+                player.sendMessage(ColorUtil.parseComponent(messages.getString("spy-mode-enabled")));
+                plugin.logResponse("Spy mode enabled for " + player.getName());
+            }
+        } catch (Exception e) {
+            plugin.logError("Error toggling spy mode for " + player.getName() + ": " + e.getMessage());
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("error-occurred")));
+        }
+    }
+
+    public void onPrivateMessage(Player sender, Player target, Component message) {
+        String plainMessage = PlainTextComponentSerializer.plainText().serialize(message);
+        String spyFormat = pluginConfig.getSpyFormat()
+                .replace("{sender}", sender.getName())
+                .replace("{target}", target.getName())
+                .replace("{message}", plainMessage);
+
+        for (Player spy : spyPlayers) {
+            if (spy != sender && spy != target && spy.isOnline()) {
+                spy.sendMessage(ColorUtil.parseComponent(spyFormat));
+                plugin.logResponse("Spy " + spy.getName() + " received message: " + spyFormat);
             }
         }
+    }
+
+    public boolean isSpying(Player player) {
+        return spyPlayers.contains(player);
+    }
+
+    public Set<Player> getSpyPlayers() {
+        return new HashSet<>(spyPlayers);
     }
 }
