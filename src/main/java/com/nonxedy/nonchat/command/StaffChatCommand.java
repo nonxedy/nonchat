@@ -18,9 +18,11 @@ import net.luckperms.api.model.user.User;
 
 public class StaffChatCommand implements CommandExecutor {
 
-    private nonchat plugin;
-    private PluginMessages messages;
-    private PluginConfig config;
+    private final nonchat plugin;
+    private final PluginMessages messages;
+    private final PluginConfig config;;
+    private static final TextColor STAFF_CHAT_COLOR = TextColor.fromHexString("#ADF3FD");
+    private static final TextColor MESSAGE_COLOR = TextColor.fromHexString("#FFFFFF");
 
     public StaffChatCommand(nonchat plugin, PluginMessages messages, PluginConfig config) {
         this.plugin = plugin;
@@ -29,58 +31,66 @@ public class StaffChatCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
-        
-        if (!sender.hasPermission("nonchat.staffchat")) {
+
+        if (!sender.hasPermission("nonchat.sc")) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("You don't have permission to send broadcast.");
             return true;
         }
+
         if (args.length < 1) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-sc")));
             plugin.logError("Invalid usage for staffchat command");
             return true;
         }
-        
-        String message = String.join(" ", args);
-        String staffchat = config.getScFormat();
-        String staffChatName = config.getStaffChatName();
 
+        String message = String.join(" ", args);
+        broadcastStaffMessage(sender, message);
+        return true;
+    }
+
+    private void broadcastStaffMessage(CommandSender sender, String message) {
+        String staffChatFormat = config.getScFormat();
+        String staffChatName = config.getStaffChatName();
+        
+        Component staffMessage = createStaffMessage(sender, staffChatName, staffChatFormat, message);
+        
+        try {
+            plugin.getServer().getOnlinePlayers().stream()
+                .filter(player -> player.hasPermission("nonchat.sc"))
+                .forEach(player -> player.sendMessage(staffMessage));
+        } catch (Exception e) {
+            plugin.logError("There was an error sending message in staff chat: " + e.getMessage());
+        }
+    }
+
+    private Component createStaffMessage(CommandSender sender, String staffChatName, String staffChatFormat, String message) {
+        String senderName = sender.getName();
+        String prefix = "";
+        String suffix = "";
+
+        Player player = (Player) sender;
         if (sender instanceof Player) {
-            Player player = (Player) sender;
-            User user = LuckPermsProvider.get().getUserManager().getUser (player.getUniqueId());
-            String prefix = user.getCachedData().getMetaData().getPrefix();
-            String suffix = user.getCachedData().getMetaData().getSuffix();
-    
-            try {
-                plugin.getServer().getOnlinePlayers().stream()
-                    .filter(p -> p.hasPermission("nonchat.sc"))
-                    .forEach(p -> p.sendMessage(Component.text()
-                    .append(Component.text(staffChatName + " ", TextColor.fromHexString("#ADF3FD")))
-                    .append(Component.text(staffchat.replace("{sender}", sender.getName())
-                            .replace("{prefix}", prefix != null ? prefix : "")
-                            .replace("{suffix}", suffix != null ? suffix : "")
-                            .replace("{message}", message), TextColor.fromHexString("#FFFFFF")))
-                    .build()));
-            } catch (Exception e) {
-                plugin.logError("There was an error sending message in staff chat: " + e.getMessage());
+            User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
+            if (user != null) {
+                prefix = user.getCachedData().getMetaData().getPrefix();
+                suffix = user.getCachedData().getMetaData().getSuffix();
             }
         } else {
-            try {
-                plugin.getServer().getOnlinePlayers().stream()
-                    .filter(p -> p.hasPermission("nonchat.sc"))
-                    .forEach(p -> p.sendMessage(Component.text()
-                    .append(Component.text(staffChatName + " ", TextColor.fromHexString("#ADF3FD")))
-                    .append(Component.text(staffchat.replace("{sender}", "Console")
-                            .replace("{prefix}", "")
-                            .replace("{suffix}", "")
-                            .replace("{message}", message), TextColor.fromHexString("#FFFFFF")))
-                    .build()));
-            } catch (Exception e) {
-                plugin.logError("There was an error sending message in staff chat: " + e.getMessage());
-            }
+            senderName = "Console";
         }
-        return true;
+
+        String formattedMessage = staffChatFormat
+            .replace("{sender}", senderName)
+            .replace("{prefix}", prefix != null ? prefix : "")
+            .replace("{suffix}", suffix != null ? suffix : "")
+            .replace("{message}", message);
+
+        return Component.text()
+            .append(Component.text(staffChatName + " ", STAFF_CHAT_COLOR))
+            .append(Component.text(formattedMessage, MESSAGE_COLOR))
+            .build();
     }
 }
