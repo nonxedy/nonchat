@@ -107,7 +107,7 @@ public class nonchat extends JavaPlugin {
     }
 
     public void registerConfigs() {
-        pluginConfig = new PluginConfig(broadcastMessage);
+        pluginConfig = new PluginConfig();
         pluginMessages = new PluginMessages();
     }
 
