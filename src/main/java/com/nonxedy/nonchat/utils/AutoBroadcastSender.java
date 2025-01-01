@@ -7,64 +7,82 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.nonxedy.nonchat.config.PluginConfig;
 
-@SuppressWarnings("deprecation")
 public class AutoBroadcastSender {
-
+    private final Plugin plugin;
     private final PluginConfig config;
-    private Map<String, BukkitRunnable> broadcastTasks;
-    private List<BroadcastMessage> randomMessages;
+    private final Map<String, BukkitTask> activeTasks;
+    private final List<BroadcastMessage> randomMessagePool;
+    private BukkitTask randomBroadcastTask;
 
-    public AutoBroadcastSender(PluginConfig config) {
+    public AutoBroadcastSender(Plugin plugin, PluginConfig config) {
+        this.plugin = plugin;
         this.config = config;
-        this.broadcastTasks = new HashMap<>();
-        this.randomMessages = new ArrayList<>();
+        this.activeTasks = new HashMap<>();
+        this.randomMessagePool = new ArrayList<>();
     }
 
     public void start() {
-        Map<String, BroadcastMessage> messages = config.getBroadcastMessages();
-        for (Map.Entry<String, BroadcastMessage> entry : messages.entrySet()) {
-            BroadcastMessage message = entry.getValue();
-            if (message.isEnabled()) {
-                if (config.isRandomBroadcastEnabled()) {
-                    randomMessages.add(message);
-                } else {
-                    BukkitRunnable task = new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            Bukkit.broadcastMessage(message.getMessage());
-                        }
-                    };
-                    task.runTaskTimer(Bukkit.getPluginManager().getPlugin("nonchat"), 0, 20 * message.getInterval());
-                    broadcastTasks.put(entry.getKey(), task);
-                }
+        stop();
+        
+        Map<String, BroadcastMessage> configuredMessages = config.getBroadcastMessages();
+        
+        configuredMessages.forEach((key, message) -> {
+            if (!message.isEnabled()) return;
+            
+            if (config.isRandomBroadcastEnabled()) {
+                randomMessagePool.add(message);
+            } else {
+                scheduleRegularBroadcast(key, message);
             }
-        }
-        if (config.isRandomBroadcastEnabled()) {
-            startRandomBroadcast();
+        });
+
+        if (config.isRandomBroadcastEnabled() && !randomMessagePool.isEmpty()) {
+            startRandomBroadcasts();
         }
     }
 
-    private void startRandomBroadcast() {
-        BukkitRunnable task = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!randomMessages.isEmpty()) {
-                    BroadcastMessage message = randomMessages.get(new Random().nextInt(randomMessages.size()));
-                    Bukkit.broadcastMessage(message.getMessage());
+    private void scheduleRegularBroadcast(String key, BroadcastMessage message) {
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, 
+            () -> broadcastMessage(message.getMessage()),
+            0L,
+            message.getInterval() * 20L
+        );
+        activeTasks.put(key, task);
+    }
+
+    private void startRandomBroadcasts() {
+        randomBroadcastTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
+            () -> {
+                if (!randomMessagePool.isEmpty()) {
+                    BroadcastMessage message = randomMessagePool.get(
+                        new Random().nextInt(randomMessagePool.size())
+                    );
+                    broadcastMessage(message.getMessage());
                 }
-            }
-        };
-        task.runTaskTimer(Bukkit.getPluginManager().getPlugin("nonchat"), 0, 20 * 60);
+            },
+            0L,
+            60 * 20L
+        );
+    }
+
+    private void broadcastMessage(String message) {
+        Bukkit.getServer().sendMessage(ColorUtil.parseComponent(message));
     }
 
     public void stop() {
-        for (BukkitRunnable task : broadcastTasks.values()) {
-            task.cancel();
+        activeTasks.values().forEach(BukkitTask::cancel);
+        activeTasks.clear();
+        
+        if (randomBroadcastTask != null) {
+            randomBroadcastTask.cancel();
+            randomBroadcastTask = null;
         }
-        broadcastTasks.clear();
+        
+        randomMessagePool.clear();
     }
 }
