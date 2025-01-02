@@ -102,7 +102,8 @@ public class nonchat extends JavaPlugin {
         autoBroadcastSender.start();
         
         if (pluginConfig.isDebug()) {
-            debugger = new Debugger();
+            debugger = new Debugger(this);
+            debugger.log("Plugin started successfully!");
         }
     }
 
@@ -147,7 +148,7 @@ public class nonchat extends JavaPlugin {
     public void reloadDebugger() {
         if ( pluginConfig.isDebug()) {
             if (debugger == null) {
-                debugger = new Debugger();
+                debugger = new Debugger(this);
             }
         } else {
             debugger = null;
