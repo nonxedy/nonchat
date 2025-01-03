@@ -14,4 +14,4 @@ TODO:
 - [ ] Add description for plugin
 - [ ] Add PlacheHolderAPI support
 - [ ] Add support for other versions
-- [ ] Improve YOUR CODE!!!
+- [X] Improve YOUR CODE!!!
