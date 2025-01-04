@@ -1,18 +1,18 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.0.0
+# Version of the plugin: 1.0.1
 #
 # - LuckPerms support.
 # - Vault support.
 # ==================================================
 
 # System messages.
-no-permission: "&#ff0000Недостаточно прав"
-player-only: "&#ff0000Только игроки могут использовать эту команду"
-blocked-words: "&#ff0000Вы отправляете запрещенное слово!"
-mentioned: "&#ffffffВы были упомянуты в чате &#84FFB8{player}!"
-player-not-found: "&#ff0000Игрок не найден."
+no-permission: "&#ff0000You do not have permission to use this command!"
+player-only: "&#ff0000Only players can use this command!"
+blocked-words: "&#ff0000You are not allowed to use this word!"
+mentioned: "&#ffffffYou were mentioned in chat by &#84FFB8{player}!"
+player-not-found: "&#ff0000Player not found."
 
 # Server Information.
 server-info: "&#FFAFFBServer Information:&#ffffff"
@@ -27,43 +27,42 @@ number-of-plugins: "&#FFAFFBNumber of Plugins:&#ffffff "
 number-of-worlds: "&#FFAFFBNumber of Worlds:&#ffffff "
 
 # Reload.
-reloading: "&#FFAFFBПерезагрузка..."
-reloaded: "&#84FFB8Плагин перезагружен!"
-reload-failed: "&#ff0000Не удалось перезагрузить плагин!"
+reloading: "&#FFAFFBReloading..."
+reloaded: "&#84FFB8Plugin reloaded!"
+reload-failed: "&#ff0000Failed to reload plugin!"
 
 #Nhelp.
-help: "&#FFAFFBnonchat | Команды плагина:"
-nreload: "&#FFAFFB/nreload&#ffffff - перезагрузка плагина"
-help-command: "&#FFAFFB/nhelp&#ffffff - список команд"
-server-command: "&#FFAFFB/server&#ffffff - информация о сервере"
-message-command: "&#FFAFFB/m <игрок> <сообщение>&#ffffff - отправка личных
-  сообщений"
-broadcast-command: "&#FFAFFB/bc <сообщение>&#ffffff - отправка сообщений всем игрокам"
-ignore-command: "&#FFAFFB/ignore <игрок>&#ffffff - игнорировать игрока"
-sc-command: "&#FFAFFB/sc <сообщение>&#ffffff - отправка сообщений всему персоналу"
-spy-command: "&#FFAFFB/spy&#ffffff - активация режима шпиона"
+help: "&#FFAFFBnonchat | commands:"
+nreload: "&#FFAFFB/nreload&#ffffff - reload plugin"
+help-command: "&#FFAFFB/nhelp&#ffffff - commands list"
+server-command: "&#FFAFFB/server&#ffffff - server information"
+message-command: "&#FFAFFB/m <player> <message>&#ffffff - sent a message to a player"
+broadcast-command: "&#FFAFFB/bc <message>&#ffffff - sent a message to all server"
+ignore-command: "&#FFAFFB/ignore <player>&#ffffff - ignore a player"
+sc-command: "&#FFAFFB/sc <message>&#ffffff - sent a message to staff"
+spy-command: "&#FFAFFB/spy&#ffffff - enable/disable spy mode"
 
 # Clear Chat.
-clear-chat: "&#FFAFFBОчистка чата..."
-chat-cleared: "&#84FFB8Чат очищен"
+clear-chat: "&#FFAFFBChat clearing..."
+chat-cleared: "&#84FFB8Chat cleared!"
 
 # Broadcast.
-broadcast: "&#FFAFFBОповещение: &#ffffff{message}"
+broadcast: "&#FFAFFBBroadcast: &#ffffff{message}"
 
 # Message.
-invalid-usage-message: "&#ffffffИспользуйте: &#FFAFFB/m <игрок> <сообщение>"
+invalid-usage-message: "&#ffffffUse: &#FFAFFB/m <player> <message>"
 
 # Ignore.
-ignored-player: "&#84FFB8Вы начали игнорировать игрока {player}."
-unignored-player: "&#ff0000Вы больше не игнорируете игрока {player}."
-ignored-by-target: "&#FFAFFBЭтот игрок игнорирует вас и не может отправить ему сообщение."
-invalid-usage-ignore: "&#ffffffИспользуйте: &#FFAFFB/ignore <игрок>"
-cannot-ignore-self: "&#ff0000Вы не можете игнорировать себя."
+ignored-player: "&#84FFB8You started ignored the player {player}."
+unignored-player: "&#ff0000You no longer ignore the player {player}."
+ignored-by-target: "&#FFAFFBThis player ignores you and you cant send him a message."
+invalid-usage-ignore: "&#ffffffUse: &#FFAFFB/ignore <player>"
+cannot-ignore-self: "&#ff0000You cant ignore yourself."
 
 # Staff Chat.
-invalid-usage-sc: "&#ffffffИспользуйте: &#FFAFFB/sc <сообщение>"
+invalid-usage-sc: "&#ffffffUse: &#FFAFFB/sc <message>"
 
 # Spy.
-spy-mode-enabled: "&#84FFB8Режим шпиона включен"
-spy-mode-disabled: "&#ff0000Режим шпиона выключен"
-invalid-usage-spy: "&#ffffffИспользуйте: &#FFAFFB/spy"
+spy-mode-enabled: "&#84FFB8Spy mode enabled"
+spy-mode-disabled: "&#ff0000Spy mode disabled"
+invalid-usage-spy: "&#ffffffUse: &#FFAFFB/spy"
