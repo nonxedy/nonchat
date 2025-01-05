@@ -46,7 +46,7 @@
 
 Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup instructions and configuration guides.
 
-## 🌟 Why NonChat?
+## 🌟 Why nonchat?
 
 - **Performance Optimized** - Built with efficiency in mind
 - **Modern Features** - Supports latest Minecraft versions (1.20.6-1.21.4)
