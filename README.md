@@ -66,7 +66,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 | ✅ | Add description for plugin |
 | ✅ | Add support for other versions |
 | ✅ | Improve code structure |
-| 🔜 | Add chat formatting GUI |
+| 🔜 | Add local and global chats |
 | 🔜 | Add multi-language support |
 
 </div>
