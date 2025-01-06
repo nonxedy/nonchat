@@ -63,6 +63,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 | ⏳ | Add documentation for plugin |
 | ⏳ | Add description for plugin |
 | ⏳ | Add PlaceholderAPI support |
+| ✅ | Add description for plugin |
 | ✅ | Add support for other versions |
 | ✅ | Improve code structure |
 | 🔜 | Add chat formatting GUI |
