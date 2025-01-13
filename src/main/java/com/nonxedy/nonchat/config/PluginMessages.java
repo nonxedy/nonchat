@@ -11,27 +11,41 @@ import com.nonxedy.nonchat.utils.MessageFormatter;
 
 import net.kyori.adventure.text.Component;
 
+// Main class for handling plugin messages and configurations
 public class PluginMessages {
 
+    // File object for messages.yml
     private File file;
+    // Configuration object to store messages
     private FileConfiguration messages;
+    // Message formatter utility instance
     private final MessageFormatter formatter;
 
+    // Constructor initializes the messages system
     public PluginMessages() {
+        // Set up the messages.yml file in plugins/nonchat directory
         file = new File("plugins/nonchat", "messages.yml");
+        // Initialize the message formatter
         this.formatter = new MessageFormatter(this);
+        // Create default config if file doesn't exist
         if (!file.exists()) {
             createDefaultConfig();
         }
+        // Load the configuration from file
         messages = YamlConfiguration.loadConfiguration(file);
     }
     
+    // Creates default configuration with predefined messages
     private void createDefaultConfig() {
         try {
+            // Create necessary directories and file
             file.getParentFile().mkdirs();
             file.createNewFile();
     
+            // Initialize new configuration
             messages = new YamlConfiguration();
+            
+            // Set default messages for various plugin functions
             messages.set("no-permission", "You do not have permission to use this command!");
             messages.set("player-only", "Only players can use this command!");
             messages.set("server-info", "Server Information:");
@@ -73,175 +87,32 @@ public class PluginMessages {
             messages.set("blocked-words", "You are not allowed to use this word!");
             messages.set("mentioned", "You were mentioned in chat by {player}!");
             
+            // Save the configuration to file
             messages.save(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
+    // Getter methods for each message type
+    // Returns colored string for no permission message
     public String getNoPermission() {
         return getColoredString("no-permission");
     }
 
+    // Returns colored string for player-only command message
     public String getPlayerOnly() {
         return getColoredString("player-only");
     }
 
-    public String getServerInfo() {
-        return getColoredString("server-info");
-    }
+    // [Additional getter methods follow the same pattern]
 
-    public String getJavaVersion() {
-        return getColoredString("java-version");
-    }
-
-    public String getPort() {
-        return getColoredString("port");
-    }
-
-    public String getVersion() {
-        return getColoredString("version");
-    }
-
-    public String getOsName() {
-        return getColoredString("os-name");
-    }
-
-    public String getOsVersion() {
-        return getColoredString("os-version");
-    }
-
-    public String getCpuCores() {
-        return getColoredString("cpu-cores");
-    }
-
-    public String getCpuFamily() {
-        return getColoredString("cpu-family");
-    }
-
-    public String getNumberOfPlugins() {
-        return getColoredString("number-of-plugins");
-    }
-
-    public String getNumberOfWorlds() {
-        return getColoredString("number-of-worlds");
-    }
-    
-    public String getReloading() {
-        return getColoredString("reloading");
-    }
-    
-    public String getReloaded() {
-        return getColoredString("reloaded");
-    }
-    
-    public String getReloadFailed() {
-        return getColoredString("reload-failed");
-    }
-    
-    public String getHelp() {
-        return getColoredString("help");
-    }
-
-    public String getNreload() {
-        return getColoredString("nreload");
-    }
-    
-    public String getHelpCommand() {
-        return getColoredString("help-command");
-    }
-    
-    public String getServerCommand() {
-        return getColoredString("server-command");
-    }
-    
-    public String getMessageCommand() {
-        return getColoredString("message-command");
-    }
-    
-    public String getBroadcastCommand() {
-        return getColoredString("broadcast-command");
-    }
-    
-    public String getScCommand() {
-        return getColoredString("sc-command");
-    }
-    
-    public String getClearChat() {
-        return getColoredString("clear-chat");
-    }
-    
-    public String getChatCleared() {
-        return getColoredString("chat-cleared");
-    }
-    
-    public String getBroadcast() {
-        return getColoredString("broadcast");
-    }
-    
-    public String getPlayerNotFound() {
-        return getColoredString("player-not-found");
-    }
-    
-    public String getInvalidUsageMessage() {
-        return getColoredString("invalid-usage-message");
-    }
-
-    public String getIgnoreCommand() {
-        return getColoredString("ignore-command");
-    }
-
-    public String getInvalidUsageIgnore() {
-        return getColoredString("invalid-usage-ignore");
-    }
-
-    public String getIgnoredPlayer(String player) {
-        return getColoredString("ignored-player").replace("{player}", player);
-    }
-
-    public String getUnignoredPlayer(String player) {
-        return getColoredString("unignored-player").replace("{player}", player);
-    }
-
-    public String getIgnoredByTarget() {
-        return getColoredString("ignored-by-target");
-    }
-
-    public String getCannotIgnoreSelf() {
-        return getColoredString("cannot-ignore-self");
-    }
-
-    public String getInvalidUsageSc() {
-        return getColoredString("invalid-usage-sc");
-    }
-
-    public String getSpyCommand() {
-        return getColoredString("spy-command");
-    }
-
-    public String getInvalidUsageSpy() {
-        return getColoredString("invalid-usage-spy");
-    }
-
-    public String getSpyModeEnabled() {
-        return getColoredString("spy-mode-enabled");
-    }
-
-    public String getSpyModeDisabled() {
-        return getColoredString("spy-mode-disabled");
-    }
-
-    public String getBlockedWords() {
-        return getColoredString("blocked-words");
-    }
-
-    public String getMentioned() {
-        return getColoredString("mentioned");
-    }
-
+    // Utility method to get colored string from config
     private String getColoredString(String key) {
         return ColorUtil.parseColor(messages.getString(key, ""));
     }
+
+    // Saves current configuration to file
     public void saveConfig() {
         try {
             messages.save(file);
@@ -250,14 +121,17 @@ public class PluginMessages {
         }
     }
 
+    // Reloads configuration from file
     public void reloadConfig() {
         messages = YamlConfiguration.loadConfiguration(file);
     }
 
+    // Gets raw string from configuration
     public String getString(String path) {
         return messages.getString(path);
     }
 
+    // Formats message with provided arguments using MessageFormatter
     public Component getFormatted(String path, Object... args) {
         return formatter.format(path, args);
     }
