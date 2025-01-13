@@ -11,60 +11,83 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
+// Main class that handles the /nhelp command
 public class NhelpCommand implements CommandExecutor {
 
+    // Store reference to plugin messages configuration
     private final PluginMessages messages;
+    // Store reference to main plugin instance
     private final nonchat plugin;
 
+    // Constructor to initialize the command with required dependencies
     public NhelpCommand(PluginMessages messages, nonchat plugin) {
         this.messages = messages;
         this.plugin = plugin;
     }
 
+    // Method called when player executes the command
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        // Log the command execution
         plugin.logCommand(command.getName(), args);
 
+        // Check if sender has permission to use this command
         if (!sender.hasPermission("nonchat.nhelp")) {
+            // Send no permission message if they don't have access
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("Permission denied: nonchat.nhelp");
             return true;
         }
 
+        // Send the help message to the player
         sendHelpMessage(sender);
         return true;
     }
 
+    // Helper method to construct and send the help message
     private void sendHelpMessage(CommandSender sender) {
         try {
+            // Create an empty component and append help header and commands list
             Component helpMessage = Component.empty()
                 .append(ColorUtil.parseComponent(messages.getString("help")))
                 .append(Component.newline())
                 .append(getCommandsList());
 
+            // Send the complete help message to the player
             sender.sendMessage(helpMessage);
             plugin.logResponse("Help message sent successfully");
         } catch (Exception e) {
+            // Log any errors that occur while sending the message
             plugin.logError("Failed to send help message: " + e.getMessage());
         }
     }
 
+    // Helper method that builds the list of available commands
     private Component getCommandsList() {
+        // Create an empty component and append all command descriptions
         return Component.empty()
+            // Add /nreload command description
             .append(ColorUtil.parseComponent(messages.getString("nreload")))
             .append(Component.newline())
+            // Add help command description
             .append(ColorUtil.parseComponent(messages.getString("help-command")))
             .append(Component.newline())
+            // Add server command description
             .append(ColorUtil.parseComponent(messages.getString("server-command")))
             .append(Component.newline())
+            // Add message command description
             .append(ColorUtil.parseComponent(messages.getString("message-command")))
             .append(Component.newline())
+            // Add broadcast command description
             .append(ColorUtil.parseComponent(messages.getString("broadcast-command")))
             .append(Component.newline())
+            // Add ignore command description
             .append(ColorUtil.parseComponent(messages.getString("ignore-command")))
             .append(Component.newline())
+            // Add staff chat command description
             .append(ColorUtil.parseComponent(messages.getString("sc-command")))
             .append(Component.newline())
+            // Add spy command description
             .append(ColorUtil.parseComponent(messages.getString("spy-command")));
     }
 }
