@@ -14,30 +14,43 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.utils.BroadcastMessage;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
+// Main configuration class for the NonChat plugin
 public class PluginConfig {
+    // File object representing the config.yml file
     private final File configFile;
+    // Configuration object to store and manage plugin settings
     private FileConfiguration config;
+    // Debug mode flag
     private boolean debug;
 
+    // Constructor initializes config file path and loads configuration
     public PluginConfig() {
+        // Sets config file path to plugins/nonchat/config.yml
         this.configFile = new File("plugins/nonchat", "config.yml");
         loadConfig();
     }
 
+    // Loads configuration from file or creates default if doesn't exist
     private void loadConfig() {
         if (!configFile.exists()) {
             createDefaultConfig();
         }
+        // Load configuration from file
         this.config = YamlConfiguration.loadConfiguration(configFile);
+        // Set debug mode from config
         this.debug = config.getBoolean("debug", false);
     }
 
+    // Creates default configuration file with initial settings
     private void createDefaultConfig() {
         try {
+            // Create directories if they don't exist
             configFile.getParentFile().mkdirs();
+            // Create new config file
             configFile.createNewFile();
 
             config = new YamlConfiguration();
+            // Set default configuration values
             setDefaultValues();
             saveConfig();
         } catch (IOException e) {
@@ -45,7 +58,9 @@ public class PluginConfig {
         }
     }
 
+    // Sets default values for all configuration options
     private void setDefaultValues() {
+        // Chat formatting settings
         config.set("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
         config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
@@ -53,21 +68,22 @@ public class PluginConfig {
         config.set("staff-chat-name", "[STAFFCHAT]");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
-        // Broadcast settings
+        // Broadcast system settings
         config.set("broadcast.enabled", true);
         config.set("broadcast.message", "This message will be sent every 60 seconds");
         config.set("broadcast.interval", 60);
         config.set("broadcast.random", false);
         
-        // Chat bubbles settings
+        // Chat bubbles configuration
         config.set("chat-bubbles.enabled", true);
         config.set("chat-bubbles.duration", 5);
         config.set("chat-bubbles.height", 2.5);
         
-        // Debug mode
+        // Debug mode setting
         config.set("debug", false);
     }
 
+    // Getter methods for various chat formats with default values
     @NotNull
     public String getChatFormat() {
         return config.getString("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
@@ -98,7 +114,7 @@ public class PluginConfig {
         return config.getString("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
     }
 
-    // Broadcast related methods
+    // Methods for broadcast system configuration
     public boolean isBroadcastEnabled() {
         return config.getBoolean("broadcast.enabled", true);
     }
@@ -116,6 +132,7 @@ public class PluginConfig {
         return config.getInt("broadcast.interval", 60);
     }
 
+    // Retrieves all broadcast messages from config
     @NotNull
     public Map<String, BroadcastMessage> getBroadcastMessages() {
         Map<String, BroadcastMessage> messages = new HashMap<>();
@@ -138,7 +155,7 @@ public class PluginConfig {
         return messages;
     }
 
-    // Chat bubbles related methods
+    // Chat bubbles configuration getters
     public boolean isChatBubblesEnabled() {
         return config.getBoolean("chat-bubbles.enabled", true);
     }
@@ -151,7 +168,7 @@ public class PluginConfig {
         return config.getDouble("chat-bubbles.height", 2.5);
     }
 
-    // Word blocker
+    // Word blocking system methods
     @NotNull
     public List<String> getBannedWords() {
         return config.getStringList("banned-words");
@@ -162,7 +179,7 @@ public class PluginConfig {
         return new WordBlocker(getBannedWords());
     }
 
-    // Debug related methods
+    // Debug mode management
     public boolean isDebug() {
         return debug;
     }
@@ -173,7 +190,7 @@ public class PluginConfig {
         saveConfig();
     }
 
-    // Config management
+    // Configuration file management methods
     public void saveConfig() {
         try {
             config.save(configFile);
