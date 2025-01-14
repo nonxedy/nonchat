@@ -31,46 +31,62 @@ import com.nonxedy.nonchat.utils.Debugger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
+// Main plugin class that extends JavaPlugin
 public class nonchat extends JavaPlugin {
 
+    // Declare listener instances
     private ChatFormatListener chatFormatListener;
     private DeathListener deathListener;
     private DeathCoordinates deathCoordinates;
     private AutoBroadcastSender autoBroadcastSender;
+    
+    // Configuration handlers
     private PluginConfig pluginConfig;
     private PluginMessages pluginMessages;
+    
+    // Utility class instances
     private BroadcastMessage broadcastMessage;
     private SpyCommand spyCommand;
     private Debugger debugger;
     private ChatBubbleListener chatBubbleListener;
 
+    // Map to store ignored players (key: player UUID, value: set of ignored player UUIDs)
     public Map<UUID, Set<UUID>> ignoredPlayers = new HashMap<>();
 
+    // Plugin directory path
     File plugin_directory = new File("plugins/nonchat");
 
+    // Called when plugin is enabled
     @Override
     public void onEnable() {
+        // Save default configuration files
         saveDefaultConfig();
         saveResource("messages.yml", false);
 
+        // Initialize plugin components
         registerConfigs();
         registerCommands();
         registerListeners();
         registerUtils();
 
+        // Send enable message to console with colored formatting
         Bukkit.getConsoleSender().sendMessage(Component.text()
             .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
             .append(Component.text("plugin enabled", TextColor.fromHexString("#52FFA6"))));
     }
 
+    // Called when plugin is disabled
     @Override
     public void onDisable() {
+        // Send disable message to console with colored formatting
         Bukkit.getConsoleSender().sendMessage(Component.text()
             .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
             .append(Component.text("nonchat disabled", TextColor.fromHexString("#FF5252"))));
     }
 
+    // Register all plugin commands with their executors
     public void registerCommands() {
+        // Initialize each command with required dependencies
         getCommand("message").setExecutor(new MessageCommand(this, pluginConfig, pluginMessages, spyCommand));
         getCommand("broadcast").setExecutor(new BroadcastCommand(pluginMessages, this));
         getCommand("server").setExecutor(new ServerCommand(pluginMessages, this));
@@ -82,45 +98,52 @@ public class nonchat extends JavaPlugin {
         getCommand("spy").setExecutor(new SpyCommand(this, pluginMessages, pluginConfig));
     }
 
+    // Register all event listeners
     public void registerListeners() {
+        // Initialize listeners with required dependencies
         chatFormatListener = new ChatFormatListener(pluginConfig, pluginMessages);
         deathListener = new DeathListener(pluginConfig);
         deathCoordinates = new DeathCoordinates(pluginConfig);
         chatBubbleListener = new ChatBubbleListener(this, pluginConfig);
 
-        // Register listeners
+        // Register listeners with Bukkit plugin manager
         Bukkit.getPluginManager().registerEvents(chatFormatListener, this);
         Bukkit.getPluginManager().registerEvents(deathListener, this);
         Bukkit.getPluginManager().registerEvents(deathCoordinates, this);
         Bukkit.getPluginManager().registerEvents(chatBubbleListener, this);
     }
 
+    // Initialize and register utility classes
     public void registerUtils() {
+        // Start auto broadcast system
         autoBroadcastSender = new AutoBroadcastSender(this, pluginConfig);
-
-        // Register utils
         autoBroadcastSender.start();
         
+        // Initialize debugger if debug mode is enabled
         if (pluginConfig.isDebug()) {
             debugger = new Debugger(this);
             debugger.log("Plugin started successfully!");
         }
     }
 
+    // Initialize configuration handlers
     public void registerConfigs() {
         pluginConfig = new PluginConfig();
         pluginMessages = new PluginMessages();
     }
 
+    // Reload plugin configuration files
     public void reloadConfig() {
         pluginConfig.reloadConfig();
         pluginMessages.reloadConfig();
     }
 
+    // Stop auto broadcast system
     public void stopAutoBroadcastSender() {
         autoBroadcastSender.stop();
     }
 
+    // Debug logging methods
     public void log(String message) {
         if (debugger != null) {
             debugger.log(message);
@@ -145,8 +168,9 @@ public class nonchat extends JavaPlugin {
         }
     }
 
+    // Reinitialize debugger based on config settings
     public void reloadDebugger() {
-        if ( pluginConfig.isDebug()) {
+        if (pluginConfig.isDebug()) {
             if (debugger == null) {
                 debugger = new Debugger(this);
             }
