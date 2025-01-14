@@ -59,7 +59,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 | Status | Task |
 |:------:|------|
-| ⏳ | Add documentation for code |
+| ✅ | Add documentation for code |
 | ✅ | Add documentation for plugin |
 | ✅ | Add description for plugin |
 | ✅ | Add support for other versions |
