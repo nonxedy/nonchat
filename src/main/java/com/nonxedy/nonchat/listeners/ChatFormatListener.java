@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat.listeners;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import org.bukkit.event.Listener;
 
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.ChatTypeUtil;
 import com.nonxedy.nonchat.utils.ColorUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
@@ -39,25 +41,96 @@ public class ChatFormatListener implements Listener {
     // Main event handler for chat messages with NORMAL priority
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerChat(AsyncChatEvent event) {
-        // Cancel the default chat event since we're handling it custom
+        // Cancel the default chat event to handle custom formatting
         event.setCancelled(true);
         // Get the player who sent the message
         Player player = event.getPlayer();
-        // Convert the message to legacy format
+        // Convert the modern component message to legacy string format
         String messageContent = getLegacyContent(event.message());
         
-        // Check for blocked words and return if message contains them
+        // Check for blocked words and return if message is not allowed
         if (handleBlockedWords(player, messageContent)) {
             return;
         }
 
-        // Process any mentions in the message
-        handleMentions(player, messageContent);
-        // Format the message with prefix, suffix, and colors
-        Component formattedMessage = formatMessage(player, messageContent);
+        // Get all configured chat types from config
+        Map<String, ChatTypeUtil> chats = config.getChats();
+        // Determine which chat type to use based on message prefix
+        ChatTypeUtil chatTypeUtil = determineChat(messageContent, chats);
         
-        // Broadcast the formatted message to all players
-        Bukkit.broadcast(formattedMessage);
+        // Check if the determined chat type is enabled
+        if (!chatTypeUtil.isEnabled()) {
+            // Send disabled message to player if chat type is disabled
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("chat-disabled")));
+            return;
+        }
+
+        // Remove chat prefix character if present
+        String finalMessage = chatTypeUtil.getChatChar() != '\0' ? 
+            messageContent.substring(1) : messageContent;
+
+        // Process any @mentions in the message
+        handleMentions(player, finalMessage);
+        // Format the message with player prefix, suffix and chat format
+        Component formattedMessage = formatMessage(player, finalMessage, chatTypeUtil);
+        
+        // Broadcast the formatted message to appropriate recipients
+        broadcastMessage(player, formattedMessage, chatTypeUtil);
+    }
+
+    // Handles message broadcasting based on chat type (global or local)
+    private void broadcastMessage(Player sender, Component message, ChatTypeUtil chatTypeUtil) {
+        // If chat type is global, broadcast to all players
+        if (chatTypeUtil.isGlobal()) {
+            Bukkit.broadcast(message);
+        } else {
+            // For local chat, only send to players within specified radius
+            for (Player recipient : Bukkit.getOnlinePlayers()) {
+                if (isInRange(sender, recipient, chatTypeUtil.getRadius())) {
+                    recipient.sendMessage(message);
+                }
+            }
+        }
+    }
+
+    // Checks if recipient is within range of sender for local chat
+    private boolean isInRange(Player sender, Player recipient, int radius) {
+        // Check if players are in same world and within radius (-1 means unlimited)
+        return sender.getWorld() == recipient.getWorld() && 
+                (radius == -1 || sender.getLocation().distance(recipient.getLocation()) <= radius);
+    }
+
+    // Determines which chat type to use based on message prefix
+    private ChatTypeUtil determineChat(String message, Map<String, ChatTypeUtil> chats) {
+        // If message is not empty, check first character for chat type
+        if (message.length() > 0) {
+            char firstChar = message.charAt(0);
+            return config.getChatTypeByChar(firstChar);
+        }
+        // Return default chat type if no prefix is found
+        return config.getDefaultChatType();
+    }
+
+    // Formats the message with player information and chat format
+    private Component formatMessage(Player player, String message, ChatTypeUtil chatTypeUtil) {
+        // Get LuckPerms user data for prefix/suffix
+        User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
+        String prefix = user.getCachedData().getMetaData().getPrefix();
+        String suffix = user.getCachedData().getMetaData().getSuffix();
+        
+        // Convert null prefix/suffix to empty string and parse colors
+        prefix = prefix == null ? "" : ColorUtil.parseColor(prefix);
+        suffix = suffix == null ? "" : ColorUtil.parseColor(suffix);
+
+        // Replace placeholders in chat format with actual values
+        String chatFormat = chatTypeUtil.getFormat()
+            .replace("{prefix}", prefix)
+            .replace("{suffix}", suffix)
+            .replace("{sender}", player.getName())
+            .replace("{message}", ColorUtil.parseColor(message));
+
+        // Convert formatted string to Component with colors
+        return ColorUtil.parseComponent(chatFormat);
     }
 
     // Converts modern Component message to legacy string format
@@ -97,27 +170,5 @@ public class ChatFormatListener implements Listener {
                 .replace("{player}", sender.getName())
         ));
         mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
-    }
-
-    // Formats the chat message using LuckPerms prefix/suffix and config format
-    private Component formatMessage(Player player, String message) {
-        // Get LuckPerms user data
-        User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
-        String prefix = user.getCachedData().getMetaData().getPrefix();
-        String suffix = user.getCachedData().getMetaData().getSuffix();
-        
-        // Handle null prefix/suffix
-        prefix = prefix == null ? "" : ColorUtil.parseColor(prefix);
-        suffix = suffix == null ? "" : ColorUtil.parseColor(suffix);
-
-        // Apply chat format from config with all placeholders
-        String chatFormat = config.getChatFormat()
-            .replace("{prefix}", prefix)
-            .replace("{suffix}", suffix)
-            .replace("{sender}", player.getName())
-            .replace("{message}", ColorUtil.parseColor(message));
-
-        // Convert to Component and return
-        return ColorUtil.parseComponent(chatFormat);
     }
 }

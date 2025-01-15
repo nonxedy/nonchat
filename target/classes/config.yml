@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.0.1
+# Version of the plugin: 1.1.1
 #
 # - LuckPerms support.
 # - Vault support.
@@ -21,7 +21,17 @@ debug: false # Enable debug mode. Restart the server.
 # ==================================================
 
 # The chat config.
-chat-format: "{prefix} §f{sender}§r {suffix}§7: §f{message}" # The chat format.
+chats:
+  global:
+    enabled: true
+    format: "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
+    radius: -1
+    char: '!'
+  local:
+    enabled: true
+    format: "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
+    radius: 100
+    char: ''
 
 # The death config.
 death-format: "{prefix} §f{player}§r {suffix}§f died" # The death format.

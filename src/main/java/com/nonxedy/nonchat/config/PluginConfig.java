@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.utils.BroadcastMessage;
+import com.nonxedy.nonchat.utils.ChatTypeUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
 // Main configuration class for the NonChat plugin
@@ -32,7 +33,9 @@ public class PluginConfig {
 
     // Loads configuration from file or creates default if doesn't exist
     private void loadConfig() {
+        // Check if config file exists
         if (!configFile.exists()) {
+            // Create default configuration if file doesn't exist
             createDefaultConfig();
         }
         // Load configuration from file
@@ -49,11 +52,14 @@ public class PluginConfig {
             // Create new config file
             configFile.createNewFile();
 
+            // Initialize new configuration object
             config = new YamlConfiguration();
             // Set default configuration values
             setDefaultValues();
+            // Save the configuration to file
             saveConfig();
         } catch (IOException e) {
+            // Throw runtime exception if config creation fails
             throw new RuntimeException("Failed to create default config", e);
         }
     }
@@ -61,7 +67,6 @@ public class PluginConfig {
     // Sets default values for all configuration options
     private void setDefaultValues() {
         // Chat formatting settings
-        config.set("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
         config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         config.set("sc-format", "{prefix} §f{sender}§r {suffix}§7: §7{message}");
@@ -83,12 +88,25 @@ public class PluginConfig {
         config.set("debug", false);
     }
 
-    // Getter methods for various chat formats with default values
-    @NotNull
-    public String getChatFormat() {
-        return config.getString("chat-format", "{prefix} §f{sender}§r {suffix}§7: §f{message}");
+    // Create default chat channels configuration
+    private void createDefaultChats() {
+        // Configure global chat channel
+        config.set("chats.global.enabled", true);
+        config.set("chats.global.format", "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("chats.global.radius", -1);
+        config.set("chats.global.char", "!");
+    
+        // Configure local chat channel
+        config.set("chats.local.enabled", true);
+        config.set("chats.local.format", "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("chats.local.radius", 100);
+        config.set("chats.local.char", "");
+        
+        // Save the configuration
+        saveConfig();
     }
 
+    // Getter methods for various chat formats with default values
     @NotNull
     public String getDeathFormat() {
         return config.getString("death-format", "{prefix} §f{player}§r {suffix}§f died");
@@ -177,6 +195,89 @@ public class PluginConfig {
     @NotNull
     public WordBlocker getWordBlocker() {
         return new WordBlocker(getBannedWords());
+    }
+
+    // Gets a chat type based on its prefix character
+    public ChatTypeUtil getChatTypeByChar(char prefix) {
+        // Get all available chat types from configuration
+        Map<String, ChatTypeUtil> chats = getChats();
+        // Stream through all chat types and find the first one matching the prefix
+        return chats.values().stream()
+            // Filter to find chat with matching prefix character
+            .filter(chat -> chat.getChatChar() == prefix)
+            // Get the first matching chat type
+            .findFirst()
+            // If no chat found with this prefix, return default local chat
+            .orElse(getDefaultChatType());
+    }
+
+    // Returns the default chat type configuration (local chat)
+    public ChatTypeUtil getDefaultChatType() {
+        // Get all available chats from config
+        // Return local chat if exists, otherwise create new default local chat
+        return getChats().getOrDefault("local", 
+            // Create new ChatTypeUtil with default local chat settings:
+            new ChatTypeUtil("local", true, 
+                "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}", 
+                100, '\0'));
+    }
+
+    // Checks if specific chat type is enabled in config
+    public boolean isChatEnabled(String chatName) {
+        // Get enabled status from config, default to false if not found
+        return config.getBoolean("chats." + chatName + ".enabled", false);
+    }
+
+    // Sets enabled status for specific chat type
+    public void setChatEnabled(String chatName, boolean enabled) {
+        // Update enabled status in config
+        config.set("chats." + chatName + ".enabled", enabled);
+        // Save changes to config file
+        saveConfig();
+    }
+
+    // Retrieves all configured chat types from config.yml
+    @NotNull
+    public Map<String, ChatTypeUtil> getChats() {
+        // Create new map to store chat configurations
+        Map<String, ChatTypeUtil> chats = new HashMap<>();
+        // Get the 'chats' section from config
+        ConfigurationSection chatsSection = config.getConfigurationSection("chats");
+        
+        // If no chats section exists in config
+        if (chatsSection == null) {
+            // Create default chat configurations
+            createDefaultChats();
+            // Get the newly created chats section
+            chatsSection = config.getConfigurationSection("chats");
+        }
+
+        // Iterate through all chat types in config
+        for (String chatName : chatsSection.getKeys(false)) {
+            // Get configuration section for specific chat
+            ConfigurationSection chatSection = chatsSection.getConfigurationSection(chatName);
+            // If chat section exists
+            if (chatSection != null) {
+                // Create new ChatTypeUtil object with configuration values
+                ChatTypeUtil chatTypeUtil = new ChatTypeUtil(
+                    // Set chat name from config key
+                    chatName,
+                    // Set enabled status with default true
+                    chatSection.getBoolean("enabled", true),
+                    // Set chat format with default format
+                    chatSection.getString("format", "§7({prefix})§r {sender}§r {suffix}§7: §f{message}"),
+                    // Set chat radius with default -1 (unlimited)
+                    chatSection.getInt("radius", -1),
+                    // Set chat prefix character, default to null character if empty
+                    chatSection.getString("char", "").isEmpty() ? '\0' : chatSection.getString("char").charAt(0)
+                );
+                // Add chat type to map with chatName as key
+                chats.put(chatName, chatTypeUtil);
+            }
+        }
+        
+        // Return complete map of chat types
+        return chats;
     }
 
     // Debug mode management
