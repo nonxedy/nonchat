@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.1.1
+# Version of the plugin: 1.1.2
 #
 # - LuckPerms support.
 # - Vault support.
@@ -22,11 +22,11 @@ debug: false # Enable debug mode. Restart the server.
 
 # The chat config.
 chats:
-  global:
-    enabled: true
-    format: "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
-    radius: -1
-    char: '!'
+  global: # The name of the chat.
+    enabled: true # Enable/disable the chat.
+    format: "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}" # The chat format.
+    radius: -1 # The radius of the chat(In blocks). -1 = global.
+    char: '!' # The character that will be used to separate the message.
   local:
     enabled: true
     format: "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
