@@ -1,0 +1,68 @@
+# ==================================================
+# NONCHAT MESSAGES FILE
+# Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
+# Version of the plugin: 1.2.2
+#
+# - LuckPerms support.
+# - Vault support.
+# ==================================================
+
+# System messages.
+no-permission: "&#ff0000У вас нет прав!"
+player-only: "&#ff0000Только игроки могут использовать эту команду!"
+blocked-words: "&#ff0000Вы не можете использовать это слово!"
+mentioned: "&#ffffffВы были упомянуты игроком &#84FFB8{player}!"
+player-not-found: "&#ff0000Игрок не найден."
+
+# Server Information.
+server-info: "&#FFAFFBИнформация о сервере:&#ffffff"
+java-version: "&#FFAFFBВерсия Джавы:&#ffffff "
+port: "&#FFAFFBПорт:&#ffffff "
+version: "&#FFAFFBВерсия:&#ffffff "
+os-name: "&#FFAFFBНазвание ОС:&#ffffff "
+os-version: "&#FFAFFBВерсия ОС:&#ffffff "
+cpu-cores: "&#FFAFFBЯдер процессора:&#ffffff "
+cpu-family: "&#FFAFFBСемейство процессоров:&#ffffff "
+number-of-plugins: "&#FFAFFBКоличество плагинов:&#ffffff "
+number-of-worlds: "&#FFAFFBКоличество миров:&#ffffff "
+
+# Reload.
+reloading: "&#FFAFFBПерезагрузка..."
+reloaded: "&#84FFB8Плагин перезагружен!"
+reload-failed: "&#ff0000Не удалось перезагрузить плагин!"
+
+#Nhelp.
+help: "&#FFAFFBnonchat | команды:"
+nreload: "&#FFAFFB/nreload&#ffffff - перезагрузка плагина"
+help-command: "&#FFAFFB/nhelp&#ffffff - список команд"
+server-command: "&#FFAFFB/server&#ffffff - информация о сервере"
+message-command: "&#FFAFFB/m <игрок> <сообщение>&#ffffff - отправить сообщение игроку"
+broadcast-command: "&#FFAFFB/bc <сообщение>&#ffffff - отправить сообщение всему серверу"
+ignore-command: "&#FFAFFB/ignore <игрок>&#ffffff - игнорировать игрока"
+sc-command: "&#FFAFFB/sc <сообщение>&#ffffff - отправить сообщение в чат персонала"
+spy-command: "&#FFAFFB/spy&#ffffff - включить/выключить режим шпиона"
+
+# Clear Chat.
+clear-chat: "&#FFAFFBОчистка чата..."
+chat-cleared: "&#84FFB8Чат очищен!"
+
+# Broadcast.
+broadcast: "&#FFAFFBОповещение: &#ffffff{message}"
+
+# Message.
+invalid-usage-message: "&#ffffffИспользуйте: &#FFAFFB/m <игрок> <сообщение>"
+
+# Ignore.
+ignored-player: "&#84FFB8Вы начали игнорировать игрока {player}."
+unignored-player: "&#ff0000Вы перестали игнорировать игрока {player}."
+ignored-by-target: "&#FFAFFBЭтот игрок игнорирует вас и вы не можете отправить ему сообщение."
+invalid-usage-ignore: "&#ffffffИспользуйте: &#FFAFFB/ignore <игрок>"
+cannot-ignore-self: "&#ff0000Вы не можете игнорировать себя."
+
+# Staff Chat.
+invalid-usage-sc: "&#ffffffИспользуйте: &#FFAFFB/sc <сообщение>"
+
+# Spy.
+spy-mode-enabled: "&#84FFB8Режим шпиона включен"
+spy-mode-disabled: "&#ff0000Режим шпиона выключен"
+invalid-usage-spy: "&#ffffffИспользуйте: &#FFAFFB/spy"

@@ -61,7 +61,8 @@ public class nonchat extends JavaPlugin {
     public void onEnable() {
         // Save default configuration files
         saveDefaultConfig();
-        saveResource("messages.yml", false);
+        saveResource("langs/messages_en.yml", false);
+        saveResource("langs/messages_ru.yml", false);
 
         // Initialize plugin components
         registerConfigs();
@@ -128,14 +129,20 @@ public class nonchat extends JavaPlugin {
 
     // Initialize configuration handlers
     public void registerConfigs() {
-        pluginConfig = new PluginConfig();
-        pluginMessages = new PluginMessages();
+        this.pluginConfig = new PluginConfig();
+        this.pluginMessages = new PluginMessages(this);
     }
 
     // Reload plugin configuration files
+    @Override
     public void reloadConfig() {
-        pluginConfig.reloadConfig();
-        pluginMessages.reloadConfig();
+        super.reloadConfig();
+        if (pluginConfig != null) {
+            pluginConfig.reloadConfig();
+        }
+        if (pluginMessages != null) {
+            pluginMessages.reloadConfig();
+        }
     }
 
     // Stop auto broadcast system
