@@ -86,6 +86,9 @@ public class PluginConfig {
         
         // Debug mode setting
         config.set("debug", false);
+
+        // Update checker settings
+        config.set("update-checker", true);
     }
 
     // Create default chat channels configuration
@@ -195,6 +198,10 @@ public class PluginConfig {
     @NotNull
     public WordBlocker getWordBlocker() {
         return new WordBlocker(getBannedWords());
+    }
+
+    public boolean isUpdateCheckerEnabled() {
+        return config.getBoolean("update-checker", true);
     }
 
     // Gets a chat type based on its prefix character
