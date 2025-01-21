@@ -20,6 +20,7 @@ public class PluginMessages {
         loadLanguage();
     }
 
+    // Loads language from configuration
     public void loadLanguage() {
         String lang = plugin.getConfig().getString("language", "en");
         languageManager.setLanguage(lang);

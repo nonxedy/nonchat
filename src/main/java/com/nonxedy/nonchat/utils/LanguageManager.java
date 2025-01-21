@@ -10,17 +10,22 @@ import java.util.Map;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+// Language manager class for handling language files and translations
 public class LanguageManager {
+
+    // Initialize class variables
     private final File langsFolder;
     private FileConfiguration currentLang;
     private final Map<String, FileConfiguration> loadedLanguages;
     
+    // Constructor initializes language folder and loads default languages
     public LanguageManager(File dataFolder) {
         this.langsFolder = new File(dataFolder, "langs");
         this.loadedLanguages = new HashMap<>();
         setupLanguages();
     }
     
+    // Create default language files if they don't exist
     private void setupLanguages() {
         if (!langsFolder.exists()) {
             langsFolder.mkdirs();
@@ -39,9 +44,11 @@ public class LanguageManager {
         }
     }
     
+    // Create a new language file if it doesn't exist
     private void createLanguageFile(String filename) {
         File langFile = new File(langsFolder, filename);
         if (!langFile.exists()) {
+            // Copy default language file from resources to the language folder
             try (InputStream in = getClass().getResourceAsStream("/langs/" + filename)) {
                 Files.copy(in, langFile.toPath());
             } catch (IOException e) {
@@ -50,10 +57,12 @@ public class LanguageManager {
         }
     }
     
+    // Set the current language and load its configuration
     public void setLanguage(String lang) {
         currentLang = loadedLanguages.getOrDefault(lang, loadedLanguages.get("en"));
     }
-    
+
+    // Get a message from the current language configuration
     public String getMessage(String key) {
         return ColorUtil.parseColor(currentLang.getString(key, "Missing message: " + key));
     }

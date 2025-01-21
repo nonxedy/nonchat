@@ -200,6 +200,7 @@ public class PluginConfig {
         return new WordBlocker(getBannedWords());
     }
 
+    // Update checker method
     public boolean isUpdateCheckerEnabled() {
         return config.getBoolean("update-checker", true);
     }
@@ -307,6 +308,7 @@ public class PluginConfig {
         }
     }
 
+    // Load configuration from file
     public void reloadConfig() {
         loadConfig();
     }
