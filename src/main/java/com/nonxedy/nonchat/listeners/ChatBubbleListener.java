@@ -13,29 +13,29 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.utils.ColorUtil;
+import com.nonxedy.nonchat.utils.BubblePacketUtil;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-@SuppressWarnings("deprecation")
+// Main listener class for handling chat bubble functionality
 public class ChatBubbleListener implements Listener {
     
     // Map to store active chat bubbles for each player
     private final Map<Player, ArmorStand> bubbles = new HashMap<>();
-    // Main plugin instance
+    // Reference to main plugin instance
     private final nonchat plugin;
-    // Configuration instance
+    // Reference to plugin configuration
     private final PluginConfig config;
 
-    // Constructor initializes the listener and starts the bubble updater
+    // Constructor initializes the listener and starts bubble updater
     public ChatBubbleListener(nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         startBubbleUpdater();
     }
 
-    // Starts a repeating task that updates bubble positions above players' heads
+    // Starts a repeating task to update bubble positions
     private void startBubbleUpdater() {
         // Run task every tick (20 ticks = 1 second)
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
@@ -45,29 +45,32 @@ public class ChatBubbleListener implements Listener {
                 ArmorStand bubble = entry.getValue();
                 // Update bubble position if player is online and bubble exists
                 if (player.isOnline() && !bubble.isDead()) {
+                    // Calculate new location above player's head
                     Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                    bubble.teleport(newLoc);
+                    // Update bubble position using packets
+                    BubblePacketUtil.updateBubbleLocation(bubble, newLoc);
                 }
             }
         }, 1L, 1L);
     }
 
-    // Handles chat events to create bubbles
+    // Handle chat events to create bubbles
     @EventHandler
     public void onChat(AsyncChatEvent e) {
-        Player player = e.getPlayer();
-
-        // Check if player has permission to use chat bubbles
-        if (!player.hasPermission("nonchat.chatbubbles")) {
+        // Check if bubbles are enabled and player has permission
+        if (!config.isChatBubblesEnabled() || !e.getPlayer().hasPermission("nonchat.chatbubbles")) {
             return;
         }
 
+        Player player = e.getPlayer();
         // Convert chat message to plain text
         String message = PlainTextComponentSerializer.plainText().serialize(e.message());
 
         // Run bubble creation in main thread
         Bukkit.getScheduler().runTask(plugin, () -> {
+            // Remove existing bubble if present
             removeBubble(player);
+            // Create new bubble with message
             createBubble(player, message);
         });
     }
@@ -76,16 +79,8 @@ public class ChatBubbleListener implements Listener {
     private void createBubble(Player player, String message) {
         // Calculate bubble position above player
         Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-        // Spawn invisible armor stand as bubble
-        ArmorStand bubble = player.getWorld().spawn(loc, ArmorStand.class);
-
-        // Configure armor stand properties
-        bubble.setCustomName(ColorUtil.parseColor(message));
-        bubble.setCustomNameVisible(true);
-        bubble.setInvisible(true);
-        bubble.setGravity(false);
-        bubble.setMarker(true);
-
+        // Spawn new bubble armor stand
+        ArmorStand bubble = BubblePacketUtil.spawnBubble(player, message, loc);
         // Store bubble in map
         bubbles.put(player, bubble);
 
@@ -95,17 +90,20 @@ public class ChatBubbleListener implements Listener {
         }, config.getChatBubblesDuration() * 20L);
     }
 
-    // Removes an existing chat bubble for a player
+    // Removes a player's chat bubble
     private void removeBubble(Player player) {
-        ArmorStand existing = bubbles.remove(player);
-        if (existing != null && !existing.isDead()) {
-            existing.remove();
+        // Get and remove bubble from map
+        ArmorStand bubble = bubbles.remove(player);
+        if (bubble != null) {
+            // Remove bubble entity using packets
+            BubblePacketUtil.removeBubble(bubble);
         }
     }
 
-    // Removes chat bubble when player leaves the server
+    // Handle player quit events
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
+        // Remove bubble when player leaves
         removeBubble(e.getPlayer());
     }
 }
