@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.2.8
+# Version of the plugin: 1.2.9
 #
 # - LuckPerms support.
 # - Vault support.
@@ -13,6 +13,7 @@ player-only: "&#ff0000Только игроки могут использова�
 blocked-words: "&#ff0000Вы не можете использовать это слово!"
 mentioned: "&#ffffffВы были упомянуты игроком &#84FFB8{player}!"
 player-not-found: "&#ff0000Игрок не найден."
+command-disabled: "&#ff0000Эта команда отключена."
 
 # Server Information.
 server-info: "&#FFAFFBИнформация о сервере:&#ffffff"
@@ -41,6 +42,7 @@ broadcast-command: "&#FFAFFB/bc <сообщение>&#ffffff - отправит�
 ignore-command: "&#FFAFFB/ignore <игрок>&#ffffff - игнорировать игрока"
 sc-command: "&#FFAFFB/sc <сообщение>&#ffffff - отправить сообщение в чат персонала"
 spy-command: "&#FFAFFB/spy&#ffffff - включить/выключить режим шпиона"
+me-command: "&#FFAFFB/me <сообщение>&#ffffff - отправить сообщение от своего лица"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBОчистка чата..."
@@ -66,3 +68,6 @@ invalid-usage-sc: "&#ffffffИспользуйте: &#FFAFFB/sc <сообщени
 spy-mode-enabled: "&#84FFB8Режим шпиона включен"
 spy-mode-disabled: "&#ff0000Режим шпиона выключен"
 invalid-usage-spy: "&#ffffffИспользуйте: &#FFAFFB/spy"
+
+# Me.
+invalid-usage-me: "&#ffffffИспользуйте: &#FFAFFB/me <сообщение>"

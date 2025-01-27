@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 1.2.8
+version: 1.2.9
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
@@ -28,6 +28,7 @@ permissions:
       - nonchat.spy
       - nonchat.antiblockedwords
       - nonchat.chatbubbles
+      - nonchat.me
   nonchat.message:
     description: Allows /message command
     default: true
@@ -60,6 +61,9 @@ permissions:
     default: false
   nonchat.bubblechat:
     description: Allows to use bubble chat
+    default: true
+  nonchat.me:
+    description: Allows to use /me command
     default: true
 
 commands:
@@ -109,4 +113,9 @@ commands:
     description: Spy on a player.
     usage: /spy
     permission: nonchat.spy
+    permission-message: You do not have <permission> to use this command!
+  me:
+    description: The character's actions are first-person.
+    usage: /me <message>
+    permission: nonchat.me
     permission-message: You do not have <permission> to use this command!

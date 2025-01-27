@@ -299,6 +299,15 @@ public class PluginConfig {
         saveConfig();
     }
 
+    // Roleplay commands configuration
+    public boolean isMeCommandEnabled() {
+        return config.getBoolean("roleplay-commands.me.enabled", true);
+    }
+
+    public String getMeFormat() {
+        return config.getString("roleplay-commands.me.format", "&f{player}&7: &f{message}");
+    }
+
     // Configuration file management methods
     public void saveConfig() {
         try {

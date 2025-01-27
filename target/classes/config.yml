@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.2.8
+# Version of the plugin: 1.2.9
 #
 # - LuckPerms support.
 # - Vault support.
@@ -76,6 +76,16 @@ chat-bubbles:
   enabled: true # Enable chat bubbles
   duration: 5 # Duration of the bubble in seconds.
   height: 2.5 # Height of the bubble in blocks.
+
+# ==================================================
+# ROLEPLAY COMMANDS
+# Roleplay commands are commands that are used to simulate roleplay in the game.
+# ==================================================
+
+roleplay-commands: # Roleplay commands.
+  me: # /me command.
+    enabled: true # Enable/disable the command.
+    format: "&7*{player}: {message}" # The format of the command.
 
 # ==================================================
 # BLOCKED WORDS

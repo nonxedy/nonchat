@@ -8,10 +8,12 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.units.qual.t;
 
 import com.nonxedy.nonchat.command.BroadcastCommand;
 import com.nonxedy.nonchat.command.ClearCommand;
 import com.nonxedy.nonchat.command.IgnoreCommand;
+import com.nonxedy.nonchat.command.MeCommand;
 import com.nonxedy.nonchat.command.MessageCommand;
 import com.nonxedy.nonchat.command.NhelpCommand;
 import com.nonxedy.nonchat.command.NreloadCommand;
@@ -97,6 +99,7 @@ public class nonchat extends JavaPlugin {
         getCommand("ignore").setExecutor(new IgnoreCommand(this, pluginMessages));
         getCommand("sc").setExecutor(new StaffChatCommand(this, pluginMessages, pluginConfig));
         getCommand("spy").setExecutor(new SpyCommand(this, pluginMessages, pluginConfig));
+        getCommand("me").setExecutor(new MeCommand(this, pluginConfig, pluginMessages));
     }
 
     // Register all event listeners
