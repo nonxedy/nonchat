@@ -30,6 +30,7 @@
 | `/clear` | Clear chat history |
 | `/ignore` | Ignore specific players |
 | `/spy` | Toggle private message spy mode |
+| `/me` | Send a first-person message |
 | `/sc` | Staff chat channel |
 | `/server` | Server management commands |
 | `/nhelp` | View plugin help |
