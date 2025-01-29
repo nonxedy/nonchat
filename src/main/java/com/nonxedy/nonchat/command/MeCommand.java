@@ -12,6 +12,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
 public class MeCommand implements CommandExecutor {
+
     private final nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
@@ -26,6 +27,12 @@ public class MeCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
 
+        if (!config.isMeCommandEnabled()) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("command-disabled")));
+            plugin.logError("Player " + sender.getName() + " tried to use disabled me command");
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-only")));
             plugin.logError("Me command can only be used by players");
@@ -35,12 +42,6 @@ public class MeCommand implements CommandExecutor {
         if (!sender.hasPermission("nonchat.me")) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
             plugin.logError("Player " + sender.getName() + " tried to use me command without permission");
-            return true;
-        }
-
-        if (!config.isMeCommandEnabled()) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("command-disabled")));
-            plugin.logError("Player " + sender.getName() + " tried to use disabled me command");
             return true;
         }
 

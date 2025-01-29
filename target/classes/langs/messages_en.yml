@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.2.9
+# Version of the plugin: 1.3.0
 #
 # - LuckPerms support.
 # - Vault support.
@@ -43,6 +43,7 @@ ignore-command: "&#FFAFFB/ignore <player>&#ffffff - ignore a player"
 sc-command: "&#FFAFFB/sc <message>&#ffffff - sent a message to staff"
 spy-command: "&#FFAFFB/spy&#ffffff - enable/disable spy mode"
 me-command: "&#FFAFFB/me <message>&#ffffff - sent a message from your character"
+roll-command: "&#FFAFFB/roll <maximum number>&#ffffff - roll a dice"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBChat clearing..."
@@ -71,3 +72,7 @@ invalid-usage-spy: "&#ffffffUse: &#FFAFFB/spy"
 
 # Me.
 invalid-usage-me: "&#ffffffUse: &#FFAFFB/me <message>"
+
+# Roll.
+invalid-usage-roll: "&#ffffffUse: &#FFAFFB/roll <max number>"
+invalid-number: "&#ff0000Please enter a valid positive number"

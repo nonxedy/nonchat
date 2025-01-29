@@ -17,6 +17,7 @@ import com.nonxedy.nonchat.command.MeCommand;
 import com.nonxedy.nonchat.command.MessageCommand;
 import com.nonxedy.nonchat.command.NhelpCommand;
 import com.nonxedy.nonchat.command.NreloadCommand;
+import com.nonxedy.nonchat.command.RollCommand;
 import com.nonxedy.nonchat.command.ServerCommand;
 import com.nonxedy.nonchat.command.SpyCommand;
 import com.nonxedy.nonchat.command.StaffChatCommand;
@@ -100,6 +101,7 @@ public class nonchat extends JavaPlugin {
         getCommand("sc").setExecutor(new StaffChatCommand(this, pluginMessages, pluginConfig));
         getCommand("spy").setExecutor(new SpyCommand(this, pluginMessages, pluginConfig));
         getCommand("me").setExecutor(new MeCommand(this, pluginConfig, pluginMessages));
+        getCommand("roll").setExecutor(new RollCommand(this, pluginConfig, pluginMessages));
     }
 
     // Register all event listeners

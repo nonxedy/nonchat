@@ -91,6 +91,9 @@ public class NhelpCommand implements CommandExecutor {
             .append(ColorUtil.parseComponent(messages.getString("spy-command")))
             .append(Component.newline())
             // Add me command description
-            .append(ColorUtil.parseComponent(messages.getString("me-command")));
+            .append(ColorUtil.parseComponent(messages.getString("me-command")))
+            .append(Component.newline())
+            // Add roll command description
+            .append(ColorUtil.parseComponent(messages.getString("roll-command")));
     }
 }

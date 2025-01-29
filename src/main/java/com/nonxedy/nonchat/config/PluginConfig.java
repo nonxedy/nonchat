@@ -308,6 +308,15 @@ public class PluginConfig {
         return config.getString("roleplay-commands.me.format", "&f{player}&7: &f{message}");
     }
 
+    public boolean isRollCommandEnabled() {
+        return config.getBoolean("roleplay-commands.roll.enabled", true);
+    }
+
+    public String getRollFormat() {
+        return config.getString("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
+    }
+
+
     // Configuration file management methods
     public void saveConfig() {
         try {

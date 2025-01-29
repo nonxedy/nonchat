@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for me :3
-version: 1.2.9
+version: 1.3.0
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
@@ -29,6 +29,7 @@ permissions:
       - nonchat.antiblockedwords
       - nonchat.chatbubbles
       - nonchat.me
+      - nonchat.roll
   nonchat.message:
     description: Allows /message command
     default: true
@@ -64,6 +65,9 @@ permissions:
     default: true
   nonchat.me:
     description: Allows to use /me command
+    default: true
+  nonchat.roll:
+    description: Allows to use /roll command
     default: true
 
 commands:
@@ -118,4 +122,9 @@ commands:
     description: The character's actions are first-person.
     usage: /me <message>
     permission: nonchat.me
+    permission-message: You do not have <permission> to use this command!
+  roll:
+    description: Roll a dice.
+    usage: /roll <max number>
+    permission: nonchat.roll
     permission-message: You do not have <permission> to use this command!
