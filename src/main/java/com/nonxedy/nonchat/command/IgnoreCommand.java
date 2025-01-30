@@ -1,11 +1,16 @@
 package com.nonxedy.nonchat.command;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +19,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
 // Class implements the player ignore command functionality in chat
-public class IgnoreCommand implements CommandExecutor {
+public class IgnoreCommand implements CommandExecutor, TabCompleter {
 
     // Instance of the main plugin
     private final nonchat plugin;
@@ -113,5 +118,30 @@ public class IgnoreCommand implements CommandExecutor {
         player.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-player").replace("{player}", target.getName())));
         target.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target").replace("{player}", player.getName())));
         plugin.logResponse("Player ignored successfully");
+    }
+
+    // Provide tab completion suggestions
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                    @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.ignore")) {
+            return Collections.emptyList();
+        }
+
+        if (!(sender instanceof Player)) {
+            return Collections.emptyList();
+        }
+
+        List<String> suggestions = new ArrayList<>();
+        
+        if (args.length == 1) {
+            return plugin.getServer().getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(name -> !name.equals(sender.getName()))
+                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        
+        return suggestions;
     }
 }

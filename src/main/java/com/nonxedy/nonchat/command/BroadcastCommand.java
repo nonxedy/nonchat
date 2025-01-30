@@ -1,7 +1,9 @@
 package com.nonxedy.nonchat.command;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -89,10 +91,23 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // Provide empty tab completion as no suggestions needed
+    // Provide tab completion suggestions
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, 
-                        @NotNull String label, @NotNull String[] args) {
-        return Collections.emptyList();
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                    @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.broadcast")) {
+            return Collections.emptyList();
+        }
+
+        List<String> suggestions = new ArrayList<>();
+        
+        if (args.length == 1) {
+            suggestions.add("message");
+        }
+        
+        return suggestions.stream()
+                .filter(suggestion -> suggestion.toLowerCase()
+                .startsWith(args[args.length - 1].toLowerCase()))
+                .collect(Collectors.toList());
     }
 }

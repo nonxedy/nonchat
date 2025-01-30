@@ -1,9 +1,15 @@
 package com.nonxedy.nonchat.command;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +18,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
-public class RollCommand implements CommandExecutor {
+public class RollCommand implements CommandExecutor, TabCompleter {
     
     private final Random random = new Random();
     private final nonchat plugin;
@@ -79,5 +85,26 @@ public class RollCommand implements CommandExecutor {
             plugin.logError("Player " + sender.getName() + " tried to use roll command with invalid number");
             return true;
         }
+    }
+
+    // Provide tab completion suggestions
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                        @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.roll")) {
+            return Collections.emptyList();
+        }
+
+        if (args.length == 1) {
+            List<String> suggestions = Arrays.asList(
+                "100"
+            );
+
+            return suggestions.stream()
+                    .filter(s -> s.startsWith(args[0]))
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 }

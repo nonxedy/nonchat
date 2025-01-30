@@ -1,12 +1,16 @@
 package com.nonxedy.nonchat.command;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +22,7 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 import net.kyori.adventure.text.Component;
 
 // Main class that handles private messaging between players
-public class MessageCommand implements CommandExecutor {
+public class MessageCommand implements CommandExecutor, TabCompleter {
 
     // Required plugin instances and configurations
     private final nonchat plugin;
@@ -133,4 +137,33 @@ public class MessageCommand implements CommandExecutor {
             plugin.logResponse("Message sent to spy players");
         }
     }
+
+    // Provide tab completion suggestions
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                        @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.message")) {
+            return Collections.emptyList();
+        }
+    
+        if (args.length == 1) {
+            return plugin.getServer().getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(name -> !name.equals(sender.getName()))
+                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+    
+        if (args.length == 2) {
+            List<String> suggestions = Arrays.asList(
+                "message"
+            );
+            return suggestions.stream()
+                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+    
+        return Collections.emptyList();
+    }
+    
 }

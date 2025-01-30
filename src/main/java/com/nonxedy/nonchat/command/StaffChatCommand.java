@@ -1,8 +1,14 @@
 package com.nonxedy.nonchat.command;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +23,7 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
 // Main class that handles staff chat commands
-public class StaffChatCommand implements CommandExecutor {
+public class StaffChatCommand implements CommandExecutor, TabCompleter {
 
     // Class fields for plugin instance, messages, and configuration
     private final nonchat plugin;
@@ -113,5 +119,26 @@ public class StaffChatCommand implements CommandExecutor {
             .append(Component.text(staffChatName + " ", STAFF_CHAT_COLOR))
             .append(Component.text(formattedMessage, MESSAGE_COLOR))
             .build();
+    }
+
+    // Provide tab completion suggestions
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                        @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.sc")) {
+            return Collections.emptyList();
+        }
+
+        if (args.length == 1) {
+            List<String> suggestions = Arrays.asList(
+                "message"
+            );
+
+            return suggestions.stream()
+                    .filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 }
