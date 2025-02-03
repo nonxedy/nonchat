@@ -20,6 +20,7 @@
 - 📢 **Auto Broadcasting** - Schedule automatic server announcements
 - 🛡️ **Word Filter** - Protect your chat from inappropriate content
 - ⚰️ **Custom Death Messages** - Stylish death announcements
+- 🎭 **Roleplay Commands** - Enhanced RP experience with /me and /roll commands
 
 ## 🎮 Commands
 
@@ -61,7 +62,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 | Status | Task |
 |:------:|------|
-| ⏳ | Add support for ProtocolLib in chat bubbles |
+| 🔜 | Add support for ProtocolLib in chat bubbles |
 | 🔜 | Add support for Folia |
 
 </div>
