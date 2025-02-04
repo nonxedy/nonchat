@@ -12,6 +12,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.utils.BroadcastMessage;
+import com.nonxedy.nonchat.utils.CapsFilter;
 import com.nonxedy.nonchat.utils.ChatTypeUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
@@ -316,6 +317,26 @@ public class PluginConfig {
         return config.getString("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
     }
 
+    // Caps filter configuration
+    public boolean isCapsFilterEnabled() {
+        return config.getBoolean("caps-filter.enabled", true);
+    }
+
+    public int getMaxCapsPercentage() {
+        return config.getInt("caps-filter.max-caps-percentage", 70);
+    }
+
+    public int getMinCapsLength() {
+        return config.getInt("caps-filter.min-length", 4);
+    }
+
+    public CapsFilter getCapsFilter() {
+        return new CapsFilter(
+            isCapsFilterEnabled(),
+            getMaxCapsPercentage(),
+            getMinCapsLength()
+        );
+    }
 
     // Configuration file management methods
     public void saveConfig() {

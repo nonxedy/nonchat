@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.3.0
+# Version of the plugin: 1.3.1
 #
 # - LuckPerms support.
 # - Vault support.
@@ -82,7 +82,7 @@ chat-bubbles:
 # Roleplay commands are commands that are used to simulate roleplay in the game.
 # ==================================================
 
-roleplay-commands: # Roleplay commands.
+roleplay-commands: # List of roleplay commands.
   me: # /me command.
     enabled: true # Enable/disable the command.
     format: "&7*{player}: {message}" # The format of the command.
@@ -94,8 +94,17 @@ roleplay-commands: # Roleplay commands.
 # BLOCKED WORDS
 # That is the list of banned words. Player will not be able to send messages with banned words.
 # ==================================================
-banned-words:
+banned-words: # List of banned words.
   - "spam"
   - "badword"
   - "anotherbadword"
   - "плохой"
+
+# ==================================================
+# CAPS FILTER
+# Caps filter is a feature that checks if the message contains too many capital letters.
+# ==================================================
+caps-filter:
+  enabled: true # Enable/disable the caps filter.
+  max-caps-percentage: 70 # Maximum percentage of capital letters allowed in a message.
+  min-length: 4 # Minimum message length to check for caps.

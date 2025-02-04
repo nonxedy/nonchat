@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.utils.CapsFilter;
 import com.nonxedy.nonchat.utils.ChatTypeUtil;
 import com.nonxedy.nonchat.utils.ColorUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
@@ -47,9 +48,23 @@ public class ChatFormatListener implements Listener {
         Player player = event.getPlayer();
         // Convert the modern component message to legacy string format
         String messageContent = getLegacyContent(event.message());
+        // Get capitalization settings from config
+        CapsFilter capsFilter = config.getCapsFilter();
         
         // Check for blocked words and return if message is not allowed
         if (handleBlockedWords(player, messageContent)) {
+            return;
+        }
+
+        // Check for excessive capitalization and cancel the event if needed
+        if (capsFilter.shouldFilter(messageContent)) {
+            // Cancel the default chat event to prevent sending the message
+            event.setCancelled(true);
+            // Get the warning message + percentages from config
+            String warningMessage = messages.getString("caps-filter")
+                .replace("{percentage}", String.valueOf(config.getMaxCapsPercentage()));
+            // Send a warning message to the player
+            event.getPlayer().sendMessage(ColorUtil.parseComponent(warningMessage));
             return;
         }
 
@@ -170,5 +185,13 @@ public class ChatFormatListener implements Listener {
                 .replace("{player}", sender.getName())
         ));
         mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+    }
+
+    private String processCaps(String message) {
+        CapsFilter capsFilter = config.getCapsFilter();
+        if (capsFilter.shouldFilter(message)) {
+            return capsFilter.filterMessage(message);
+        }
+        return message;
     }
 }
