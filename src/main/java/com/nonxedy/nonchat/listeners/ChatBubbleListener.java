@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.utils.BubblePacketUtil;
+import com.nonxedy.nonchat.utils.CapsFilter;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -62,9 +63,16 @@ public class ChatBubbleListener implements Listener {
             return;
         }
 
-        Player player = e.getPlayer();
-        // Convert chat message to plain text
+        // Add caps filter check before creating bubble
         String message = PlainTextComponentSerializer.plainText().serialize(e.message());
+        CapsFilter capsFilter = config.getCapsFilter();
+
+        // Return early if message should be blocked
+        if (capsFilter.shouldFilter(message)) {
+            return;
+        }
+
+        Player player = e.getPlayer();
 
         // Run bubble creation in main thread
         Bukkit.getScheduler().runTask(plugin, () -> {
