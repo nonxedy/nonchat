@@ -30,4 +30,8 @@ public class CapsFilter {
     public String filterMessage(String message) {
         return message.toLowerCase();
     }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

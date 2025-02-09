@@ -7,10 +7,13 @@ prefix: nonchat
 api-version: 1.16
 load: STARTUP
 
+depend:
+  - LuckPerms
+  - PlaceholderAPI
+
 softdepend:
   - Vault
   - ProtocolLib
-  - LuckPerms
 
 permissions:
   nonchat.*:

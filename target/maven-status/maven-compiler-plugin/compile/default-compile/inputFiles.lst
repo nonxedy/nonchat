@@ -13,6 +13,7 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/IgnoreCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/LanguageManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/NhelpCommand.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/placeholders/NonchatExpansion.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/ColorUtil.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/MeCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/NreloadCommand.java
@@ -22,6 +23,7 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/RollCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/WordBlocker.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/MessageFormatter.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/IgnoreManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/AutoBroadcastSender.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/listeners/DeathListener.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/SpyCommand.java

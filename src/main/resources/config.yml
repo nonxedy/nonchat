@@ -5,6 +5,7 @@
 #
 # - LuckPerms support.
 # - Vault support.
+# - PlaceHolderAPI support.
 # ==================================================
 
 debug: false # Enable debug mode. Restart the server.

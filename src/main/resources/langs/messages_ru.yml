@@ -5,6 +5,7 @@
 #
 # - LuckPerms support.
 # - Vault support.
+# - PlaceHolderAPI support.
 # ==================================================
 
 # System messages.
@@ -77,3 +78,22 @@ invalid-usage-me: "&#ffffffИспользуйте: &#FFAFFB/me <сообщени
 # Roll.
 invalid-usage-roll: "&#ffffffИспользуйте: &#FFAFFB/roll <максимальное число>"
 invalid-number: "&#ff0000Пожалуйста, используйте допустимое положительное число"
+
+# Placeholders.
+placeholders:
+  # Spy command placeholders.
+  spy: # %nonchat_spy_enabled%
+    enabled: "&#ffffffШпионаж: &#84FFB8Включен"
+    disabled: "&#ffffffШпионаж: &#ff0000Выключен"
+  # Chat bubbles placeholders.
+  bubble: # %nonchat_bubble_enabled%
+    enabled: "&#ffffffПузыри: &#84FFB8Включены"
+    disabled: "&#ffffffПузыри: &#ff0000Выключены"
+  # Caps filter placeholders.
+  caps-filter: # %nonchat_caps_filter_enabled%
+    enabled: "&#ffffffКапс фильтр: &#84FFB8Включен"
+    disabled: "&#ffffffКапс фильтр: &#ff0000Выключен"
+  # Ignore command placeholders.
+  ignored: # %nonchat_ignored%
+    true: "&#84FFB8Вы игнорируете игроков"
+    false: "&#ff0000Вы никого не игнорируете"

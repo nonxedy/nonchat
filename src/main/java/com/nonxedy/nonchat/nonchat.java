@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.checkerframework.checker.units.qual.t;
 
 import com.nonxedy.nonchat.command.BroadcastCommand;
 import com.nonxedy.nonchat.command.ClearCommand;
@@ -27,9 +26,11 @@ import com.nonxedy.nonchat.listeners.ChatBubbleListener;
 import com.nonxedy.nonchat.listeners.ChatFormatListener;
 import com.nonxedy.nonchat.listeners.DeathCoordinates;
 import com.nonxedy.nonchat.listeners.DeathListener;
+import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.utils.AutoBroadcastSender;
 import com.nonxedy.nonchat.utils.BroadcastMessage;
 import com.nonxedy.nonchat.utils.Debugger;
+import com.nonxedy.nonchat.utils.IgnoreManager;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -68,6 +69,7 @@ public class nonchat extends JavaPlugin {
         saveResource("langs/messages_ru.yml", false);
 
         // Initialize plugin components
+        registerPlaceholders();
         registerConfigs();
         registerCommands();
         registerListeners();
@@ -121,6 +123,9 @@ public class nonchat extends JavaPlugin {
 
     // Initialize and register utility classes
     public void registerUtils() {
+        // Initialize SpyCommand before other utils
+        this.spyCommand = new SpyCommand(this, pluginMessages, pluginConfig);
+
         // Start auto broadcast system
         autoBroadcastSender = new AutoBroadcastSender(this, pluginConfig);
         autoBroadcastSender.start();
@@ -138,6 +143,29 @@ public class nonchat extends JavaPlugin {
         this.pluginMessages = new PluginMessages(this);
     }
 
+    public void registerPlaceholders() {
+        // Initialize placeholder API
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new NonchatExpansion(this).register();
+        }
+    }
+
+    public SpyCommand getSpyCommand() {
+        return spyCommand;
+    }
+    
+    public PluginConfig getPluginConfig() {
+        return pluginConfig;
+    }
+
+    public IgnoreManager getIgnoreManager() {
+        return new IgnoreManager(ignoredPlayers);
+    }
+
+    public PluginMessages getPluginMessages() {
+        return pluginMessages;
+    }
+    
     // Reload plugin configuration files
     @Override
     public void reloadConfig() {
