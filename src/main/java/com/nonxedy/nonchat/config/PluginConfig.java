@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.utils.BroadcastMessage;
 import com.nonxedy.nonchat.utils.CapsFilter;
 import com.nonxedy.nonchat.utils.ChatTypeUtil;
+import com.nonxedy.nonchat.utils.HoverTextUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
 // Main configuration class for the NonChat plugin
@@ -336,6 +337,19 @@ public class PluginConfig {
             getMaxCapsPercentage(),
             getMinCapsLength()
         );
+    }
+
+    // Hover text configuration
+    public boolean isHoverEnabled() {
+        return config.getBoolean("hover-text.enabled", true);
+    }
+
+    public List<String> getHoverFormat() {
+        return config.getStringList("hover-text.format");
+    }
+
+    public HoverTextUtil getHoverTextUtil() {
+        return new HoverTextUtil(getHoverFormat(), isHoverEnabled());
     }
 
     // Configuration file management methods

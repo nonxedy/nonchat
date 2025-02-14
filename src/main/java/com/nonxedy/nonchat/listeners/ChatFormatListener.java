@@ -137,15 +137,25 @@ public class ChatFormatListener implements Listener {
         prefix = prefix == null ? "" : ColorUtil.parseColor(prefix);
         suffix = suffix == null ? "" : ColorUtil.parseColor(suffix);
 
-        // Replace placeholders in chat format with actual values
-        String chatFormat = chatTypeUtil.getFormat()
+        // Create base format without player name
+        String baseFormat = chatTypeUtil.getFormat()
             .replace("{prefix}", prefix)
             .replace("{suffix}", suffix)
-            .replace("{sender}", player.getName())
             .replace("{message}", ColorUtil.parseColor(message));
 
-        // Convert formatted string to Component with colors
-        return ColorUtil.parseComponent(chatFormat);
+        // Split format at {sender} placeholder
+        String[] parts = baseFormat.split("\\{sender\\}");
+
+        // Create the final component
+        Component finalMessage = ColorUtil.parseComponent(parts[0])
+            .append(config.getHoverTextUtil().createHoverablePlayerName(player, player.getName()));
+
+        // Append remaining format if present
+        if (parts.length > 1) {
+            finalMessage = finalMessage.append(ColorUtil.parseComponent(parts[1]));
+        }
+
+        return finalMessage;
     }
 
     // Converts modern Component message to legacy string format

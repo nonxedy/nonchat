@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.3.2
+# Version of the plugin: 1.3.3
 #
 # - LuckPerms support.
 # - Vault support.
@@ -90,6 +90,21 @@ roleplay-commands: # List of roleplay commands.
   roll:
     enabled: true
     format: "&7*{player} rolled a {number}"
+
+# ==================================================
+# HOVER TEXT
+# Hover text are texts that are performed when a player hovers over a player's name in chat.
+# ==================================================
+hover-text:
+  enabled: true # Enable/disable the hover text.
+  format:
+    - "&#FFAFFB⭐ {player}" # Player name
+    - "&#FFAFFB► Rank: &#FFFFFF{prefix}" # Prefix in luckperms
+    - "&#FFAFFB► Balance: &#FFFFFF${balance}" # Balance in vault
+    - "&#FFAFFB► Level: &#FFFFFF{level}" # Level in minecraft
+    - "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%" # Playtime in PlaceholderAPI
+    - "&#FFAFFB► Location: &#FFFFFF%player_world%" # Location in PlaceholderAPI
+    - "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms" # Ping in PlaceholderAPI
 
 # ==================================================
 # BLOCKED WORDS

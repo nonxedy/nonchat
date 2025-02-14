@@ -30,7 +30,9 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.utils.AutoBroadcastSender;
 import com.nonxedy.nonchat.utils.BroadcastMessage;
 import com.nonxedy.nonchat.utils.Debugger;
+import com.nonxedy.nonchat.utils.HoverTextUtil;
 import com.nonxedy.nonchat.utils.IgnoreManager;
+import com.nonxedy.nonchat.utils.IntegrationUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -53,6 +55,7 @@ public class nonchat extends JavaPlugin {
     private SpyCommand spyCommand;
     private Debugger debugger;
     private ChatBubbleListener chatBubbleListener;
+    private IntegrationUtil integrationUtil;
 
     // Map to store ignored players (key: player UUID, value: set of ignored player UUIDs)
     public Map<UUID, Set<UUID>> ignoredPlayers = new HashMap<>();
@@ -129,6 +132,9 @@ public class nonchat extends JavaPlugin {
         // Start auto broadcast system
         autoBroadcastSender = new AutoBroadcastSender(this, pluginConfig);
         autoBroadcastSender.start();
+
+        // Initialize integration utils
+        IntegrationUtil.setupIntegrations();
         
         // Initialize debugger if debug mode is enabled
         if (pluginConfig.isDebug()) {
@@ -164,6 +170,10 @@ public class nonchat extends JavaPlugin {
 
     public PluginMessages getPluginMessages() {
         return pluginMessages;
+    }
+
+    public HoverTextUtil getHoverTextUtil() {
+        return pluginConfig.getHoverTextUtil();
     }
     
     // Reload plugin configuration files
