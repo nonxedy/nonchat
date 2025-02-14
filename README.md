@@ -21,6 +21,8 @@
 - 🛡️ **Word Filter** - Protect your chat from inappropriate content
 - ⚰️ **Custom Death Messages** - Stylish death announcements
 - 🎭 **Roleplay Commands** - Enhanced RP experience with /me and /roll commands
+- 🔒 **Staff Chat** - Private communication for staff member
+- 💡 **Hover Messages** - Interactive hover text with additional information
 
 ## 🎮 Commands
 
@@ -62,6 +64,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 | Status | Task |
 |:------:|------|
+| ⏳ | Add support for DiscordSRV |
 | 🔜 | Add support for ProtocolLib in chat bubbles |
 | 🔜 | Add support for Folia |
 
