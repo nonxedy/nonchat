@@ -1,5 +1,9 @@
 package com.nonxedy.nonchat.utils;
 
+/**
+ * Represents a chat type configuration with formatting and behavior settings
+ * Handles different chat modes like global and local radius-based chat
+ */
 public class ChatTypeUtil {
     private final String name;
     private final boolean enabled;

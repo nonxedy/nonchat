@@ -10,12 +10,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-// UpdateChecker class to check for plugin updates
+/**
+ * Handles version checking and update notifications for the plugin
+ * Connects to Modrinth API to check for new versions
+ */
 public class UpdateChecker {
 
     // Initialize class variables
     private final JavaPlugin plugin;
     private final String currentVersion;
+    /** Modrinth API endpoint for version checking */
     private static final String MODRINTH_API = "https://api.modrinth.com/v2/project/nonchat/version";
 
     // Constructor to initialize class variables
@@ -24,21 +28,28 @@ public class UpdateChecker {
         this.currentVersion = plugin.getDescription().getVersion();
     }
 
-    // Method to check for updates asynchronously
+    /**
+     * Performs an asynchronous check for plugin updates
+     * Compares current version with latest version from Modrinth
+     */
     public void checkForUpdates() {
         // Run the update check asynchronously on the main thread
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                // Make a GET request to the Modrinth API to get the latest version
+                // Connect to Modrinth API
                 URL url = new URL(MODRINTH_API);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                
+                // Parse JSON response to get latest version info
                 JsonObject latestVersion = JsonParser.parseReader(
                     new InputStreamReader(connection.getInputStream())
                 ).getAsJsonArray().get(0).getAsJsonObject();
 
+                // Extract version information
                 String latestVersionNumber = latestVersion.get("version_number").getAsString();
                 String downloadUrl = "https://modrinth.com/plugin/nonchat/version/" + latestVersionNumber;
 
+                // Compare versions and notify accordingly
                 if (!currentVersion.equals(latestVersionNumber)) {
                     notifyUpdate(latestVersionNumber, downloadUrl);
                 } else {
@@ -50,7 +61,11 @@ public class UpdateChecker {
         });
     }
 
-    // Method to notify players about an update
+    /**
+     * Sends update notification to players with appropriate permissions
+     * @param newVersion The latest available version number
+     * @param downloadUrl URL where the new version can be downloaded
+     */
     private void notifyUpdate(String newVersion, String downloadUrl) {
         String message = ColorUtil.parseColor("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + newVersion + 
                         "\n&#FFAFFB[nonchat] &#ffffffDownload: &#FFAFFB" + downloadUrl);
@@ -66,7 +81,9 @@ public class UpdateChecker {
         });
     }
     
-    // Method to notify players that the plugin is up to date
+    /**
+     * Logs a message indicating the plugin is up to date
+     */
     private void notifyUpToDate() {
         plugin.getLogger().info("You are using the latest version of nonchat!");
     }

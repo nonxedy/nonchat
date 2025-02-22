@@ -1,5 +1,9 @@
 package com.nonxedy.nonchat.utils;
 
+/**
+ * Manages automated broadcast messages with timing control
+ * Handles configuration and delivery of scheduled announcements
+ */
 public class BroadcastMessage {
     private boolean enabled;
     private String message;

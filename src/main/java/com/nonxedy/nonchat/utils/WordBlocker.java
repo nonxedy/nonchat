@@ -2,8 +2,12 @@ package com.nonxedy.nonchat.utils;
 
 import java.util.List;
 
-// WordBlocker class to check if a message contains banned words
+/**
+ * Handles message filtering by checking for banned words
+ * Provides functionality to block messages containing prohibited content
+ */
 public class WordBlocker {
+    /** List of words that are not allowed in messages */
     private List<String> bannedWords;
 
     // Constructor to initialize banned words
@@ -11,7 +15,11 @@ public class WordBlocker {
         this.bannedWords = bannedWords;
     }
 
-    // Method to check if a message is allowed (does not contain banned words)
+    /**
+     * Checks if a message is allowed by scanning for banned words
+     * @param message The message to check
+     * @return true if message is allowed, false if it contains banned words
+     */
     public boolean isMessageAllowed(String message) {
         for (String word : bannedWords) {
             if (message.toLowerCase().contains(word.toLowerCase())) {

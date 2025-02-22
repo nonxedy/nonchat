@@ -7,13 +7,20 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 
-// Utility class for handling color codes and text formatting in chat messages
+/**
+ * Provides color code processing and text formatting for chat messages
+ * Supports both legacy color codes and hex colors
+ */
 public class ColorUtil {
-    // Regex pattern to match hex color codes in format &#RRGGBB
+    // Pattern for matching hex color codes in &#RRGGBB format
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
-    // Converts color codes in a string to actual colored text
-    // Supports both & color codes and hex colors (&#RRGGBB format)
+    /**
+     * Converts color codes in text to actual colored output
+     * Processes both & color codes and hex colors
+     * @param message The text containing color codes
+     * @return Processed string with color codes converted
+     */
     public static String parseColor(String message) {
         // Return empty string if message is null
         if (message == null) return "";
@@ -37,8 +44,12 @@ public class ColorUtil {
         return ChatColor.translateAlternateColorCodes('&', buffer.toString());
     }
 
-    // Converts a color-coded string into a Component object for Adventure API
-    // Used for modern text rendering in Minecraft
+    /**
+     * Converts color-coded text into Adventure API Component
+     * Used for modern Minecraft text rendering
+     * @param message The text to convert to Component
+     * @return Adventure Component with processed colors
+     */
     public static Component parseComponent(String message) {
         // First convert the color codes to legacy format
         String legacyMessage = parseColor(message);

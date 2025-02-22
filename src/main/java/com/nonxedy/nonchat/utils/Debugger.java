@@ -10,7 +10,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
-// Main debug class for handling debug logging in YAML format
+/**
+ * Handles debug logging in YAML format with timestamps
+ * Provides functionality to log, clear, and manage debug entries
+ */
 public class Debugger {
     // Store reference to the plugin instance
     private final Plugin plugin;
@@ -30,7 +33,10 @@ public class Debugger {
         initializeDebugFile();
     }
 
-    // Initialize the debug file if it doesn't exist
+    /**
+     * Creates and initializes the debug file if it doesn't exist
+     * Sets up initial configuration and timestamp
+     */
     private void initializeDebugFile() {
         // Check if debug file exists
         if (!logFile.exists()) {
@@ -54,7 +60,10 @@ public class Debugger {
         debugConfig = YamlConfiguration.loadConfiguration(logFile);
     }
 
-    // Add a new log entry with timestamp
+    /**
+     * Adds a new timestamped log entry to the debug file
+     * @param message The debug message to log
+     */
     public void log(String message) {
         try {
             // Get current timestamp
@@ -76,7 +85,9 @@ public class Debugger {
         }
     }
 
-    // Clear all log entries and record clearing time
+    /**
+     * Clears all debug entries and records the clearing time
+     */
     public void clear() {
         try {
             // Remove all log entries

@@ -12,7 +12,10 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.nonxedy.nonchat.config.PluginConfig;
 
-// Class responsible for managing and sending automated broadcast messages
+/**
+ * Manages automated broadcast system with support for regular and random broadcasts
+ * Handles scheduling, sending, and managing broadcast messages
+ */
 public class AutoBroadcastSender {
     // Plugin instance reference
     private final Plugin plugin;
@@ -33,7 +36,10 @@ public class AutoBroadcastSender {
         this.randomMessagePool = new ArrayList<>();
     }
 
-    // Starts the broadcast system
+    /**
+     * Initializes and starts the broadcast system
+     * Sets up regular or random broadcasts based on configuration
+     */
     public void start() {
         // Stop any existing broadcasts before starting
         stop();
@@ -60,7 +66,11 @@ public class AutoBroadcastSender {
         }
     }
 
-    // Schedules a regular interval broadcast for a specific message
+    /**
+     * Schedules a regular interval broadcast
+     * @param key Identifier for the broadcast task
+     * @param message Message configuration to broadcast
+     */
     private void scheduleRegularBroadcast(String key, BroadcastMessage message) {
         // Create async task that repeats at specified intervals
         BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, 
@@ -72,7 +82,7 @@ public class AutoBroadcastSender {
         activeTasks.put(key, task);
     }
 
-    // Initiates random message broadcasting
+    // Initiates random message broadcasting system
     private void startRandomBroadcasts() {
         // Create task that randomly selects and broadcasts messages every minute
         randomBroadcastTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
@@ -90,7 +100,10 @@ public class AutoBroadcastSender {
         );
     }
 
-    // Sends the actual broadcast message to all players
+    /**
+     * Sends a broadcast message to all players
+     * @param message The message to broadcast
+     */
     private void broadcastMessage(String message) {
         // Convert color codes and send message to server
         Bukkit.getServer().sendMessage(ColorUtil.parseComponent(message));
