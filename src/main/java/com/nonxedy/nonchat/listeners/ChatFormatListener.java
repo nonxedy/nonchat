@@ -24,7 +24,10 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
-// Main class that handles chat formatting and implements Bukkit's Listener interface
+/**
+ * Main chat formatting and processing handler
+ * Manages chat types, filtering, and message delivery
+ */
 public class ChatFormatListener implements Listener {
     
     // Configuration instances for plugin settings and messages
@@ -39,7 +42,10 @@ public class ChatFormatListener implements Listener {
         this.messages = messages;
     }
 
-    // Main event handler for chat messages with NORMAL priority
+    /**
+     * Processes chat messages and applies formatting
+     * @param event The async chat event
+     */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerChat(AsyncChatEvent event) {
         // Cancel the default chat event to handle custom formatting
@@ -93,7 +99,12 @@ public class ChatFormatListener implements Listener {
         broadcastMessage(player, formattedMessage, chatTypeUtil);
     }
 
-    // Handles message broadcasting based on chat type (global or local)
+    /**
+     * Broadcasts message to appropriate recipients
+     * @param sender Message sender
+     * @param message Formatted message
+     * @param chatTypeUtil Chat type configuration
+     */
     private void broadcastMessage(Player sender, Component message, ChatTypeUtil chatTypeUtil) {
         // If chat type is global, broadcast to all players
         if (chatTypeUtil.isGlobal()) {
@@ -108,14 +119,25 @@ public class ChatFormatListener implements Listener {
         }
     }
 
-    // Checks if recipient is within range of sender for local chat
+    /**
+     * Checks if recipient is within chat range
+     * @param sender Message sender
+     * @param recipient Message recipient
+     * @param radius Chat range in blocks
+     * @return true if in range, false otherwise
+     */
     private boolean isInRange(Player sender, Player recipient, int radius) {
         // Check if players are in same world and within radius (-1 means unlimited)
         return sender.getWorld() == recipient.getWorld() && 
                 (radius == -1 || sender.getLocation().distance(recipient.getLocation()) <= radius);
     }
 
-    // Determines which chat type to use based on message prefix
+    /**
+     * Determines chat type from message prefix
+     * @param message Raw message content
+     * @param chats Available chat types
+     * @return Appropriate chat type configuration
+     */
     private ChatTypeUtil determineChat(String message, Map<String, ChatTypeUtil> chats) {
         // If message is not empty, check first character for chat type
         if (message.length() > 0) {
@@ -126,7 +148,13 @@ public class ChatFormatListener implements Listener {
         return config.getDefaultChatType();
     }
 
-    // Formats the message with player information and chat format
+    /**
+     * Formats message with player info and chat format
+     * @param player Message sender
+     * @param message Raw message content
+     * @param chatTypeUtil Chat type configuration
+     * @return Formatted component
+     */
     private Component formatMessage(Player player, String message, ChatTypeUtil chatTypeUtil) {
         // Get LuckPerms user data for prefix/suffix
         User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
@@ -158,12 +186,21 @@ public class ChatFormatListener implements Listener {
         return finalMessage;
     }
 
-    // Converts modern Component message to legacy string format
+    /**
+     * Converts component to legacy string format
+     * @param message Component to convert
+     * @return Legacy format string
+     */
     private String getLegacyContent(Component message) {
         return LegacyComponentSerializer.legacySection().serialize(message);
     }
 
-    // Checks if message contains blocked words unless player has bypass permission
+    /**
+     * Checks message for blocked words
+     * @param player Message sender
+     * @param message Message content
+     * @return true if message blocked, false otherwise
+     */
     private boolean handleBlockedWords(Player player, String message) {
         if (!player.hasPermission("nonchat.antiblockedwords")) {
             WordBlocker wordBlocker = config.getWordBlocker();
@@ -175,7 +212,11 @@ public class ChatFormatListener implements Listener {
         return false;
     }
 
-    // Processes @mentions in messages and notifies mentioned players
+    /**
+     * Processes @mentions in messages
+     * @param sender Message sender
+     * @param message Message content
+     */
     private void handleMentions(Player sender, String message) {
         Matcher mentionMatcher = mentionPattern.matcher(message);
         while (mentionMatcher.find()) {
@@ -188,7 +229,11 @@ public class ChatFormatListener implements Listener {
         }
     }
 
-    // Sends notification and plays sound to mentioned player
+    /**
+     * Notifies mentioned player with sound and message
+     * @param mentioned Player mentioned
+     * @param sender Message sender
+     */
     private void notifyMentionedPlayer(Player mentioned, Player sender) {
         mentioned.sendMessage(ColorUtil.parseComponent(
             messages.getString("mentioned")
@@ -197,6 +242,11 @@ public class ChatFormatListener implements Listener {
         mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
     }
 
+    /**
+     * Processes message capitalization
+     * @param message Message to process
+     * @return Processed message
+     */
     private String processCaps(String message) {
         CapsFilter capsFilter = config.getCapsFilter();
         if (capsFilter.shouldFilter(message)) {

@@ -12,7 +12,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
-// Class that handles player death events and customizes death messages
+/**
+ * Handles player death events and customizes death messages
+ * Integrates with LuckPerms for prefix/suffix support
+ */
 public class DeathListener implements Listener {
 
     // Store plugin configuration instance
@@ -23,7 +26,11 @@ public class DeathListener implements Listener {
         this.config = config;
     }
     
-    // Event handler method with HIGH priority for player death events
+    /**
+     * Processes player death events and formats messages
+     * Uses HIGH priority to modify messages after other plugins
+     * @param event The player death event
+     */
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
         // Get the player who died

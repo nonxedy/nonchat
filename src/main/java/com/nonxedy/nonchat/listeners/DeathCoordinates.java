@@ -13,10 +13,15 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
-// Main class that handles death coordinate messages
+/**
+ * Handles death location messages and coordinates display
+ * Provides dimension-specific location information on player death
+ */
 public class DeathCoordinates implements Listener {
     
     // Define constant colors for message formatting
+    
+    // I'll rework work with colors
     private static final TextColor WHITE = TextColor.fromHexString("#FFFFFF");
     private static final TextColor PURPLE = TextColor.fromHexString("#E088FF");
     
@@ -28,7 +33,10 @@ public class DeathCoordinates implements Listener {
         this.config = config;
     }
     
-    // Event handler that triggers when a player dies
+    /**
+     * Processes death events and sends coordinate information
+     * @param event The player death event
+     */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerDeath(PlayerDeathEvent event) {
         // Get the player who died
@@ -49,7 +57,12 @@ public class DeathCoordinates implements Listener {
         player.sendMessage(coordsMessage);
     }
     
-    // Helper method to construct the full death message
+    /**
+     * Constructs formatted death location message
+     * @param dimension World dimension where death occurred
+     * @param loc Location of player death
+     * @return Formatted component with death coordinates
+     */
     private Component buildDeathMessage(Environment dimension, Location loc) {
         return Component.text()
             .append(Component.text("You died in ", WHITE))
@@ -61,7 +74,12 @@ public class DeathCoordinates implements Listener {
             .build();
     }
     
-    // Helper method to format individual coordinate components
+    /**
+     * Formats individual coordinate components
+     * @param axis Coordinate axis label (x/y/z)
+     * @param value Coordinate value
+     * @return Formatted coordinate component
+     */
     private Component formatCoordinate(String axis, int value) {
         return Component.text()
             .append(Component.text(" " + axis + ":", WHITE))
@@ -69,7 +87,11 @@ public class DeathCoordinates implements Listener {
             .build();
     }
     
-    // Helper method to convert dimension enum to readable text
+    /**
+     * Converts dimension type to readable name
+     * @param dimension Environment type to format
+     * @return Human-readable dimension name
+     */
     private String formatDimension(Environment dimension) {
         switch (dimension) {
             case NORMAL: return "Overworld";

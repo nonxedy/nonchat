@@ -19,7 +19,10 @@ import com.nonxedy.nonchat.utils.CapsFilter;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-// Main listener class for handling chat bubble functionality
+/**
+ * Manages floating chat bubbles above players' heads
+ * Handles creation, updating, and removal of chat display entities
+ */
 public class ChatBubbleListener implements Listener {
     
     // Map to store active chat bubbles for each player
@@ -36,7 +39,10 @@ public class ChatBubbleListener implements Listener {
         startBubbleUpdater();
     }
 
-    // Starts a repeating task to update bubble positions
+    /**
+     * Initializes repeating task for updating bubble positions
+     * Runs every tick to keep bubbles above players
+     */
     private void startBubbleUpdater() {
         // Run task every tick (20 ticks = 1 second)
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
@@ -55,7 +61,10 @@ public class ChatBubbleListener implements Listener {
         }, 1L, 1L);
     }
 
-    // Handle chat events to create bubbles
+    /**
+     * Processes chat events to create chat bubbles
+     * @param e The async chat event
+     */
     @EventHandler
     public void onChat(AsyncChatEvent e) {
         // Check if bubbles are enabled and player has permission
@@ -83,7 +92,11 @@ public class ChatBubbleListener implements Listener {
         });
     }
 
-    // Creates a new chat bubble for a player
+    /**
+     * Creates new chat bubble for a player
+     * @param player Player to create bubble for
+     * @param message Message to display in bubble
+     */
     private void createBubble(Player player, String message) {
         // Calculate bubble position above player
         Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
@@ -98,7 +111,10 @@ public class ChatBubbleListener implements Listener {
         }, config.getChatBubblesDuration() * 20L);
     }
 
-    // Removes a player's chat bubble
+    /**
+     * Removes a player's chat bubble
+     * @param player Player whose bubble to remove
+     */
     private void removeBubble(Player player) {
         // Get and remove bubble from map
         ArmorStand bubble = bubbles.remove(player);
@@ -108,7 +124,10 @@ public class ChatBubbleListener implements Listener {
         }
     }
 
-    // Handle player quit events
+    /**
+     * Handles player quit events to remove bubbles
+     * @param e The player quit event
+     */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
         // Remove bubble when player leaves
