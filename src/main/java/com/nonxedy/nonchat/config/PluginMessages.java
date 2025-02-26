@@ -6,7 +6,10 @@ import com.nonxedy.nonchat.utils.MessageFormatter;
 
 import net.kyori.adventure.text.Component;
 
-// Main class for handling plugin messages and configurations
+/**
+ * Central manager for plugin messages and translations
+ * Handles message loading, formatting and language selection
+ */
 public class PluginMessages {
     private final MessageFormatter formatter;
     private final LanguageManager languageManager;
@@ -20,23 +23,36 @@ public class PluginMessages {
         loadLanguage();
     }
 
-    // Loads language from configuration
+    /**
+     * Loads language configuration from plugin settings
+     */
     public void loadLanguage() {
         String lang = plugin.getConfig().getString("language", "en");
         languageManager.setLanguage(lang);
     }
 
-    // Reloads configuration from file
+    /**
+     * Reloads language configuration from file
+     */
     public void reloadConfig() {
         loadLanguage();
     }
 
-    // Gets raw string from configuration
+    /**
+     * Gets raw message string from configuration
+     * @param path Message identifier path
+     * @return Raw message string
+     */
     public String getString(String path) {
         return languageManager.getMessage(path);
     }
 
-    // Formats message with provided arguments using MessageFormatter
+    /**
+     * Gets formatted message with variables replaced
+     * @param path Message identifier path
+     * @param args Variables to insert into message
+     * @return Formatted component
+     */
     public Component getFormatted(String path, Object... args) {
         return formatter.format(path, args);
     }

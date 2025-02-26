@@ -17,7 +17,10 @@ import com.nonxedy.nonchat.utils.ChatTypeUtil;
 import com.nonxedy.nonchat.utils.HoverTextUtil;
 import com.nonxedy.nonchat.utils.WordBlocker;
 
-// Main configuration class for the NonChat plugin
+/**
+ * Central configuration manager for the NonChat plugin
+ * Handles loading, saving and accessing all plugin settings
+ */
 public class PluginConfig {
     // File object representing the config.yml file
     private final File configFile;
@@ -33,7 +36,9 @@ public class PluginConfig {
         loadConfig();
     }
 
-    // Loads configuration from file or creates default if doesn't exist
+    /**
+     * Loads configuration from file or creates default
+     */
     private void loadConfig() {
         // Check if config file exists
         if (!configFile.exists()) {
@@ -46,7 +51,10 @@ public class PluginConfig {
         this.debug = config.getBoolean("debug", false);
     }
 
-    // Creates default configuration file with initial settings
+    /**
+     * Creates default configuration file with initial settings
+     * @throws RuntimeException if file creation fails
+     */
     private void createDefaultConfig() {
         try {
             // Create directories if they don't exist
@@ -66,7 +74,9 @@ public class PluginConfig {
         }
     }
 
-    // Sets default values for all configuration options
+    /**
+     * Sets all default configuration values
+     */
     private void setDefaultValues() {
         // Chat formatting settings
         config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
@@ -93,7 +103,7 @@ public class PluginConfig {
         config.set("update-checker", true);
     }
 
-    // Create default chat channels configuration
+    // Creates default chat channels configuration
     private void createDefaultChats() {
         // Configure global chat channel
         config.set("chats.global.enabled", true);
@@ -111,51 +121,88 @@ public class PluginConfig {
         saveConfig();
     }
 
-    // Getter methods for various chat formats with default values
+    /**
+     * Gets death message format
+     * @return Formatted death message string
+     */
     @NotNull
     public String getDeathFormat() {
         return config.getString("death-format", "{prefix} §f{player}§r {suffix}§f died");
     }
 
+    /**
+     * Gets private chat message format
+     * @return Private chat format string
+     */
     @NotNull
     public String getPrivateChatFormat() {
         return config.getString("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
     }
 
+    /**
+     * Gets staff chat format
+     * @return Staff chat format string
+     */
     @NotNull
     public String getScFormat() {
         return config.getString("sc-format", "{prefix} §f{sender}§r {suffix}§7: §7{message}");
     }
 
+    /**
+     * Gets staff chat name prefix
+     * @return Staff chat identifier
+     */
     @NotNull
     public String getStaffChatName() {
         return config.getString("staff-chat-name", "[STAFFCHAT]");
     }
 
+    /**
+     * Gets spy message format
+     * @return Spy message format string
+     */
     @NotNull
     public String getSpyFormat() {
         return config.getString("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
     }
 
-    // Methods for broadcast system configuration
+    /**
+     * Checks if broadcast system is enabled
+     * @return true if enabled
+     */
     public boolean isBroadcastEnabled() {
         return config.getBoolean("broadcast.enabled", true);
     }
 
+    /**
+     * Checks if random broadcast is enabled
+     * @return true if random mode enabled
+     */
     public boolean isRandomBroadcastEnabled() {
         return config.getBoolean("broadcast.random", false);
     }
 
+    /**
+     * Gets default broadcast message
+     * @return Default message string
+     */
     @NotNull
     public String getBroadcastMessage() {
         return config.getString("broadcast.message", "Default broadcast message");
     }
 
+    /**
+     * Gets broadcast interval in seconds
+     * @return Interval between broadcasts
+     */
     public int getBroadcastInterval() {
         return config.getInt("broadcast.interval", 60);
     }
 
-    // Retrieves all broadcast messages from config
+    /**
+     * Gets all configured broadcast messages
+     * @return Map of broadcast messages
+     */
     @NotNull
     public Map<String, BroadcastMessage> getBroadcastMessages() {
         Map<String, BroadcastMessage> messages = new HashMap<>();
@@ -178,36 +225,61 @@ public class PluginConfig {
         return messages;
     }
 
-    // Chat bubbles configuration getters
+    /**
+     * Checks if chat bubbles are enabled
+     * @return true if enabled
+     */
     public boolean isChatBubblesEnabled() {
         return config.getBoolean("chat-bubbles.enabled", true);
     }
 
+    /**
+     * Gets chat bubble duration in seconds
+     * @return Duration time
+     */
     public int getChatBubblesDuration() {
         return config.getInt("chat-bubbles.duration", 5);
     }
 
+    /**
+     * Gets chat bubble height above player
+     * @return Height in blocks
+     */
     public double getChatBubblesHeight() {
         return config.getDouble("chat-bubbles.height", 2.5);
     }
 
-    // Word blocking system methods
+    /**
+     * Gets list of banned words
+     * @return List of blocked words
+     */
     @NotNull
     public List<String> getBannedWords() {
         return config.getStringList("banned-words");
     }
 
+    /**
+     * Gets word blocker instance
+     * @return Configured WordBlocker
+     */
     @NotNull
     public WordBlocker getWordBlocker() {
         return new WordBlocker(getBannedWords());
     }
 
-    // Update checker method
+    /**
+     * Checks if update checker is enabled
+     * @return true if enabled
+     */
     public boolean isUpdateCheckerEnabled() {
         return config.getBoolean("update-checker", true);
     }
 
-    // Gets a chat type based on its prefix character
+    /**
+     * Gets chat type by prefix character
+     * @param prefix Character to check
+     * @return Matching ChatTypeUtil or default
+     */
     public ChatTypeUtil getChatTypeByChar(char prefix) {
         // Get all available chat types from configuration
         Map<String, ChatTypeUtil> chats = getChats();
@@ -221,7 +293,10 @@ public class PluginConfig {
             .orElse(getDefaultChatType());
     }
 
-    // Returns the default chat type configuration (local chat)
+    /**
+     * Gets default chat type configuration
+     * @return Default ChatTypeUtil
+     */
     public ChatTypeUtil getDefaultChatType() {
         // Get all available chats from config
         // Return local chat if exists, otherwise create new default local chat
@@ -232,13 +307,21 @@ public class PluginConfig {
                 100, '\0'));
     }
 
-    // Checks if specific chat type is enabled in config
+    /**
+     * Checks if specific chat type is enabled
+     * @param chatName Chat type to check
+     * @return true if enabled
+     */
     public boolean isChatEnabled(String chatName) {
         // Get enabled status from config, default to false if not found
         return config.getBoolean("chats." + chatName + ".enabled", false);
     }
 
-    // Sets enabled status for specific chat type
+    /**
+     * Sets enabled state for chat type
+     * @param chatName Chat type to modify
+     * @param enabled New enabled state
+     */
     public void setChatEnabled(String chatName, boolean enabled) {
         // Update enabled status in config
         config.set("chats." + chatName + ".enabled", enabled);
@@ -246,7 +329,10 @@ public class PluginConfig {
         saveConfig();
     }
 
-    // Retrieves all configured chat types from config.yml
+    /**
+     * Gets all configured chat types
+     * @return Map of chat configurations
+     */
     @NotNull
     public Map<String, ChatTypeUtil> getChats() {
         // Create new map to store chat configurations
@@ -290,47 +376,84 @@ public class PluginConfig {
         return chats;
     }
 
-    // Debug mode management
+    /**
+     * Gets debug mode state
+     * @return true if debug enabled
+     */
     public boolean isDebug() {
         return debug;
     }
 
+    /**
+     * Sets debug mode state
+     * @param debug New debug state
+     */
     public void setDebug(boolean debug) {
         this.debug = debug;
         config.set("debug", debug);
         saveConfig();
     }
 
-    // Roleplay commands configuration
+    /**
+     * Checks if /me command is enabled
+     * @return true if enabled
+     */
     public boolean isMeCommandEnabled() {
         return config.getBoolean("roleplay-commands.me.enabled", true);
     }
 
+    /**
+     * Gets /me command format
+     * @return Format string
+     */
     public String getMeFormat() {
         return config.getString("roleplay-commands.me.format", "&f{player}&7: &f{message}");
     }
 
+    /**
+     * Checks if /roll command is enabled
+     * @return true if enabled
+     */
     public boolean isRollCommandEnabled() {
         return config.getBoolean("roleplay-commands.roll.enabled", true);
     }
 
+    /**
+     * Gets /roll command format
+     * @return Format string
+     */
     public String getRollFormat() {
         return config.getString("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
     }
 
-    // Caps filter configuration
+    /**
+     * Checks if caps filter is enabled
+     * @return true if enabled
+     */
     public boolean isCapsFilterEnabled() {
         return config.getBoolean("caps-filter.enabled", true);
     }
 
+    /**
+     * Gets maximum allowed caps percentage
+     * @return Maximum percentage
+     */
     public int getMaxCapsPercentage() {
         return config.getInt("caps-filter.max-caps-percentage", 70);
     }
 
+    /**
+     * Gets minimum length for caps checking
+     * @return Minimum length
+     */
     public int getMinCapsLength() {
         return config.getInt("caps-filter.min-length", 4);
     }
 
+    /**
+     * Gets caps filter instance
+     * @return Configured CapsFilter
+     */
     public CapsFilter getCapsFilter() {
         return new CapsFilter(
             isCapsFilterEnabled(),
@@ -339,20 +462,34 @@ public class PluginConfig {
         );
     }
 
-    // Hover text configuration
+    /**
+     * Checks if hover text is enabled
+     * @return true if enabled
+     */
     public boolean isHoverEnabled() {
         return config.getBoolean("hover-text.enabled", true);
     }
 
+    /**
+     * Gets hover text format
+     * @return List of format lines
+     */
     public List<String> getHoverFormat() {
         return config.getStringList("hover-text.format");
     }
 
+    /**
+     * Gets hover text utility instance
+     * @return Configured HoverTextUtil
+     */
     public HoverTextUtil getHoverTextUtil() {
         return new HoverTextUtil(getHoverFormat(), isHoverEnabled());
     }
 
-    // Configuration file management methods
+    /**
+     * Saves configuration to file
+     * @throws RuntimeException if save fails
+     */
     public void saveConfig() {
         try {
             config.save(configFile);
@@ -361,7 +498,7 @@ public class PluginConfig {
         }
     }
 
-    // Load configuration from file
+    // Reloads configuration from file
     public void reloadConfig() {
         loadConfig();
     }
