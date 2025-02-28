@@ -11,7 +11,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
-// Main class that handles the /nhelp command
+/**
+ * Handles help command functionality
+ * Displays available commands and their usage
+ */
 public class NhelpCommand implements CommandExecutor {
 
     // Store reference to plugin messages configuration
@@ -25,7 +28,14 @@ public class NhelpCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    // Method called when player executes the command
+    /**
+     * Handles help command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         // Log the command execution
@@ -44,7 +54,10 @@ public class NhelpCommand implements CommandExecutor {
         return true;
     }
 
-    // Helper method to construct and send the help message
+    /**
+     * Sends formatted help message to sender
+     * @param sender Command sender
+     */
     private void sendHelpMessage(CommandSender sender) {
         try {
             // Create an empty component and append help header and commands list
@@ -62,7 +75,10 @@ public class NhelpCommand implements CommandExecutor {
         }
     }
 
-    // Helper method that builds the list of available commands
+    /**
+     * Builds list of available commands
+     * @return Formatted component with commands
+     */
     private Component getCommandsList() {
         // Create an empty component and append all command descriptions
         return Component.empty()

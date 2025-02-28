@@ -17,18 +17,31 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
+/**
+ * Handles roleplay action command functionality
+ * Broadcasts player actions in third person
+ */
 public class MeCommand implements CommandExecutor, TabCompleter {
 
     private final nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
 
+    // Constructor to initialize all required dependencies
     public MeCommand(nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
     }
 
+    /**
+     * Handles me command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, 
                             @NotNull String label, String[] args) {
@@ -47,6 +60,11 @@ public class MeCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Validates command usage permissions
+     * @param sender Command sender
+     * @return true if usage allowed
+     */
     private boolean validateCommandUsage(CommandSender sender) {
         if (!config.isMeCommandEnabled()) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("command-disabled")));
@@ -69,6 +87,11 @@ public class MeCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Broadcasts roleplay action message
+     * @param sender Command sender
+     * @param args Command arguments
+     */
     private void broadcastMeMessage(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-me")));
@@ -85,12 +108,24 @@ public class MeCommand implements CommandExecutor, TabCompleter {
         plugin.logResponse("Me command executed: " + sender.getName() + " - " + message);
     }
 
+    /**
+     * Handles command execution errors
+     * @param sender Command sender
+     * @param e Exception that occurred
+     */
     private void handleError(CommandSender sender, Exception e) {
         sender.sendMessage(ColorUtil.parseComponent("&cAn error occurred while executing the command"));
         plugin.logError("Me command error: " + e.getMessage());
     }
 
-    // Provide tab completion suggestions
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                         @NotNull String label, @NotNull String[] args) {

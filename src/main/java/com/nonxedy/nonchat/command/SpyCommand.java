@@ -17,7 +17,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-// Main command class for handling spy functionality
+/**
+ * Manages private message spying functionality
+ * Allows staff to monitor private communications
+ */
 public class SpyCommand implements CommandExecutor {
 
     // Plugin instance reference
@@ -38,7 +41,14 @@ public class SpyCommand implements CommandExecutor {
         this.spyPlayers = new HashSet<>();
     }
 
-    // Command execution handler
+    /**
+     * Handles spy command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         // Log the command execution
@@ -64,7 +74,10 @@ public class SpyCommand implements CommandExecutor {
         return true;
     }
 
-    // Helper method to toggle spy mode status
+    /**
+     * Toggles spy mode for a player
+     * @param player Player to toggle spy mode for
+     */
     private void toggleSpyMode(Player player) {
         try {
             // If player is already spying, disable it
@@ -84,7 +97,12 @@ public class SpyCommand implements CommandExecutor {
         }
     }
 
-    // Method to handle private messages and send them to spies
+    /**
+     * Processes private messages for spying players
+     * @param sender Message sender
+     * @param target Message recipient
+     * @param message Message content
+     */
     public void onPrivateMessage(Player sender, Player target, Component message) {
         // Convert message component to plain text
         String plainMessage = PlainTextComponentSerializer.plainText().serialize(message);
@@ -103,12 +121,19 @@ public class SpyCommand implements CommandExecutor {
         }
     }
 
-    // Check if a player is currently spying
+    /**
+     * Checks if a player is currently spying
+     * @param player Player to check
+     * @return true if player is spying
+     */
     public boolean isSpying(Player player) {
         return spyPlayers.contains(player);
     }
 
-    // Get a copy of the current spy players set
+    /**
+     * Gets set of all spying players
+     * @return Copy of spy players set
+     */
     public Set<Player> getSpyPlayers() {
         return new HashSet<>(spyPlayers);
     }

@@ -21,7 +21,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
-// Main class that handles private messaging between players
+/**
+ * Handles private messaging between players
+ * Provides secure player-to-player communication
+ */
 public class MessageCommand implements CommandExecutor, TabCompleter {
 
     // Required plugin instances and configurations
@@ -38,7 +41,14 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         this.spyCommand = spyCommand;
     }
 
-    // Main command execution method that handles the private message command
+    /**
+     * Handles private message command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         // Log the command execution for debugging
@@ -86,7 +96,11 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Helper method to check if command name is a valid message command alias
+    /**
+     * Checks if command is a valid message command alias
+     * @param commandName Command name to check
+     * @return true if valid message command
+     */
     private boolean isMessageCommand(String commandName) {
         return commandName.equalsIgnoreCase("message") ||
             commandName.equalsIgnoreCase("msg") ||
@@ -96,7 +110,12 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
             commandName.equalsIgnoreCase("whisper");
     }
 
-    // Check if target player has ignored the sender
+    /**
+     * Checks if target has ignored sender
+     * @param sender Message sender
+     * @param target Message recipient
+     * @return true if sender is ignored
+     */
     private boolean isIgnored(CommandSender sender, Player target) {
         if (!(sender instanceof Player)) {
             return false;
@@ -106,7 +125,12 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
             plugin.ignoredPlayers.get(target.getUniqueId()).contains(senderUUID);
     }
 
-    // Send the private message to both sender and target, also notify spy players
+    /**
+     * Sends private message to sender and recipient
+     * @param sender Message sender
+     * @param target Message recipient
+     * @param message Message content
+     */
     private void sendPrivateMessage(CommandSender sender, Player target, String message) {
         // Get the message format from config
         String format = config.getPrivateChatFormat();
@@ -138,7 +162,14 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // Provide tab completion suggestions
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                         @NotNull String label, @NotNull String[] args) {

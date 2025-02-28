@@ -17,7 +17,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
-// Main class that handles broadcast commands in the plugin
+/**
+ * Handles server-wide broadcast functionality
+ * Provides command to send formatted announcements
+ */
 public class BroadcastCommand implements CommandExecutor, TabCompleter {
 
     // Reference to plugin messages for localization
@@ -31,7 +34,14 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
     }
 
-    // Handle the broadcast command execution
+    /**
+     * Handles broadcast command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                     @NotNull String label, @NotNull String[] args) {
@@ -55,19 +65,28 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Send no permission message to command sender
+    /**
+     * Sends permission denied message
+     * @param sender Command sender
+     */
     private void sendNoPermissionMessage(CommandSender sender) {
         sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
         plugin.logError("Sender doesn't have broadcast permission");
     }
 
-    // Send proper command usage information
+    /**
+     * Sends command usage information
+     * @param sender Command sender
+     */
     private void sendUsageMessage(CommandSender sender) {
         sender.sendMessage(ColorUtil.parseComponent(messages.getString("broadcast-command")));
         plugin.logError("Invalid usage: /bc <message>");
     }
 
-    // Process and send the broadcast message
+    /**
+     * Broadcasts formatted message to all players
+     * @param message Message to broadcast
+     */
     private void broadcastMessage(String message) {
         try {
             // Create formatted message component
@@ -91,7 +110,14 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // Provide tab completion suggestions
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                     @NotNull String label, @NotNull String[] args) {

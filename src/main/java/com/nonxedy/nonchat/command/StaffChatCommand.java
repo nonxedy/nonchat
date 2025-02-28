@@ -22,15 +22,20 @@ import net.kyori.adventure.text.format.TextColor;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
-// Main class that handles staff chat commands
+/**
+ * Handles staff chat commands and message formatting
+ * Provides secure communication channel for staff members
+ */
 public class StaffChatCommand implements CommandExecutor, TabCompleter {
 
     // Class fields for plugin instance, messages, and configuration
     private final nonchat plugin;
     private final PluginMessages messages;
     private final PluginConfig config;
-    
+
     // Define static color constants for staff chat formatting
+    
+    // I'll rework work with colors
     private static final TextColor STAFF_CHAT_COLOR = TextColor.fromHexString("#ADF3FD");
     private static final TextColor MESSAGE_COLOR = TextColor.fromHexString("#FFFFFF");
 
@@ -41,7 +46,14 @@ public class StaffChatCommand implements CommandExecutor, TabCompleter {
         this.config = config;
     }
 
-    // Main command execution method that handles the staff chat command
+    /**
+     * Handles staff chat command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         // Log the executed command for tracking
@@ -67,7 +79,11 @@ public class StaffChatCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Method to broadcast the staff message to all players with permission
+    /**
+     * Broadcasts staff message to authorized players
+     * @param sender Message sender
+     * @param message Message content
+     */
     private void broadcastStaffMessage(CommandSender sender, String message) {
         // Get format settings from config
         String staffChatFormat = config.getScFormat();
@@ -86,7 +102,14 @@ public class StaffChatCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // Method to create a formatted staff message with prefix/suffix support
+    /**
+     * Creates formatted staff message with prefix/suffix
+     * @param sender Message sender
+     * @param staffChatName Staff chat identifier
+     * @param staffChatFormat Message format template
+     * @param message Message content
+     * @return Formatted component
+     */
     private Component createStaffMessage(CommandSender sender, String staffChatName, String staffChatFormat, String message) {
         // Initialize sender information
         String senderName = sender.getName();
@@ -121,7 +144,14 @@ public class StaffChatCommand implements CommandExecutor, TabCompleter {
             .build();
     }
 
-    // Provide tab completion suggestions
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                         @NotNull String label, @NotNull String[] args) {

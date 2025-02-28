@@ -14,7 +14,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.format.TextColor;
 
-// Main class that handles the server information command
+/**
+ * Handles server information command
+ * Displays system and server statistics
+ */
 public class ServerCommand implements CommandExecutor {
 
     // Store plugin messages configuration
@@ -28,7 +31,14 @@ public class ServerCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    // Command execution handler
+    /**
+     * Handles server command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         // Log the executed command
@@ -53,7 +63,10 @@ public class ServerCommand implements CommandExecutor {
         return true;
     }
     
-    // Method to collect and send server information
+    /**
+     * Sends server information to command sender
+     * @param sender Command sender to receive info
+     */
     private void sendServerInfo(CommandSender sender) {
         // Build server info message using builder pattern
         ServerInfoBuilder info = new ServerInfoBuilder()
@@ -74,6 +87,8 @@ public class ServerCommand implements CommandExecutor {
     }
     
     // Helper class to build formatted server information
+    
+    // Ill create file for that class
     private static class ServerInfoBuilder {
         // Component builder for creating formatted text
         private final Builder builder = Component.text();

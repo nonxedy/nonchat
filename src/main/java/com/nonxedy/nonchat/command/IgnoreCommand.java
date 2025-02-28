@@ -18,7 +18,10 @@ import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
-// Class implements the player ignore command functionality in chat
+/**
+ * Manages player ignore functionality
+ * Allows players to block messages from specific users
+ */
 public class IgnoreCommand implements CommandExecutor, TabCompleter {
 
     // Instance of the main plugin
@@ -32,7 +35,14 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
         this.messages = messages;
     }
 
-    // Method executes when a player enters the command
+    /**
+     * Handles ignore command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         // Log the executed command
@@ -81,7 +91,11 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Method to handle ignore toggle logic
+    /**
+     * Handles ignore status toggling
+     * @param player Player toggling ignore
+     * @param target Target to ignore/unignore
+     */
     private void handleIgnoreToggle(Player player, Player target) {
         try {
             UUID playerUUID = player.getUniqueId();
@@ -98,20 +112,33 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // Check if player is being ignored
+    /**
+     * Checks if target is ignored by player
+     * @param playerUUID Player UUID
+     * @param targetUUID Target UUID
+     * @return true if target is ignored
+     */
     private boolean isIgnored(UUID playerUUID, UUID targetUUID) {
         return plugin.ignoredPlayers.containsKey(playerUUID) && 
             plugin.ignoredPlayers.get(playerUUID).contains(targetUUID);
     }
 
-    // Remove player from ignore list
+    /**
+     * Removes target from player's ignore list
+     * @param player Player removing ignore
+     * @param target Target to unignore
+     */
     private void removeIgnore(Player player, Player target) {
         plugin.ignoredPlayers.get(player.getUniqueId()).remove(target.getUniqueId());
         player.sendMessage(ColorUtil.parseComponent(messages.getString("unignored-player").replace("{player}", target.getName())));
         plugin.logResponse("Player unignored successfully");
     }
 
-    // Add player to ignore list
+    /**
+     * Adds target to player's ignore list
+     * @param player Player adding ignore
+     * @param target Target to ignore
+     */
     private void addIgnore(Player player, Player target) {
         plugin.ignoredPlayers.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>())
             .add(target.getUniqueId());
@@ -120,7 +147,14 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
         plugin.logResponse("Player ignored successfully");
     }
 
-    // Provide tab completion suggestions
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                     @NotNull String label, @NotNull String[] args) {

@@ -13,7 +13,10 @@ import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
-// Main command class that handles the reload functionality
+/**
+ * Handles plugin configuration reloading
+ * Provides command to refresh settings at runtime
+ */
 public class NreloadCommand implements CommandExecutor, TabCompleter {
 
     // Store reference to main plugin instance
@@ -27,7 +30,14 @@ public class NreloadCommand implements CommandExecutor, TabCompleter {
         this.messages = messages;
     }
 
-    // Main command execution method that handles the reload command
+    /**
+     * Handles reload command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, 
                         @NotNull String label, @NotNull String[] args) {
@@ -42,7 +52,11 @@ public class NreloadCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Verify if sender has the required permission
+    /**
+     * Verifies sender has reload permission
+     * @param sender Command sender to check
+     * @return true if sender has permission
+     */
     private boolean hasReloadPermission(CommandSender sender) {
         if (!sender.hasPermission("nonchat.nreload")) {
             sendNoPermissionMessage(sender);
@@ -51,13 +65,19 @@ public class NreloadCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    // Send no permission message to sender and log the denial
+    /**
+     * Sends permission denied message
+     * @param sender Command sender
+     */
     private void sendNoPermissionMessage(CommandSender sender) {
         sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
         plugin.logError("Permission denied: nonchat.nreload");
     }
 
-    // Handle the entire reload process with proper messaging
+    /**
+     * Executes reload process with messaging
+     * @param sender Command sender
+     */
     private void performReload(CommandSender sender) {
         // Send initial reload message
         sender.sendMessage(ColorUtil.parseComponent(messages.getString("reloading")));
@@ -87,14 +107,25 @@ public class NreloadCommand implements CommandExecutor, TabCompleter {
         plugin.registerUtils();
     }
 
-    // Handle and log any errors during reload
+    /**
+     * Handles reload errors with messaging
+     * @param sender Command sender
+     * @param e Exception that occurred
+     */
     private void handleReloadError(CommandSender sender, Exception e) {
         sender.sendMessage(ColorUtil.parseComponent(messages.getString("reload-failed")));
         plugin.logError("Configuration reload failed: " + e.getMessage());
         e.printStackTrace();
     }
 
-    // Tab completion method - returns empty list as no arguments are needed
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                         @NotNull String label, @NotNull String[] args) {

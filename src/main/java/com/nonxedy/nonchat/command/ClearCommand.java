@@ -13,7 +13,10 @@ import com.nonxedy.nonchat.utils.ColorUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-// Chat clear command class implementing CommandExecutor interface
+/**
+ * Handles chat clearing functionality
+ * Provides command to clear chat history
+ */
 public class ClearCommand implements CommandExecutor {
     
     // Fields to store plugin messages and main class instance
@@ -28,7 +31,14 @@ public class ClearCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    // Method called when command is executed
+    /**
+     * Handles clear command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, 
                         @NotNull String label, String[] args) {
@@ -47,7 +57,11 @@ public class ClearCommand implements CommandExecutor {
         return true;
     }
 
-    // Method to check sender's permissions
+    /**
+     * Verifies sender has clear permission
+     * @param sender Command sender
+     * @return true if sender has permission
+     */
     private boolean hasPermission(CommandSender sender) {
         // Check for nonchat.clear permission
         if (!sender.hasPermission("nonchat.clear")) {
@@ -60,7 +74,7 @@ public class ClearCommand implements CommandExecutor {
         return true;
     }
 
-    // Method to clear chat
+    // Clears chat by sending empty lines
     private void clearChat() {
         try {
             // Create empty component for clearing
@@ -80,7 +94,7 @@ public class ClearCommand implements CommandExecutor {
         }
     }
 
-    // Method to send chat clear notification
+    // Sends chat clear notification
     private void sendClearNotification() {
         // Send message to all players that chat was cleared
         Bukkit.broadcast(ColorUtil.parseComponent(messages.getString("chat-cleared")));

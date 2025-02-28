@@ -18,8 +18,13 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.utils.ColorUtil;
 
+/**
+ * Handles dice rolling command functionality
+ * Provides random number generation for roleplay
+ */
 public class RollCommand implements CommandExecutor, TabCompleter {
     
+    // Random number generator
     private final Random random = new Random();
     private final nonchat plugin;
     private final PluginConfig config;
@@ -31,6 +36,14 @@ public class RollCommand implements CommandExecutor, TabCompleter {
         this.messages = messages;
     }
 
+    /**
+     * Handles roll command execution
+     * @param sender Command sender
+     * @param command Command being executed
+     * @param label Command label used
+     * @param args Command arguments
+     * @return true if command handled successfully
+     */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         plugin.logCommand(command.getName(), args);
@@ -87,7 +100,14 @@ public class RollCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    // Provide tab completion suggestions
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                         @NotNull String label, @NotNull String[] args) {
