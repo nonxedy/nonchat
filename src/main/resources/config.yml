@@ -1,11 +1,12 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.3.4
+# Version of the plugin: 1.3.5
 #
 # - LuckPerms support.
 # - Vault support.
 # - PlaceHolderAPI support.
+# - DiscordSRV support.
 # ==================================================
 
 debug: false # Enable debug mode. Restart the server.
@@ -124,3 +125,21 @@ caps-filter:
   enabled: true # Enable/disable the caps filter.
   max-caps-percentage: 70 # Maximum percentage of capital letters allowed in a message.
   min-length: 4 # Minimum message length to check for caps.
+
+# ==================================================
+# DISCORD INTEGRATION
+# Discord Integration is a feature that adds DiscordSRV support for the plugin.
+# With this feature, you will be able to monitor the server from your discord channel.
+# ==================================================
+discord:
+  enabled: true
+  staff-channel-id: "YOUR_CHANNEL_ID"
+  chat-channel-id: "YOUR_CHANNEL_ID"
+  commands:
+    enabled: true
+    prefix: "!"
+    allowed-roles:
+      - "Admin"
+      - "Moderator"
+    command-log-channel: "YOUR_LOG_CHANNEL_ID"
+    command-feedback: true

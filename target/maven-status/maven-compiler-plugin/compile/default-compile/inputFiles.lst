@@ -1,3 +1,4 @@
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/DiscordManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/config/PluginConfig.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/MessageCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/listeners/DeathCoordinates.java
@@ -22,9 +23,11 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/ServerCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/nonchat.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/StaffChatCommand.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/DiscordCommandLogger.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/RollCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/WordBlocker.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/MessageFormatter.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/DiscordCommandHandler.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/IgnoreManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/utils/AutoBroadcastSender.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/listeners/DeathListener.java

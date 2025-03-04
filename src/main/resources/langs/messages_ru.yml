@@ -1,11 +1,12 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.3.4
+# Version of the plugin: 1.3.5
 #
 # - LuckPerms support.
 # - Vault support.
 # - PlaceHolderAPI support.
+# - DiscordSRV support.
 # ==================================================
 
 # System messages.
@@ -97,3 +98,16 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8Вы игнорируете игроков"
     false: "&#ff0000Вы никого не игнорируете"
+
+# Discord integration
+discord:
+  command:
+    success: "✅ Команда выполнена успешно"
+    failed: "❌ Ошибка выполнения команды"
+  log: # Embed log
+    title: "Команда выполнена"
+    executor: "Исполнитель"
+    command: "Команда"
+    status:
+      success: "✅ Успешно"
+      failed: "❌ Ошибка"

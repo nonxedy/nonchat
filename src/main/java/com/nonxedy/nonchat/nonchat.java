@@ -30,10 +30,13 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.utils.AutoBroadcastSender;
 import com.nonxedy.nonchat.utils.BroadcastMessage;
 import com.nonxedy.nonchat.utils.Debugger;
+import com.nonxedy.nonchat.utils.DiscordCommandHandler;
+import com.nonxedy.nonchat.utils.DiscordManager;
 import com.nonxedy.nonchat.utils.HoverTextUtil;
 import com.nonxedy.nonchat.utils.IgnoreManager;
 import com.nonxedy.nonchat.utils.IntegrationUtil;
 
+import github.scarsz.discordsrv.DiscordSRV;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
@@ -56,6 +59,7 @@ public class nonchat extends JavaPlugin {
     private Debugger debugger;
     private ChatBubbleListener chatBubbleListener;
     private IntegrationUtil integrationUtil;
+    private DiscordManager discordManager;
 
     // Map to store ignored players (key: player UUID, value: set of ignored player UUIDs)
     public Map<UUID, Set<UUID>> ignoredPlayers = new HashMap<>();
@@ -136,6 +140,12 @@ public class nonchat extends JavaPlugin {
         // Initialize integration utils
         IntegrationUtil.setupIntegrations();
         
+        // Initialize DiscordSRV support
+        if (getServer().getPluginManager().getPlugin("DiscordSRV") != null) {
+            this.discordManager = new DiscordManager(this);
+            DiscordSRV.api.subscribe(new DiscordCommandHandler(this, pluginMessages));
+        }
+
         // Initialize debugger if debug mode is enabled
         if (pluginConfig.isDebug()) {
             debugger = new Debugger(this);
