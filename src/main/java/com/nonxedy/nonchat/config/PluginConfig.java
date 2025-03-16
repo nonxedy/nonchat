@@ -5,17 +5,18 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.utils.BroadcastMessage;
-import com.nonxedy.nonchat.utils.CapsFilter;
-import com.nonxedy.nonchat.utils.ChatTypeUtil;
-import com.nonxedy.nonchat.utils.HoverTextUtil;
-import com.nonxedy.nonchat.utils.WordBlocker;
+import com.nonxedy.nonchat.util.BroadcastMessage;
+import com.nonxedy.nonchat.util.CapsFilter;
+import com.nonxedy.nonchat.util.ChatTypeUtil;
+import com.nonxedy.nonchat.util.HoverTextUtil;
+import com.nonxedy.nonchat.util.WordBlocker;
 
 /**
  * Central configuration manager for the NonChat plugin
@@ -39,7 +40,7 @@ public class PluginConfig {
     /**
      * Loads configuration from file or creates default
      */
-    private void loadConfig() {
+    public void loadConfig() {
         // Check if config file exists
         if (!configFile.exists()) {
             // Create default configuration if file doesn't exist
@@ -501,5 +502,49 @@ public class PluginConfig {
     // Reloads configuration from file
     public void reloadConfig() {
         loadConfig();
+    }
+
+    public String getString(String path) {
+        return config.getString(path);
+    }
+
+    public String getString(String path, String defaultValue) {
+        return config.getString(path, defaultValue);
+    }
+
+    public int getInt(String path) {
+        return config.getInt(path);
+    }
+
+    public int getInt(String path, int defaultValue) {
+        return config.getInt(path, defaultValue);
+    }
+
+    public boolean getBoolean(String path) {
+        return config.getBoolean(path);
+    }
+
+    public boolean getBoolean(String path, boolean defaultValue) {
+        return config.getBoolean(path, defaultValue);
+    }
+
+    public List<String> getStringList(String path) {
+        return config.getStringList(path);
+    }
+
+    public void set(String path, Object value) {
+        config.set(path, value);
+    }
+
+    public boolean contains(String path) {
+        return config.contains(path);
+    }
+
+    public ConfigurationSection getConfigurationSection(String path) {
+        return config.getConfigurationSection(path);
+    }
+
+    public Set<String> getKeys(boolean deep) {
+        return config.getKeys(deep);
     }
 }

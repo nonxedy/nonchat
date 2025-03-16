@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.utils.ColorUtil;
+import com.nonxedy.nonchat.util.ColorUtil;
 
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;

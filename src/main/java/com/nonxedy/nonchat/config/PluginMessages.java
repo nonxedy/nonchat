@@ -1,8 +1,8 @@
 package com.nonxedy.nonchat.config;
 
 import com.nonxedy.nonchat.nonchat;
-import com.nonxedy.nonchat.utils.LanguageManager;
-import com.nonxedy.nonchat.utils.MessageFormatter;
+import com.nonxedy.nonchat.util.LanguageManager;
+import com.nonxedy.nonchat.util.MessageFormatter;
 
 import net.kyori.adventure.text.Component;
 
@@ -20,7 +20,6 @@ public class PluginMessages {
         this.plugin = plugin;
         this.languageManager = new LanguageManager(plugin.getDataFolder());
         this.formatter = new MessageFormatter(this);
-        loadLanguage();
     }
 
     /**
