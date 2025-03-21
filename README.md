@@ -36,7 +36,6 @@
 | `/spy` | Toggle private message spy mode |
 | `/me` | Send a first-person message |
 | `/roll` | RP roll dice |
-| `/sc` | Staff chat channel |
 | `/server` | Server management commands |
 | `/nhelp` | View plugin help |
 | `/nreload` | Reload plugin configuration |
