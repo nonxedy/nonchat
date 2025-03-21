@@ -1,7 +1,7 @@
 # ==================================================
 # NONCHAT MESSAGES FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat.
-# Version of the plugin: 1.3.6
+# Version of the plugin: 1.3.7
 #
 # - LuckPerms support.
 # - Vault support.
@@ -10,7 +10,7 @@
 # ==================================================
 
 # System messages.
-no-permission: "&#ff0000You do not have permission to use this command!"
+no-permission: "&#ff0000You do not have permission!"
 player-only: "&#ff0000Only players can use this command!"
 blocked-words: "&#ff0000You are not allowed to use this word!"
 mentioned: "&#ffffffYou were mentioned in chat by &#84FFB8{player}!"
@@ -43,7 +43,6 @@ server-command: "&#FFAFFB/server&#ffffff - server information"
 message-command: "&#FFAFFB/m <player> <message>&#ffffff - sent a message to a player"
 broadcast-command: "&#FFAFFB/bc <message>&#ffffff - sent a message to all server"
 ignore-command: "&#FFAFFB/ignore <player>&#ffffff - ignore a player"
-sc-command: "&#FFAFFB/sc <message>&#ffffff - sent a message to staff"
 spy-command: "&#FFAFFB/spy&#ffffff - enable/disable spy mode"
 me-command: "&#FFAFFB/me <message>&#ffffff - sent a message from your character"
 roll-command: "&#FFAFFB/roll <maximum number>&#ffffff - roll a dice"

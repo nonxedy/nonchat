@@ -82,8 +82,6 @@ public class PluginConfig {
         // Chat formatting settings
         config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-        config.set("sc-format", "{prefix} §f{sender}§r {suffix}§7: §7{message}");
-        config.set("staff-chat-name", "[STAFFCHAT]");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
         // Broadcast system settings
@@ -138,24 +136,6 @@ public class PluginConfig {
     @NotNull
     public String getPrivateChatFormat() {
         return config.getString("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-    }
-
-    /**
-     * Gets staff chat format
-     * @return Staff chat format string
-     */
-    @NotNull
-    public String getScFormat() {
-        return config.getString("sc-format", "{prefix} §f{sender}§r {suffix}§7: §7{message}");
-    }
-
-    /**
-     * Gets staff chat name prefix
-     * @return Staff chat identifier
-     */
-    @NotNull
-    public String getStaffChatName() {
-        return config.getString("staff-chat-name", "[STAFFCHAT]");
     }
 
     /**
@@ -303,9 +283,9 @@ public class PluginConfig {
         // Return local chat if exists, otherwise create new default local chat
         return getChats().getOrDefault("local", 
             // Create new ChatTypeUtil with default local chat settings:
-            new ChatTypeUtil("local", true, 
+            new ChatTypeUtil(true, 
                 "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}", 
-                100, '\0'));
+                100, '\0', null));
     }
 
     /**
@@ -330,50 +310,30 @@ public class PluginConfig {
         saveConfig();
     }
 
-    /**
-     * Gets all configured chat types
-     * @return Map of chat configurations
-     */
-    @NotNull
     public Map<String, ChatTypeUtil> getChats() {
-        // Create new map to store chat configurations
         Map<String, ChatTypeUtil> chats = new HashMap<>();
-        // Get the 'chats' section from config
-        ConfigurationSection chatsSection = config.getConfigurationSection("chats");
+        ConfigurationSection section = config.getConfigurationSection("chats");
         
-        // If no chats section exists in config
-        if (chatsSection == null) {
-            // Create default chat configurations
-            createDefaultChats();
-            // Get the newly created chats section
-            chatsSection = config.getConfigurationSection("chats");
-        }
-
-        // Iterate through all chat types in config
-        for (String chatName : chatsSection.getKeys(false)) {
-            // Get configuration section for specific chat
-            ConfigurationSection chatSection = chatsSection.getConfigurationSection(chatName);
-            // If chat section exists
-            if (chatSection != null) {
-                // Create new ChatTypeUtil object with configuration values
-                ChatTypeUtil chatTypeUtil = new ChatTypeUtil(
-                    // Set chat name from config key
-                    chatName,
-                    // Set enabled status with default true
-                    chatSection.getBoolean("enabled", true),
-                    // Set chat format with default format
-                    chatSection.getString("format", "§7({prefix})§r {sender}§r {suffix}§7: §f{message}"),
-                    // Set chat radius with default -1 (unlimited)
-                    chatSection.getInt("radius", -1),
-                    // Set chat prefix character, default to null character if empty
-                    chatSection.getString("char", "").isEmpty() ? '\0' : chatSection.getString("char").charAt(0)
-                );
-                // Add chat type to map with chatName as key
-                chats.put(chatName, chatTypeUtil);
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                ConfigurationSection chatSection = section.getConfigurationSection(key);
+                if (chatSection != null) {
+                    boolean enabled = chatSection.getBoolean("enabled", true);
+                    String format = chatSection.getString("format", "{prefix} {sender} {suffix}: {message}");
+                    int radius = chatSection.getInt("radius", -1);
+                    String charStr = chatSection.getString("char", "");
+                    char chatChar = charStr.isEmpty() ? '\0' : charStr.charAt(0);
+                    
+                    // Permission is optional - if not specified, it will be null
+                    String permission = null;
+                    if (chatSection.contains("permission")) {
+                        permission = chatSection.getString("permission");
+                    }
+                    
+                    chats.put(key, new ChatTypeUtil(enabled, format, radius, chatChar, permission));
+                }
             }
         }
-        
-        // Return complete map of chat types
         return chats;
     }
 

@@ -20,7 +20,6 @@ import com.nonxedy.nonchat.command.impl.NreloadCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
 import com.nonxedy.nonchat.command.impl.ServerCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
-import com.nonxedy.nonchat.command.impl.StaffChatCommand;
 
 public class CommandService {
     private final nonchat plugin;
@@ -50,7 +49,6 @@ public class CommandService {
     
         // Chat management commands
         registerCommand("broadcast", new BroadcastCommand(configService.getMessages(), plugin));
-        registerCommand("sc", new StaffChatCommand(plugin, configService.getMessages(), configService.getConfig()));
         registerCommand("spy", spyCommand); // Use the existing instance
         registerCommand("clear", new ClearCommand(configService.getMessages(), plugin));
         registerCommand("ignore", ignoreCommand); // Use the existing instance

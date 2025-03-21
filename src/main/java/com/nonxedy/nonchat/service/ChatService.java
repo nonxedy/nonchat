@@ -42,12 +42,7 @@ public class ChatService implements IMessageHandler {
 
     @Override
     public void handleStaffChat(Player sender, String message) {
-        String format = config.getScFormat()
-            .replace("{sender}", sender.getName())
-            .replace("{message}", message);
-        
-        Bukkit.getOnlinePlayers().stream()
-            .filter(player -> player.hasPermission("nonchat.staffchat"))
-            .forEach(player -> player.sendMessage(ColorUtil.parseComponent(format)));
+        // Instead of using the old staff chat format, we'll use the chat manager with the staff chat prefix
+        chatManager.processChat(sender, "@" + message);
     }
 }

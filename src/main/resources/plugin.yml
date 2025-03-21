@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for 1.16-1.21.4
-version: 1.3.6
+version: 1.3.
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
@@ -54,9 +54,6 @@ permissions:
     default: false
   nonchat.ignore:
     description: Allows /ignore command
-    default: true
-  nonchat.sc:
-    description: Allows /sc command
     default: true
   nonchat.spy:
     description: Allows /spy command
@@ -111,11 +108,6 @@ commands:
     description: Ignore a player.
     usage: /ignore <player>
     permission: nonchat.ignore
-    permission-message: You do not have <permission> to use this command!
-  sc:
-    description: Staff chat.
-    usage: /sc
-    permission: nonchat.sc
     permission-message: You do not have <permission> to use this command!
   spy:
     description: Spy on a player.

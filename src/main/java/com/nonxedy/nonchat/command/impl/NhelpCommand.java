@@ -100,9 +100,6 @@ public class NhelpCommand implements CommandExecutor {
             // Add ignore command description
             .append(ColorUtil.parseComponent(messages.getString("ignore-command")))
             .append(Component.newline())
-            // Add staff chat command description
-            .append(ColorUtil.parseComponent(messages.getString("sc-command")))
-            .append(Component.newline())
             // Add spy command description
             .append(ColorUtil.parseComponent(messages.getString("spy-command")))
             .append(Component.newline())

@@ -42,32 +42,37 @@ public class ChatManager {
         if (handleBlockedWords(player, messageContent)) {
             return;
         }
-
+    
         CapsFilter capsFilter = config.getCapsFilter();
         if (capsFilter.shouldFilter(messageContent)) {
             player.sendMessage(ColorUtil.parseComponent(messages.getString("caps-filter")
                 .replace("{percentage}", String.valueOf(config.getMaxCapsPercentage()))));
             return;
         }
-
+    
         Map<String, ChatTypeUtil> chats = config.getChats();
         ChatTypeUtil chatTypeUtil = determineChat(messageContent, chats);
-
+    
         if (!chatTypeUtil.isEnabled()) {
             player.sendMessage(ColorUtil.parseComponent(messages.getString("chat-disabled")));
             return;
         }
-
+        
+        if (chatTypeUtil.hasPermission() && !player.hasPermission(chatTypeUtil.getPermission())) {
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            return;
+        }
+    
         if (config.isChatBubblesEnabled() && player.hasPermission("nonchat.chatbubbles")) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 removeBubble(player);
                 createBubble(player, messageContent);
             });
         }
-
+    
         String finalMessage = chatTypeUtil.getChatChar() != '\0' ? 
             messageContent.substring(1) : messageContent;
-
+    
         handleMentions(player, finalMessage);
         Component formattedMessage = formatMessage(player, finalMessage, chatTypeUtil);
         broadcastMessage(player, formattedMessage, chatTypeUtil);
@@ -161,11 +166,26 @@ public class ChatManager {
 
     private void broadcastMessage(Player sender, Component message, ChatTypeUtil chatTypeUtil) {
         if (chatTypeUtil.isGlobal()) {
-            Bukkit.broadcast(message);
+            if (chatTypeUtil.hasPermission()) {
+                // If permission is specified, only send to players with that permission
+                for (Player recipient : Bukkit.getOnlinePlayers()) {
+                    if (recipient.hasPermission(chatTypeUtil.getPermission())) {
+                        recipient.sendMessage(message);
+                    }
+                }
+            } else {
+                // If no permission is specified, send to everyone
+                Bukkit.broadcast(message);
+            }
         } else {
+            // For local chats
             for (Player recipient : Bukkit.getOnlinePlayers()) {
+                // Check range first
                 if (isInRange(sender, recipient, chatTypeUtil.getRadius())) {
-                    recipient.sendMessage(message);
+                    // Then check permission if specified
+                    if (!chatTypeUtil.hasPermission() || recipient.hasPermission(chatTypeUtil.getPermission())) {
+                        recipient.sendMessage(message);
+                    }
                 }
             }
         }
