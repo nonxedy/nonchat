@@ -39,7 +39,7 @@ public class ConfigService implements IConfigurable {
 
     @Override
     public void reload() {
-        plugin.reloadConfig();
+        //plugin.reloadConfig();
         config.reloadConfig();
         messages.reloadConfig();
     }

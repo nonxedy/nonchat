@@ -9,7 +9,6 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
-import com.nonxedy.nonchat.util.ColorUtil;
 
 public class ChatService implements IMessageHandler {
     private final ChatManager chatManager;
