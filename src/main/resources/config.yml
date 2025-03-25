@@ -42,7 +42,7 @@ chats:
     enabled: true
     format: "§7(§bSC§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
     radius: -1
-    char: '@'
+    char: '*'
     permission: "nonchat.chat.staff" # Permission to use and see this chat
 
 # The death config.
