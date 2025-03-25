@@ -89,9 +89,11 @@ If you enjoy nonchat, consider supporting its development:
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="assets/screenshot1.png" alt="Chat Format" width="400"/>
-  <img src="assets/screenshot2.png" alt="Hex support" width="400"/>
-  <img src="assets/screenshot3.png" alt="Chat Bubbles" width="400"/>
+  <img src="assets/screenshot1.png" alt="Auto Broadcast" width="400"/>
+  <img src="assets/screenshot2.png" alt="Word Filter" width="400"/>
+  <img src="assets/screenshot3.png" alt="Player Pings" width="400"/>
+  <img src="assets/screenshot4.png" alt="Chat Bubbles" width="400"/>
+  <img src="assets/screenshot5.png" alt="Hex Support" width="400"/>
 </div>
 
 ## 📝 License
