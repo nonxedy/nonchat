@@ -10,11 +10,11 @@ load: STARTUP
 depend:
   - LuckPerms
   - PlaceholderAPI
-  - Vault
 
 softdepend:
   - ProtocolLib
   - DiscordSRV
+  - Vault
 
 permissions:
   nonchat.*:
