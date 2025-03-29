@@ -196,4 +196,10 @@ public class nonchat extends JavaPlugin {
             debugger.log("Error: " + error);
         }
     }
+
+    public void logPlaceholder(String placeholder, String result) {
+        if (debugger != null) {
+            debugger.log("Placeholder: " + placeholder + " -> " + result);
+        }
+    }
 }

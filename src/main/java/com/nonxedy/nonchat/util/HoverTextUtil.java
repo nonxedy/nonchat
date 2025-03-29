@@ -45,12 +45,6 @@ public class HoverTextUtil {
             .hoverEvent(HoverEvent.showText(ColorUtil.parseComponent(hoverText)));
     }
 
-    /**
-     * Processes a single line of hover text, replacing placeholders
-     * @param text The text template to process
-     * @param player The player to get information from
-     * @return Processed text with all placeholders replaced
-     */
     private String processLine(String text, Player player) {
         if (text == null) return "";
         
@@ -66,9 +60,15 @@ public class HoverTextUtil {
             .replace("{balance}", balance != null ? balance : "0");
     
         if (usePlaceholderAPI) {
-            processed = PlaceholderAPI.setPlaceholders(player, processed);
+            try {
+                processed = PlaceholderAPI.setPlaceholders(player, processed);
+            } catch (Exception e) {
+                // Log the error but don't crash
+                Bukkit.getLogger().warning("[nonchat] Error processing placeholder: " + e.getMessage());
+            }
         }
     
         return ColorUtil.parseColor(processed);
     }
+    
 }

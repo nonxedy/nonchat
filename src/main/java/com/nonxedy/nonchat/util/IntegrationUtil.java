@@ -83,4 +83,22 @@ public class IntegrationUtil {
         }
         return "0h";
     }
+
+    /**
+    * Process any placeholder using PlaceholderAPI
+    * @param player The player to process placeholders for
+    * @param text The text containing placeholders
+    * @return Processed text with placeholders replaced or original if PlaceholderAPI not available
+    */
+    public static String processPlaceholders(Player player, String text) {
+        if (placeholderAPIEnabled && player != null && text != null) {
+            try {
+                return PlaceholderAPI.setPlaceholders(player, text);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[nonchat] Error processing placeholder: " + e.getMessage());
+                return text;
+            }
+        }
+        return text;
+    }
 }

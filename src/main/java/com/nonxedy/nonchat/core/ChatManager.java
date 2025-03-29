@@ -20,6 +20,7 @@ import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.WordBlocker;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
@@ -143,11 +144,22 @@ public class ChatManager {
         User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
         String prefix = user.getCachedData().getMetaData().getPrefix();
         String suffix = user.getCachedData().getMetaData().getSuffix();
-        
+    
         prefix = prefix == null ? "" : ColorUtil.parseColor(prefix);
         suffix = suffix == null ? "" : ColorUtil.parseColor(suffix);
 
-        String baseFormat = chatTypeUtil.getFormat()
+        // Process the message format with PlaceholderAPI first
+        String baseFormat = chatTypeUtil.getFormat();
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
+            } catch (Exception e) {
+                // Log but continue with original format
+                Bukkit.getLogger().warning("[nonchat] Error processing format placeholders: " + e.getMessage());
+            }
+        }
+    
+        baseFormat = baseFormat
             .replace("{prefix}", prefix)
             .replace("{suffix}", suffix)
             .replace("{message}", ColorUtil.parseColor(message));
