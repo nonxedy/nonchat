@@ -11,6 +11,7 @@ import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
 import com.nonxedy.nonchat.listeners.ChatListener;
+import com.nonxedy.nonchat.listeners.ChatListenerFactory;
 import com.nonxedy.nonchat.listeners.DeathCoordinates;
 import com.nonxedy.nonchat.listeners.DeathListener;
 import com.nonxedy.nonchat.placeholders.NonchatExpansion;
@@ -19,6 +20,7 @@ import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.Debugger;
 import com.nonxedy.nonchat.util.DiscordCommandHandler;
+import com.nonxedy.nonchat.util.UpdateChecker;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import net.kyori.adventure.text.Component;
@@ -80,8 +82,8 @@ public class nonchat extends JavaPlugin {
 
     private void registerListeners() {
         // Create and register chat listener
-        this.chatListener = new ChatListener(chatManager, chatService);
-        Bukkit.getPluginManager().registerEvents(chatListener, this);
+        this.chatListener = ChatListenerFactory.createChatListener(chatManager, chatService);
+        getServer().getPluginManager().registerEvents(chatListener, this);
         
         // Register death-related listeners
         Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
@@ -102,6 +104,14 @@ public class nonchat extends JavaPlugin {
     private void setupIntegrations() {
         if (getServer().getPluginManager().getPlugin("DiscordSRV") != null) {
             DiscordSRV.api.subscribe(new DiscordCommandHandler(this, configService.getMessages()));
+        }
+
+        if (configService.getConfig().isUpdateCheckerEnabled()) {
+            getLogger().info("Initializing update checker...");
+            new UpdateChecker(this);
+            if (debugger != null) {
+                debugger.log("Update checker initialized");
+            }
         }
     }
 

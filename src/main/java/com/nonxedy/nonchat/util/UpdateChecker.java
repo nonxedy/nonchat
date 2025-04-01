@@ -1,6 +1,7 @@
 package com.nonxedy.nonchat.util;
 
 import com.google.gson.JsonParser;
+import com.nonxedy.nonchat.nonchat;
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -36,10 +37,19 @@ public class UpdateChecker implements Listener {
         this.plugin = plugin;
         this.currentVersion = plugin.getDescription().getVersion();
         
+        if (plugin instanceof nonchat) {
+            nonchat nonchatPlugin = (nonchat) plugin;
+            if (!nonchatPlugin.getConfigService().getConfig().isUpdateCheckerEnabled()) {
+                plugin.getLogger().info("Update checker is disabled in config");
+                return;
+            }
+        }
+
         // Register this as an event listener
         Bukkit.getPluginManager().registerEvents(this, plugin);
         
         // Run initial update check
+        plugin.getLogger().info("Initializing update checker for nonchat version " + currentVersion);
         checkForUpdates().thenAccept(hasUpdate -> {
             if (hasUpdate) {
                 plugin.getLogger().info("New version available: " + latestVersion);
@@ -53,11 +63,6 @@ public class UpdateChecker implements Listener {
         });
     }
 
-    /**
-     * Performs an asynchronous check for plugin updates
-     * Compares current version with latest version from Modrinth
-     * @return CompletableFuture<Boolean> that completes with true if update is available
-     */
     public CompletableFuture<Boolean> checkForUpdates() {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         
@@ -70,20 +75,30 @@ public class UpdateChecker implements Listener {
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 
+                // Log connection attempt
+                plugin.getLogger().info("Checking for updates from: " + MODRINTH_API);
+                
                 // Parse JSON response to get latest version info
                 JsonObject latestVersion = JsonParser.parseReader(
                     new InputStreamReader(connection.getInputStream())
                 ).getAsJsonArray().get(0).getAsJsonObject();
-
+    
                 // Extract version information
                 this.latestVersion = latestVersion.get("version_number").getAsString();
                 this.downloadUrl = "https://modrinth.com/plugin/nonchat/version/" + this.latestVersion;
-
+    
+                // Log received version info
+                plugin.getLogger().info("Current version: " + currentVersion);
+                plugin.getLogger().info("Latest version: " + this.latestVersion);
+    
                 // Compare versions and update status
                 this.updateAvailable = !currentVersion.equals(this.latestVersion);
+                plugin.getLogger().info("Update available: " + this.updateAvailable);
+                
                 future.complete(this.updateAvailable);
             } catch (Exception e) {
                 plugin.getLogger().warning("Failed to check for updates: " + e.getMessage());
+                e.printStackTrace();
                 future.complete(false);
             }
         });
@@ -106,14 +121,11 @@ public class UpdateChecker implements Listener {
         });
     }
     
-    /**
-     * Checks if a player has permission to see update notifications
-     * @param player The player to check
-     * @return true if player has permission
-     */
     private boolean hasUpdatePermission(Player player) {
-        return player.hasPermission("nonchat.admin") || 
-               player.isOp();
+        boolean hasPermission = player.hasPermission("nonchat.*") || 
+                               player.isOp();
+        
+        return hasPermission;
     }
     
     /**
@@ -121,36 +133,35 @@ public class UpdateChecker implements Listener {
      * @param player The player to notify
      */
     private void sendUpdateNotification(Player player) {
-        String message = ColorUtil.parseColor("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + latestVersion + 
-                        "\n&#FFAFFB[nonchat] &#ffffffDownload: &#FFAFFB" + downloadUrl);
-        player.sendMessage(message);
+        try {
+            player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + latestVersion));
+            player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffffDownload: &#FFAFFB" + downloadUrl));
+            
+            plugin.getLogger().info("Sent update notification to admin: " + player.getName());
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to send update notification to " + player.getName() + ": " + e.getMessage());
+        }
     }
     
-    /**
-    * Listens for player join events to notify admins about updates
-    * @param event The player join event
-    */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-    
-        // If no update is available or update check hasn't completed yet, run a new check
-        if (!updateAvailable && latestVersion == null) {
-            checkForUpdates().thenAccept(hasUpdate -> {
-                if (hasUpdate && hasUpdatePermission(player)) {
-                    // Delay the message slightly to ensure it's seen after join messages
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                        sendUpdateNotification(player);
-                    }, 20L); // 1 second delay
-                }
-            });
-        } 
-        // If we already know an update is available, notify the player
-        else if (updateAvailable && hasUpdatePermission(player)) {
-            // Delay the message slightly to ensure it's seen after join messages
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                sendUpdateNotification(player);
-            }, 20L); // 1 second delay
+        
+        if (hasUpdatePermission(player)) {
+            if (updateAvailable) {
+                // Delay the message slightly to ensure it's seen after join messages
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    sendUpdateNotification(player);
+                }, 40L); // 2 second delay for better visibility
+            } else if (latestVersion == null) {
+                checkForUpdates().thenAccept(hasUpdate -> {
+                    if (hasUpdate) {
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                            sendUpdateNotification(player);
+                        }, 40L);
+                    }
+                });
+            }
         }
     }
 }

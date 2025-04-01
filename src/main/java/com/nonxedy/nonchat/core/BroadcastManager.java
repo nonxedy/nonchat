@@ -52,8 +52,15 @@ public class BroadcastManager {
     }
 
     public void broadcast(CommandSender sender, String message) {
-        Component formatted = ColorUtil.parseComponent(message);
-        Bukkit.broadcast(formatted);
+        try {
+            // Try to use Adventure API first
+            Component formatted = ColorUtil.parseComponent(message);
+            Bukkit.broadcast(formatted);
+        } catch (NoSuchMethodError e) {
+            // Fall back to traditional Bukkit broadcast if Adventure API is not available
+            String legacyMessage = ColorUtil.parseColor(message);
+            Bukkit.broadcastMessage(legacyMessage);
+        }
     }
 
     private void scheduleRegularBroadcast(String key, BroadcastMessage message) {
