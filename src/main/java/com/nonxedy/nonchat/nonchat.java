@@ -49,9 +49,7 @@ public class nonchat extends JavaPlugin {
         registerListeners();
         setupIntegrations();
 
-        Bukkit.getConsoleSender().sendMessage(Component.text()
-            .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
-            .append(Component.text("plugin enabled", TextColor.fromHexString("#52FFA6"))));
+        Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
     }
 
     private void initializeServices() {

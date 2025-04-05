@@ -1,6 +1,7 @@
 package com.nonxedy.nonchat.core;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +31,7 @@ public class ChatManager {
     private final PluginConfig config;
     private final PluginMessages messages;
     private final Pattern mentionPattern = Pattern.compile("@(\\w+)");
-    private final Map<Player, ArmorStand> bubbles = new HashMap<>();
+    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
 
     public ChatManager(Plugin plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
@@ -81,12 +82,13 @@ public class ChatManager {
 
     private void startBubbleUpdater() {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            for (Map.Entry<Player, ArmorStand> entry : bubbles.entrySet()) {
+            for (Map.Entry<Player, List<ArmorStand>> entry : bubbles.entrySet()) {
                 Player player = entry.getKey();
-                ArmorStand bubble = entry.getValue();
-                if (player.isOnline() && !bubble.isDead()) {
+                List<ArmorStand> playerBubbles = entry.getValue();
+                
+                if (player.isOnline() && !playerBubbles.isEmpty()) {
                     Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                    BubblePacketUtil.updateBubbleLocation(bubble, newLoc);
+                    BubblePacketUtil.updateBubblesLocation(playerBubbles, newLoc);
                 }
             }
         }, 1L, 1L);
@@ -94,8 +96,9 @@ public class ChatManager {
 
     private void createBubble(Player player, String message) {
         Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-        ArmorStand bubble = BubblePacketUtil.spawnBubble(player, message, loc);
-        bubbles.put(player, bubble);
+        
+        List<ArmorStand> playerBubbles = BubblePacketUtil.spawnMultilineBubble(player, message, loc);
+        bubbles.put(player, playerBubbles);
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             removeBubble(player);
@@ -103,9 +106,9 @@ public class ChatManager {
     }
 
     private void removeBubble(Player player) {
-        ArmorStand bubble = bubbles.remove(player);
-        if (bubble != null) {
-            BubblePacketUtil.removeBubble(bubble);
+        List<ArmorStand> playerBubbles = bubbles.remove(player);
+        if (playerBubbles != null) {
+            BubblePacketUtil.removeBubbles(playerBubbles);
         }
     }
 
