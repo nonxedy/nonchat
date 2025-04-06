@@ -65,15 +65,15 @@ public class ChatManager {
             return;
         }
     
+        String finalMessage = chatTypeUtil.getChatChar() != '\0' ? 
+            messageContent.substring(1) : messageContent;
+    
         if (config.isChatBubblesEnabled() && player.hasPermission("nonchat.chatbubbles")) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 removeBubble(player);
-                createBubble(player, messageContent);
+                createBubble(player, finalMessage);
             });
         }
-    
-        String finalMessage = chatTypeUtil.getChatChar() != '\0' ? 
-            messageContent.substring(1) : messageContent;
     
         handleMentions(player, finalMessage);
         Component formattedMessage = formatMessage(player, finalMessage, chatTypeUtil);
