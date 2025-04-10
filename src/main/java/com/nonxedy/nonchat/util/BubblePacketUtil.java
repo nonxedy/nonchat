@@ -1,16 +1,16 @@
 package com.nonxedy.nonchat.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import net.kyori.adventure.text.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Manages chat bubble display using armor stands
@@ -80,15 +80,23 @@ public class BubblePacketUtil {
      */
     private static List<String> splitTextIntoLines(String text, int maxLength) {
         List<String> lines = new ArrayList<>();
-        
+
+        Pattern colorPattern = Pattern.compile("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}");
         String currentColor = "";
-        Pattern colorPattern = Pattern.compile("§[0-9a-fk-or]|#[0-9a-fA-F]{6}");
         
-        String[] words = text.split(" ");
+        String processedText = ColorUtil.parseColor(text);
+
+        String[] words = processedText.split(" ");
         StringBuilder currentLine = new StringBuilder();
-        
+
         for (String word : words) {
-            if (currentLine.length() + word.length() + 1 <= maxLength) {
+            String wordWithoutColors = word.replaceAll("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}", "");
+            int visibleLength = wordWithoutColors.length();
+
+            String lineWithoutColors = currentLine.toString().replaceAll("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}", "");
+            int currentVisibleLength = lineWithoutColors.length();
+
+            if (currentVisibleLength + visibleLength + (currentVisibleLength > 0 ? 1 : 0) <= maxLength) {
                 if (currentLine.length() > 0) {
                     currentLine.append(" ");
                 }
@@ -96,38 +104,94 @@ public class BubblePacketUtil {
             } else {
                 if (currentLine.length() > 0) {
                     lines.add(currentLine.toString());
-                    
+
                     Matcher matcher = colorPattern.matcher(currentLine.toString());
+                    currentColor = "";
                     while (matcher.find()) {
                         currentColor = matcher.group();
                     }
-                    
+
                     currentLine = new StringBuilder(currentColor);
                 }
-                
-                if (word.length() > maxLength) {
-                    int startIndex = 0;
-                    while (startIndex < word.length()) {
-                        int endIndex = Math.min(startIndex + maxLength, word.length());
-                        String part = word.substring(startIndex, endIndex);
-                        lines.add(currentColor + part);
-                        startIndex = endIndex;
+
+                if (visibleLength > maxLength) {
+                    StringBuilder remainingWord = new StringBuilder(word);
+
+                    while (remainingWord.length() > 0) {
+                        StringBuilder colorCodes = new StringBuilder();
+                        int i = 0;
+                        while (i < remainingWord.length()) {
+                            if (remainingWord.charAt(i) == '§' && i + 1 < remainingWord.length()) {
+                                colorCodes.append(remainingWord.charAt(i)).append(remainingWord.charAt(i + 1));
+                                i += 2;
+                            } else if (i + 2 < remainingWord.length() && 
+                                      remainingWord.charAt(i) == '&' && 
+                                      remainingWord.charAt(i+1) == '#') {
+                                int endIndex = Math.min(i + 8, remainingWord.length());
+                                colorCodes.append(remainingWord.substring(i, endIndex));
+                                i = endIndex;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (i > 0) {
+                            remainingWord.delete(0, i);
+                        }
+
+                        String visiblePart = remainingWord.toString().replaceAll("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}", "");
+                        int charsToTake = Math.min(visiblePart.length(), maxLength);
+
+                        StringBuilder linePart = new StringBuilder(currentColor).append(colorCodes);
+                        int charsTaken = 0;
+                        i = 0;
+
+                        while (i < remainingWord.length() && charsTaken < charsToTake) {
+                            if (remainingWord.charAt(i) == '§' && i + 1 < remainingWord.length()) {
+                                linePart.append(remainingWord.charAt(i)).append(remainingWord.charAt(i + 1));
+                                i += 2;
+                            } else if (i + 2 < remainingWord.length() && 
+                                      remainingWord.charAt(i) == '&' && 
+                                      remainingWord.charAt(i+1) == '#') {
+                                int endIndex = Math.min(i + 8, remainingWord.length());
+                                linePart.append(remainingWord.substring(i, endIndex));
+                                i = endIndex;
+                            } else {
+                                linePart.append(remainingWord.charAt(i));
+                                i++;
+                                charsTaken++;
+                            }
+                        }
+
+                        lines.add(linePart.toString());
+
+                        Matcher matcher = colorPattern.matcher(linePart.toString());
+                        while (matcher.find()) {
+                            currentColor = matcher.group();
+                        }
+
+                        remainingWord.delete(0, i);
+
+                        if (remainingWord.length() > 0) {
+                            remainingWord.insert(0, currentColor);
+                        }
                     }
+
                     currentLine = new StringBuilder();
                 } else {
                     currentLine.append(word);
                 }
             }
         }
-        
+    
         if (currentLine.length() > 0) {
             lines.add(currentLine.toString());
         }
-        
+
         if (lines.isEmpty()) {
             lines.add(text);
         }
-        
+
         return lines;
     }
     
