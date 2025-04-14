@@ -135,7 +135,8 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
      */
     private void removeIgnore(Player player, Player target) {
         ignoredPlayers.get(player.getUniqueId()).remove(target.getUniqueId());
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("unignored-player").replace("{player}", target.getName())));
+        player.sendMessage(ColorUtil.parseComponent(messages.getString("unignored-player")
+                            .replace("{player}", target.getName())));
         plugin.logResponse("Player unignored successfully");
     }
 
@@ -147,8 +148,10 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
     private void addIgnore(Player player, Player target) {
         ignoredPlayers.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>())
             .add(target.getUniqueId());
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-player").replace("{player}", target.getName())));
-        target.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target").replace("{player}", player.getName())));
+        player.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-player")
+                            .replace("{player}", target.getName())));
+        target.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")
+                            .replace("{player}", player.getName())));
         plugin.logResponse("Player ignored successfully");
     }
 

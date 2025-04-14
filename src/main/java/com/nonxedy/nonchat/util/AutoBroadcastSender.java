@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 
 /**
@@ -17,19 +17,14 @@ import com.nonxedy.nonchat.config.PluginConfig;
  * Handles scheduling, sending, and managing broadcast messages
  */
 public class AutoBroadcastSender {
-    // Plugin instance reference
-    private final Plugin plugin;
-    // Configuration instance reference
+    private final nonchat plugin;
     private final PluginConfig config;
-    // Map to store active broadcast tasks with their identifiers
     private final Map<String, BukkitTask> activeTasks;
-    // List to store messages for random broadcasting
     private final List<BroadcastMessage> randomMessagePool;
-    // Task for random broadcast scheduling
     private BukkitTask randomBroadcastTask;
 
     // Constructor initializes the sender with plugin and config references
-    public AutoBroadcastSender(Plugin plugin, PluginConfig config) {
+    public AutoBroadcastSender(nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.activeTasks = new HashMap<>();
@@ -106,7 +101,7 @@ public class AutoBroadcastSender {
      */
     private void broadcastMessage(String message) {
         // Convert color codes and send message to server
-        Bukkit.getServer().sendMessage(ColorUtil.parseComponent(message));
+        plugin.getServer().sendMessage(ColorUtil.parseComponent(message));
     }
 
     // Stops all broadcast tasks and clears message pools

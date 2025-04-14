@@ -8,24 +8,21 @@ import java.util.logging.Level;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
+
+import com.nonxedy.nonchat.nonchat;
 
 /**
  * Handles debug logging in YAML format with timestamps
  * Provides functionality to log, clear, and manage debug entries
  */
 public class Debugger {
-    // Store reference to the plugin instance
-    private final Plugin plugin;
-    // File object for the debug.yml file
+    private final nonchat plugin;
     private final File logFile;
-    // Configuration object to manage YAML content
     private FileConfiguration debugConfig;
-    // Define timestamp format for debug entries
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // Constructor initializes debugger with plugin reference
-    public Debugger(Plugin plugin) {
+    public Debugger(nonchat plugin) {
         this.plugin = plugin;
         // Set debug file path in plugin's data folder
         this.logFile = new File(plugin.getDataFolder(), "debug.yml");

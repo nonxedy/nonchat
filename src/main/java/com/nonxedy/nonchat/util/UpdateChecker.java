@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -22,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class UpdateChecker implements Listener {
 
     // Initialize class variables
-    private final JavaPlugin plugin;
+    private final nonchat plugin;
     private final String currentVersion;
     /** Modrinth API endpoint for version checking */
     private static final String MODRINTH_API = "https://api.modrinth.com/v2/project/nonchat/version";
@@ -33,14 +32,14 @@ public class UpdateChecker implements Listener {
     private boolean updateAvailable = false;
 
     // Constructor to initialize class variables
-    public UpdateChecker(JavaPlugin plugin) {
+    public UpdateChecker(nonchat plugin) {
         this.plugin = plugin;
         this.currentVersion = plugin.getDescription().getVersion();
         
         if (plugin instanceof nonchat) {
             nonchat nonchatPlugin = (nonchat) plugin;
             if (!nonchatPlugin.getConfigService().getConfig().isUpdateCheckerEnabled()) {
-                plugin.getLogger().info("Update checker is disabled in config");
+                plugin.logResponse("Update checker is disabled in config");
                 return;
             }
         }
@@ -49,16 +48,16 @@ public class UpdateChecker implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         
         // Run initial update check
-        plugin.getLogger().info("Initializing update checker for nonchat version " + currentVersion);
+        plugin.logResponse("Initializing update checker for nonchat version " + currentVersion);
         checkForUpdates().thenAccept(hasUpdate -> {
             if (hasUpdate) {
-                plugin.getLogger().info("New version available: " + latestVersion);
-                plugin.getLogger().info("Download: " + downloadUrl);
+                plugin.logResponse("New version available: " + latestVersion);
+                plugin.logResponse("Download: " + downloadUrl);
                 
                 // Notify online admins
                 notifyOnlinePlayers();
             } else {
-                plugin.getLogger().info("You are using the latest version of nonchat!");
+                plugin.logResponse("You are using the latest version of nonchat!");
             }
         });
     }
@@ -76,7 +75,7 @@ public class UpdateChecker implements Listener {
                 connection.setReadTimeout(5000);
                 
                 // Log connection attempt
-                plugin.getLogger().info("Checking for updates from: " + MODRINTH_API);
+                plugin.logResponse("Checking for updates from: " + MODRINTH_API);
                 
                 // Parse JSON response to get latest version info
                 JsonObject latestVersion = JsonParser.parseReader(
@@ -88,16 +87,16 @@ public class UpdateChecker implements Listener {
                 this.downloadUrl = "https://modrinth.com/plugin/nonchat/version/" + this.latestVersion;
     
                 // Log received version info
-                plugin.getLogger().info("Current version: " + currentVersion);
-                plugin.getLogger().info("Latest version: " + this.latestVersion);
+                plugin.logResponse("Current version: " + currentVersion);
+                plugin.logResponse("Latest version: " + this.latestVersion);
     
                 // Compare versions and update status
                 this.updateAvailable = !currentVersion.equals(this.latestVersion);
-                plugin.getLogger().info("Update available: " + this.updateAvailable);
+                plugin.logResponse("Update available: " + this.updateAvailable);
                 
                 future.complete(this.updateAvailable);
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to check for updates: " + e.getMessage());
+                plugin.logError("Failed to check for updates: " + e.getMessage());
                 e.printStackTrace();
                 future.complete(false);
             }
@@ -137,9 +136,9 @@ public class UpdateChecker implements Listener {
             player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + latestVersion));
             player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffffDownload: &#FFAFFB" + downloadUrl));
             
-            plugin.getLogger().info("Sent update notification to admin: " + player.getName());
+            plugin.logResponse("Sent update notification to admin: " + player.getName());
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to send update notification to " + player.getName() + ": " + e.getMessage());
+            plugin.logError("Failed to send update notification to " + player.getName() + ": " + e.getMessage());
         }
     }
     

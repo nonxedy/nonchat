@@ -70,21 +70,21 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Verify if the command is a valid message command alias
         if (!isMessageCommand(command.getName())) {
-            logError("Invalid command: " + command.getName());
+            plugin.logError("Invalid command: " + command.getName());
             return false;
         }
 
         // Check if sender has permission to use private messaging
         if (!sender.hasPermission("nonchat.message")) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
-            logError("Player " + sender.getName() + " tried to use the message command without permission.");
+            plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             return true;
         }
 
         // Validate command arguments (need at least target player and message)
         if (args.length < 2) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-message")));
-            logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
+            plugin.logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
             return true;
         }
 
@@ -92,14 +92,14 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
-            logError("Player " + sender.getName() + " tried to message a player that is not online.");
+            plugin.logError("Player " + sender.getName() + " tried to message a player that is not online.");
             return true;
         }
 
         // Check if target player has ignored the sender
         if (isIgnored(sender, target)) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
-            logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
+            plugin.logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
             return true;
         }
 
@@ -184,7 +184,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
                 .replace("{message}", message)
         );
         sender.sendMessage(senderMessage);
-        logResponse("Message sent to " + sender.getName());
+        plugin.logResponse("Message sent to " + sender.getName());
     
         // Create and send formatted message to target
         Component targetMessage = ColorUtil.parseComponent(
@@ -193,12 +193,12 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
                 .replace("{message}", message)
         );
         target.sendMessage(targetMessage);
-        logResponse("Message sent to " + target.getName());
+        plugin.logResponse("Message sent to " + target.getName());
     
         // Notify spy players if spy system is enabled and sender is a player
         if (spyCommand != null && sender instanceof Player) {
             spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message));
-            logResponse("Message sent to spy players");
+            plugin.logResponse("Message sent to spy players");
         }
     }
 
@@ -235,18 +235,5 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         }
     
         return Collections.emptyList();
-    }
-    
-    // Logging methods with null checks
-    private void logResponse(String message) {
-        if (plugin != null) {
-            plugin.logResponse(message);
-        }
-    }
-    
-    private void logError(String message) {
-        if (plugin != null) {
-            plugin.logError(message);
-        }
     }
 }

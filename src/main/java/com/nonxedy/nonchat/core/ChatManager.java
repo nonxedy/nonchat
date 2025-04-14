@@ -11,8 +11,8 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
+import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.BubblePacketUtil;
@@ -27,13 +27,13 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
 public class ChatManager {
-    private final Plugin plugin;
+    private final nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
     private final Pattern mentionPattern = Pattern.compile("@(\\w+)");
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
 
-    public ChatManager(Plugin plugin, PluginConfig config, PluginMessages messages) {
+    public ChatManager(nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
@@ -158,7 +158,7 @@ public class ChatManager {
                 baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
             } catch (Exception e) {
                 // Log but continue with original format
-                Bukkit.getLogger().warning("[nonchat] Error processing format placeholders: " + e.getMessage());
+                plugin.logError("Error processing format placeholders: " + e.getMessage());
             }
         }
     

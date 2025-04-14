@@ -17,10 +17,7 @@ import net.kyori.adventure.text.Component;
  * Handles creation, removal and updating of floating text displays
  */
 public class BubblePacketUtil {
-    
-    // Максимальная длина строки в символах
     private static final int MAX_LINE_LENGTH = 40;
-    // Вертикальное расстояние между строками
     private static final double LINE_SPACING = 0.25;
     
     /**

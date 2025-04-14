@@ -8,9 +8,9 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.BroadcastMessage;
 import com.nonxedy.nonchat.util.ColorUtil;
@@ -18,13 +18,13 @@ import com.nonxedy.nonchat.util.ColorUtil;
 import net.kyori.adventure.text.Component;
 
 public class BroadcastManager {
-    private final Plugin plugin;
+    private final nonchat plugin;
     private final PluginConfig config;
     private final Map<String, BukkitTask> activeTasks;
     private final List<BroadcastMessage> randomMessagePool;
     private BukkitTask randomBroadcastTask;
 
-    public BroadcastManager(Plugin plugin, PluginConfig config) {
+    public BroadcastManager(nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.activeTasks = new HashMap<>();
@@ -58,6 +58,7 @@ public class BroadcastManager {
             Bukkit.broadcast(formatted);
         } catch (NoSuchMethodError e) {
             // Fall back to traditional Bukkit broadcast if Adventure API is not available
+            plugin.logError("Adventure API isn't avaible: " + e.getMessage());
             String legacyMessage = ColorUtil.parseColor(message);
             Bukkit.broadcastMessage(legacyMessage);
         }
