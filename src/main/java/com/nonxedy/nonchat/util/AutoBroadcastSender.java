@@ -7,10 +7,13 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
+
+import net.kyori.adventure.text.Component;
 
 /**
  * Manages automated broadcast system with support for regular and random broadcasts
@@ -100,8 +103,16 @@ public class AutoBroadcastSender {
      * @param message The message to broadcast
      */
     private void broadcastMessage(String message) {
-        // Convert color codes and send message to server
-        plugin.getServer().sendMessage(ColorUtil.parseComponent(message));
+        // Use LinkDetector to make links clickable
+        Component clickableMessage = LinkDetector.makeLinksClickable(message);
+    
+        // Send to all players
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(clickableMessage);
+        }
+    
+        // Log to console
+        plugin.getLogger().info(ColorUtil.parseColor(message));
     }
 
     // Stops all broadcast tasks and clears message pools

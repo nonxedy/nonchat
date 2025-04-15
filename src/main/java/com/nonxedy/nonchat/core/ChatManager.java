@@ -19,6 +19,7 @@ import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.CapsFilter;
 import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.LinkDetector;
 import com.nonxedy.nonchat.util.WordBlocker;
 
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -147,33 +148,40 @@ public class ChatManager {
         User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
         String prefix = user.getCachedData().getMetaData().getPrefix();
         String suffix = user.getCachedData().getMetaData().getSuffix();
-    
+
         prefix = prefix == null ? "" : ColorUtil.parseColor(prefix);
         suffix = suffix == null ? "" : ColorUtil.parseColor(suffix);
 
-        // Process the message format with PlaceholderAPI first
         String baseFormat = chatTypeUtil.getFormat();
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
                 baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
             } catch (Exception e) {
-                // Log but continue with original format
                 plugin.logError("Error processing format placeholders: " + e.getMessage());
             }
         }
-    
+
         baseFormat = baseFormat
             .replace("{prefix}", prefix)
-            .replace("{suffix}", suffix)
-            .replace("{message}", ColorUtil.parseColor(message));
+            .replace("{suffix}", suffix);
 
-        String[] parts = baseFormat.split("\\{sender\\}");
+        String[] formatParts = baseFormat.split("\\{message\\}");
+        String beforeMessage = formatParts[0];
+        String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
 
-        Component finalMessage = ColorUtil.parseComponent(parts[0])
+        String[] beforeParts = beforeMessage.split("\\{sender\\}");
+    
+        Component finalMessage = ColorUtil.parseComponent(beforeParts[0])
             .append(config.getHoverTextUtil().createHoverablePlayerName(player, player.getName()));
 
-        if (parts.length > 1) {
-            finalMessage = finalMessage.append(ColorUtil.parseComponent(parts[1]));
+        if (beforeParts.length > 1) {
+            finalMessage = finalMessage.append(ColorUtil.parseComponent(beforeParts[1]));
+        }
+    
+        finalMessage = finalMessage.append(LinkDetector.makeLinksClickable(message));
+    
+        if (!afterMessage.isEmpty()) {
+            finalMessage = finalMessage.append(ColorUtil.parseComponent(afterMessage));
         }
 
         return finalMessage;

@@ -2,6 +2,9 @@ package com.nonxedy.nonchat.util;
 
 import com.google.gson.JsonParser;
 import com.nonxedy.nonchat.nonchat;
+
+import net.kyori.adventure.text.Component;
+
 import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -134,13 +137,20 @@ public class UpdateChecker implements Listener {
     private void sendUpdateNotification(Player player) {
         try {
             player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffff A new version is available: &#FFAFFB" + latestVersion));
-            player.sendMessage(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffffDownload: &#FFAFFB" + downloadUrl));
+        
+            Component downloadMessage = Component.text()
+                .append(ColorUtil.parseComponent("&#FFAFFB[nonchat] &#ffffffDownload: "))
+                .append(LinkDetector.makeLinksClickable(downloadUrl))
+                .build();
+        
+            player.sendMessage(downloadMessage);
             
             plugin.logResponse("Sent update notification to admin: " + player.getName());
         } catch (Exception e) {
             plugin.logError("Failed to send update notification to " + player.getName() + ": " + e.getMessage());
         }
     }
+
     
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
