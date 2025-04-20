@@ -13,7 +13,6 @@ depend:
 
 softdepend:
   - ProtocolLib
-  - DiscordSRV
   - Vault
 
 permissions:
@@ -34,6 +33,8 @@ permissions:
       - nonchat.chatbubbles
       - nonchat.me
       - nonchat.roll
+      - nonchat.command.channel
+      - nonchat.bypass.cooldown
   nonchat.message:
     description: Allows /message command
     default: true
@@ -70,6 +71,24 @@ permissions:
   nonchat.roll:
     description: Allows to use /roll command
     default: true
+  nonchat.command.channel:
+    description: Allows access to channel commands
+    default: true
+  nonchat.admin.channel.create:
+    description: Allows creating new channels
+    default: op
+  nonchat.admin.channel.edit:
+    description: Allows editing existing channels
+    default: op
+  nonchat.admin.channel.delete:
+    description: Allows deleting channels
+    default: op
+  nonchat.admin.channel.default:
+    description: Allows setting the default channel
+    default: op
+  nonchat.bypass.cooldown:
+    description: Bypass chat channel cooldowns
+    default: op
 
 commands:
   message:
@@ -123,4 +142,10 @@ commands:
     description: Roll a dice.
     usage: /roll <max number>
     permission: nonchat.roll
+    permission-message: You do not have <permission> to use this command!
+  channel:
+    description: Manage chat channels.
+    aliases: [ch]
+    usage: /channel <set|list|info|create|edit|delete|default> [args]
+    permission: nonchat.command.channel
     permission-message: You do not have <permission> to use this command!

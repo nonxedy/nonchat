@@ -18,11 +18,9 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.command.impl.ChannelCommand;
 import com.nonxedy.nonchat.util.Debugger;
-import com.nonxedy.nonchat.util.DiscordCommandHandler;
 import com.nonxedy.nonchat.util.UpdateChecker;
-
-import github.scarsz.discordsrv.DiscordSRV;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
@@ -100,9 +98,10 @@ public class nonchat extends JavaPlugin {
     }
 
     private void setupIntegrations() {
-        if (getServer().getPluginManager().getPlugin("DiscordSRV") != null) {
-            DiscordSRV.api.subscribe(new DiscordCommandHandler(this, configService.getMessages()));
-        }
+        // Register channel command
+        ChannelCommand channelCommand = new ChannelCommand(this, chatManager, configService.getMessages());
+        getCommand("channel").setExecutor(channelCommand);
+        getCommand("channel").setTabCompleter(channelCommand);
 
         if (configService.getConfig().isUpdateCheckerEnabled()) {
             getLogger().info("Initializing update checker...");
@@ -160,9 +159,13 @@ public class nonchat extends JavaPlugin {
             broadcastManager.reload();
         }
         
-        // Reload commands
+        // Reload commands and channels
         if (commandService != null) {
             commandService.reloadCommands();
+        }
+        
+        if (chatManager != null) {
+            chatManager.reloadChannels();
         }
         
         // Reinitialize debugger if needed
@@ -185,6 +188,10 @@ public class nonchat extends JavaPlugin {
 
     public ConfigService getConfigService() {
         return configService;
+    }
+    
+    public ChatManager getChatManager() {
+        return chatManager;
     }
 
     public void logCommand(String command, String[] args) {

@@ -6,11 +6,39 @@
 # - LuckPerms support.
 # - Vault support.
 # - PlaceHolderAPI support.
-# - DiscordSRV support.
 # ==================================================
-
-debug: false # Enable debug mode. Restart the server.
-
+# CUSTOM CHANNELS
+# You can create your own custom channels in several ways:
+#
+# 1. Adding them to this config file:
+#    Copy and modify one of the existing channel blocks under the "channels:" section.
+#    Make sure to use a unique ID and set all the parameters you need.
+#
+# 2. Using the in-game command (requires nonchat.admin.channel.create permission):
+#    /channel create <id> <display-name> [options]
+#    
+# Available options for channels:
+#   enabled: true/false         - Whether the channel is enabled
+#   display-name: "Name"        - Display name shown in messages and listings
+#   format: "text {placeholders}" - The message format (must include {message})
+#   radius: number              - Chat radius in blocks, -1 for global
+#   character: 'X'              - Trigger character (prefix) for this channel
+#   send-permission: "perm"     - Permission needed to send messages
+#   receive-permission: "perm"  - Permission needed to receive messages
+#   cooldown: number            - Seconds between messages (0 for no cooldown)
+#   min-length: number          - Minimum message length (0 for no minimum)
+#   max-length: number          - Maximum message length (-1 for unlimited)
+#
+# Command options format:
+#   format:text {prefix} {sender} {message}
+#   char:X                      - Trigger character
+#   send:permission.node        - Permission to send
+#   receive:permission.node     - Permission to receive
+#   radius:100                  - Radius in blocks (-1 for global)
+#   enabled:true                - Enable/disable
+#   cooldown:5                  - Cooldown in seconds
+#   min:1                       - Min message length
+#   max:100                     - Max message length
 # ==================================================
 # CHAT FORMATTING:
 #
@@ -26,24 +54,46 @@ language: en # Supported: en, ru
 
 update-checker: true # Enable/disable the update checker.
 
-# The chat config.
-chats:
-  global: # The name of the chat.
-    enabled: true # Enable/disable the chat.
-    format: "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}" # The chat format.
-    radius: -1 # The radius of the chat(In blocks). -1 = global.
-    char: '!' # The character that will be used to separate the message.
+# Default channel that players will use when they join
+default-channel: "local"
+
+# The channels configuration.
+channels:
+  global: # The ID of the channel
+    enabled: true # Enable/disable the channel
+    display-name: "Global" # Display name for the channel
+    format: "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}" # The chat format
+    radius: -1 # The radius of chat (in blocks). -1 = global
+    character: '!' # The character that triggers this channel
+    send-permission: "" # Permission to send messages in this channel (empty = everyone)
+    receive-permission: "" # Permission to receive messages from this channel (empty = everyone)
+    cooldown: 0 # Cooldown between messages in seconds (0 = no cooldown)
+    min-length: 0 # Minimum message length (0 = no minimum)
+    max-length: -1 # Maximum message length (-1 to disable limit)
+  
   local:
     enabled: true
+    display-name: "Local"
     format: "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
     radius: 100
-    char: ''
+    character: ''
+    send-permission: ""
+    receive-permission: ""
+    cooldown: 0
+    min-length: 0
+    max-length: -1
+  
   staff:
     enabled: true
+    display-name: "Staff"
     format: "§7(§bSC§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
     radius: -1
-    char: '*'
-    permission: "nonchat.chat.staff" # Permission to use and see this chat
+    character: '*'
+    send-permission: "nonchat.chat.staff"
+    receive-permission: "nonchat.chat.staff"
+    cooldown: 0
+    min-length: 0
+    max-length: -1
 
 # The death config.
 death-format: "{prefix} §f{player}§r {suffix}§f died" # The death format.
@@ -127,21 +177,3 @@ caps-filter:
   enabled: true # Enable/disable the caps filter.
   max-caps-percentage: 70 # Maximum percentage of capital letters allowed in a message.
   min-length: 4 # Minimum message length to check for caps.
-
-# ==================================================
-# DISCORD INTEGRATION
-# Discord Integration is a feature that adds DiscordSRV support for the plugin.
-# With this feature, you will be able to monitor the server from your discord channel.
-# ==================================================
-discord:
-  enabled: true
-  staff-channel-id: "YOUR_CHANNEL_ID"
-  chat-channel-id: "YOUR_CHANNEL_ID"
-  commands:
-    enabled: true
-    prefix: "!"
-    allowed-roles:
-      - "Admin"
-      - "Moderator"
-    command-log-channel: "YOUR_LOG_CHANNEL_ID"
-    command-feedback: true
