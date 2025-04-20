@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.listeners;
+package com.nonxedy.nonchat.listener;
 
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.service.ChatService;

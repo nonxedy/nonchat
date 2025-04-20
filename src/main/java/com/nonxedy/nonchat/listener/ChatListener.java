@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.listeners;
+package com.nonxedy.nonchat.listener;
 
 import org.bukkit.event.Listener;
 
