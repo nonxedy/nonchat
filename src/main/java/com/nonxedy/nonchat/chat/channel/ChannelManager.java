@@ -15,7 +15,6 @@ import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.HoverTextUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 /**
  * Manages all chat channels in the NonChat plugin.
@@ -187,12 +186,13 @@ public class ChannelManager {
      * @param cooldown Cooldown between messages in seconds (null to keep existing)
      * @param minLength Minimum message length (null to keep existing)
      * @param maxLength Maximum message length (null to keep existing)
+     * @param discordChannelId Discord channel ID for integration (null to keep existing)
      * @return True if the channel was updated, false otherwise
      */
     public boolean updateChannel(String channelId, String displayName, String format,
                                 Character character, String sendPermission, String receivePermission,
                                 Integer radius, Boolean enabled, Integer cooldown, 
-                                Integer minLength, Integer maxLength) {
+                                Integer minLength, Integer maxLength, String discordChannelId) {
         // Get existing channel
         Channel existingChannel = getChannel(channelId);
         if (existingChannel == null) {
@@ -211,7 +211,7 @@ public class ChannelManager {
             receivePermission != null ? receivePermission : existingChannel.getReceivePermission(),
             radius != null ? radius : existingChannel.getRadius(),
             enabled != null ? enabled : existingChannel.isEnabled(),
-            "", // No discord integration
+            discordChannelId != null ? discordChannelId : existingChannel.getDiscordChannelId(),
             config.getHoverTextUtil(),
             cooldown != null ? cooldown : existingChannel.getCooldown(),
             minLength != null ? minLength : existingChannel.getMinLength(),
@@ -226,6 +226,29 @@ public class ChannelManager {
         config.saveConfig();
         
         return true;
+    }
+    
+    /**
+     * Updates an existing channel with new properties.
+     * @param channelId The channel ID to update
+     * @param displayName The display name for the channel (null to keep existing)
+     * @param format The message format for the channel (null to keep existing)
+     * @param character The trigger character (null to keep existing, '\0' to remove)
+     * @param sendPermission Permission to send to this channel (null to keep existing)
+     * @param receivePermission Permission to receive from this channel (null to keep existing)
+     * @param radius Radius of the channel in blocks (-1 for global, null to keep existing)
+     * @param enabled Whether the channel is enabled (null to keep existing)
+     * @param cooldown Cooldown between messages in seconds (null to keep existing)
+     * @param minLength Minimum message length (null to keep existing)
+     * @param maxLength Maximum message length (null to keep existing)
+     * @return True if the channel was updated, false otherwise
+     */
+    public boolean updateChannel(String channelId, String displayName, String format,
+                                Character character, String sendPermission, String receivePermission,
+                                Integer radius, Boolean enabled, Integer cooldown, 
+                                Integer minLength, Integer maxLength) {
+        return updateChannel(channelId, displayName, format, character, sendPermission, receivePermission,
+                             radius, enabled, cooldown, minLength, maxLength, null);
     }
     
     /**

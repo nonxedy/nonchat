@@ -1,11 +1,12 @@
 # ==================================================
 # NONCHAT CONFIGURATION FILE
 # Plugin created by nonxedy (@nonxedy). Published on github https://github.com/nonxedy/nonchat
-# Version of the plugin: 1.4.3
+# Version of the plugin: 1.4.4
 #
 # - LuckPerms support.
 # - Vault support.
 # - PlaceHolderAPI support.
+# - DiscordSRV support.
 # ==================================================
 # CUSTOM CHANNELS
 # You can create your own custom channels in several ways:
@@ -25,6 +26,7 @@
 #   character: 'X'              - Trigger character (prefix) for this channel
 #   send-permission: "perm"     - Permission needed to send messages
 #   receive-permission: "perm"  - Permission needed to receive messages
+#   discord-channel: "id"       - Discord channel ID for DiscordSRV integration
 #   cooldown: number            - Seconds between messages (0 for no cooldown)
 #   min-length: number          - Minimum message length (0 for no minimum)
 #   max-length: number          - Maximum message length (-1 for unlimited)
@@ -35,6 +37,7 @@
 #   send:permission.node        - Permission to send
 #   receive:permission.node     - Permission to receive
 #   radius:100                  - Radius in blocks (-1 for global)
+#   discord:ID                  - Discord channel ID
 #   enabled:true                - Enable/disable
 #   cooldown:5                  - Cooldown in seconds
 #   min:1                       - Min message length

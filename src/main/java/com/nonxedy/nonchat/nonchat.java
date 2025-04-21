@@ -19,6 +19,7 @@ import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.command.impl.ChannelCommand;
+import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.util.Debugger;
 import com.nonxedy.nonchat.util.UpdateChecker;
 import net.kyori.adventure.text.Component;
@@ -35,6 +36,7 @@ public class nonchat extends JavaPlugin {
     private Debugger debugger;
     private ChatListener chatListener;
     private IgnoreCommand ignoreCommand;
+    private DiscordSRVIntegration discordSRVIntegration;
 
     @Override
     public void onEnable() {
@@ -103,6 +105,15 @@ public class nonchat extends JavaPlugin {
         getCommand("channel").setExecutor(channelCommand);
         getCommand("channel").setTabCompleter(channelCommand);
 
+        // Setup DiscordSRV integration if available
+        this.discordSRVIntegration = new DiscordSRVIntegration(this);
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            discordSRVIntegration.register();
+            if (debugger != null) {
+                debugger.log("DiscordSRV integration initialized");
+            }
+        }, 20L); // Wait 1 second to ensure DiscordSRV is fully loaded
+
         if (configService.getConfig().isUpdateCheckerEnabled()) {
             getLogger().info("Initializing update checker...");
             new UpdateChecker(this);
@@ -119,6 +130,9 @@ public class nonchat extends JavaPlugin {
         }
         if (commandService != null) {
             commandService.unregisterAll();
+        }
+        if (discordSRVIntegration != null) {
+            discordSRVIntegration.unregister();
         }
 
         Bukkit.getConsoleSender().sendMessage(Component.text()
@@ -192,6 +206,10 @@ public class nonchat extends JavaPlugin {
     
     public ChatManager getChatManager() {
         return chatManager;
+    }
+    
+    public DiscordSRVIntegration getDiscordSRVIntegration() {
+        return discordSRVIntegration;
     }
 
     public void logCommand(String command, String[] args) {

@@ -221,6 +221,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         int cooldown = 0;
         int minLength = 0;
         int maxLength = 256;
+        String discordChannelId = "";
         
         // Process optional parameters
         for (int i = 3; i < args.length; i++) {
@@ -261,15 +262,27 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
                     return true;
                 }
+            } else if (arg.startsWith("discord:")) {
+                discordChannelId = arg.substring(8);
             }
         }
         
         // Create the channel
+        // First create without discord channel ID
         Channel channel = chatManager.createChannel(
             channelId, displayName, format, character, 
             sendPermission, receivePermission, radius,
             cooldown, minLength, maxLength
         );
+        
+        // Then update with discord channel ID if provided
+        if (channel != null && !discordChannelId.isEmpty()) {
+            chatManager.updateChannel(
+                channelId, null, null, null,
+                null, null, null, null,
+                null, null, null, discordChannelId
+            );
+        }
         
         if (channel == null) {
             player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-create-failed")
@@ -314,6 +327,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         Integer cooldown = null;
         Integer minLength = null;
         Integer maxLength = null;
+        String discordChannelId = null;
         
         for (int i = 2; i < args.length; i++) {
             String arg = args[i];
@@ -361,6 +375,8 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
                     return true;
                 }
+            } else if (arg.startsWith("discord:")) {
+                discordChannelId = arg.substring(8);
             }
         }
         
@@ -368,7 +384,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         boolean success = chatManager.updateChannel(
             channelId, displayName, format, character,
             sendPermission, receivePermission, radius, enabled,
-            cooldown, minLength, maxLength
+            cooldown, minLength, maxLength, discordChannelId
         );
         
         if (success) {

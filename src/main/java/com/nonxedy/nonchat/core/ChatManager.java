@@ -17,6 +17,8 @@ import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.event.ChannelMessageEvent;
+import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.CapsFilter;
 import com.nonxedy.nonchat.util.ChatTypeUtil;
@@ -119,7 +121,7 @@ public class ChatManager {
     
         handleMentions(player, finalMessage);
         Component formattedMessage = channel.formatMessage(player, finalMessage);
-        broadcastMessage(player, formattedMessage, channel);
+        broadcastMessage(player, formattedMessage, channel, finalMessage);
         
         // Record message sent for cooldown tracking
         channelManager.recordMessageSent(player);
@@ -188,9 +190,10 @@ public class ChatManager {
         mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
     }
 
-    private void broadcastMessage(Player sender, Component message, Channel channel) {
-        // Discord integration is currently disabled
-        // This section is reserved for future integration with external chat systems
+    private void broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
+        // Fire channel message event for potential external systems
+        ChannelMessageEvent event = new ChannelMessageEvent(sender, channel, sender.getName() + ": " + message.toString(), channel.getDiscordChannelId());
+        Bukkit.getPluginManager().callEvent(event);
         
         // Always send to console
         Bukkit.getConsoleSender().sendMessage(message);
@@ -209,6 +212,28 @@ public class ChatManager {
                 if (channel.isInRange(sender, recipient) && channel.canReceive(recipient)) {
                     recipient.sendMessage(message);
                 }
+            }
+        }
+        
+        // Try to send message to Discord if there's a valid channel ID
+        if (!channel.getDiscordChannelId().isEmpty()) {
+            try {
+                // Get the DiscordSRV integration instance directly from the main plugin
+                DiscordSRVIntegration discordIntegration = plugin.getDiscordSRVIntegration();
+                
+                if (discordIntegration != null) {
+                    // ULTRA SIMPLIFIED APPROACH:
+                    // Don't try to parse the message at all, just send the original text from the player
+                    // This completely bypasses all formatting issues
+                    
+                    String playerMessage = originalMessage.trim();
+                    
+                    // Just send the raw player text to Discord
+                    plugin.logResponse("Sending raw message from player to Discord: " + sender.getName() + ": " + playerMessage);
+                    discordIntegration.sendRawMessageToDiscord(sender, playerMessage, channel);
+                }
+            } catch (Exception e) {
+                plugin.logError("Failed to send message to Discord: " + e.getMessage());
             }
         }
     }
@@ -322,6 +347,31 @@ public class ChatManager {
         return channelManager.updateChannel(channelId, displayName, format, character,
                                           sendPermission, receivePermission, radius, enabled,
                                           cooldown, minLength, maxLength);
+    }
+    
+    /**
+     * Updates an existing channel with new properties, including Discord channel ID.
+     * @param channelId The channel ID to update
+     * @param displayName The display name for the channel (null to keep existing)
+     * @param format The message format for the channel (null to keep existing)
+     * @param character The trigger character (null to keep existing, '\0' to remove)
+     * @param sendPermission Permission to send to this channel (null to keep existing)
+     * @param receivePermission Permission to receive from this channel (null to keep existing)
+     * @param radius Radius of the channel in blocks (-1 for global, null to keep existing)
+     * @param enabled Whether the channel is enabled (null to keep existing)
+     * @param cooldown Cooldown between messages in seconds (null to keep existing)
+     * @param minLength Minimum message length (null to keep existing)
+     * @param maxLength Maximum message length (null to keep existing)
+     * @param discordChannelId Discord channel ID for DiscordSRV integration (null to keep existing)
+     * @return True if the channel was updated, false otherwise
+     */
+    public boolean updateChannel(String channelId, String displayName, String format,
+                                Character character, String sendPermission, String receivePermission,
+                                Integer radius, Boolean enabled, Integer cooldown, 
+                                Integer minLength, Integer maxLength, String discordChannelId) {
+        return channelManager.updateChannel(channelId, displayName, format, character,
+                                          sendPermission, receivePermission, radius, enabled,
+                                          cooldown, minLength, maxLength, discordChannelId);
     }
     
     /**

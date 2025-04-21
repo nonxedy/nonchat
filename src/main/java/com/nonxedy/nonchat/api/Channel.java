@@ -92,12 +92,9 @@ public interface Channel {
     boolean isInRange(Player sender, Player recipient);
     
     /**
-     * Gets the Discord channel ID (reserved for future use).
-     * This method is kept for backward compatibility and will return empty values.
-     * @return Discord channel ID, currently always returns empty
-     * @deprecated Discord integration has been removed
+     * Gets the Discord channel ID for DiscordSRV integration.
+     * @return Discord channel ID
      */
-    @Deprecated
     String getDiscordChannelId();
     
     /**

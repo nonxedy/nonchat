@@ -9,11 +9,8 @@ import com.nonxedy.nonchat.api.Channel;
 
 /**
  * Event fired when a message is sent to a channel.
- * This class is kept for backward compatibility and for future extensions.
- * External integrations are currently disabled.
- * @deprecated External chat integrations have been temporarily removed
+ * This event is used for integrations with external chat systems like DiscordSRV.
  */
-@Deprecated
 public class ChannelMessageEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
     private final Player sender;
@@ -54,11 +51,8 @@ public class ChannelMessageEvent extends Event {
     
     /**
      * Gets the Discord channel ID associated with this channel.
-     * This method is kept for backward compatibility.
-     * @return The Discord channel ID (currently always empty)
-     * @deprecated External integrations have been removed
+     * @return The Discord channel ID for the channel
      */
-    @Deprecated
     public String getDiscordChannelId() {
         return discordChannelId;
     }
