@@ -11,6 +11,7 @@ import org.bukkit.command.TabCompleter;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.command.impl.BroadcastCommand;
+import com.nonxedy.nonchat.command.impl.ChannelCommand;
 import com.nonxedy.nonchat.command.impl.ClearCommand;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.MeCommand;
@@ -52,6 +53,7 @@ public class CommandService {
         registerCommand("spy", spyCommand); // Use the existing instance
         registerCommand("clear", new ClearCommand(configService.getMessages(), plugin));
         registerCommand("ignore", ignoreCommand); // Use the existing instance
+        registerCommand("channel", new ChannelCommand(plugin, plugin.getChatManager(), configService.getMessages()));
     
         // Roleplay commands
         registerCommand("me", new MeCommand(plugin, configService.getConfig(), configService.getMessages()));

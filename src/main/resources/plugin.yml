@@ -34,8 +34,12 @@ permissions:
       - nonchat.chatbubbles
       - nonchat.me
       - nonchat.roll
-      - nonchat.command.channel
+      - nonchat.channel
       - nonchat.bypass.cooldown
+      - nonchat.admin.channel.create
+      - nonchat.admin.channel.edit
+      - nonchat.admin.channel.delete
+      - nonchat.admin.channel.default
   nonchat.message:
     description: Allows /message command
     default: true
@@ -72,8 +76,8 @@ permissions:
   nonchat.roll:
     description: Allows to use /roll command
     default: true
-  nonchat.command.channel:
-    description: Allows access to channel commands
+  nonchat.channel:
+    description: Allows access to /channel commands
     default: true
   nonchat.admin.channel.create:
     description: Allows creating new channels
@@ -148,5 +152,5 @@ commands:
     description: Manage chat channels.
     aliases: [ch]
     usage: /channel <set|list|info|create|edit|delete|default> [args]
-    permission: nonchat.command.channel
+    permission: nonchat.channel
     permission-message: You do not have <permission> to use this command!

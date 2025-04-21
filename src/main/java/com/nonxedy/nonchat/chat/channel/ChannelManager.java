@@ -17,7 +17,7 @@ import com.nonxedy.nonchat.util.HoverTextUtil;
 import org.bukkit.Bukkit;
 
 /**
- * Manages all chat channels in the NonChat plugin.
+ * Manages all chat channels in the nonchat plugin.
  */
 public class ChannelManager {
     private final Map<String, Channel> channels = new ConcurrentHashMap<>();

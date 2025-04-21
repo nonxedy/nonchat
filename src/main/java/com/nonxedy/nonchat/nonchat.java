@@ -100,11 +100,6 @@ public class nonchat extends JavaPlugin {
     }
 
     private void setupIntegrations() {
-        // Register channel command
-        ChannelCommand channelCommand = new ChannelCommand(this, chatManager, configService.getMessages());
-        getCommand("channel").setExecutor(channelCommand);
-        getCommand("channel").setTabCompleter(channelCommand);
-
         // Setup DiscordSRV integration if available
         this.discordSRVIntegration = new DiscordSRVIntegration(this);
         Bukkit.getScheduler().runTaskLater(this, () -> {
