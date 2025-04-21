@@ -117,7 +117,9 @@ public class ColorUtil {
         String result = buffer.toString();
         
         // Convert legacy color codes to MiniMessage format
-        // &0-&f -> <black>, <dark_blue>, etc.
+        // &0-&f and §0-§f -> <black>, <dark_blue>, etc.
+        
+        // Convert & codes
         result = result.replace("&0", "<black>");
         result = result.replace("&1", "<dark_blue>");
         result = result.replace("&2", "<dark_green>");
@@ -135,13 +137,39 @@ public class ColorUtil {
         result = result.replace("&e", "<yellow>");
         result = result.replace("&f", "<white>");
         
-        // Format codes
+        // Convert § codes (section symbol)
+        result = result.replace("§0", "<black>");
+        result = result.replace("§1", "<dark_blue>");
+        result = result.replace("§2", "<dark_green>");
+        result = result.replace("§3", "<dark_aqua>");
+        result = result.replace("§4", "<dark_red>");
+        result = result.replace("§5", "<dark_purple>");
+        result = result.replace("§6", "<gold>");
+        result = result.replace("§7", "<gray>");
+        result = result.replace("§8", "<dark_gray>");
+        result = result.replace("§9", "<blue>");
+        result = result.replace("§a", "<green>");
+        result = result.replace("§b", "<aqua>");
+        result = result.replace("§c", "<red>");
+        result = result.replace("§d", "<light_purple>");
+        result = result.replace("§e", "<yellow>");
+        result = result.replace("§f", "<white>");
+        
+        // Format codes with & prefix
         result = result.replace("&l", "<bold>");
         result = result.replace("&m", "<strikethrough>");
         result = result.replace("&n", "<underlined>");
         result = result.replace("&o", "<italic>");
         result = result.replace("&k", "<obfuscated>");
         result = result.replace("&r", "<reset>");
+        
+        // Format codes with § prefix
+        result = result.replace("§l", "<bold>");
+        result = result.replace("§m", "<strikethrough>");
+        result = result.replace("§n", "<underlined>");
+        result = result.replace("§o", "<italic>");
+        result = result.replace("§k", "<obfuscated>");
+        result = result.replace("§r", "<reset>");
         
         return result;
     }

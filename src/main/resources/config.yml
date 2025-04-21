@@ -55,6 +55,8 @@
 
 language: en # Supported: en, ru
 
+debug: false # Enable/disable debug mode
+
 update-checker: true # Enable/disable the update checker.
 
 # Default channel that players will use when they join
