@@ -64,7 +64,6 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 | Status | Task |
 |:------:|------|
-| ⏳ | Fully integrate DiscordSRV |
 | 🔜 | Add support for ProtocolLib in chat bubbles |
 | 🔜 | Add support for Folia |
 | ✅ | Add support for DiscordSRV |
