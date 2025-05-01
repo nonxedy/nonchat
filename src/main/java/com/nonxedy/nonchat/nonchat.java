@@ -19,6 +19,7 @@ import com.nonxedy.nonchat.listener.ChatListenerFactory;
 import com.nonxedy.nonchat.listener.DeathCoordinates;
 import com.nonxedy.nonchat.listener.DeathListener;
 import com.nonxedy.nonchat.listener.DiscordSRVListener;
+import com.nonxedy.nonchat.listener.JoinQuitListener;
 import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
@@ -93,6 +94,9 @@ public class nonchat extends JavaPlugin {
         // Register death-related listeners
         Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
         Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig()), this);
+        
+        // Register join/quit listener
+        Bukkit.getPluginManager().registerEvents(new JoinQuitListener(configService.getConfig()), this);
         
         // Log successful listener registration
         if (debugger != null) {

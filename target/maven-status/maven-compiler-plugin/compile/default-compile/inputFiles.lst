@@ -18,6 +18,7 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/impl/MessageCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/hook/DiscordSRVHook.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/api/IMessageHandler.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/listener/JoinQuitListener.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/config/DiscordManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/BroadcastMessage.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/config/ConfigFile.java

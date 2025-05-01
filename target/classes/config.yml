@@ -105,6 +105,15 @@ channels:
 # The death config.
 death-format: "{prefix} §f{player}§r {suffix}§f died" # The death format.
 
+# The join/quit message config.
+join-messages:
+  enabled: true # Enable/disable join messages
+  format: "§8(§a+§8) {prefix} §f{player}§r {suffix}" # Join message format
+
+quit-messages:
+  enabled: true # Enable/disable quit messages
+  format: "§8(§c-§8) {prefix} §f{player}§r {suffix}" # Quit message format
+
 # The private chat config.
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
 

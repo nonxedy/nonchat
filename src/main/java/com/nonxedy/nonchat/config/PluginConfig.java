@@ -81,6 +81,10 @@ public class PluginConfig {
     private void setDefaultValues() {
         // Chat formatting settings
         config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
+        config.set("join-messages.enabled", true);
+        config.set("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
+        config.set("quit-messages.enabled", true);
+        config.set("quit-messages.format", "§8(§c-§8) {prefix} §f{player}§r {suffix}");
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
@@ -127,6 +131,40 @@ public class PluginConfig {
     @NotNull
     public String getDeathFormat() {
         return config.getString("death-format", "{prefix} §f{player}§r {suffix}§f died");
+    }
+    
+    /**
+     * Checks if join messages are enabled
+     * @return true if enabled
+     */
+    public boolean isJoinMessageEnabled() {
+        return config.getBoolean("join-messages.enabled", true);
+    }
+    
+    /**
+     * Gets join message format
+     * @return Formatted join message string
+     */
+    @NotNull
+    public String getJoinFormat() {
+        return config.getString("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
+    }
+    
+    /**
+     * Checks if quit messages are enabled
+     * @return true if enabled
+     */
+    public boolean isQuitMessageEnabled() {
+        return config.getBoolean("quit-messages.enabled", true);
+    }
+    
+    /**
+     * Gets quit message format
+     * @return Formatted quit message string
+     */
+    @NotNull
+    public String getQuitFormat() {
+        return config.getString("quit-messages.format", "§8(§c-§8) {prefix} §f{player}§r {suffix}");
     }
 
     /**
