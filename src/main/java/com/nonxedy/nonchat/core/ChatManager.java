@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
@@ -17,8 +18,7 @@ import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.event.ChannelMessageEvent;
-import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
+import com.nonxedy.nonchat.hook.DiscordHook;
 import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.CapsFilter;
 import com.nonxedy.nonchat.util.ChatTypeUtil;
@@ -191,13 +191,9 @@ public class ChatManager {
     }
 
     private void broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
-        // Fire channel message event for potential external systems
-        ChannelMessageEvent event = new ChannelMessageEvent(sender, channel, sender.getName() + ": " + message.toString(), channel.getDiscordChannelId());
-        Bukkit.getPluginManager().callEvent(event);
-        
         // Always send to console
         Bukkit.getConsoleSender().sendMessage(message);
-        
+
         // Send to players
         if (channel.isGlobal()) {
             for (Player recipient : Bukkit.getOnlinePlayers()) {
@@ -214,26 +210,46 @@ public class ChatManager {
                 }
             }
         }
-        
-        // Try to send message to Discord if there's a valid channel ID
-        if (!channel.getDiscordChannelId().isEmpty()) {
-            try {
-                // Get the DiscordSRV integration instance directly from the main plugin
-                DiscordSRVIntegration discordIntegration = plugin.getDiscordSRVIntegration();
-                
-                if (discordIntegration != null) {
-                    // ULTRA SIMPLIFIED APPROACH:
-                    // Don't try to parse the message at all, just send the original text from the player
-                    // This completely bypasses all formatting issues
+
+        // Forward to Discord if channel has a discord channel set
+        String discordChannelId = channel.getDiscordChannelId();
+        if (discordChannelId != null && !discordChannelId.isEmpty()) {
+            // Format the message for Discord - strip Minecraft color codes
+            String discordMessage = ChatColor.stripColor(message.toString());
+            
+            // Clean up the message - remove any Minecraft-specific formatting
+            discordMessage = discordMessage.replaceAll("§[0-9a-fk-or]", "");
+            
+            // Prepare and send formatted message
+            String formattedDiscordMessage = sender.getName() + ": " + originalMessage;
+            String channelPrefix = "[" + channel.getDisplayName() + "] ";
+            
+            // Add channel prefix for better clarity in Discord
+            formattedDiscordMessage = channelPrefix + formattedDiscordMessage;
+            
+            // Get Discord hook from the main plugin class
+            DiscordHook discordHook = plugin.getDiscordHook();
+            if (discordHook != null) {
+                plugin.getLogger().info("Sending message to Discord channel " + discordChannelId 
+                    + ": " + formattedDiscordMessage);
                     
-                    String playerMessage = originalMessage.trim();
-                    
-                    // Just send the raw player text to Discord
-                    plugin.logResponse("Sending raw message from player to Discord: " + sender.getName() + ": " + playerMessage);
-                    discordIntegration.sendRawMessageToDiscord(sender, playerMessage, channel);
+                // Get the webhook URL - first check if the channel has its own webhook
+                String webhookUrl = channel.getDiscordWebhook();
+                // If not, use the global webhook
+                if (webhookUrl == null || webhookUrl.trim().isEmpty()) {
+                    webhookUrl = plugin.getDiscordManager().getDiscordHook();
                 }
-            } catch (Exception e) {
-                plugin.logError("Failed to send message to Discord: " + e.getMessage());
+                
+                // If DiscordSRV integration is enabled, we'll use it but with our channel-specific routing;
+                // otherwise fall back to webhook
+                if (plugin.getDiscordManager().isUseDiscordSRV()) {
+                    // DiscordSRVListener will prevent DiscordSRV from handling this message
+                    // So we can explicitly route it to the correct Discord channel
+                    discordHook.sendMessage(formattedDiscordMessage, discordChannelId, webhookUrl);
+                } else {
+                    // Use direct webhook
+                    discordHook.sendMessage(formattedDiscordMessage, webhookUrl);
+                }
             }
         }
     }
@@ -390,6 +406,10 @@ public class ChatManager {
      */
     public boolean setDefaultChannel(String channelId) {
         return channelManager.setDefaultChannel(channelId);
+    }
+
+    public ChannelManager getChannelManager() {
+        return channelManager;
     }
     
     /**

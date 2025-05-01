@@ -10,6 +10,7 @@ load: STARTUP
 depend:
   - LuckPerms
   - PlaceholderAPI
+  - DiscordSRV
 
 softdepend:
   - ProtocolLib

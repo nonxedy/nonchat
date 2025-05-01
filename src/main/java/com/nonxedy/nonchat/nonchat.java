@@ -5,23 +5,27 @@ import java.util.Arrays;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
+import com.nonxedy.nonchat.config.DiscordManager;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
+import com.nonxedy.nonchat.hook.DiscordHook;
+import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.listener.ChatListener;
 import com.nonxedy.nonchat.listener.ChatListenerFactory;
 import com.nonxedy.nonchat.listener.DeathCoordinates;
 import com.nonxedy.nonchat.listener.DeathListener;
+import com.nonxedy.nonchat.listener.DiscordSRVListener;
 import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
-import com.nonxedy.nonchat.command.impl.ChannelCommand;
-import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.util.Debugger;
 import com.nonxedy.nonchat.util.UpdateChecker;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
@@ -36,6 +40,9 @@ public class nonchat extends JavaPlugin {
     private Debugger debugger;
     private ChatListener chatListener;
     private IgnoreCommand ignoreCommand;
+    private DiscordHook discordHook;
+    private DiscordManager discordManager;
+    private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
 
     @Override
@@ -100,15 +107,22 @@ public class nonchat extends JavaPlugin {
     }
 
     private void setupIntegrations() {
-        // Setup DiscordSRV integration if available
-        this.discordSRVIntegration = new DiscordSRVIntegration(this);
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            discordSRVIntegration.register();
-            if (debugger != null) {
-                debugger.log("DiscordSRV integration initialized");
-            }
-        }, 20L); // Wait 1 second to ensure DiscordSRV is fully loaded
-
+        // Initialize Discord integration
+        this.discordManager = new DiscordManager(this);
+        this.discordHook = new DiscordHook(this);
+        ChannelAPI.initialize(this);
+        
+        // Check if DiscordSRV is present and initialize integration
+        if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null) {
+            this.discordSRVIntegration = new DiscordSRVIntegration(this);
+            getLogger().info("DiscordSRV integration enabled");
+        }
+        
+        if (debugger != null) {
+            debugger.log("Discord integration initialized");
+        }
+        
+        // Initialize update checker if enabled
         if (configService.getConfig().isUpdateCheckerEnabled()) {
             getLogger().info("Initializing update checker...");
             new UpdateChecker(this);
@@ -198,14 +212,6 @@ public class nonchat extends JavaPlugin {
     public ConfigService getConfigService() {
         return configService;
     }
-    
-    public ChatManager getChatManager() {
-        return chatManager;
-    }
-    
-    public DiscordSRVIntegration getDiscordSRVIntegration() {
-        return discordSRVIntegration;
-    }
 
     public void logCommand(String command, String[] args) {
         if (debugger != null) {
@@ -229,5 +235,19 @@ public class nonchat extends JavaPlugin {
         if (debugger != null) {
             debugger.log("Placeholder: " + placeholder + " -> " + result);
         }
+    }
+
+    // -----------------------------------------------------------------------------------------
+
+    public DiscordManager getDiscordManager() {
+        return discordManager;
+    }
+
+    public DiscordHook getDiscordHook() {
+        return discordHook;
+    }
+
+    public ChatManager getChatManager() {
+        return chatManager;
     }
 }

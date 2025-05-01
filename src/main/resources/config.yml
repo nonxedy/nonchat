@@ -27,6 +27,7 @@
 #   send-permission: "perm"     - Permission needed to send messages
 #   receive-permission: "perm"  - Permission needed to receive messages
 #   discord-channel: "id"       - Discord channel ID for DiscordSRV integration
+#   discord-webhook: "url"      - Channel-specific Discord webhook URL (override global URL)
 #   cooldown: number            - Seconds between messages (0 for no cooldown)
 #   min-length: number          - Minimum message length (0 for no minimum)
 #   max-length: number          - Maximum message length (-1 for unlimited)
@@ -72,6 +73,7 @@ channels:
     character: '!' # The character that triggers this channel
     send-permission: "" # Permission to send messages in this channel (empty = everyone)
     receive-permission: "" # Permission to receive messages from this channel (empty = everyone)
+    discord-channel: "global" # The channel name in DiscordSRV config (Channels section)
     cooldown: 0 # Cooldown between messages in seconds (0 = no cooldown)
     min-length: 0 # Minimum message length (0 = no minimum)
     max-length: -1 # Maximum message length (-1 to disable limit)

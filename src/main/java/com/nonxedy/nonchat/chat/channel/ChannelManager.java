@@ -65,14 +65,15 @@ public class ChannelManager {
             String receivePermission = channelSection.getString("receive-permission", "");
             int radius = channelSection.getInt("radius", -1);
             String discordChannelId = channelSection.getString("discord-channel", "");
+            String discordWebhook = channelSection.getString("discord-webhook", "");
             int cooldown = channelSection.getInt("cooldown", 0);
             int minLength = channelSection.getInt("min-length", 0);
             int maxLength = channelSection.getInt("max-length", 256);
-            
+
             // Create and register channel
             Channel channel = new BaseChannel(
                 channelId, displayName, format, character, sendPermission, receivePermission,
-                radius, enabled, discordChannelId, hoverTextUtil, cooldown, minLength, maxLength
+                radius, enabled, discordChannelId, discordWebhook, hoverTextUtil, cooldown, minLength, maxLength
             );
             
             if (config.isDebug()) {
@@ -97,14 +98,14 @@ public class ChannelManager {
         // Create global channel
         Channel globalChannel = new BaseChannel(
             "global", "Global", "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}",
-            '!', "", "", -1, true, "", hoverTextUtil, 0, 0, 256
+            '!', "", "", -1, true, "", "", hoverTextUtil, 0, 0, 256
         );
         channels.put("global", globalChannel);
         
         // Create local channel
         Channel localChannel = new BaseChannel(
             "local", "Local", "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}",
-            '\0', "", "", 100, true, "", hoverTextUtil, 0, 0, 256
+            '\0', "", "", 100, true, "", "", hoverTextUtil, 0, 0, 256
         );
         channels.put("local", localChannel);
         
@@ -135,6 +136,30 @@ public class ChannelManager {
     public Channel createChannel(String channelId, String displayName, String format,
                                 Character character, String sendPermission, String receivePermission,
                                 int radius, int cooldown, int minLength, int maxLength) {
+        return createChannel(channelId, displayName, format, character, sendPermission, 
+                           receivePermission, radius, cooldown, minLength, maxLength, "", "");
+    }
+    
+    /**
+     * Creates a new channel with the specified properties.
+     * @param channelId The unique channel ID (must be lowercase letters, numbers and hyphens only)
+     * @param displayName The display name for the channel
+     * @param format The message format for the channel
+     * @param character The trigger character, or null for none
+     * @param sendPermission Permission to send to this channel, or empty for everyone
+     * @param receivePermission Permission to receive from this channel, or empty for everyone
+     * @param radius Radius of the channel in blocks, or -1 for global
+     * @param cooldown Cooldown between messages in seconds
+     * @param minLength Minimum message length
+     * @param maxLength Maximum message length, or -1 for unlimited
+     * @param discordChannelId Discord channel ID for integration
+     * @param discordWebhook Discord webhook URL for this channel
+     * @return The created channel, or null if the ID already exists
+     */
+    public Channel createChannel(String channelId, String displayName, String format,
+                                Character character, String sendPermission, String receivePermission,
+                                int radius, int cooldown, int minLength, int maxLength,
+                                String discordChannelId, String discordWebhook) {
         // Check if channel already exists
         if (channels.containsKey(channelId)) {
             return null;
@@ -148,15 +173,16 @@ public class ChannelManager {
         
         // Create the channel
         Channel channel = new BaseChannel(
-            channelId, 
+            channelId,
             displayName,
-            format, 
+            format,
             character != null ? character : '\0',
             sendPermission,
             receivePermission,
             radius,
             true, // Enabled by default
-            "", // No discord integration
+            discordChannelId,
+            discordWebhook,
             config.getHoverTextUtil(),
             cooldown,
             minLength,
@@ -193,6 +219,32 @@ public class ChannelManager {
                                 Character character, String sendPermission, String receivePermission,
                                 Integer radius, Boolean enabled, Integer cooldown, 
                                 Integer minLength, Integer maxLength, String discordChannelId) {
+        return updateChannel(channelId, displayName, format, character, sendPermission, receivePermission,
+                           radius, enabled, cooldown, minLength, maxLength, discordChannelId, null);
+    }
+    
+    /**
+     * Updates an existing channel with new properties, including Discord channel ID and webhook.
+     * @param channelId The channel ID to update
+     * @param displayName The display name for the channel (null to keep existing)
+     * @param format The message format for the channel (null to keep existing)
+     * @param character The trigger character (null to keep existing, '\0' to remove)
+     * @param sendPermission Permission to send to this channel (null to keep existing)
+     * @param receivePermission Permission to receive from this channel (null to keep existing)
+     * @param radius Radius of the channel in blocks (-1 for global, null to keep existing)
+     * @param enabled Whether the channel is enabled (null to keep existing)
+     * @param cooldown Cooldown between messages in seconds (null to keep existing)
+     * @param minLength Minimum message length (null to keep existing)
+     * @param maxLength Maximum message length (null to keep existing)
+     * @param discordChannelId Discord channel ID for DiscordSRV integration (null to keep existing)
+     * @param discordWebhook Discord webhook URL for this channel (null to keep existing)
+     * @return True if the channel was updated, false otherwise
+     */
+    public boolean updateChannel(String channelId, String displayName, String format,
+                                Character character, String sendPermission, String receivePermission,
+                                Integer radius, Boolean enabled, Integer cooldown, 
+                                Integer minLength, Integer maxLength, String discordChannelId,
+                                String discordWebhook) {
         // Get existing channel
         Channel existingChannel = getChannel(channelId);
         if (existingChannel == null) {
@@ -212,6 +264,7 @@ public class ChannelManager {
             radius != null ? radius : existingChannel.getRadius(),
             enabled != null ? enabled : existingChannel.isEnabled(),
             discordChannelId != null ? discordChannelId : existingChannel.getDiscordChannelId(),
+            discordWebhook != null ? discordWebhook : existingChannel.getDiscordWebhook(),
             config.getHoverTextUtil(),
             cooldown != null ? cooldown : existingChannel.getCooldown(),
             minLength != null ? minLength : existingChannel.getMinLength(),
@@ -318,6 +371,7 @@ public class ChannelManager {
         config.set(basePath + "receive-permission", channel.getReceivePermission());
         config.set(basePath + "radius", channel.getRadius());
         config.set(basePath + "discord-channel", channel.getDiscordChannelId());
+        config.set(basePath + "discord-webhook", channel.getDiscordWebhook());
         config.set(basePath + "cooldown", channel.getCooldown());
         config.set(basePath + "min-length", channel.getMinLength());
         config.set(basePath + "max-length", channel.getMaxLength());
