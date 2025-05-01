@@ -24,29 +24,29 @@ public class DeathCoordinates implements Listener {
     }
     
     /**
-     * Handles player death events
+     * Handles player death events to display death coordinates
+     * Runs with HIGH priority after vanilla message generation
      * @param event Death event
      */
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        // This listener now ONLY handles coordinates, not death messages
         Player player = event.getPlayer();
         Location deathLoc = player.getLocation();
         Environment dimension = deathLoc.getWorld().getEnvironment();
         
-        event.deathMessage(ColorUtil.parseComponent(config.getDeathFormat()
-            .replace("{prefix}", "")
-            .replace("{player}", player.getName())
-            .replace("{suffix}", "")));
+        // Only send coordinates if enabled in config
+        if (config.isShowDeathCoordinatesEnabled()) {
+            String coordsMessage = String.format(
+                "&fYou died in &d%s &fat coordinates: &fx:&d%d &fy:&d%d &fz:&d%d",
+                formatDimension(dimension),
+                deathLoc.getBlockX(),
+                deathLoc.getBlockY(),
+                deathLoc.getBlockZ()
+            );
             
-        String coordsMessage = String.format(
-            "&fYou died in &d%s &fat coordinates: &fx:&d%d &fy:&d%d &fz:&d%d",
-            formatDimension(dimension),
-            deathLoc.getBlockX(),
-            deathLoc.getBlockY(),
-            deathLoc.getBlockZ()
-        );
-        
-        player.sendMessage(ColorUtil.parseComponent(coordsMessage));
+            player.sendMessage(ColorUtil.parseComponent(coordsMessage));
+        }
     }
     
     /**

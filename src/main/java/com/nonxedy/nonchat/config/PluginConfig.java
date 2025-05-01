@@ -79,8 +79,10 @@ public class PluginConfig {
      * Sets all default configuration values
      */
     private void setDefaultValues() {
-        // Chat formatting settings
-        config.set("death-format", "{prefix} §f{player}§r {suffix}§f died");
+        // Death settings
+        config.set("death.enabled", true);
+        config.set("death.format", "{prefix} §f{player}§r {suffix}§f died");
+        config.set("death.show-coordinates", true);
         config.set("join-messages.enabled", true);
         config.set("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
         config.set("quit-messages.enabled", true);
@@ -125,12 +127,28 @@ public class PluginConfig {
     }
 
     /**
+     * Checks if custom death messages are enabled
+     * @return true if enabled
+     */
+    public boolean isDeathMessagesEnabled() {
+        return config.getBoolean("death.enabled", true);
+    }
+    
+    /**
+     * Checks if showing death coordinates is enabled
+     * @return true if enabled
+     */
+    public boolean isShowDeathCoordinatesEnabled() {
+        return config.getBoolean("death.show-coordinates", true);
+    }
+    
+    /**
      * Gets death message format
      * @return Formatted death message string
      */
     @NotNull
     public String getDeathFormat() {
-        return config.getString("death-format", "{prefix} §f{player}§r {suffix}§f died");
+        return config.getString("death.format", "{prefix} §f{player}§r {suffix}§f died");
     }
     
     /**

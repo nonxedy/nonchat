@@ -33,6 +33,11 @@ public class DeathListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        // Only process if custom death messages are enabled
+        if (!config.isDeathMessagesEnabled()) {
+            return; // Keep vanilla death message
+        }
+        
         // Get the player who died
         Player player = event.getEntity();
         // Get LuckPerms user data for the player

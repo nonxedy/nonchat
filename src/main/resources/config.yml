@@ -103,7 +103,10 @@ channels:
     max-length: -1
 
 # The death config.
-death-format: "{prefix} §f{player}§r {suffix}§f died" # The death format.
+death:
+  enabled: true # Enable/disable custom death messages
+  format: "{prefix} §f{player}§r {suffix}§f died" # The death format.
+  show-coordinates: true # Show death coordinates to the player
 
 # The join/quit message config.
 join-messages:
