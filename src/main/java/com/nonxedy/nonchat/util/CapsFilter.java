@@ -22,7 +22,13 @@ public class CapsFilter {
      * @return true if message exceeds caps limit, false otherwise
      */
     public boolean shouldFilter(String message) {
-        if (!enabled || message.length() < minLength) {
+        // First strictly check if filter is disabled
+        if (!this.enabled) {
+            return false;
+        }
+        
+        // Then check message length
+        if (message.length() < this.minLength) {
             return false;
         }
 
@@ -34,7 +40,7 @@ public class CapsFilter {
         }
 
         double percentage = (double) capsCount / message.length() * 100;
-        return percentage > maxCapsPercentage;
+        return percentage > this.maxCapsPercentage;
     }
 
     /**
@@ -52,5 +58,21 @@ public class CapsFilter {
      */
     public boolean isEnabled() {
         return enabled;
+    }
+    
+    /**
+     * Gets the maximum percentage of caps allowed
+     * @return Maximum caps percentage
+     */
+    public int getMaxCapsPercentage() {
+        return maxCapsPercentage;
+    }
+    
+    /**
+     * Gets the minimum message length for caps checking
+     * @return Minimum message length
+     */
+    public int getMinLength() {
+        return minLength;
     }
 }

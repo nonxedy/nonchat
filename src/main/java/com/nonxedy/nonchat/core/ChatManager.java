@@ -51,7 +51,7 @@ public class ChatManager {
         CapsFilter capsFilter = config.getCapsFilter();
         if (capsFilter.shouldFilter(messageContent)) {
             player.sendMessage(ColorUtil.parseComponent(messages.getString("caps-filter")
-                .replace("{percentage}", String.valueOf(config.getMaxCapsPercentage()))));
+                .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
             return;
         }
     
