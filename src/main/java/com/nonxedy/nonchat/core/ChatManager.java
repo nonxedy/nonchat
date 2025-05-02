@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
@@ -18,7 +17,6 @@ import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.hook.DiscordHook;
 import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.CapsFilter;
 import com.nonxedy.nonchat.util.ChatTypeUtil;
@@ -210,48 +208,6 @@ public class ChatManager {
                 }
             }
         }
-
-        // Forward to Discord if channel has a discord channel set
-        String discordChannelId = channel.getDiscordChannelId();
-        if (discordChannelId != null && !discordChannelId.isEmpty()) {
-            // Format the message for Discord - strip Minecraft color codes
-            String discordMessage = ChatColor.stripColor(message.toString());
-            
-            // Clean up the message - remove any Minecraft-specific formatting
-            discordMessage = discordMessage.replaceAll("§[0-9a-fk-or]", "");
-            
-            // Prepare and send formatted message
-            String formattedDiscordMessage = sender.getName() + ": " + originalMessage;
-            String channelPrefix = "[" + channel.getDisplayName() + "] ";
-            
-            // Add channel prefix for better clarity in Discord
-            formattedDiscordMessage = channelPrefix + formattedDiscordMessage;
-            
-            // Get Discord hook from the main plugin class
-            DiscordHook discordHook = plugin.getDiscordHook();
-            if (discordHook != null) {
-                plugin.getLogger().info("Sending message to Discord channel " + discordChannelId 
-                    + ": " + formattedDiscordMessage);
-                    
-                // Get the webhook URL - first check if the channel has its own webhook
-                String webhookUrl = channel.getDiscordWebhook();
-                // If not, use the global webhook
-                if (webhookUrl == null || webhookUrl.trim().isEmpty()) {
-                    webhookUrl = plugin.getDiscordManager().getDiscordHook();
-                }
-                
-                // If DiscordSRV integration is enabled, we'll use it but with our channel-specific routing;
-                // otherwise fall back to webhook
-                if (plugin.getDiscordManager().isUseDiscordSRV()) {
-                    // DiscordSRVListener will prevent DiscordSRV from handling this message
-                    // So we can explicitly route it to the correct Discord channel
-                    discordHook.sendMessage(formattedDiscordMessage, discordChannelId, webhookUrl);
-                } else {
-                    // Use direct webhook
-                    discordHook.sendMessage(formattedDiscordMessage, webhookUrl);
-                }
-            }
-        }
     }
     
     /**
@@ -342,7 +298,7 @@ public class ChatManager {
     }
     
     /**
-     * Updates an existing channel with new properties.
+     * Updates an existing channel with new properties, including Discord channel ID.
      * @param channelId The channel ID to update
      * @param displayName The display name for the channel (null to keep existing)
      * @param format The message format for the channel (null to keep existing)
@@ -363,31 +319,6 @@ public class ChatManager {
         return channelManager.updateChannel(channelId, displayName, format, character,
                                           sendPermission, receivePermission, radius, enabled,
                                           cooldown, minLength, maxLength);
-    }
-    
-    /**
-     * Updates an existing channel with new properties, including Discord channel ID.
-     * @param channelId The channel ID to update
-     * @param displayName The display name for the channel (null to keep existing)
-     * @param format The message format for the channel (null to keep existing)
-     * @param character The trigger character (null to keep existing, '\0' to remove)
-     * @param sendPermission Permission to send to this channel (null to keep existing)
-     * @param receivePermission Permission to receive from this channel (null to keep existing)
-     * @param radius Radius of the channel in blocks (-1 for global, null to keep existing)
-     * @param enabled Whether the channel is enabled (null to keep existing)
-     * @param cooldown Cooldown between messages in seconds (null to keep existing)
-     * @param minLength Minimum message length (null to keep existing)
-     * @param maxLength Maximum message length (null to keep existing)
-     * @param discordChannelId Discord channel ID for DiscordSRV integration (null to keep existing)
-     * @return True if the channel was updated, false otherwise
-     */
-    public boolean updateChannel(String channelId, String displayName, String format,
-                                Character character, String sendPermission, String receivePermission,
-                                Integer radius, Boolean enabled, Integer cooldown, 
-                                Integer minLength, Integer maxLength, String discordChannelId) {
-        return channelManager.updateChannel(channelId, displayName, format, character,
-                                          sendPermission, receivePermission, radius, enabled,
-                                          cooldown, minLength, maxLength, discordChannelId);
     }
     
     /**

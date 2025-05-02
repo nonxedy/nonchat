@@ -92,19 +92,6 @@ public interface Channel {
     boolean isInRange(Player sender, Player recipient);
     
     /**
-     * Gets the Discord channel ID for DiscordSRV integration.
-     * @return Discord channel ID
-     */
-    String getDiscordChannelId();
-    
-    /**
-     * Gets the Discord webhook URL for this channel.
-     * If null or empty, the global webhook URL from discord.yml will be used.
-     * @return Discord webhook URL
-     */
-    String getDiscordWebhook();
-    
-    /**
      * Sets whether this channel is enabled.
      * @param enabled New enabled state
      */

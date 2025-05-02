@@ -8,11 +8,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
-import com.nonxedy.nonchat.config.DiscordManager;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
-import com.nonxedy.nonchat.hook.DiscordHook;
+import com.nonxedy.nonchat.hook.DiscordSRVHook;
 import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.listener.ChatListener;
 import com.nonxedy.nonchat.listener.ChatListenerFactory;
@@ -41,8 +40,7 @@ public class nonchat extends JavaPlugin {
     private Debugger debugger;
     private ChatListener chatListener;
     private IgnoreCommand ignoreCommand;
-    private DiscordHook discordHook;
-    private DiscordManager discordManager;
+    private DiscordSRVHook discordSRVHook;
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
 
@@ -111,19 +109,15 @@ public class nonchat extends JavaPlugin {
     }
 
     private void setupIntegrations() {
-        // Initialize Discord integration
-        this.discordManager = new DiscordManager(this);
-        this.discordHook = new DiscordHook(this);
+        // Initialize DiscordSRV
+        this.discordSRVHook = new DiscordSRVHook(this);
         ChannelAPI.initialize(this);
         
-        // Check if DiscordSRV is present and initialize integration
+        // Initialize DiscordSRV listener
         if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null) {
+            this.discordSRVListener = new DiscordSRVListener(this);
             this.discordSRVIntegration = new DiscordSRVIntegration(this);
             getLogger().info("DiscordSRV integration enabled");
-        }
-        
-        if (debugger != null) {
-            debugger.log("Discord integration initialized");
         }
         
         // Initialize update checker if enabled
@@ -141,9 +135,15 @@ public class nonchat extends JavaPlugin {
         if (broadcastManager != null) {
             broadcastManager.stop();
         }
+        
         if (commandService != null) {
             commandService.unregisterAll();
         }
+
+        if (discordSRVListener != null) {
+            discordSRVListener.shutdown();
+        }
+
         if (discordSRVIntegration != null) {
             discordSRVIntegration.unregister();
         }
@@ -242,14 +242,6 @@ public class nonchat extends JavaPlugin {
     }
 
     // -----------------------------------------------------------------------------------------
-
-    public DiscordManager getDiscordManager() {
-        return discordManager;
-    }
-
-    public DiscordHook getDiscordHook() {
-        return discordHook;
-    }
 
     public ChatManager getChatManager() {
         return chatManager;

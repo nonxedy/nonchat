@@ -95,7 +95,7 @@ public class IntegrationUtil {
             try {
                 return PlaceholderAPI.setPlaceholders(player, text);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[nonchat] Error processing placeholder: " + e.getMessage());
+                Bukkit.getLogger().warning("Error processing placeholder: " + e.getMessage());
                 return text;
             }
         }

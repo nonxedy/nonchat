@@ -32,9 +32,9 @@ public class DiscordSRVHook {
                 // Register this as a listener for DiscordSRV events
                 DiscordSRV.api.subscribe(this);
                 this.isHooked = true;
-                plugin.getLogger().info("Successfully hooked into DiscordSRV!");
+                plugin.logResponse("Successfully hooked into DiscordSRV!");
             } else {
-                plugin.getLogger().warning("DiscordSRV plugin not found or is disabled. DiscordSRV integration will not be available.");
+                plugin.logError("DiscordSRV plugin not found or is disabled. DiscordSRV integration will not be available.");
             }
         } catch (Exception e) {
             plugin.getLogger().severe("Failed to hook into DiscordSRV: " + e.getMessage());
@@ -49,34 +49,27 @@ public class DiscordSRVHook {
      * @param message The message to send
      * @return true if message was sent, false otherwise
      */
-/**
- * Send a message to a specific Discord channel using DiscordSRV
- * @param channelName The channel name from the DiscordSRV Channels configuration
- * @param message The message to send
- * @return true if successful, false if not
- */
-public boolean sendMessageToChannel(String channelName, String message) {
+    public boolean sendMessageToChannel(String channelName, String message) {
         if (!isHooked || discordSRV == null) {
             return false;
         }
 
         try {
-            plugin.getLogger().info("DiscordSRVHook: Sending message to channel '" + channelName + "': " + message);
+            plugin.logResponse("DiscordSRVHook: Sending message to channel '" + channelName + "': " + message);
             
             // Get the TextChannel object from DiscordSRV using the channel name
             TextChannel channel = discordSRV.getDestinationTextChannelForGameChannelName(channelName);
             
             if (channel != null) {
-                plugin.getLogger().info("Found Discord channel: " + channel.getName() + " (" + channel.getId() + ")");
+                plugin.logResponse("Found Discord channel: " + channel.getName() + " (" + channel.getId() + ")");
                 DiscordUtil.sendMessage(channel, message);
                 return true;
             } else {
-                plugin.getLogger().warning("DiscordSRV channel not found: " + channelName);
+                plugin.logError("DiscordSRV channel not found: " + channelName);
                 return false;
             }
         } catch (Exception e) {
-            plugin.getLogger().severe("Error sending message to Discord: " + e.getMessage());
-            e.printStackTrace();
+            plugin.logError("Error sending message to Discord: " + e.getMessage());
         }
         
         return false;
@@ -87,7 +80,7 @@ public boolean sendMessageToChannel(String channelName, String message) {
      */
     @Subscribe
     public void onDiscordReady(DiscordReadyEvent event) {
-        plugin.getLogger().info("Connected to Discord via DiscordSRV!");
+        plugin.logResponse("Connected to Discord via DiscordSRV!");
     }
 
     /**
@@ -135,52 +128,10 @@ public boolean sendMessageToChannel(String channelName, String message) {
         if (isHooked && discordSRV != null) {
             try {
                 DiscordSRV.api.unsubscribe(this);
-                plugin.getLogger().info("Successfully unhooked from DiscordSRV");
+                plugin.logResponse("Successfully unhooked from DiscordSRV");
             } catch (Exception e) {
-                plugin.getLogger().severe("Error while unhooking from DiscordSRV: " + e.getMessage());
+                plugin.logError("Error while unhooking from DiscordSRV: " + e.getMessage());
             }
         }
-    }
-
-    /**
-     * Send a player join message to Discord
-     * 
-     * @param playerName The name of the player who joined
-     */
-    public void sendJoinMessage(String playerName) {
-        if (!isHooked || !plugin.getDiscordManager().isJoinEnabled() || discordSRV == null) {
-            return;
-        }
-        
-        String message = plugin.getDiscordManager().getJoinDescription().replace("%player%", playerName);
-        sendMessageToChannel("global", message);
-    }
-
-    /**
-     * Send a player leave message to Discord
-     * 
-     * @param playerName The name of the player who left
-     */
-    public void sendLeftMessage(String playerName) {
-        if (!isHooked || !plugin.getDiscordManager().isQuitEnabled() || discordSRV == null) {
-            return;
-        }
-        
-        String message = plugin.getDiscordManager().getQuitDescription().replace("%player%", playerName);
-        sendMessageToChannel("global", message);
-    }
-
-    /**
-     * Send a player death message to Discord
-     * 
-     * @param playerName The name of the player who died
-     */
-    public void sendDeathMessage(String playerName) {
-        if (!isHooked || !plugin.getDiscordManager().isDeathEnabled() || discordSRV == null) {
-            return;
-        }
-        
-        String message = plugin.getDiscordManager().getDeathDescription().replace("%player%", playerName);
-        sendMessageToChannel("global", message);
     }
 }

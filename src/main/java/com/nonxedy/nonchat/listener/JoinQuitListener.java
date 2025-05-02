@@ -37,7 +37,6 @@ public class JoinQuitListener implements Listener {
         
         Player player = event.getPlayer();
         
-        // Get prefix and suffix from LuckPerms
         String prefix = "";
         String suffix = "";
         
@@ -72,7 +71,6 @@ public class JoinQuitListener implements Listener {
         
         Player player = event.getPlayer();
         
-        // Get prefix and suffix from LuckPerms
         String prefix = "";
         String suffix = "";
         

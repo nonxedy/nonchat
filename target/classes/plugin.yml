@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.nonchat
 description: The best chat plugin for 1.16-1.21.5
-version: 1.4.4
+version: 1.4.5
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
@@ -10,7 +10,6 @@ load: STARTUP
 depend:
   - LuckPerms
   - PlaceholderAPI
-  - DiscordSRV
 
 softdepend:
   - ProtocolLib

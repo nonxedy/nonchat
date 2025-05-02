@@ -2,6 +2,7 @@ package com.nonxedy.nonchat.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,10 @@ public class PluginConfig {
     private FileConfiguration config;
     // Debug mode flag
     private boolean debug;
+    // Language setting
+    private String language;
+    // Default channel
+    private String defaultChannel;
 
     // Constructor initializes config file path and loads configuration
     public PluginConfig() {
@@ -50,6 +55,10 @@ public class PluginConfig {
         this.config = YamlConfiguration.loadConfiguration(configFile);
         // Set debug mode from config
         this.debug = config.getBoolean("debug", false);
+        // Set language from config
+        this.language = config.getString("language", "en");
+        // Set default channel
+        this.defaultChannel = config.getString("default-channel", "local");
     }
 
     /**
@@ -79,53 +88,132 @@ public class PluginConfig {
      * Sets all default configuration values
      */
     private void setDefaultValues() {
-        // Death settings
-        config.set("death.enabled", true);
-        config.set("death.format", "{prefix} §f{player}§r {suffix}§f died");
-        config.set("death.show-coordinates", true);
-        config.set("join-messages.enabled", true);
-        config.set("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
-        config.set("quit-messages.enabled", true);
-        config.set("quit-messages.format", "§8(§c-§8) {prefix} §f{player}§r {suffix}");
-        config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-        config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-        
-        // Broadcast system settings
-        config.set("broadcast.enabled", true);
-        config.set("broadcast.message", "This message will be sent every 60 seconds");
-        config.set("broadcast.interval", 60);
-        config.set("broadcast.random", false);
-        
-        // Chat bubbles configuration
-        config.set("chat-bubbles.enabled", true);
-        config.set("chat-bubbles.duration", 5);
-        config.set("chat-bubbles.height", 2.5);
+        // Language setting
+        config.set("language", "en");
         
         // Debug mode setting
         config.set("debug", false);
 
         // Update checker settings
         config.set("update-checker", true);
+        
+        // Default channel setting
+        config.set("default-channel", "local");
+        
+        // Death settings
+        config.set("death.enabled", true);
+        config.set("death.format", "{prefix} §f{player}§r {suffix}§f died");
+        config.set("death.show-coordinates", true);
+        
+        // Join/Quit messages settings
+        config.set("join-messages.enabled", true);
+        config.set("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
+        config.set("quit-messages.enabled", true);
+        config.set("quit-messages.format", "§8(§c-§8) {prefix} §f{player}§r {suffix}");
+        
+        // Private chat settings
+        config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+        config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+        
+        // Chat bubbles configuration
+        config.set("chat-bubbles.enabled", true);
+        config.set("chat-bubbles.duration", 5);
+        config.set("chat-bubbles.height", 2.5);
+        
+        // Create default channel configurations
+        createDefaultChannels();
+        
+        // Roleplay commands
+        config.set("roleplay-commands.me.enabled", true);
+        config.set("roleplay-commands.me.format", "&7*{player}: {message}");
+        config.set("roleplay-commands.roll.enabled", true);
+        config.set("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
+        
+        // Hover text
+        config.set("hover-text.enabled", true);
+        List<String> defaultHoverFormat = Arrays.asList(
+            "&#FFAFFB⭐ {player}", 
+            "&#FFAFFB► Rank: &#FFFFFF{prefix}",
+            "&#FFAFFB► Balance: &#FFFFFF${balance}",
+            "&#FFAFFB► Level: &#FFFFFF{level}",
+            "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%",
+            "&#FFAFFB► Location: &#FFFFFF%player_world%",
+            "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms"
+        );
+        config.set("hover-text.format", defaultHoverFormat);
+        
+        // Banned words
+        config.set("banned-words", Arrays.asList("spam", "badword", "anotherbadword", "плохой"));
+        
+        // Caps filter
+        config.set("caps-filter.enabled", true);
+        config.set("caps-filter.max-caps-percentage", 70);
+        config.set("caps-filter.min-length", 4);
+        
+        // Broadcast settings
+        config.set("broadcast.random", true);
+        config.set("broadcast.example.enabled", true);
+        config.set("broadcast.example.message", "This message will be sent every 60 seconds");
+        config.set("broadcast.example.interval", 60);
     }
 
     // Creates default chat channels configuration
-    private void createDefaultChats() {
+    private void createDefaultChannels() {
         // Configure global chat channel
-        config.set("chats.global.enabled", true);
-        config.set("chats.global.format", "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
-        config.set("chats.global.radius", -1);
-        config.set("chats.global.char", "!");
+        config.set("channels.global.enabled", true);
+        config.set("channels.global.display-name", "Global");
+        config.set("channels.global.format", "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("channels.global.radius", -1);
+        config.set("channels.global.character", "!");
+        config.set("channels.global.send-permission", "");
+        config.set("channels.global.receive-permission", "");
+        config.set("channels.global.cooldown", 0);
+        config.set("channels.global.min-length", 0);
+        config.set("channels.global.max-length", -1);
     
         // Configure local chat channel
-        config.set("chats.local.enabled", true);
-        config.set("chats.local.format", "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
-        config.set("chats.local.radius", 100);
-        config.set("chats.local.char", "");
+        config.set("channels.local.enabled", true);
+        config.set("channels.local.display-name", "Local");
+        config.set("channels.local.format", "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("channels.local.radius", 100);
+        config.set("channels.local.character", "");
+        config.set("channels.local.send-permission", "");
+        config.set("channels.local.receive-permission", "");
+        config.set("channels.local.cooldown", 0);
+        config.set("channels.local.min-length", 0);
+        config.set("channels.local.max-length", -1);
         
-        // Save the configuration
-        saveConfig();
+        // Configure staff chat channel
+        config.set("channels.staff.enabled", true);
+        config.set("channels.staff.display-name", "Staff");
+        config.set("channels.staff.format", "§7(§bSC§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("channels.staff.radius", -1);
+        config.set("channels.staff.character", "*");
+        config.set("channels.staff.send-permission", "nonchat.chat.staff");
+        config.set("channels.staff.receive-permission", "nonchat.chat.staff");
+        config.set("channels.staff.cooldown", 0);
+        config.set("channels.staff.min-length", 0);
+        config.set("channels.staff.max-length", -1);
     }
 
+    /**
+     * Gets configured language
+     * @return Language code (en, ru)
+     */
+    @NotNull
+    public String getLanguage() {
+        return language;
+    }
+    
+    /**
+     * Gets the default channel ID
+     * @return Default channel ID
+     */
+    @NotNull
+    public String getDefaultChannel() {
+        return defaultChannel;
+    }
+    
     /**
      * Checks if custom death messages are enabled
      * @return true if enabled
@@ -346,33 +434,80 @@ public class PluginConfig {
 
     /**
      * Checks if specific chat type is enabled
-     * @param chatName Chat type to check
+     * @param channelId Channel ID to check
      * @return true if enabled
      */
-    public boolean isChatEnabled(String chatName) {
+    public boolean isChatEnabled(String channelId) {
         // Get enabled status from config, default to false if not found
-        return config.getBoolean("chats." + chatName + ".enabled", false);
+        return config.getBoolean("channels." + channelId + ".enabled", false);
     }
 
     /**
      * Sets enabled state for chat type
-     * @param chatName Chat type to modify
+     * @param channelId Channel ID to modify
      * @param enabled New enabled state
      */
-    public void setChatEnabled(String chatName, boolean enabled) {
+    public void setChatEnabled(String channelId, boolean enabled) {
         // Update enabled status in config
-        config.set("chats." + chatName + ".enabled", enabled);
+        config.set("channels." + channelId + ".enabled", enabled);
         // Save changes to config file
         saveConfig();
     }
 
+    /**
+     * Gets all configured chat channels
+     * @return Map of channel IDs to ChatTypeUtil objects
+     */
     public Map<String, ChatTypeUtil> getChats() {
-        Map<String, ChatTypeUtil> chats = new HashMap<>();
-        ConfigurationSection section = config.getConfigurationSection("chats");
+        Map<String, ChatTypeUtil> channels = new HashMap<>();
+        ConfigurationSection section = config.getConfigurationSection("channels");
         
         if (section != null) {
             for (String key : section.getKeys(false)) {
-                ConfigurationSection chatSection = section.getConfigurationSection(key);
+                ConfigurationSection channelSection = section.getConfigurationSection(key);
+                if (channelSection != null) {
+                    boolean enabled = channelSection.getBoolean("enabled", true);
+                    String displayName = channelSection.getString("display-name", key);
+                    String format = channelSection.getString("format", "{prefix} {sender} {suffix}: {message}");
+                    int radius = channelSection.getInt("radius", -1);
+                    String charStr = channelSection.getString("character", "");
+                    char chatChar = charStr.isEmpty() ? '\0' : charStr.charAt(0);
+                    
+                    // Get send permission
+                    String sendPermission = channelSection.getString("send-permission", "");
+                    
+                    // For backward compatibility, check old permission field too
+                    if (sendPermission.isEmpty() && channelSection.contains("permission")) {
+                        sendPermission = channelSection.getString("permission");
+                    }
+                    
+                    // Get additional properties
+                    String receivePermission = channelSection.getString("receive-permission", "");
+                    int cooldown = channelSection.getInt("cooldown", 0);
+                    int minLength = channelSection.getInt("min-length", 0);
+                    int maxLength = channelSection.getInt("max-length", -1);
+                    
+                    channels.put(key, new ChatTypeUtil(
+                        enabled, 
+                        displayName,
+                        format, 
+                        radius, 
+                        chatChar, 
+                        sendPermission,
+                        receivePermission,
+                        cooldown,
+                        minLength,
+                        maxLength
+                    ));
+                }
+            }
+        }
+        
+        // For backward compatibility, check old "chats" section too
+        ConfigurationSection oldSection = config.getConfigurationSection("chats");
+        if (oldSection != null && channels.isEmpty()) {
+            for (String key : oldSection.getKeys(false)) {
+                ConfigurationSection chatSection = oldSection.getConfigurationSection(key);
                 if (chatSection != null) {
                     boolean enabled = chatSection.getBoolean("enabled", true);
                     String format = chatSection.getString("format", "{prefix} {sender} {suffix}: {message}");
@@ -386,11 +521,12 @@ public class PluginConfig {
                         permission = chatSection.getString("permission");
                     }
                     
-                    chats.put(key, new ChatTypeUtil(enabled, format, radius, chatChar, permission));
+                    channels.put(key, new ChatTypeUtil(enabled, format, radius, chatChar, permission));
                 }
             }
         }
-        return chats;
+        
+        return channels;
     }
 
     /**
