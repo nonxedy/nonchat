@@ -67,9 +67,6 @@ ignored-by-target: "&#FFAFFBThis player ignores you and you cant send him a mess
 invalid-usage-ignore: "&#ffffffUse: &#FFAFFB/ignore <player>"
 cannot-ignore-self: "&#ff0000You cant ignore yourself."
 
-# Staff Chat.
-invalid-usage-sc: "&#ffffffUse: &#FFAFFB/sc <message>"
-
 # Spy.
 spy-mode-enabled: "&#84FFB8Spy mode enabled"
 spy-mode-disabled: "&#ff0000Spy mode disabled"
@@ -81,25 +78,6 @@ invalid-usage-me: "&#ffffffUse: &#FFAFFB/me <message>"
 # Roll.
 invalid-usage-roll: "&#ffffffUse: &#FFAFFB/roll <max number>"
 invalid-number: "&#ff0000Please enter a valid positive number"
-
-# Placeholders.
-placeholders:
-  # Spy command placeholders.
-  spy: # %nonchat_spy_enabled%
-    enabled: "&#ffffffSpy Mode: &#84FFB8Enabled"
-    disabled: "&#ffffffSpy Mode: &#ff0000Disabled"
-  # Chat Bubbles placeholders.
-  bubble: # %nonchat_bubble_enabled%
-    enabled: "&#ffffffChat Bubbles: &#84FFB8Enabled"
-    disabled: "&#ffffffChat Bubbles: &#ff0000Disabled"
-  # Caps Filter placeholders.
-  caps-filter: # %nonchat_caps_filter_enabled%
-    enabled: "&#ffffffCaps Filter: &#84FFB8Enabled"
-    disabled: "&#ffffffCaps Filter: &#ff0000Disabled"
-  # Ignore command placeholders.
-  ignored: # %nonchat_ignored%
-    true: "&#84FFB8You are ignoring players"
-    false: "&#ff0000You are not ignoring anyone"
 
 # Channel Command
 channel-help-header: "&#FFAFFBChannel Commands:"
@@ -151,3 +129,22 @@ channel-deleted: "&#84FFB8Channel {channel} deleted"
 channel-delete-failed: "&#ff0000Failed to delete channel {channel}. Channel may be the default channel."
 channel-default-set: "&#84FFB8Default channel set to {channel}"
 channel-default-failed: "&#ff0000Failed to set default channel to {channel}"
+
+# Placeholders.
+placeholders:
+  # Spy command placeholders.
+  spy: # %nonchat_spy_enabled%
+    enabled: "&#ffffffSpy Mode: &#84FFB8Enabled"
+    disabled: "&#ffffffSpy Mode: &#ff0000Disabled"
+  # Chat Bubbles placeholders.
+  bubble: # %nonchat_bubble_enabled%
+    enabled: "&#ffffffChat Bubbles: &#84FFB8Enabled"
+    disabled: "&#ffffffChat Bubbles: &#ff0000Disabled"
+  # Caps Filter placeholders.
+  caps-filter: # %nonchat_caps_filter_enabled%
+    enabled: "&#ffffffCaps Filter: &#84FFB8Enabled"
+    disabled: "&#ffffffCaps Filter: &#ff0000Disabled"
+  # Ignore command placeholders.
+  ignored: # %nonchat_ignored%
+    true: "&#84FFB8You are ignoring players"
+    false: "&#ff0000You are not ignoring anyone"
