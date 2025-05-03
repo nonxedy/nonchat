@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.4.5
+# Version of the plugin: 1.4.6
 #
 # - LuckPerms support.
 # - Vault support.
@@ -48,6 +48,7 @@ ignore-command: "&#FFAFFB/ignore <player>&#ffffff - ignore a player"
 spy-command: "&#FFAFFB/spy&#ffffff - enable/disable spy mode"
 me-command: "&#FFAFFB/me <message>&#ffffff - sent a message from your character"
 roll-command: "&#FFAFFB/roll <maximum number>&#ffffff - roll a dice"
+channel-command: "&#FFAFFB/channel help&#ffffff - show channel commands"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBChat clearing..."

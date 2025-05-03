@@ -66,7 +66,23 @@ public class ColorUtil {
                 message.contains("<strikethrough") ||
                 message.contains("<obfuscated") ||
                 message.contains("<reset") ||
-                message.contains("<color")
+                message.contains("<color") ||
+                // legacy color codes in MiniMessage
+                message.contains("<black") ||
+                message.contains("<dark_blue") ||
+                message.contains("<dark_green") ||
+                message.contains("<dark_aqua") ||
+                message.contains("<dark_red") ||
+                message.contains("<dark_purple") ||
+                message.contains("<gold") ||
+                message.contains("<gray") ||
+                message.contains("<dark_gray") ||
+                message.contains("<blue") ||
+                message.contains("<aqua") ||
+                message.contains("<red") ||
+                message.contains("<light_purple") ||
+                message.contains("<yellow") ||
+                message.contains("<white")
             )) {
             // Parse with MiniMessage if it contains MiniMessage format tags
             return parseMiniMessageComponent(message);
