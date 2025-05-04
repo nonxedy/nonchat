@@ -65,6 +65,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 | Status | Task |
 |:------:|------|
+| ⏳ | Add metrics to plugin |
 | 🔜 | Update plugin API |
 | 🔜 | Update plugin architecture |
 | 🔜 | Add support for ProtocolLib in chat bubbles |
