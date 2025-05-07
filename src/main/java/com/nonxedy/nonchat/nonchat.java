@@ -24,6 +24,7 @@ import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.Debugger;
+import com.nonxedy.nonchat.util.Metrics;
 import com.nonxedy.nonchat.util.UpdateChecker;
 
 import net.kyori.adventure.text.Component;
@@ -43,6 +44,7 @@ public class nonchat extends JavaPlugin {
     private DiscordSRVHook discordSRVHook;
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
+    private Metrics metrics;
 
     @Override
     public void onEnable() {
@@ -109,6 +111,9 @@ public class nonchat extends JavaPlugin {
     }
 
     private void setupIntegrations() {
+        // Initialize metrics
+        this.metrics = new Metrics(this, 25786);
+
         // Initialize DiscordSRV
         this.discordSRVHook = new DiscordSRVHook(this);
         ChannelAPI.initialize(this);
