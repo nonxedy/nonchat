@@ -64,13 +64,12 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 <div align="center">
 
 | Status | Task |
-|:------:|------|
-| ⏳ | Add metrics to plugin |
-| 🔜 | Update plugin API |
+|:------:|------| |
+| ⏳ | Update plugin API |
 | 🔜 | Update plugin architecture |
 | 🔜 | Add support for ProtocolLib in chat bubbles |
 | 🔜 | Add support for Folia |
-| ✅ | Add support for DiscordSRV |
+| ✅ | Add metrics to plugin
 
 </div>
 
