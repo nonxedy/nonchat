@@ -69,7 +69,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 | 🔜 | Update plugin architecture |
 | 🔜 | Add support for ProtocolLib in chat bubbles |
 | 🔜 | Add support for Folia |
-| ✅ | Add metrics to plugin
+| ✅ | Add metrics to plugin |
 
 </div>
 
