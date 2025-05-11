@@ -53,7 +53,6 @@ public class CommandService {
         registerCommand("spy", spyCommand); // Use the existing instance
         registerCommand("clear", new ClearCommand(configService.getMessages(), plugin));
         registerCommand("ignore", ignoreCommand); // Use the existing instance
-        plugin.getCommand("ignore").setTabCompleter(plugin.getIgnoreCommand());
         registerCommand("channel", new ChannelCommand(plugin, plugin.getChatManager(), configService.getMessages()));
     
         // Roleplay commands
