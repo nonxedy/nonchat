@@ -65,6 +65,7 @@ ignored-player: "&#84FFB8Вы начали игнорировать игрока
 unignored-player: "&#ff0000Вы перестали игнорировать игрока {player}."
 ignored-by-target: "&#FFAFFBЭтот игрок игнорирует вас и вы не можете отправить ему сообщение."
 invalid-usage-ignore: "&#ffffffИспользуйте: &#FFAFFB/ignore <игрок>"
+you-are-ignoring-player: "&#ff0000Вы игнорируете {player}. Сначала перестаньте игнорировать, чтобы отправлять сообщения."
 cannot-ignore-self: "&#ff0000Вы не можете игнорировать себя."
 
 # Spy.

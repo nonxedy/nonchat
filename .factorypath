@@ -52,8 +52,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/net/bytebuddy/byte-buddy/1.15.1/byte-buddy-1.15.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/me/clip/placeholderapi/2.11.6/placeholderapi-2.11.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/bstats/bstats-bukkit/3.0.1/bstats-bukkit-3.0.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/bstats/bstats-base/3.0.1/bstats-base-3.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/kyori/adventure-platform-bukkit/4.3.2/adventure-platform-bukkit-4.3.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/kyori/adventure-platform-api/4.3.2/adventure-platform-api-4.3.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/kyori/adventure-text-serializer-bungeecord/4.3.2/adventure-text-serializer-bungeecord-4.3.2.jar" enabled="true" runInBatchMode="false"/>
@@ -64,4 +62,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/github/MilkBowl/VaultAPI/1.7.1/VaultAPI-1.7.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/discordsrv/discordsrv/1.28.0/discordsrv-1.28.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/bstats/bstats-bukkit/3.0.2/bstats-bukkit-3.0.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/bstats/bstats-base/3.0.2/bstats-base-3.0.2.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>

@@ -65,6 +65,7 @@ ignored-player: "&#84FFB8You started ignored the player {player}."
 unignored-player: "&#ff0000You no longer ignore the player {player}."
 ignored-by-target: "&#FFAFFBThis player ignores you and you cant send him a message."
 invalid-usage-ignore: "&#ffffffUse: &#FFAFFB/ignore <player>"
+you-are-ignoring-player: "&#ff0000You are ignoring {player}. Unignore them first to send messages."
 cannot-ignore-self: "&#ff0000You cant ignore yourself."
 
 # Spy.

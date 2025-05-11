@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.nonxedy.nonchat.api.Channel;
+import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.HoverTextUtil;
 import com.nonxedy.nonchat.util.LinkDetector;
@@ -32,6 +33,7 @@ public class BaseChannel implements Channel {
     private final HoverTextUtil hoverTextUtil;
     private boolean enabled;
     private static final Pattern mentionPattern = Pattern.compile("@(\\w+)");
+    private IgnoreCommand ignoreCommand;
 
     /**
      * Creates a new BaseChannel with all properties.
@@ -201,5 +203,13 @@ public class BaseChannel implements Channel {
         }
 
         return finalMessage;
+    }
+    
+    /**
+     * Sets the ignore command instance.
+     * @param ignoreCommand The ignore command instance
+     */
+    public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
+        this.ignoreCommand = ignoreCommand;
     }
 }

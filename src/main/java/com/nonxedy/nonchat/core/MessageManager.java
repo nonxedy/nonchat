@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
@@ -19,6 +20,7 @@ public class MessageManager {
     private final PluginMessages messages;
     private final SpyCommand spyCommand;
     private final Map<UUID, UUID> lastMessageSender;
+    private IgnoreCommand ignoreCommand;
 
     public MessageManager(PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
         this.config = config;
@@ -28,6 +30,17 @@ public class MessageManager {
     }
 
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
+        if (ignoreCommand != null && ignoreCommand.isIgnoring(receiver, sender)) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
+            return;
+        }
+        
+        if (ignoreCommand != null && ignoreCommand.isIgnoring(sender, receiver)) {
+            sender.sendMessage(ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
+                    .replace("%player%", receiver.getName())));
+            return;
+        }
+        
         lastMessageSender.put(receiver.getUniqueId(), sender.getUniqueId());
 
         String senderFormat = config.getPrivateChatFormat()
@@ -69,5 +82,13 @@ public class MessageManager {
 
     public void clearLastMessageSender(Player player) {
         lastMessageSender.remove(player.getUniqueId());
+    }
+    
+    /**
+     * Sets the ignore command instance.
+     * @param ignoreCommand The ignore command instance
+     */
+    public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
+        this.ignoreCommand = ignoreCommand;
     }
 }

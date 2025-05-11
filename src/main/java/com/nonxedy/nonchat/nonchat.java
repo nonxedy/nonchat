@@ -73,6 +73,10 @@ public class nonchat extends JavaPlugin {
         this.messageManager = new MessageManager(configService.getConfig(), configService.getMessages(), spyCommand);
         this.broadcastManager = new BroadcastManager(this, configService.getConfig());
         
+        // Set ignore command in managers
+        this.chatManager.setIgnoreCommand(ignoreCommand);
+        this.messageManager.setIgnoreCommand(ignoreCommand);
+        
         // Initialize service layer that depends on managers
         this.chatService = new ChatService(chatManager, messageManager, broadcastManager, configService.getConfig());
         

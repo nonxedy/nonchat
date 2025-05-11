@@ -1,22 +1,31 @@
 package com.nonxedy.nonchat.util;
 
+import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import org.bukkit.entity.Player;
-import java.util.Map;
+
 import java.util.Set;
 import java.util.UUID;
-import java.util.HashSet;
 
 /**
  * Manages player ignore lists for chat functionality
  * Tracks which players have ignored other players
  */
 public class IgnoreManager {
-    /** Map storing ignored player UUIDs for each player */
-    private final Map<UUID, Set<UUID>> ignoredPlayers;
+    private final IgnoreCommand ignoreCommand;
 
-    // Constructor to initialize ignored players map
-    public IgnoreManager(Map<UUID, Set<UUID>> ignoredPlayers) {
-        this.ignoredPlayers = ignoredPlayers;
+    // Constructor to initialize with ignore command
+    public IgnoreManager(IgnoreCommand ignoreCommand) {
+        this.ignoreCommand = ignoreCommand;
+    }
+    
+    /**
+     * Checks if a player is ignoring another player
+     * @param sender The player who might be ignoring
+     * @param target The player who might be ignored
+     * @return true if sender is ignoring target
+     */
+    public boolean isIgnoring(Player sender, Player target) {
+        return ignoreCommand.isIgnoring(sender, target);
     }
     
     /**
@@ -25,6 +34,15 @@ public class IgnoreManager {
      * @return Set of UUIDs representing ignored players, empty set if none
      */
     public Set<UUID> getIgnoredPlayers(Player player) {
-        return ignoredPlayers.getOrDefault(player.getUniqueId(), new HashSet<>());
+        return ignoreCommand.getIgnoredPlayers(player);
+    }
+    
+    /**
+     * Checks if a player is ignoring anyone
+     * @param player The player to check
+     * @return true if the player is ignoring at least one other player
+     */
+    public boolean isIgnoringAnyone(Player player) {
+        return ignoreCommand.isIgnoringAnyone(player);
     }
 }

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
+import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.BubblePacketUtil;
@@ -32,12 +33,14 @@ public class ChatManager {
     private final ChannelManager channelManager;
     private final Pattern mentionPattern = Pattern.compile("@(\\w+)");
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+    private IgnoreCommand ignoreCommand;
 
     public ChatManager(nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
         this.channelManager = new ChannelManager(config);
+        this.ignoreCommand = plugin.getIgnoreCommand();
         startBubbleUpdater();
     }
 
@@ -195,6 +198,11 @@ public class ChatManager {
         // Send to players
         if (channel.isGlobal()) {
             for (Player recipient : Bukkit.getOnlinePlayers()) {
+                // Skip if recipient is ignoring sender
+                if (ignoreCommand != null && ignoreCommand.isIgnoring(recipient, sender)) {
+                    continue;
+                }
+                
                 if (channel.canReceive(recipient)) {
                     recipient.sendMessage(message);
                 }
@@ -202,6 +210,11 @@ public class ChatManager {
         } else {
             // For local chats
             for (Player recipient : Bukkit.getOnlinePlayers()) {
+                // Skip if recipient is ignoring sender
+                if (ignoreCommand != null && ignoreCommand.isIgnoring(recipient, sender)) {
+                    continue;
+                }
+                
                 // Check both range and permission
                 if (channel.isInRange(sender, recipient) && channel.canReceive(recipient)) {
                     recipient.sendMessage(message);
@@ -356,5 +369,13 @@ public class ChatManager {
             return config.getChatTypeByChar(firstChar);
         }
         return config.getDefaultChatType();
+    }
+    
+    /**
+     * Sets the ignore command instance.
+     * @param ignoreCommand The ignore command instance
+     */
+    public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
+        this.ignoreCommand = ignoreCommand;
     }
 }
