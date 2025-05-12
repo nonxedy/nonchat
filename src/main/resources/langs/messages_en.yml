@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.4.6
+# Version of the plugin: 1.4.7
 #
 # - LuckPerms support.
 # - Vault support.
@@ -37,7 +37,7 @@ reloading: "&#FFAFFBReloading..."
 reloaded: "&#84FFB8Plugin reloaded!"
 reload-failed: "&#ff0000Failed to reload plugin!"
 
-#Nhelp.
+# Help.
 help: "&#FFAFFBnonchat | commands:"
 nreload: "&#FFAFFB/nonchat reload&#ffffff - reload plugin"
 help-command: "&#FFAFFB/nonchat help&#ffffff - commands list"
