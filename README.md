@@ -38,8 +38,8 @@
 | `/roll` | RP roll dice |
 | `/server` | Server management commands |
 | `/channel` | Channel managment commands |
-| `/nhelp` | View plugin help |
-| `/nreload` | Reload plugin configuration |
+| `/nonchat help` | View plugin help |
+| `/nonchat reload` | Reload plugin configuration |
 
 ## 🚀 Quick Start
 
