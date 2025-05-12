@@ -24,8 +24,8 @@ permissions:
       - nonchat.message
       - nonchat.broadcast
       - nonchat.server
-      - nonchat.nreload
-      - nonchat.nhelp
+      - nonchat.reload
+      - nonchat.help
       - nonchat.clear
       - nonchat.ignore
       - nonchat.sc
@@ -49,11 +49,11 @@ permissions:
   nonchat.server:
     description: Allows /server command
     default: false
-  nonchat.nreload:
-    description: Allows /nreload command
+  nonchat.reload:
+    description: Allows /nonchat reload command
     default: false
-  nonchat.nhelp:
-    description: Allows /nhelp command
+  nonchat.help:
+    description: Allows /nonchat help command
     default: true
   nonchat.clear:
     description: Allows /clear command
@@ -113,15 +113,10 @@ commands:
     usage: /server
     permission: nonchat.server
     permission-message: You do not have <permission> to use this command!
-  nreload:
-    description: Reload a plugin.
-    usage: /nreload
-    permission: nonchat.nreload
-    permission-message: You do not have <permission> to use this command!
-  nhelp:
-    description: Show plugin info.
-    usage: /nhelp
-    permission: nonchat.nhelp
+  nonchat:
+    description: Main plugin command for nonchat.
+    usage: /nonchat <reload|help>
+    permission: nonchat.help
     permission-message: You do not have <permission> to use this command!
   clear:
     description: Clear chat.

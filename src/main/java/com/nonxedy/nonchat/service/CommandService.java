@@ -16,8 +16,7 @@ import com.nonxedy.nonchat.command.impl.ClearCommand;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.MeCommand;
 import com.nonxedy.nonchat.command.impl.MessageCommand;
-import com.nonxedy.nonchat.command.impl.NhelpCommand;
-import com.nonxedy.nonchat.command.impl.NreloadCommand;
+import com.nonxedy.nonchat.command.impl.NonchatCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
 import com.nonxedy.nonchat.command.impl.ServerCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
@@ -61,8 +60,7 @@ public class CommandService {
     
         // Utility commands
         registerCommand("server", new ServerCommand(configService.getMessages(), plugin));
-        registerCommand("nhelp", new NhelpCommand(configService.getMessages(), plugin));
-        registerCommand("nreload", new NreloadCommand(plugin, configService));
+        registerCommand("nonchat", new NonchatCommand(plugin, configService));
     }
 
     public void registerCommand(String name, CommandExecutor executor) {
@@ -100,5 +98,3 @@ public class CommandService {
         commands.clear();
     }
 }
-
-

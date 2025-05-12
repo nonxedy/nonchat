@@ -39,8 +39,8 @@ reload-failed: "&#ff0000Failed to reload plugin!"
 
 #Nhelp.
 help: "&#FFAFFBnonchat | commands:"
-nreload: "&#FFAFFB/nreload&#ffffff - reload plugin"
-help-command: "&#FFAFFB/nhelp&#ffffff - commands list"
+nreload: "&#FFAFFB/nonchat reload&#ffffff - reload plugin"
+help-command: "&#FFAFFB/nonchat help&#ffffff - commands list"
 server-command: "&#FFAFFB/server&#ffffff - server information"
 message-command: "&#FFAFFB/m <player> <message>&#ffffff - sent a message to a player"
 broadcast-command: "&#FFAFFB/bc <message>&#ffffff - sent a message to all server"

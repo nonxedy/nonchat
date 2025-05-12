@@ -39,8 +39,8 @@ reload-failed: "&#ff0000Не удалось перезагрузить плаг�
 
 #Nhelp.
 help: "&#FFAFFBnonchat | команды:"
-nreload: "&#FFAFFB/nreload&#ffffff - перезагрузка плагина"
-help-command: "&#FFAFFB/nhelp&#ffffff - список команд"
+nreload: "&#FFAFFB/nonchat reload&#ffffff - перезагрузка плагина"
+help-command: "&#FFAFFB/nonchat help&#ffffff - список команд"
 server-command: "&#FFAFFB/server&#ffffff - информация о сервере"
 message-command: "&#FFAFFB/m <игрок> <сообщение>&#ffffff - отправить сообщение игроку"
 broadcast-command: "&#FFAFFB/bc <сообщение>&#ffffff - отправить сообщение всему серверу"
