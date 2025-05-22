@@ -46,9 +46,6 @@ permissions:
   nonchat.broadcast:
     description: Allows /broadcast command
     default: false
-  nonchat.server:
-    description: Allows /server command
-    default: false
   nonchat.reload:
     description: Allows /nonchat reload command
     default: false
@@ -107,11 +104,6 @@ commands:
     aliases: [bc, broadcast]
     usage: /broadcast <message>
     permission: nonchat.broadcast
-    permission-message: You do not have <permission> to use this command!
-  server:
-    description: Show info of server.
-    usage: /server
-    permission: nonchat.server
     permission-message: You do not have <permission> to use this command!
   nonchat:
     description: Main plugin command for nonchat.

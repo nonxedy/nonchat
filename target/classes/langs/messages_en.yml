@@ -20,18 +20,6 @@ player-not-found: "&#ff0000Player not found."
 command-disabled: "&#ff0000This command is disabled."
 caps-filter: "&#ff0000Too many capital letters! Maximum allowed: {percentage}%"
 
-# Server Information.
-server-info: "&#FFAFFBServer Information:&#ffffff"
-java-version: "&#FFAFFBJava Version:&#ffffff "
-port: "&#FFAFFBPort:&#ffffff "
-version: "&#FFAFFBVersion:&#ffffff "
-os-name: "&#FFAFFBOS Name:&#ffffff "
-os-version: "&#FFAFFBOS Version:&#ffffff "
-cpu-cores: "&#FFAFFBCPU Cores:&#ffffff "
-cpu-family: "&#FFAFFBCPU Family:&#ffffff "
-number-of-plugins: "&#FFAFFBNumber of Plugins:&#ffffff "
-number-of-worlds: "&#FFAFFBNumber of Worlds:&#ffffff "
-
 # Reload.
 reloading: "&#FFAFFBReloading..."
 reloaded: "&#84FFB8Plugin reloaded!"

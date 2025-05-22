@@ -20,18 +20,6 @@ player-not-found: "&#ff0000Игрок не найден."
 command-disabled: "&#ff0000Эта команда отключена."
 caps-filter: "&#ff0000Слишком много заглавных букв! Максимально разрешено: {percentage}%"
 
-# Server Information.
-server-info: "&#FFAFFBИнформация о сервере:&#ffffff"
-java-version: "&#FFAFFBВерсия Джавы:&#ffffff "
-port: "&#FFAFFBПорт:&#ffffff "
-version: "&#FFAFFBВерсия:&#ffffff "
-os-name: "&#FFAFFBНазвание ОС:&#ffffff "
-os-version: "&#FFAFFBВерсия ОС:&#ffffff "
-cpu-cores: "&#FFAFFBЯдер процессора:&#ffffff "
-cpu-family: "&#FFAFFBСемейство процессоров:&#ffffff "
-number-of-plugins: "&#FFAFFBКоличество плагинов:&#ffffff "
-number-of-worlds: "&#FFAFFBКоличество миров:&#ffffff "
-
 # Reload.
 reloading: "&#FFAFFBПерезагрузка..."
 reloaded: "&#84FFB8Плагин перезагружен!"

@@ -18,7 +18,6 @@ import com.nonxedy.nonchat.command.impl.MeCommand;
 import com.nonxedy.nonchat.command.impl.MessageCommand;
 import com.nonxedy.nonchat.command.impl.NonchatCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
-import com.nonxedy.nonchat.command.impl.ServerCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 
 public class CommandService {
@@ -59,7 +58,6 @@ public class CommandService {
         registerCommand("roll", new RollCommand(plugin, configService.getConfig(), configService.getMessages()));
     
         // Utility commands
-        registerCommand("server", new ServerCommand(configService.getMessages(), plugin));
         registerCommand("nonchat", new NonchatCommand(plugin, configService));
     }
 
