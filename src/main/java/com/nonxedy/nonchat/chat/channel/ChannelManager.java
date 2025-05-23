@@ -341,6 +341,41 @@ public class ChannelManager {
     }
     
     /**
+     * Gets all global channels.
+     * @return Collection of global channels
+     */
+    @NotNull
+    public Collection<Channel> getGlobalChannels() {
+        return channels.values().stream()
+                .filter(Channel::isGlobal)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Gets all local channels.
+     * @return Collection of local channels
+     */
+    @NotNull
+    public Collection<Channel> getLocalChannels() {
+        return channels.values().stream()
+                .filter(channel -> !channel.isGlobal())
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Gets channels that the player can send messages to.
+     * @param player The player to check permissions for
+     * @return Collection of channels the player can use
+     */
+    @NotNull
+    public Collection<Channel> getChannelsForPlayer(Player player) {
+        return channels.values().stream()
+                .filter(Channel::isEnabled)
+                .filter(channel -> channel.canSend(player))
+                .collect(Collectors.toList());
+    }
+    
+    /**
      * Determines the channel for a message based on its prefix character.
      * @param message The message to check
      * @return The appropriate channel, or default if no match
@@ -351,15 +386,27 @@ public class ChannelManager {
             return getDefaultChannel();
         }
         
-        char firstChar = message.charAt(0);
+        final char firstChar = message.charAt(0);
         
-        for (Channel channel : channels.values()) {
-            if (channel.isEnabled() && channel.hasTriggerCharacter() && channel.getCharacter() == firstChar) {
-                return channel;
-            }
-        }
-        
-        return getDefaultChannel();
+        return channels.values().stream()
+            .filter(Channel::isEnabled)
+            .filter(Channel::hasTriggerCharacter)
+            .filter(channel -> channel.getCharacter() == firstChar)
+            .findFirst()
+            .orElse(getDefaultChannel());
+    }
+    
+    /**
+     * Finds a channel by its trigger character.
+     * @param triggerChar The character to search for
+     * @return Optional containing the channel, or empty if not found
+     */
+    public Optional<Channel> findChannelByCharacter(char triggerChar) {
+        return channels.values().stream()
+            .filter(Channel::isEnabled)
+            .filter(Channel::hasTriggerCharacter)
+            .filter(channel -> channel.getCharacter() == triggerChar)
+            .findFirst();
     }
     
     /**

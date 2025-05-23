@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 
 import com.nonxedy.nonchat.nonchat;
 import com.nonxedy.nonchat.api.Channel;
+import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
@@ -112,17 +113,34 @@ public class ChatManager {
                 .replace("{channel}", channel.getDisplayName())));
             return;
         }
+        
+        // The final message content to be used from now on
+        final String messageToSend;
+        
+        // Check if message should be filtered by registered filters
+        if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("message-filtered")));
+            return;
+        }
+        
+        // Process message through registered processors
+        String processedMessage = ChannelAPI.processMessage(player, finalMessage, channel.getId());
+        if (processedMessage == null) {
+            // Message was cancelled by a processor
+            return;
+        }
+        messageToSend = processedMessage; // Use a new variable for the processed message
     
         if (config.isChatBubblesEnabled() && player.hasPermission("nonchat.chatbubbles")) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 removeBubble(player);
-                createBubble(player, finalMessage);
+                createBubble(player, messageToSend);
             });
         }
     
-        handleMentions(player, finalMessage);
-        Component formattedMessage = channel.formatMessage(player, finalMessage);
-        broadcastMessage(player, formattedMessage, channel, finalMessage);
+        handleMentions(player, messageToSend);
+        Component formattedMessage = channel.formatMessage(player, messageToSend);
+        broadcastMessage(player, formattedMessage, channel, messageToSend);
         
         // Record message sent for cooldown tracking
         channelManager.recordMessageSent(player);
@@ -130,15 +148,14 @@ public class ChatManager {
 
     private void startBubbleUpdater() {
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-            for (Map.Entry<Player, List<ArmorStand>> entry : bubbles.entrySet()) {
-                Player player = entry.getKey();
-                List<ArmorStand> playerBubbles = entry.getValue();
-                
-                if (player.isOnline() && !playerBubbles.isEmpty()) {
+            // Use Stream API to handle updating bubbles
+            bubbles.entrySet().stream()
+                .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
+                .forEach(entry -> {
+                    Player player = entry.getKey();
                     Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                    BubblePacketUtil.updateBubblesLocation(playerBubbles, newLoc);
-                }
-            }
+                    BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
+                });
         }, 1L, 1L);
     }
 
@@ -172,15 +189,21 @@ public class ChatManager {
     }
 
     private void handleMentions(Player sender, String message) {
+        // Find all mentions in the message
         Matcher mentionMatcher = mentionPattern.matcher(message);
+        
+        // Collect all the names found into a list and process with Stream API
+        java.util.List<String> mentionedNames = new java.util.ArrayList<>();
         while (mentionMatcher.find()) {
-            String mentionedPlayerName = mentionMatcher.group(1);
-            Player mentionedPlayer = Bukkit.getPlayer(mentionedPlayerName);
-            
-            if (mentionedPlayer != null && mentionedPlayer.isOnline()) {
-                notifyMentionedPlayer(mentionedPlayer, sender);
-            }
+            mentionedNames.add(mentionMatcher.group(1));
         }
+        
+        // Process the mentions using Stream API
+        mentionedNames.stream()
+            .map(Bukkit::getPlayer)
+            .filter(java.util.Objects::nonNull)
+            .filter(Player::isOnline)
+            .forEach(player -> notifyMentionedPlayer(player, sender));
     }
 
     private void notifyMentionedPlayer(Player mentioned, Player sender) {
@@ -195,32 +218,16 @@ public class ChatManager {
         // Always send to console
         Bukkit.getConsoleSender().sendMessage(message);
 
-        // Send to players
-        if (channel.isGlobal()) {
-            for (Player recipient : Bukkit.getOnlinePlayers()) {
-                // Skip if recipient is ignoring sender
-                if (ignoreCommand != null && ignoreCommand.isIgnoring(recipient, sender)) {
-                    continue;
-                }
-                
-                if (channel.canReceive(recipient)) {
-                    recipient.sendMessage(message);
-                }
-            }
-        } else {
-            // For local chats
-            for (Player recipient : Bukkit.getOnlinePlayers()) {
-                // Skip if recipient is ignoring sender
-                if (ignoreCommand != null && ignoreCommand.isIgnoring(recipient, sender)) {
-                    continue;
-                }
-                
-                // Check both range and permission
-                if (channel.isInRange(sender, recipient) && channel.canReceive(recipient)) {
-                    recipient.sendMessage(message);
-                }
-            }
-        }
+        // Send to players using Stream API
+        Bukkit.getOnlinePlayers().stream()
+            // Skip players ignoring the sender
+            .filter(recipient -> ignoreCommand == null || !ignoreCommand.isIgnoring(recipient, sender))
+            // Check channel-specific conditions
+            .filter(recipient -> channel.canReceive(recipient))
+            // For local channels, also check range
+            .filter(recipient -> channel.isGlobal() || channel.isInRange(sender, recipient))
+            // Send message to filtered recipients
+            .forEach(recipient -> recipient.sendMessage(message));
     }
     
     /**
@@ -229,12 +236,7 @@ public class ChatManager {
      * @return The channel, or null if not found
      */
     private Channel findChannelByChar(char c) {
-        for (Channel channel : channelManager.getAllChannels()) {
-            if (channel.isEnabled() && channel.hasTriggerCharacter() && channel.getCharacter() == c) {
-                return channel;
-            }
-        }
-        return null;
+        return channelManager.findChannelByCharacter(c).orElse(null);
     }
     
     /**

@@ -49,5 +49,7 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/core/MessageManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/impl/ClearCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/impl/MeCommand.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/api/MessageProcessor.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/service/ChatService.java
+/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/api/MessageFilter.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/config/PluginMessages.java
