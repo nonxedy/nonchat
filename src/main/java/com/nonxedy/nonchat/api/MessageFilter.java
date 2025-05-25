@@ -4,9 +4,9 @@ import org.bukkit.entity.Player;
 
 /**
  * Interface for filtering messages in a channel.
- * Implementations can determine if a message should be filtered out.
+ * Implementations can determine if a message should be filtered out
+ * and provide a reason for the filtering.
  */
-@FunctionalInterface
 public interface MessageFilter {
     
     /**
@@ -17,4 +17,14 @@ public interface MessageFilter {
      * @return true if the message should be filtered out, false if it should be allowed
      */
     boolean shouldFilter(Player player, String message);
+    
+    /**
+     * Gets the reason why the message was filtered.
+     * This message can be displayed to the player when their message is blocked.
+     * 
+     * @return The reason for filtering the message
+     */
+    default String getReason() {
+        return "Ваше сообщение было заблокировано";
+    }
 }

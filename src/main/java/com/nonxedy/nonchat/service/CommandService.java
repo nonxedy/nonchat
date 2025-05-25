@@ -20,12 +20,22 @@ import com.nonxedy.nonchat.command.impl.NonchatCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 
+/**
+ * Сервис для регистрации и управления командами плагина.
+ */
 public class CommandService {
     private final nonchat plugin;
     private final ChatService chatService;
     private final ConfigService configService;
     private final Map<String, CommandExecutor> commands;
 
+    /**
+     * Создает новый сервис команд.
+     *
+     * @param plugin Экземпляр плагина
+     * @param chatService Сервис чата
+     * @param configService Сервис конфигурации
+     */
     public CommandService(nonchat plugin, ChatService chatService, ConfigService configService) {
         this.plugin = plugin;
         this.chatService = chatService;
@@ -34,6 +44,9 @@ public class CommandService {
         registerCommands();
     }
 
+    /**
+     * Регистрирует все команды плагина.
+     */
     private void registerCommands() {
         // Get the SpyCommand from the plugin to ensure we use the same instance
         SpyCommand spyCommand = plugin.getSpyCommand();
@@ -61,6 +74,12 @@ public class CommandService {
         registerCommand("nonchat", new NonchatCommand(plugin, configService));
     }
 
+    /**
+     * Регистрирует команду в Bukkit.
+     *
+     * @param name Имя команды
+     * @param executor Исполнитель команды
+     */
     public void registerCommand(String name, CommandExecutor executor) {
         commands.put(name.toLowerCase(), executor);
         PluginCommand pluginCommand = plugin.getCommand(name);
@@ -72,19 +91,36 @@ public class CommandService {
         }
     }
 
+    /**
+     * Получает исполнителя команды по имени.
+     *
+     * @param name Имя команды
+     * @return Исполнитель команды
+     */
     public CommandExecutor getCommand(String name) {
         return commands.get(name.toLowerCase());
     }
 
+    /**
+     * Перезагружает все команды.
+     */
     public void reloadCommands() {
         commands.clear();
         registerCommands();
     }
 
+    /**
+     * Получает множество имен зарегистрированных команд.
+     *
+     * @return Множество имен команд
+     */
     public Set<String> getRegisteredCommands() {
         return Collections.unmodifiableSet(commands.keySet());
     }
 
+    /**
+     * Отменяет регистрацию всех команд.
+     */
     public void unregisterAll() {
         commands.forEach((name, executor) -> {
             PluginCommand pluginCommand = plugin.getCommand(name);
