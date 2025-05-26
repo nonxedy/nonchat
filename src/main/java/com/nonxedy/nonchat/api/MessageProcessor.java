@@ -3,18 +3,44 @@ package com.nonxedy.nonchat.api;
 import org.bukkit.entity.Player;
 
 /**
- * Interface for processing messages in a channel.
- * Implementations can modify or cancel messages sent in a channel.
+ * Interface for processing chat messages.
+ * Implementations can modify messages before they are sent to chat.
  */
-@FunctionalInterface
 public interface MessageProcessor {
     
     /**
-     * Process a message sent by a player in a channel.
+     * Processes a chat message.
      * 
      * @param player The player who sent the message
      * @param message The original message
-     * @return The processed message, or null to cancel the message
+     * @return The processed message
      */
     String process(Player player, String message);
+    
+    /**
+     * Gets the processor name for identification.
+     * 
+     * @return Processor name
+     */
+    default String getName() {
+        return this.getClass().getSimpleName();
+    }
+    
+    /**
+     * Checks if the processor is enabled.
+     * 
+     * @return true if processor is enabled
+     */
+    default boolean isEnabled() {
+        return true;
+    }
+    
+    /**
+     * Gets processor priority (lower = higher priority).
+     * 
+     * @return Priority value
+     */
+    default int getPriority() {
+        return 0;
+    }
 }

@@ -3,22 +3,16 @@ package com.nonxedy.nonchat.api.annotation;
 import java.lang.annotation.*;
 
 /**
- * Аннотация для процессоров сообщений чата.
- * Классы с этой аннотацией будут обрабатывать сообщения в указанных каналах.
+ * Annotation for chat message processors.
+ * Classes with this annotation will process messages in specified channels.
  * 
- * Пример использования:
- * 
+ * Example usage:
  * <pre>
  * {@code 
- * @ChatProcessor(
- *     channels = {"global", "staff"}, 
- *     priority = 100,
- *     permission = "nonchat.format"
- * )
+ * @ChatProcessor(channels = {"global"}, priority = 100)
  * public class ColorCodeProcessor implements MessageProcessor {
  *     @Override
  *     public String process(Player sender, String message) {
- *         // Обработка сообщения, например замена цветовых кодов
  *         return message.replace("&", "§");
  *     }
  * }
@@ -29,26 +23,22 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface ChatProcessor {
     /**
-     * Каналы, к которым применяется процессор.
-     * Пустой массив означает применение ко всем каналам.
+     * Channels to apply processor to (empty = all channels)
      */
     String[] channels() default {};
     
     /**
-     * Приоритет процессора. Чем ниже значение, тем раньше выполняется.
+     * Processor priority (lower = higher priority)
      */
     int priority() default 0;
     
     /**
-     * Разрешение, необходимое для применения процессора.
-     * Пустая строка означает, что разрешение не требуется.
+     * Required permission to use processor
      */
     String permission() default "";
     
     /**
-     * Если true, процессор будет работать только если отправитель имеет указанное разрешение.
-     * Если false, процессор будет работать для всех, но функциональность может отличаться
-     * в зависимости от наличия разрешения.
+     * Permission required for processor to work
      */
     boolean permissionRequired() default false;
 }

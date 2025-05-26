@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.nonxedy.nonchat.api.ChannelAPI;
+import com.nonxedy.nonchat.api.registry.FilterRegistry;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.core.BroadcastManager;
@@ -45,6 +46,7 @@ public class nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
+    private FilterRegistry filterRegistry;
 
     @Override
     public void onEnable() {
@@ -55,6 +57,7 @@ public class nonchat extends JavaPlugin {
         initializeServices();
         registerPlaceholders();
         registerListeners();
+        initializeAnnotationSystems();
         setupIntegrations();
 
         Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
@@ -149,6 +152,10 @@ public class nonchat extends JavaPlugin {
             commandService.unregisterAll();
         }
 
+        if (filterRegistry != null) {
+            filterRegistry.clear();
+        }
+
         if (discordSRVListener != null) {
             discordSRVListener.shutdown();
         }
@@ -156,6 +163,7 @@ public class nonchat extends JavaPlugin {
         if (discordSRVIntegration != null) {
             discordSRVIntegration.unregister();
         }
+        
 
         Bukkit.getConsoleSender().sendMessage(Component.text()
             .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
@@ -214,6 +222,25 @@ public class nonchat extends JavaPlugin {
         }
     }
 
+    /**
+     * Initializes the new annotation-based systems.
+     */
+    private void initializeAnnotationSystems() {
+        logResponse("Initializing annotation-based systems...");
+        
+        // Initialize filter registry
+        filterRegistry = new FilterRegistry(this);
+    
+        // Scan for filters and processors
+        filterRegistry.scanAndRegister("com.nonxedy.nonchat.filter");
+        filterRegistry.scanAndRegister("com.nonxedy.nonchat.processor");
+    
+        // Register annotated commands
+        registerAnnotatedCommands();
+    
+        logResponse("Annotation-based systems initialized successfully");
+    }
+
     public SpyCommand getSpyCommand() {
         return spyCommand;
     }
@@ -224,6 +251,16 @@ public class nonchat extends JavaPlugin {
 
     public ConfigService getConfigService() {
         return configService;
+    }
+
+    /**
+     * Checks if debug mode is enabled.
+     * 
+     * @return true if debug is enabled
+     */
+    public boolean isDebugEnabled() {
+        return debugger != null && configService != null && 
+               configService.getConfig().getBoolean("debug.enabled", false);
     }
 
     public void logCommand(String command, String[] args) {
@@ -254,5 +291,13 @@ public class nonchat extends JavaPlugin {
 
     public ChatManager getChatManager() {
         return chatManager;
+    }
+
+    public FilterRegistry getFilterRegistry() {
+        return filterRegistry;
+    }
+
+    public CommandService getCommandService() {
+        return commandService;
     }
 }

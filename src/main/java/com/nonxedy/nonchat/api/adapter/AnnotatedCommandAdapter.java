@@ -10,34 +10,34 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.api.annotation.CommandHandler;
 import com.nonxedy.nonchat.api.annotation.Parameter;
-import com.nonxedy.nonchat.api.annotation.Sender;
 import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.util.ColorUtil;
 
 import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Адаптер для аннотированных команд, реализующий CommandExecutor.
- * Позволяет использовать новый API с аннотациями для команд.
+ * Adapter for annotated commands implementing CommandExecutor.
+ * Allows using new annotation-based API for commands.
  */
 public class AnnotatedCommandAdapter implements CommandExecutor, TabCompleter {
     
     private final Object commandInstance;
-    private final List<HandlerInfo> handlers;
+    private final List<HandlerMethod> handlers;
     private final com.nonxedy.nonchat.api.annotation.Command commandAnnotation;
     private final nonchat plugin;
     
     /**
-     * Создает новый адаптер для аннотированной команды.
+     * Creates new adapter for annotated command.
      *
-     * @param plugin Экземпляр плагина
-     * @param commandInstance Экземпляр класса команды с аннотациями
+     * @param plugin Plugin instance
+     * @param commandInstance Command class instance with annotations
      */
     public AnnotatedCommandAdapter(nonchat plugin, Object commandInstance) {
         this.plugin = plugin;
         this.commandInstance = commandInstance;
         
-        // Получаем аннотацию @Command из класса
+        // Get @Command annotation from class
         this.commandAnnotation = commandInstance.getClass().getAnnotation(
             com.nonxedy.nonchat.api.annotation.Command.class);
         
@@ -46,64 +46,70 @@ public class AnnotatedCommandAdapter implements CommandExecutor, TabCompleter {
                                               + " is not annotated with @Command");
         }
         
-        // Находим все методы с аннотацией @CommandHandler
+        // Find all methods with @CommandHandler annotation
         this.handlers = new ArrayList<>();
         for (Method method : commandInstance.getClass().getDeclaredMethods()) {
             CommandHandler handlerAnnotation = method.getAnnotation(CommandHandler.class);
             if (handlerAnnotation != null) {
-                handlers.add(new HandlerInfo(method, handlerAnnotation));
+                method.setAccessible(true);
+                handlers.add(new HandlerMethod(method, handlerAnnotation));
             }
         }
         
-        // Сортируем обработчики по приоритету
+        // Sort handlers by priority
         handlers.sort(Comparator.comparingInt(h -> h.annotation.priority()));
+        
+        plugin.logResponse("Registered command: " + commandAnnotation.name() + 
+                          " with " + handlers.size() + " handlers");
     }
     
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, 
                             @NotNull String label, String[] args) {
-        // Проверка на Player Only
+        // Check player only restriction
         if (commandAnnotation.playerOnly() && !(sender instanceof Player)) {
-            sender.sendMessage("§cЭта команда доступна только для игроков!");
+            sender.sendMessage(ColorUtil.parseColor("&cThis command is only available for players!"));
             return true;
         }
         
-        // Проверка разрешения
+        // Check permission
         if (!commandAnnotation.permission().isEmpty() && !sender.hasPermission(commandAnnotation.permission())) {
-            sender.sendMessage("§cУ вас нет разрешения на использование этой команды!");
+            sender.sendMessage(ColorUtil.parseColor("&cYou don't have permission to use this command!"));
             return true;
         }
         
-        // Поиск подходящего обработчика
-        for (HandlerInfo handler : handlers) {
+        // Find suitable handler
+        for (HandlerMethod handler : handlers) {
             CommandHandler annotation = handler.annotation;
             
-            // Проверка минимального и максимального количества аргументов
+            // Check argument count
             if (args.length < annotation.minArgs()) continue;
             if (annotation.maxArgs() != -1 && args.length > annotation.maxArgs()) continue;
             
             try {
-                // Подготавливаем аргументы для вызова метода
+                // Prepare method arguments
                 Object[] methodArgs = prepareArguments(sender, args, handler.method);
                 
-                // Вызываем метод обработчика
+                // Invoke handler method
                 handler.method.invoke(commandInstance, methodArgs);
                 return true;
             } catch (Exception e) {
-                plugin.getLogger().severe("Ошибка выполнения обработчика команды: " + e.getMessage());
-                e.printStackTrace();
-                sender.sendMessage("§cПроизошла ошибка при выполнении команды!");
+                plugin.logError("Error executing command handler: " + e.getMessage());
+                if (plugin.isDebugEnabled()) {
+                    e.printStackTrace();
+                }
+                sender.sendMessage(ColorUtil.parseColor("&cAn error occurred while executing the command!"));
                 return true;
             }
         }
         
-        // Если подходящий обработчик не найден
+        // No suitable handler found
         if (!handlers.isEmpty()) {
             CommandHandler firstHandler = handlers.get(0).annotation;
             String usage = firstHandler.usage();
             if (!usage.isEmpty()) {
-                sender.sendMessage("§cНеправильное использование команды:");
-                sender.sendMessage("§7" + usage);
+                sender.sendMessage(ColorUtil.parseColor("&cIncorrect command usage:"));
+                sender.sendMessage(ColorUtil.parseColor("&7" + usage));
             }
         }
         
@@ -113,79 +119,47 @@ public class AnnotatedCommandAdapter implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, 
                                      @NotNull String alias, String[] args) {
-        // Для примера выводим онлайн-игроков для первого аргумента
+        // Basic tab completion - return online player names for first argument
         if (args.length == 1) {
-            return null; // Стандартное автодополнение имен игроков
+            return null; // Let Bukkit handle player name completion
         }
         return Collections.emptyList();
     }
     
     /**
-     * Подготавливает аргументы для вызова метода обработчика команды.
+     * Prepares arguments for method invocation.
      */
     private Object[] prepareArguments(CommandSender sender, String[] args, Method method) {
         java.lang.reflect.Parameter[] parameters = method.getParameters();
         Object[] result = new Object[parameters.length];
+        int argIndex = 0;
         
         for (int i = 0; i < parameters.length; i++) {
             java.lang.reflect.Parameter param = parameters[i];
             
-            // Обработка аннотации @Sender
-            if (param.isAnnotationPresent(Sender.class)) {
-                Class<?> paramType = param.getType();
-                if (paramType.isInstance(sender)) {
-                    result[i] = sender;
-                } else {
-                    throw new IllegalArgumentException("Sender type mismatch");
-                }
-                continue;
-            }
-            
-            // Обработка аннотации @Parameter
+            // Handle @Parameter annotation
             if (param.isAnnotationPresent(Parameter.class)) {
                 Parameter annotation = param.getAnnotation(Parameter.class);
+                result[i] = processParameter(sender, args, annotation, argIndex);
                 
-                // Определяем индекс аргумента
-                int index = annotation.index();
-                if (index == -1) {
-                    // Если индекс не указан, используем порядковый номер параметра
-                    // (пропуская параметры с @Sender)
-                    index = getParameterIndex(parameters, i);
-                }
-                
-                // Проверяем, есть ли аргумент с таким индексом
-                if (index >= args.length) {
-                    if (annotation.required()) {
-                        throw new IllegalArgumentException("Required parameter missing");
+                // Increment arg index for non-sender parameters
+                if (annotation.type() != Parameter.ParameterType.SENDER) {
+                    if (annotation.joined()) {
+                        argIndex = args.length; // Consume all remaining args
                     } else {
-                        result[i] = annotation.defaultValue();
-                        continue;
+                        argIndex++;
                     }
                 }
-                
-                // Получаем значение аргумента
-                String argValue = args[index];
-                
-                // Если параметр joined, объединяем все оставшиеся аргументы
-                if (annotation.joined() && index < args.length - 1) {
-                    StringBuilder joinedValue = new StringBuilder(argValue);
-                    for (int j = index + 1; j < args.length; j++) {
-                        joinedValue.append(" ").append(args[j]);
-                    }
-                    argValue = joinedValue.toString();
-                }
-                
-                // Конвертируем значение в нужный тип
-                result[i] = convertArgument(argValue, param.getType());
-                continue;
-            }
-            
-            // Если параметр без аннотаций, используем порядковый номер
-            int index = getParameterIndex(parameters, i);
-            if (index < args.length) {
-                result[i] = convertArgument(args[index], param.getType());
             } else {
-                throw new IllegalArgumentException("Missing argument");
+                // Handle parameters without annotation
+                Class<?> paramType = param.getType();
+                if (CommandSender.class.isAssignableFrom(paramType)) {
+                    result[i] = sender;
+                } else if (paramType == String[].class) {
+                    result[i] = args;
+                } else {
+                    throw new IllegalArgumentException("Unsupported parameter type: " + paramType.getName());
+                }
             }
         }
         
@@ -193,74 +167,113 @@ public class AnnotatedCommandAdapter implements CommandExecutor, TabCompleter {
     }
     
     /**
-     * Определяет индекс параметра с учетом параметров с @Sender.
+     * Processes parameter based on annotation.
      */
-    private int getParameterIndex(java.lang.reflect.Parameter[] parameters, int currentIndex) {
-        int argIndex = 0;
-        for (int i = 0; i < currentIndex; i++) {
-            if (!parameters[i].isAnnotationPresent(Sender.class)) {
-                argIndex++;
-            }
+    private Object processParameter(CommandSender sender, String[] args, Parameter annotation, int argIndex) {
+        switch (annotation.type()) {
+            case SENDER:
+                return sender;
+                
+            case PLAYER:
+                if (argIndex >= args.length) {
+                    if (annotation.optional()) {
+                        return null;
+                    }
+                    throw new IllegalArgumentException("Missing required player parameter");
+                }
+                Player player = Bukkit.getPlayer(args[argIndex]);
+                if (player == null || !player.isOnline()) {
+                    throw new IllegalArgumentException("Player not found: " + args[argIndex]);
+                }
+                return player;
+                
+            case STRING:
+                if (argIndex >= args.length) {
+                    if (annotation.optional()) {
+                        return annotation.defaultValue();
+                    }
+                    throw new IllegalArgumentException("Missing required string parameter");
+                }
+                
+                if (annotation.joined()) {
+                    StringBuilder joined = new StringBuilder(args[argIndex]);
+                    for (int i = argIndex + 1; i < args.length; i++) {
+                        joined.append(" ").append(args[i]);
+                    }
+                    return joined.toString();
+                } else {
+                    return args[argIndex];
+                }
+                
+            case INTEGER:
+                if (argIndex >= args.length) {
+                    if (annotation.optional()) {
+                        return annotation.defaultValue().isEmpty() ? 0 : Integer.parseInt(annotation.defaultValue());
+                    }
+                    throw new IllegalArgumentException("Missing required integer parameter");
+                }
+                try {
+                    return Integer.parseInt(args[argIndex]);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid integer: " + args[argIndex]);
+                }
+                
+            case DOUBLE:
+                if (argIndex >= args.length) {
+                    if (annotation.optional()) {
+                        return annotation.defaultValue().isEmpty() ? 0.0 : Double.parseDouble(annotation.defaultValue());
+                    }
+                    throw new IllegalArgumentException("Missing required double parameter");
+                }
+                try {
+                    return Double.parseDouble(args[argIndex]);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid double: " + args[argIndex]);
+                }
+                
+            case BOOLEAN:
+                if (argIndex >= args.length) {
+                    if (annotation.optional()) {
+                        return annotation.defaultValue().isEmpty() ? false : Boolean.parseBoolean(annotation.defaultValue());
+                    }
+                    throw new IllegalArgumentException("Missing required boolean parameter");
+                }
+                return Boolean.parseBoolean(args[argIndex]);
+                
+            default:
+                throw new IllegalArgumentException("Unsupported parameter type: " + annotation.type());
         }
-        return argIndex;
     }
     
     /**
-     * Конвертирует строковое значение в указанный тип.
+     * Handler method information.
      */
-    private Object convertArgument(String value, Class<?> targetType) {
-        if (targetType == String.class) {
-            return value;
-        } else if (targetType == int.class || targetType == Integer.class) {
-            return Integer.parseInt(value);
-        } else if (targetType == boolean.class || targetType == Boolean.class) {
-            return Boolean.parseBoolean(value);
-        } else if (targetType == double.class || targetType == Double.class) {
-            return Double.parseDouble(value);
-        } else if (targetType == float.class || targetType == Float.class) {
-            return Float.parseFloat(value);
-        } else if (targetType == long.class || targetType == Long.class) {
-            return Long.parseLong(value);
-        } else if (targetType == Player.class) {
-            Player player = Bukkit.getPlayer(value);
-            if (player == null || !player.isOnline()) {
-                throw new IllegalArgumentException("Player not found: " + value);
-            }
-            return player;
-        }
-        
-        throw new IllegalArgumentException("Unsupported parameter type: " + targetType.getName());
-    }
-    
-    /**
-     * Класс, представляющий информацию об обработчике команды.
-     */
-    private static class HandlerInfo {
+    private static class HandlerMethod {
         private final Method method;
         private final CommandHandler annotation;
         
-        public HandlerInfo(Method method, CommandHandler annotation) {
+        public HandlerMethod(Method method, CommandHandler annotation) {
             this.method = method;
             this.annotation = annotation;
         }
     }
 
     /**
-     * Получает имя команды из аннотации.
+     * Gets command name from annotation.
      */
     public String getName() {
         return commandAnnotation.name();
     }
     
     /**
-     * Получает псевдонимы команды из аннотации.
+     * Gets command aliases from annotation.
      */
     public String[] getAliases() {
         return commandAnnotation.aliases();
     }
     
     /**
-     * Получает описание команды из аннотации.
+     * Gets command description from annotation.
      */
     public String getDescription() {
         return commandAnnotation.description();

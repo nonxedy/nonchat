@@ -3,19 +3,13 @@ package com.nonxedy.nonchat.api.annotation;
 import java.lang.annotation.*;
 
 /**
- * Аннотация для классов команд.
+ * Annotation for command classes.
+ * Marks a class as a command handler with basic configuration.
  * 
- * Пример использования:
- * 
+ * Example usage:
  * <pre>
  * {@code 
- * @Command(
- *     name = "message", 
- *     aliases = {"msg", "m", "tell"}, 
- *     description = "Send a private message",
- *     permission = "nonchat.message",
- *     playerOnly = true
- * )
+ * @Command(name = "message", aliases = {"msg", "tell"}, permission = "nonchat.message")
  * public class MessageCommand {
  *     // Command implementation
  * }
@@ -26,27 +20,27 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface Command {
     /**
-     * Имя команды
+     * Command name (required)
      */
     String name();
     
     /**
-     * Альтернативные названия команды
+     * Command aliases
      */
     String[] aliases() default {};
     
     /**
-     * Описание команды для help
+     * Command description
      */
     String description() default "";
     
     /**
-     * Требуемое разрешение
+     * Required permission
      */
     String permission() default "";
     
     /**
-     * Ограничение команды только для игроков
+     * Player only command
      */
     boolean playerOnly() default false;
 }

@@ -1,135 +1,139 @@
 package com.nonxedy.nonchat.api.model;
 
 import org.bukkit.entity.Player;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
- * Рекорд представляющий упоминание в чате (@player, @group, @all и т.д.).
- * Иммутабельный объект, содержащий информацию о типе упоминания, целях и т.д.
+ * Represents a mention in chat (@player, @group, @all, etc.).
+ * Immutable object containing information about mention type, targets, etc.
  */
-public record Mention(
-    // Оригинальный текст упоминания (как написал пользователь)
-    String originalText,
+public class Mention {
+    private final String originalText;
+    private final String targetName;
+    private final MentionType type;
+    private final List<Player> targetPlayers;
+    private final String formattedText;
+    private final boolean allowed;
     
-    // Имя цели упоминания (без @ и других символов)
-    String targetName,
-    
-    // Тип упоминания (игрок, группа, все и т.д.)
-    MentionType type,
-    
-    // Список игроков, которые упомянуты
-    List<Player> targetPlayers,
-    
-    // Форматированный текст упоминания (с цветами и т.д.)
-    String formattedText,
-    
-    // Разрешено ли упоминание (может быть отклонено фильтрами)
-    boolean allowed
-) {
     /**
-     * Компактный конструктор для установки значений по умолчанию.
+     * Creates a new mention instance.
+     * 
+     * @param originalText Original mention text
+     * @param targetName Target name (without @ symbol)
+     * @param type Mention type
+     * @param targetPlayers List of mentioned players
+     * @param formattedText Formatted mention text
+     * @param allowed Whether mention is allowed
      */
-    public Mention {
-        if (targetPlayers == null) {
-            targetPlayers = Collections.emptyList();
-        }
-        
-        if (formattedText == null) {
-            formattedText = originalText;
-        }
+    public Mention(String originalText, String targetName, MentionType type, 
+                   List<Player> targetPlayers, String formattedText, boolean allowed) {
+        this.originalText = originalText;
+        this.targetName = targetName;
+        this.type = type;
+        this.targetPlayers = targetPlayers != null ? new ArrayList<>(targetPlayers) : new ArrayList<>();
+        this.formattedText = formattedText != null ? formattedText : originalText;
+        this.allowed = allowed;
     }
     
     /**
-     * Базовый конструктор для создания упоминания игрока.
+     * Creates a player mention.
      * 
-     * @param originalText Оригинальный текст упоминания
-     * @param player Упомянутый игрок
+     * @param originalText Original mention text
+     * @param player Mentioned player
+     * @return New mention instance
      */
-    public Mention(String originalText, Player player) {
-        this(originalText, player.getName(), MentionType.PLAYER, 
-             Collections.singletonList(player), null, true);
+    public static Mention player(String originalText, Player player) {
+        return new Mention(originalText, player.getName(), MentionType.PLAYER, 
+                          Collections.singletonList(player), null, true);
     }
     
     /**
-     * Создает упоминание группы игроков.
+     * Creates a group mention.
      * 
-     * @param originalText Оригинальный текст упоминания
-     * @param groupName Название группы
-     * @param players Список игроков в группе
-     * @return Новый объект Mention для группы
+     * @param originalText Original mention text
+     * @param groupName Group name
+     * @param players Players in group
+     * @return New mention instance
      */
     public static Mention group(String originalText, String groupName, List<Player> players) {
         return new Mention(originalText, groupName, MentionType.GROUP, players, null, true);
     }
     
     /**
-     * Создает упоминание всех игроков.
+     * Creates an everyone mention.
      * 
-     * @param originalText Оригинальный текст упоминания (обычно "@all" или "@everyone")
-     * @param players Список всех игроков онлайн
-     * @return Новый объект Mention для всех
+     * @param originalText Original mention text
+     * @param players All online players
+     * @return New mention instance
      */
-    public static Mention all(String originalText, List<Player> players) {
-        return new Mention(originalText, "all", MentionType.ALL, players, null, true);
+    public static Mention everyone(String originalText, List<Player> players) {
+        return new Mention(originalText, "everyone", MentionType.ALL, players, null, true);
     }
     
     /**
-     * Создает новую версию упоминания с указанным форматированным текстом.
+     * Creates a copy with new formatted text.
      * 
-     * @param newFormattedText Новый форматированный текст
-     * @return Новый объект Mention с обновленным форматированным текстом
+     * @param newFormattedText New formatted text
+     * @return New mention instance
      */
     public Mention withFormattedText(String newFormattedText) {
         return new Mention(originalText, targetName, type, targetPlayers, newFormattedText, allowed);
     }
     
     /**
-     * Создает новую версию упоминания, отмеченную как неразрешенную.
+     * Creates a copy marked as denied.
      * 
-     * @return Новый объект Mention с флагом allowed = false
+     * @return New mention instance with allowed = false
      */
     public Mention deny() {
         return new Mention(originalText, targetName, type, targetPlayers, formattedText, false);
     }
     
     /**
-     * Проверяет, упоминается ли конкретный игрок.
+     * Checks if specific player is mentioned.
      * 
-     * @param player Игрок для проверки
-     * @return true, если игрок упоминается, иначе false
+     * @param player Player to check
+     * @return true if player is mentioned
      */
     public boolean mentions(Player player) {
         return targetPlayers.contains(player);
     }
     
     /**
-     * Проверяет, упоминается ли игрок с указанным именем.
+     * Checks if player with given name is mentioned.
      * 
-     * @param playerName Имя игрока для проверки
-     * @return true, если игрок упоминается, иначе false
+     * @param playerName Player name to check
+     * @return true if player is mentioned
      */
     public boolean mentionsByName(String playerName) {
         return targetPlayers.stream()
-            .map(Player::getName)
-            .anyMatch(name -> name.equalsIgnoreCase(playerName));
+            .anyMatch(p -> p.getName().equalsIgnoreCase(playerName));
     }
     
+    // Getters
+    public String getOriginalText() { return originalText; }
+    public String getTargetName() { return targetName; }
+    public MentionType getType() { return type; }
+    public List<Player> getTargetPlayers() { return Collections.unmodifiableList(targetPlayers); }
+    public String getFormattedText() { return formattedText; }
+    public boolean isAllowed() { return allowed; }
+    
     /**
-     * Типы упоминаний.
+     * Mention types enumeration.
      */
     public enum MentionType {
-        /** Упоминание конкретного игрока (@player) */
+        /** Individual player mention (@player) */
         PLAYER,
         
-        /** Упоминание группы игроков (@group, @admin, @mod и т.д.) */
+        /** Group mention (@group, @admin, @mod, etc.) */
         GROUP,
         
-        /** Упоминание всех игроков (@all, @everyone) */
+        /** Everyone mention (@all, @everyone) */
         ALL,
         
-        /** Другие типы упоминаний */
+        /** Other mention types */
         OTHER
     }
 }

@@ -3,24 +3,15 @@ package com.nonxedy.nonchat.api.annotation;
 import java.lang.annotation.*;
 
 /**
- * Аннотация для методов обработчиков команд.
- * Позволяет определить метод, который будет вызываться при выполнении команды.
+ * Annotation for command handler methods.
+ * Marks a method as a command execution handler.
  * 
- * Пример использования:
- * 
+ * Example usage:
  * <pre>
  * {@code 
- * @Command(name = "message", aliases = {"msg", "m"})
- * public class MessageCommand {
- * 
- *     @CommandHandler(minArgs = 2, usage = "/msg <player> <message>")
- *     public void onMessage(
- *         @Sender Player sender, 
- *         @Parameter(name = "player") Player target, 
- *         @Parameter(name = "message", joined = true) String message
- *     ) {
- *         // Implementation
- *     }
+ * @CommandHandler(usage = "/msg <player> <message>")
+ * public void execute(CommandSender sender, String[] args) {
+ *     // Implementation
  * }
  * }
  * </pre>
@@ -29,22 +20,22 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 public @interface CommandHandler {
     /**
-     * Минимальное количество аргументов
+     * Minimum arguments required
      */
     int minArgs() default 0;
     
     /**
-     * Максимальное количество аргументов (-1 = без ограничений)
+     * Maximum arguments allowed (-1 for unlimited)
      */
     int maxArgs() default -1;
     
     /**
-     * Инструкция по использованию команды
+     * Usage message
      */
     String usage() default "";
     
     /**
-     * Приоритет обработчика (если несколько обработчиков подходят по условиям)
+     * Handler priority (lower = higher priority)
      */
     int priority() default 0;
 }

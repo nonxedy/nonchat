@@ -3,28 +3,17 @@ package com.nonxedy.nonchat.api.annotation;
 import java.lang.annotation.*;
 
 /**
- * Аннотация для фильтров сообщений чата.
- * Классы с этой аннотацией будут использоваться для фильтрации сообщений в указанных каналах.
+ * Annotation for chat message filters.
+ * Classes with this annotation will be used to filter messages in specified channels.
  * 
- * Пример использования:
- * 
+ * Example usage:
  * <pre>
  * {@code 
- * @ChatFilter(
- *     channels = {"global", "local"},
- *     priority = 50,
- *     bypassPermission = "nonchat.bypass.profanity"
- * )
+ * @ChatFilter(channels = {"global", "local"}, priority = 50)
  * public class ProfanityFilter implements MessageFilter {
  *     @Override
  *     public boolean shouldFilter(Player sender, String message) {
- *         // Проверка сообщения на наличие запрещенных слов
  *         return containsProfanity(message);
- *     }
- *     
- *     @Override
- *     public String getReason() {
- *         return "Message contains inappropriate language";
  *     }
  * }
  * }
@@ -34,36 +23,22 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 public @interface ChatFilter {
     /**
-     * Каналы, к которым применяется фильтр.
-     * Пустой массив означает применение ко всем каналам.
+     * Channels to apply filter to (empty = all channels)
      */
     String[] channels() default {};
     
     /**
-     * Приоритет фильтра. Чем ниже значение, тем раньше выполняется.
+     * Filter priority (lower = higher priority)
      */
     int priority() default 0;
     
     /**
-     * Если true, игрок не будет получать уведомление о блокировке сообщения.
+     * Silent filtering (no notification to player)
      */
     boolean silent() default false;
     
     /**
-     * Разрешение для обхода фильтра.
-     * Игрок с этим разрешением не будет подвергаться фильтрации.
+     * Permission to bypass filter
      */
     String bypassPermission() default "";
-    
-    /**
-     * Если true, сообщение будет заменено на кастомное, 
-     * а не полностью заблокировано
-     */
-    boolean replace() default false;
-    
-    /**
-     * Если replace=true, указывает текст для замены отфильтрованного сообщения.
-     * Если не указан, используется значение по умолчанию из конфигурации.
-     */
-    String replacementText() default "";
 }
