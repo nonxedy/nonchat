@@ -235,9 +235,6 @@ public class nonchat extends JavaPlugin {
         filterRegistry.scanAndRegister("com.nonxedy.nonchat.filter");
         filterRegistry.scanAndRegister("com.nonxedy.nonchat.processor");
     
-        // Register annotated commands
-        registerAnnotatedCommands();
-    
         logResponse("Annotation-based systems initialized successfully");
     }
 
