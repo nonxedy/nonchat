@@ -16,6 +16,7 @@ com/nonxedy/nonchat/util/Metrics$CustomChart.class
 com/nonxedy/nonchat/util/UpdateChecker.class
 com/nonxedy/nonchat/command/impl/ClearCommand.class
 com/nonxedy/nonchat/util/LanguageManager.class
+com/nonxedy/nonchat/util/ItemDisplayUtil.class
 com/nonxedy/nonchat/api/IConfigurable.class
 com/nonxedy/nonchat/api/ChannelAPI.class
 com/nonxedy/nonchat/util/LinkDetector.class
@@ -46,6 +47,7 @@ com/nonxedy/nonchat/util/Metrics$AdvancedPie.class
 com/nonxedy/nonchat/util/CapsFilter.class
 com/nonxedy/nonchat/command/impl/SpyCommand.class
 com/nonxedy/nonchat/command/impl/IgnoreCommand.class
+com/nonxedy/nonchat/util/ItemDetector.class
 com/nonxedy/nonchat/util/HoverTextUtil.class
 com/nonxedy/nonchat/chat/channel/ChannelManager.class
 com/nonxedy/nonchat/util/WordBlocker.class

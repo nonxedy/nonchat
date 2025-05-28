@@ -9,10 +9,12 @@ import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.HoverTextUtil;
+import com.nonxedy.nonchat.util.ItemDetector;
 import com.nonxedy.nonchat.util.LinkDetector;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
@@ -194,8 +196,18 @@ public class BaseChannel implements Channel {
             finalMessage = finalMessage.append(ColorUtil.parseComponent(beforeParts[1]));
         }
     
-        // Add message with clickable links
-        finalMessage = finalMessage.append(LinkDetector.makeLinksClickable(message));
+        // Process the message for items and links
+        Component processedMessage = ItemDetector.processItemPlaceholders(player, message);
+        
+        // If we processed items, append the processed component
+        // Otherwise, process for links as before
+        if (processedMessage instanceof TextComponent && ((TextComponent) processedMessage).content().equals(message)) {
+            // No item placeholders found, process links as usual
+            finalMessage = finalMessage.append(LinkDetector.makeLinksClickable(message));
+        } else {
+            // Item placeholders were processed, use the processed message
+            finalMessage = finalMessage.append(processedMessage);
+        }
     
         // Add after message part if it exists
         if (!afterMessage.isEmpty()) {

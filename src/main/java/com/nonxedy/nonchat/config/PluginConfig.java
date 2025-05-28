@@ -100,6 +100,10 @@ public class PluginConfig {
         // Default channel setting
         config.set("default-channel", "local");
         
+        // Interactive chat settings
+        config.set("interactive-chat.item.enabled", true);
+        config.set("interactive-chat.item.format", "&7*{player} shows: ");
+        
         // Death settings
         config.set("death.enabled", true);
         config.set("death.format", "{prefix} §f{player}§r {suffix}§f died");
@@ -577,6 +581,15 @@ public class PluginConfig {
      */
     public String getRollFormat() {
         return config.getString("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
+    }
+    
+    /**
+     * Gets item display format for [item] placeholders
+     * @return Format string
+     */
+    public String getItemFormat() {
+        String defaultFormat = "&7*{player} shows: ";
+        return config.getString("interactive-chat.item.format", defaultFormat);
     }
 
     /**

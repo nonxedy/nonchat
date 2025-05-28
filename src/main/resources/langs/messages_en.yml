@@ -69,6 +69,9 @@ invalid-usage-me: "&#ffffffUse: &#FFAFFB/me <message>"
 invalid-usage-roll: "&#ffffffUse: &#FFAFFB/roll <max number>"
 invalid-number: "&#ff0000Please enter a valid positive number"
 
+# General command errors
+command-error: "&#ff0000An error occurred while executing the command."
+
 # Channel Command
 channel-help-header: "&#FFAFFBChannel Commands:"
 channel-help-set: "&#FFAFFB/channel set <channel>&#ffffff - set your active channel"

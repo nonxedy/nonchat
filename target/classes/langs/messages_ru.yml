@@ -69,6 +69,9 @@ invalid-usage-me: "&#ffffffИспользуйте: &#FFAFFB/me <сообщени
 invalid-usage-roll: "&#ffffffИспользуйте: &#FFAFFB/roll <максимальное число>"
 invalid-number: "&#ff0000Пожалуйста, используйте допустимое положительное число"
 
+# General command errors
+command-error: "&#ff0000Произошла ошибка при выполнении команды."
+
 # Channel Command
 channel-help-header: "&#FFAFFBКоманды каналов:"
 channel-help-set: "&#FFAFFB/channel set <канал>&#ffffff - выбрать активный канал"
