@@ -11,6 +11,7 @@ import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.HoverTextUtil;
 import com.nonxedy.nonchat.util.ItemDetector;
 import com.nonxedy.nonchat.util.LinkDetector;
+import com.nonxedy.nonchat.util.PingDetector;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -196,17 +197,16 @@ public class BaseChannel implements Channel {
             finalMessage = finalMessage.append(ColorUtil.parseComponent(beforeParts[1]));
         }
     
-        // Process the message for items and links
-        Component processedMessage = ItemDetector.processItemPlaceholders(player, message);
+        // Process the message for items, ping, and links
+        Component itemProcessed = ItemDetector.processItemPlaceholders(player, message);
+        Component pingProcessed = PingDetector.processPingPlaceholders(player, 
+            itemProcessed instanceof TextComponent ? ((TextComponent) itemProcessed).content() : message);
         
-        // If we processed items, append the processed component
-        // Otherwise, process for links as before
-        if (processedMessage instanceof TextComponent && ((TextComponent) processedMessage).content().equals(message)) {
-            // No item placeholders found, process links as usual
+        // If no item/ping placeholders found, process links as usual
+        if (pingProcessed instanceof TextComponent && ((TextComponent) pingProcessed).content().equals(message)) {
             finalMessage = finalMessage.append(LinkDetector.makeLinksClickable(message));
         } else {
-            // Item placeholders were processed, use the processed message
-            finalMessage = finalMessage.append(processedMessage);
+            finalMessage = finalMessage.append(pingProcessed);
         }
     
         // Add after message part if it exists

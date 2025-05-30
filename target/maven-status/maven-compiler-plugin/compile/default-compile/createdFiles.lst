@@ -37,6 +37,7 @@ com/nonxedy/nonchat/util/MessageFormatter.class
 com/nonxedy/nonchat/command/impl/NonchatCommand.class
 com/nonxedy/nonchat/util/Metrics.class
 com/nonxedy/nonchat/util/Metrics$MultiLineChart.class
+com/nonxedy/nonchat/util/PingDetector.class
 com/nonxedy/nonchat/listener/DeathListener.class
 com/nonxedy/nonchat/util/AutoBroadcastSender.class
 com/nonxedy/nonchat/listener/DiscordSRVListener.class
