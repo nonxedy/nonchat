@@ -54,18 +54,9 @@ public class LinkDetector {
             
             // Get the URL
             String url = matcher.group();
-            String clickableUrl = url;
-            
-            // Ensure URL has proper protocol for clicking
-            if (url.toLowerCase().startsWith("www.")) {
-                clickableUrl = "https://" + url;
-            }
             
             // Create clickable link component
-            Component linkComponent = ColorUtil.parseComponent("&#3498db" + url)
-                    .clickEvent(ClickEvent.openUrl(clickableUrl))
-                    .hoverEvent(HoverEvent.showText(ColorUtil.parseComponent("&#2ecc71Click to open: &#ffffff" + clickableUrl)))
-                    .decoration(TextDecoration.UNDERLINED, true);
+            Component linkComponent = createLinkComponent(url);
             
             builder.append(linkComponent);
             
@@ -73,41 +64,22 @@ public class LinkDetector {
         }
         
         // Add any remaining text after the last URL
-        if (lastEnd < text.length()) {
-            builder.append(ColorUtil.parseComponent(text.substring(lastEnd)));
+        String afterLastUrl = text.substring(lastEnd);
+        if (!afterLastUrl.isEmpty()) {
+            builder.append(ColorUtil.parseComponent(afterLastUrl));
         }
         
         return builder.build();
     }
 
-    /**
-     * Checks if the given text contains any URLs
-     * @param text The text to check
-     * @return true if the text contains URLs, false otherwise
-     */
-    public static boolean containsLinks(String text) {
-        if (text == null || text.isEmpty()) {
-            return false;
+    private static Component createLinkComponent(String url) {
+        String clickableUrl = url;
+        if (url.toLowerCase().startsWith("www.")) {
+            clickableUrl = "https://" + url;
         }
-        return URL_PATTERN.matcher(text).find();
-    }
-    
-    /**
-     * Extracts all URLs from the given text
-     * @param text The text to extract URLs from
-     * @return List of URLs found in the text
-     */
-    public static List<String> extractLinks(String text) {
-        List<String> links = new ArrayList<>();
-        if (text == null || text.isEmpty()) {
-            return links;
-        }
-        
-        Matcher matcher = URL_PATTERN.matcher(text);
-        while (matcher.find()) {
-            links.add(matcher.group());
-        }
-        
-        return links;
+        return Component.text(url)
+                .clickEvent(ClickEvent.openUrl(clickableUrl))
+                .hoverEvent(HoverEvent.showText(Component.text("Click to open: " + clickableUrl)))
+                .decoration(TextDecoration.UNDERLINED, true);
     }
 }
