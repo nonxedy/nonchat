@@ -21,9 +21,12 @@
 - 🛡️ **Word Filter** - Protect your chat from inappropriate content
 - ⚰️ **Custom Death Messages** - Stylish death announcements
 - 🎭 **Roleplay Commands** - Enhanced RP experience with /me and /roll commands
-- 🔒 **Staff Chat** - Private communication for staff member
+- 🔒 **Staff Chat** - Private communication for staff members
 - 💡 **Hover Messages** - Interactive hover text with additional information
 - 🔗 **DiscordSRV Integration** - Seamless chat synchronization between Minecraft and Discord
+- 📱 **Interactive Chat Placeholders** - Dynamic placeholders for enhanced chat experience:
+  - `[ping]` - Display your current ping with color-coded status
+  - `[item]` - Show your held item with detailed hover information
 
 ## 🎮 Commands
 
@@ -36,10 +39,30 @@
 | `/spy` | Toggle private message spy mode |
 | `/me` | Send a first-person message |
 | `/roll` | RP roll dice |
-| `/server` | Server management commands |
-| `/channel` | Channel managment commands |
+| `/channel` | Channel management commands |
 | `/nonchat help` | View plugin help |
 | `/nonchat reload` | Reload plugin configuration |
+
+## 🔧 Interactive Chat Placeholders
+
+nonchat supports dynamic placeholders that make your chat more interactive and informative:
+
+### 📊 Ping Placeholder
+Use `[ping]` in your messages to display your current connection latency:
+- **Green** (< 100ms) - Excellent connection
+- **Gold** (100-300ms) - Good connection  
+- **Red** (> 300ms) - Poor connection
+
+**Example:** `My ping is [ping]` → `My ping is 45ms`
+
+### 🎒 Item Placeholder
+Use `[item]` in your messages to showcase the item you're currently holding:
+- Displays item name with rarity-based coloring
+- Hover over the item name to see detailed information
+- Shows enchantments, durability, and other item properties
+- Automatically detects if you're not holding anything
+
+**Example:** `Check out this [item]!` → `Check out this Diamond Sword!` (with hover details)
 
 ## 🚀 Quick Start
 
@@ -56,6 +79,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 - **Performance Optimized** - Built with efficiency in mind
 - **Modern Features** - Supports latest Minecraft versions (1.16-1.21.5)
+- **Interactive Elements** - Dynamic placeholders for enhanced player experience
 - **Easy Configuration** - Simple YAML configuration with messages.yml support
 - **Active Development** - Regular updates and feature additions
 
@@ -64,11 +88,13 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 <div align="center">
 
 | Status | Task |
-|:------:|------| |
-| ⏳ | Update plugin API |
+|:------:|------|
 | 🔜 | Update plugin architecture |
 | 🔜 | Add support for ProtocolLib in chat bubbles |
 | 🔜 | Add support for Folia |
+| 🔜 | Add more interactive placeholders (ex. [coords], [health], [time]) |
+| ✅ | Add interactive placeholders ([ping], [item]) |
+| ✅ | Update plugin API |
 | ✅ | Add metrics to plugin |
 
 </div>
@@ -97,6 +123,7 @@ If you enjoy nonchat, consider supporting its development:
   <img src="assets/screenshot3.png" alt="Player Pings" width="400"/>
   <img src="assets/screenshot4.png" alt="Chat Bubbles" width="400"/>
   <img src="assets/screenshot5.png" alt="Hex Support" width="400"/>
+  <img src="assets/screenshot6.png" alt="Interactive Placeholders" width="400"/>
 </div>
 
 ## 📝 License
