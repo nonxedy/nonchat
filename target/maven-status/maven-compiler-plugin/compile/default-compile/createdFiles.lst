@@ -61,6 +61,7 @@ com/nonxedy/nonchat/util/IntegrationUtil.class
 com/nonxedy/nonchat/util/Metrics$JsonObjectBuilder.class
 com/nonxedy/nonchat/listener/ChatListener.class
 com/nonxedy/nonchat/api/MessageFilter.class
+com/nonxedy/nonchat/nonchat$1.class
 com/nonxedy/nonchat/command/impl/MeCommand.class
 com/nonxedy/nonchat/nonchat.class
 com/nonxedy/nonchat/api/IMessageHandler.class

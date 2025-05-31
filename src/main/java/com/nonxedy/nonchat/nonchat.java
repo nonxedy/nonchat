@@ -1,8 +1,17 @@
 package com.nonxedy.nonchat;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.nonxedy.nonchat.api.ChannelAPI;
@@ -23,6 +32,7 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.Debugger;
 import com.nonxedy.nonchat.util.Metrics;
 import com.nonxedy.nonchat.util.UpdateChecker;
@@ -46,6 +56,8 @@ public class nonchat extends JavaPlugin {
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
 
+    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -56,6 +68,19 @@ public class nonchat extends JavaPlugin {
         registerPlaceholders();
         registerListeners();
         setupIntegrations();
+
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+            @Override
+            public void run() {
+                for (World world : Bukkit.getWorlds()) {
+                    for (Entity entity : world.getEntities()) {
+                        if (entity instanceof ArmorStand) {
+                            entity.remove();
+                        }
+                    }
+                }
+            }
+        }, 20);
 
         Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
     }
@@ -211,6 +236,14 @@ public class nonchat extends JavaPlugin {
             }
         } else {
             debugger = null;
+        }
+    }
+
+    @EventHandler
+    public void onPlayerTeleport(PlayerTeleportEvent event) {
+        List<ArmorStand> playerBubbles = bubbles.remove(event.getPlayer());
+        if (playerBubbles != null) {
+            BubblePacketUtil.removeBubbles(playerBubbles);
         }
     }
 
