@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.4.7
+# Version of the plugin: 1.4.8
 #
 # - LuckPerms support.
 # - Vault support.
@@ -68,6 +68,9 @@ invalid-usage-me: "&#ffffffИспользуйте: &#FFAFFB/me <сообщени
 # Roll.
 invalid-usage-roll: "&#ffffffИспользуйте: &#FFAFFB/roll <максимальное число>"
 invalid-number: "&#ff0000Пожалуйста, используйте допустимое положительное число"
+
+# General command errors
+command-error: "&#ff0000Произошла ошибка при выполнении команды."
 
 # Channel Command
 channel-help-header: "&#FFAFFBКоманды каналов:"

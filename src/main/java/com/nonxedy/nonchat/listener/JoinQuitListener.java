@@ -1,5 +1,10 @@
 package com.nonxedy.nonchat.listener;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -8,6 +13,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
 
 import net.luckperms.api.LuckPermsProvider;
@@ -20,6 +26,7 @@ import net.luckperms.api.model.user.User;
 public class JoinQuitListener implements Listener {
     
     private final PluginConfig config;
+    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
     
     public JoinQuitListener(PluginConfig config) {
         this.config = config;
@@ -65,6 +72,11 @@ public class JoinQuitListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
+        List<ArmorStand> playerBubbles = bubbles.remove(event.getPlayer());
+        if (playerBubbles != null) {
+            BubblePacketUtil.removeBubbles(playerBubbles);
+        }
+
         if (!config.isQuitMessageEnabled()) {
             return;
         }
