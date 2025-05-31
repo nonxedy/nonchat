@@ -1,21 +1,25 @@
 package com.nonxedy.nonchat.chat.channel;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.HoverTextUtil;
 import com.nonxedy.nonchat.util.ItemDetector;
+import com.nonxedy.nonchat.util.ItemDisplayUtil;
 import com.nonxedy.nonchat.util.LinkDetector;
 import com.nonxedy.nonchat.util.PingDetector;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.User;
 
@@ -197,24 +201,88 @@ public class BaseChannel implements Channel {
             finalMessage = finalMessage.append(ColorUtil.parseComponent(beforeParts[1]));
         }
     
-        // Process the message for items, ping, and links
-        Component itemProcessed = ItemDetector.processItemPlaceholders(player, message);
-        Component pingProcessed = PingDetector.processPingPlaceholders(player, 
-            itemProcessed instanceof TextComponent ? ((TextComponent) itemProcessed).content() : message);
-        
-        // If no item/ping placeholders found, process links as usual
-        if (pingProcessed instanceof TextComponent && ((TextComponent) pingProcessed).content().equals(message)) {
-            finalMessage = finalMessage.append(LinkDetector.makeLinksClickable(message));
+        // Process the message for placeholders
+        Component messageComponent;
+    
+        // Check what placeholders we have
+        boolean hasItem = message.toLowerCase().contains("[item]");
+        boolean hasPing = message.toLowerCase().contains("[ping]");
+    
+        if (hasItem && hasPing) {
+            // Process both placeholders
+            messageComponent = processBothPlaceholders(player, message);
+        } else if (hasItem) {
+            messageComponent = ItemDetector.processItemPlaceholders(player, message);
+        } else if (hasPing) {
+            messageComponent = PingDetector.processPingPlaceholders(player, message);
         } else {
-            finalMessage = finalMessage.append(pingProcessed);
+            messageComponent = LinkDetector.makeLinksClickable(message);
         }
     
+        finalMessage = finalMessage.append(messageComponent);
+
         // Add after message part if it exists
         if (!afterMessage.isEmpty()) {
             finalMessage = finalMessage.append(ColorUtil.parseComponent(afterMessage));
         }
 
         return finalMessage;
+    }
+
+    /**
+     * Processes both item and ping placeholders in a message
+     */
+    private Component processBothPlaceholders(Player player, String message) {
+        // Use TextComponent.Builder instead of Component.Builder
+        TextComponent.Builder builder = Component.text();
+    
+        // Split by [item] and [ping] and process each part
+        String[] parts = message.split("(?i)\\[(item|ping)\\]");
+        Pattern pattern = Pattern.compile("(?i)\\[(item|ping)\\]");
+        Matcher matcher = pattern.matcher(message);
+    
+        int partIndex = 0;
+    
+        while (matcher.find()) {
+            // Add text before placeholder
+            if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
+                builder.append(Component.text(parts[partIndex]));
+            }
+            partIndex++;
+            
+            String placeholder = matcher.group().toLowerCase();
+            if (placeholder.equals("[item]")) {
+                // Process item
+                ItemStack heldItem = player.getInventory().getItemInMainHand();
+                if (heldItem == null || heldItem.getType().isAir()) {
+                    builder.append(Component.text("No item"));
+                } else {
+                    String itemName = ItemDisplayUtil.getItemName(heldItem);
+                    Component itemComponent = Component.text(itemName)
+                        .hoverEvent(ItemDisplayUtil.createItemHoverEvent(heldItem));
+                    builder.append(itemComponent);
+                }
+            } else if (placeholder.equals("[ping]")) {
+                // Process ping
+                int ping = player.getPing();
+                NamedTextColor color;
+                if (ping < 100) {
+                    color = NamedTextColor.GREEN;
+                } else if (ping < 300) {
+                    color = NamedTextColor.GOLD;
+                } else {
+                    color = NamedTextColor.RED;
+                }
+                builder.append(Component.text(ping + "ms").color(color));
+            }
+        }
+        
+        // Add remaining text
+        if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
+            builder.append(Component.text(parts[partIndex]));
+        }
+        
+        return builder.build();
     }
     
     /**
