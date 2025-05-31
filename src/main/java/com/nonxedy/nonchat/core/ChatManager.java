@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
@@ -160,6 +161,10 @@ public class ChatManager {
     }
 
     private void createBubble(Player player, String message) {
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            return; // Don't spawn bubble if player is in spectator mode
+        }
+
         Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
         
         List<ArmorStand> playerBubbles = BubblePacketUtil.spawnMultilineBubble(player, message, loc);
