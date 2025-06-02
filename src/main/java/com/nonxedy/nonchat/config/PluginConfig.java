@@ -100,6 +100,9 @@ public class PluginConfig {
         // Default channel setting
         config.set("default-channel", "local");
         
+        // Message delivery notification settings
+        config.set("message-delivery.notify-no-recipients", true);
+        
         // Interactive chat settings
         config.set("interactive-chat.item.enabled", true);
         config.set("interactive-chat.item.format", "&7*{player} shows: ");
@@ -198,6 +201,23 @@ public class PluginConfig {
         config.set("channels.staff.cooldown", 0);
         config.set("channels.staff.min-length", 0);
         config.set("channels.staff.max-length", -1);
+    }
+
+    /**
+     * Checks if message delivery notifications are enabled
+     * @return true if enabled
+     */
+    public boolean isMessageDeliveryNotificationEnabled() {
+        return config.getBoolean("message-delivery.notify-no-recipients", true);
+    }
+
+    /**
+     * Sets message delivery notification state
+     * @param enabled New enabled state
+     */
+    public void setMessageDeliveryNotificationEnabled(boolean enabled) {
+        config.set("message-delivery.notify-no-recipients", enabled);
+        saveConfig();
     }
 
     /**
