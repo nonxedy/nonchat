@@ -123,6 +123,7 @@ public class PluginConfig {
         config.set("chat-bubbles.enabled", true);
         config.set("chat-bubbles.duration", 5);
         config.set("chat-bubbles.height", 2.5);
+        config.set("chat-bubbles.show-in-private-channels", false);
         
         // Create default channel configurations
         createDefaultChannels();
@@ -377,6 +378,15 @@ public class PluginConfig {
     public double getChatBubblesHeight() {
         return config.getDouble("chat-bubbles.height", 2.5);
     }
+
+    /**
+     * Checks if chat bubbles should be shown in private channels
+     * @return true if bubbles should show in private channels
+     */
+    public boolean shouldShowBubblesInPrivateChannels() {
+        return config.getBoolean("chat-bubbles.show-in-private-channels", false);
+    }
+
 
     /**
      * Gets list of banned words

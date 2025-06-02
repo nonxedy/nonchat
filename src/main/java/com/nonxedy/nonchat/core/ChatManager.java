@@ -132,7 +132,13 @@ public class ChatManager {
         }
         messageToSend = processedMessage; // Use a new variable for the processed message
     
-        if (config.isChatBubblesEnabled() && player.hasPermission("nonchat.chatbubbles")) {
+        // Only show chat bubbles for public channels (channels without receive permission requirements)
+        // or if the channel doesn't have restricted access
+        boolean shouldShowBubble = config.isChatBubblesEnabled() && 
+                                  player.hasPermission("nonchat.chatbubbles") &&
+                                  isPublicChannel(channel);
+        
+        if (shouldShowBubble) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 removeBubble(player);
                 createBubble(player, messageToSend);
@@ -142,9 +148,38 @@ public class ChatManager {
         handleMentions(player, messageToSend);
         Component formattedMessage = channel.formatMessage(player, messageToSend);
         broadcastMessage(player, formattedMessage, channel, messageToSend);
-        
+
         // Record message sent for cooldown tracking
         channelManager.recordMessageSent(player);
+    }
+
+    /**
+     * Checks if a channel is considered "public" (should show chat bubbles)
+     * A channel is public if it doesn't require special permissions to receive messages
+     * or if the config allows bubbles in private channels
+     * @param channel The channel to check
+     * @return true if the channel should show bubbles, false otherwise
+     */
+    private boolean isPublicChannel(Channel channel) {
+        // If config allows bubbles in private channels, always show them
+        if (config.shouldShowBubblesInPrivateChannels()) {
+            return true;
+        }
+
+        // If channel has receive permission requirements, it's considered private
+        String receivePermission = channel.getReceivePermission();
+        if (receivePermission != null && !receivePermission.isEmpty()) {
+            return false;
+        }
+
+        // If channel has send permission requirements, it's also considered private
+        String sendPermission = channel.getSendPermission();
+        if (sendPermission != null && !sendPermission.isEmpty()) {
+            return false;
+        }
+
+        // Channel is public if it doesn't require any special permissions
+        return true;
     }
 
     private void startBubbleUpdater() {
