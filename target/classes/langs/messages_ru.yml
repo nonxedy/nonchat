@@ -20,6 +20,7 @@ mentioned: "&#ffffffВы были упомянуты игроком &#84FFB8{pla
 player-not-found: "&#ff0000Игрок не найден."
 command-disabled: "&#ff0000Эта команда отключена."
 caps-filter: "&#ff0000Слишком много заглавных букв! Максимально разрешено: {percentage}%"
+message-not-delivered: "&#ff0000Ваше сообщение не было доставлено."
 
 # Reload.
 reloading: "&#FFAFFBПерезагрузка..."
@@ -141,3 +142,4 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8Вы игнорируете игроков"
     false: "&#ff0000Вы никого не игнорируете"
+

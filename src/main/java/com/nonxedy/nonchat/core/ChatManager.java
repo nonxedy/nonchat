@@ -24,6 +24,7 @@ import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.CapsFilter;
 import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.MessageDeliveryTracker;
 import com.nonxedy.nonchat.util.WordBlocker;
 
 import net.kyori.adventure.text.Component;
@@ -35,6 +36,7 @@ public class ChatManager {
     private final ChannelManager channelManager;
     private final Pattern mentionPattern = Pattern.compile("@(\\w+)");
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+    private final MessageDeliveryTracker deliveryTracker;
     private IgnoreCommand ignoreCommand;
 
     public ChatManager(nonchat plugin, PluginConfig config, PluginMessages messages) {
@@ -43,6 +45,7 @@ public class ChatManager {
         this.messages = messages;
         this.channelManager = new ChannelManager(config);
         this.ignoreCommand = plugin.getIgnoreCommand();
+        this.deliveryTracker = new MessageDeliveryTracker(messages, config);
         startBubbleUpdater();
     }
 
@@ -113,6 +116,16 @@ public class ChatManager {
                 .replace("{seconds}", String.valueOf(remainingSeconds))
                 .replace("{channel}", channel.getDisplayName())));
             return;
+        }
+        
+        // Convert Channel to ChatTypeUtil for delivery check
+        ChatTypeUtil chatType = convertChannelToChatType(channel);
+        
+        // Check message delivery before processing
+        if (config.isMessageDeliveryNotificationEnabled()) {
+            if (!deliveryTracker.checkMessageDelivery(player, chatType)) {
+                return; // Message not delivered, stop processing
+            }
         }
         
         // The final message content to be used from now on
@@ -396,6 +409,14 @@ public class ChatManager {
 
     public ChannelManager getChannelManager() {
         return channelManager;
+    }
+    
+    /**
+     * Gets the message delivery tracker
+     * @return MessageDeliveryTracker instance
+     */
+    public MessageDeliveryTracker getDeliveryTracker() {
+        return deliveryTracker;
     }
     
     /**
