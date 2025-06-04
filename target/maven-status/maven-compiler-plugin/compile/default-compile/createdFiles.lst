@@ -7,7 +7,6 @@ com/nonxedy/nonchat/util/Metrics$SimplePie.class
 com/nonxedy/nonchat/config/PluginMessages.class
 com/nonxedy/nonchat/util/Metrics$SingleLineChart.class
 com/nonxedy/nonchat/listener/ChatListenerFactory.class
-com/nonxedy/nonchat/util/MessageDeliveryTracker.class
 com/nonxedy/nonchat/util/Metrics$MetricsBase.class
 com/nonxedy/nonchat/command/impl/ChannelCommand.class
 com/nonxedy/nonchat/service/ChatService.class
@@ -29,7 +28,6 @@ com/nonxedy/nonchat/listener/BukkitChatListener.class
 com/nonxedy/nonchat/listener/PaperChatListener.class
 com/nonxedy/nonchat/service/CommandService.class
 com/nonxedy/nonchat/command/impl/MessageCommand.class
-com/nonxedy/nonchat/command/base/BaseCommand.class
 com/nonxedy/nonchat/api/MessageProcessor.class
 com/nonxedy/nonchat/placeholders/NonchatExpansion.class
 com/nonxedy/nonchat/util/BroadcastMessage.class

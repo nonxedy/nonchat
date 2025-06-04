@@ -162,13 +162,6 @@ public class BaseChannel implements Channel {
 
     @Override
     public Component formatMessage(Player player, String message) {
-        User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
-        String prefix = user.getCachedData().getMetaData().getPrefix();
-        String suffix = user.getCachedData().getMetaData().getSuffix();
-
-        prefix = prefix == null ? "" : ColorUtil.parseColor(prefix);
-        suffix = suffix == null ? "" : ColorUtil.parseColor(suffix);
-
         String baseFormat = getFormat();
         
         // Apply PlaceholderAPI if available
@@ -180,34 +173,42 @@ public class BaseChannel implements Channel {
             }
         }
 
-        // Replace basic placeholders
-        baseFormat = baseFormat
-            .replace("{prefix}", prefix)
-            .replace("{suffix}", suffix)
-            .replace("{channel}", getDisplayName());
+        // Replace channel placeholder
+        baseFormat = baseFormat.replace("{channel}", getDisplayName());
 
-        // Split format into parts
+        // Split format into parts around {message}
         String[] formatParts = baseFormat.split("\\{message\\}");
         String beforeMessage = formatParts[0];
         String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
 
-        String[] beforeParts = beforeMessage.split("\\{sender\\}");
-    
-        // Build component with hoverable player name
-        Component finalMessage = ColorUtil.parseComponent(beforeParts[0])
-            .append(hoverTextUtil.createHoverablePlayerName(player, player.getName()));
-
-        if (beforeParts.length > 1) {
-            finalMessage = finalMessage.append(ColorUtil.parseComponent(beforeParts[1]));
+        // Check if we need to create hoverable player name
+        // Look for %player_name% in the before message part
+        Component finalMessage;
+        if (beforeMessage.contains("%player_name%")) {
+            // Split around %player_name% to create hoverable name
+            String[] nameParts = beforeMessage.split("%player_name%");
+            String beforeName = nameParts[0];
+            String afterName = nameParts.length > 1 ? nameParts[1] : "";
+            
+            // Build component with hoverable player name
+            finalMessage = ColorUtil.parseComponent(beforeName)
+                .append(hoverTextUtil.createHoverablePlayerName(player, player.getName()));
+            
+            if (!afterName.isEmpty()) {
+                finalMessage = finalMessage.append(ColorUtil.parseComponent(afterName));
+            }
+        } else {
+            // No player name placeholder, just parse the before message
+            finalMessage = ColorUtil.parseComponent(beforeMessage);
         }
-    
+
         // Process the message for placeholders
         Component messageComponent;
-    
+
         // Check what placeholders we have
         boolean hasItem = message.toLowerCase().contains("[item]");
         boolean hasPing = message.toLowerCase().contains("[ping]");
-    
+
         if (hasItem && hasPing) {
             // Process both placeholders
             messageComponent = processBothPlaceholders(player, message);
@@ -218,7 +219,7 @@ public class BaseChannel implements Channel {
         } else {
             messageComponent = LinkDetector.makeLinksClickable(message);
         }
-    
+
         finalMessage = finalMessage.append(messageComponent);
 
         // Add after message part if it exists

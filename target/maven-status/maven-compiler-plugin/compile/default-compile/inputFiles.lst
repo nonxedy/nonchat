@@ -7,7 +7,6 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/api/MessageProcessor.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/chat/channel/BaseChannel.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/chat/channel/ChannelManager.java
-/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/base/BaseCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/impl/BroadcastCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/impl/ChannelCommand.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/command/impl/ClearCommand.java
@@ -51,7 +50,6 @@
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/ItemDisplayUtil.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/LanguageManager.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/LinkDetector.java
-/run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/MessageDeliveryTracker.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/MessageFormatter.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/Metrics.java
 /run/media/nonxedy/fdda53da-6e23-4070-b2de-7d34acbce7d9/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/PingDetector.java

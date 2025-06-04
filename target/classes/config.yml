@@ -33,7 +33,7 @@
 #   max-length: number          - Maximum message length (-1 for unlimited)
 #
 # Command options format:
-#   format:text {prefix} {sender} {message}
+#   format:text %luckperms_prefix% %player_name% {message}
 #   char:X                      - Trigger character
 #   send:permission.node        - Permission to send
 #   receive:permission.node     - Permission to receive
@@ -45,10 +45,8 @@
 # ==================================================
 # CHAT FORMATTING:
 #
-# {prefix} - Prefix in luckperms
-# {sender} - Name of the player who sent the message
-# {suffix} - Suffix in luckperms
-# {message} - The message
+# {message} - The message (required)
+# PlaceholderAPI placeholders
 #
 # !!! DONT DELETE {message} IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE !!!
 # ==================================================
@@ -67,7 +65,7 @@ channels:
   global: # The ID of the channel
     enabled: true # Enable/disable the channel
     display-name: "Global" # Display name for the channel
-    format: "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}" # The chat format
+    format: "§7(§6G§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}" # The chat format
     radius: -1 # The radius of chat (in blocks). -1 = global
     character: '!' # The character that triggers this channel
     send-permission: "" # Permission to send messages in this channel (empty = everyone)
@@ -79,7 +77,7 @@ channels:
   local:
     enabled: true
     display-name: "Local"
-    format: "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
+    format: "§7(§6L§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}"
     radius: 100
     character: ''
     send-permission: ""
@@ -91,7 +89,7 @@ channels:
   staff:
     enabled: true
     display-name: "Staff"
-    format: "§7(§bSC§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}"
+    format: "§7(§bSC§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}"
     radius: -1
     character: '*'
     send-permission: "nonchat.chat.staff"
@@ -103,17 +101,17 @@ channels:
 # The death config.
 death:
   enabled: true # Enable/disable custom death messages
-  format: "{prefix} §f{player}§r {suffix}§f died" # The death format.
+  format: "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died" # The death format.
   show-coordinates: true # Show death coordinates to the player
 
 # The join/quit message config.
 join-messages:
   enabled: true # Enable/disable join messages
-  format: "§8(§a+§8) {prefix} §f{player}§r {suffix}" # Join message format
+  format: "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%" # Join message format
 
 quit-messages:
   enabled: true # Enable/disable quit messages
-  format: "§8(§c-§8) {prefix} §f{player}§r {suffix}" # Quit message format
+  format: "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%" # Quit message format
 
 # The private chat config.
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
@@ -156,10 +154,10 @@ chat-bubbles:
 roleplay-commands: # List of roleplay commands.
   me: # /me command.
     enabled: true # Enable/disable the command.
-    format: "&7*{player}: {message}" # The format of the command.
+    format: "&7*%player_name%: {message}" # The format of the command.
   roll:
     enabled: true
-    format: "&7*{player} rolled a {number}"
+    format: "&7*%player_name% rolled a {number}"
 
 # ==================================================
 # HOVER TEXT
@@ -168,10 +166,10 @@ roleplay-commands: # List of roleplay commands.
 hover-text:
   enabled: true # Enable/disable the hover text.
   format:
-    - "&#FFAFFB⭐ {player}" # Player name
-    - "&#FFAFFB► Rank: &#FFFFFF{prefix}" # Prefix in luckperms
-    - "&#FFAFFB► Balance: &#FFFFFF${balance}" # Balance in vault
-    - "&#FFAFFB► Level: &#FFFFFF{level}" # Level in minecraft
+    - "&#FFAFFB⭐ %player_name%" # Player name
+    - "&#FFAFFB► Rank: &#FFFFFF%luckperms_prefix%" # Prefix in luckperms
+    - "&#FFAFFB► Balance: &#FFFFFF$%vault_eco_balance%" # Balance in vault
+    - "&#FFAFFB► Level: &#FFFFFF%player_level%" # Level in minecraft
     - "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%" # Playtime in PlaceholderAPI
     - "&#FFAFFB► Location: &#FFFFFF%player_world%" # Location in PlaceholderAPI
     - "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms" # Ping in PlaceholderAPI

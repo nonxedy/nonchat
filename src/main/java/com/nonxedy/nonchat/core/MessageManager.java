@@ -13,7 +13,6 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
-import com.nonxedy.nonchat.util.MessageDeliveryTracker;
 
 import net.kyori.adventure.text.Component;
 
@@ -22,7 +21,6 @@ public class MessageManager {
     private final PluginMessages messages;
     private final SpyCommand spyCommand;
     private final Map<UUID, UUID> lastMessageSender;
-    private final MessageDeliveryTracker deliveryTracker;
     private IgnoreCommand ignoreCommand;
 
     public MessageManager(PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
@@ -30,17 +28,6 @@ public class MessageManager {
         this.messages = messages;
         this.spyCommand = spyCommand;
         this.lastMessageSender = new HashMap<>();
-        this.deliveryTracker = new MessageDeliveryTracker(messages, config);
-    }
-
-    /**
-     * Checks if a chat message would be delivered to any recipients
-     * @param sender The player sending the message
-     * @param chatType The chat channel being used
-     * @return true if message would be delivered, false otherwise
-     */
-    public boolean checkChatMessageDelivery(Player sender, ChatTypeUtil chatType) {
-        return deliveryTracker.checkMessageDelivery(sender, chatType);
     }
 
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
@@ -104,13 +91,5 @@ public class MessageManager {
      */
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
         this.ignoreCommand = ignoreCommand;
-    }
-
-    /**
-     * Gets the message delivery tracker instance
-     * @return MessageDeliveryTracker instance
-     */
-    public MessageDeliveryTracker getDeliveryTracker() {
-        return deliveryTracker;
     }
 }

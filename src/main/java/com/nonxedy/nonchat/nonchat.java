@@ -55,7 +55,6 @@ public class nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
-
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
 
     @Override

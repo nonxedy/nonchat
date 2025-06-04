@@ -26,6 +26,7 @@ import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.WordBlocker;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 
 public class ChatManager {
@@ -247,10 +248,21 @@ public class ChatManager {
     }
 
     private void notifyMentionedPlayer(Player mentioned, Player sender) {
-        mentioned.sendMessage(ColorUtil.parseComponent(
-            messages.getString("mentioned")
-                .replace("{player}", sender.getName())
-        ));
+        String mentionMessage = messages.getString("mentioned");
+        
+        // Apply PlaceholderAPI to mention message
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                mentionMessage = PlaceholderAPI.setPlaceholders(sender, mentionMessage);
+            } catch (Exception e) {
+                plugin.logError("Error processing mention message placeholders: " + e.getMessage());
+            }
+        }
+        
+        // Replace {player} with sender name (keeping this for backward compatibility)
+        mentionMessage = mentionMessage.replace("{player}", sender.getName());
+        
+        mentioned.sendMessage(ColorUtil.parseComponent(mentionMessage));
         mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
     }
 
