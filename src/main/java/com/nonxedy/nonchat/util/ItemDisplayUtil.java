@@ -1,20 +1,17 @@
 package com.nonxedy.nonchat.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for creating item displays in chat
@@ -41,6 +38,39 @@ public class ItemDisplayUtil {
     }
     
     /**
+     * Creates a formatted item component with brackets for chat display
+     * @param item The item to display
+     * @return Component with item name in brackets and hover event
+     */
+    public static Component createBracketedItemComponent(ItemStack item) {
+        if (item == null || item.getType().isAir()) {
+            return Component.text("[No item]").color(NamedTextColor.GRAY);
+        }
+        
+        // Check if item has custom display name with formatting
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            // Use the original item display name component (preserving custom colors)
+            Component displayNameComponent = item.getItemMeta().displayName();
+            
+            // Create bracketed component with custom name
+            Component itemComponent = Component.text("[")
+                .append(displayNameComponent)
+                .append(Component.text("]"))
+                .hoverEvent(createItemHoverEvent(item));
+            
+            return itemComponent;
+        } else {
+            // For items without custom names, use default white color
+            String itemName = getItemName(item);
+            Component itemComponent = Component.text("[" + itemName + "]")
+                .color(NamedTextColor.WHITE)
+                .hoverEvent(createItemHoverEvent(item));
+            
+            return itemComponent;
+        }
+    }
+    
+    /**
      * Creates a hover event containing item information
      * This method is public to allow direct access from ItemDetector
      * @param item The item to create hover event for
@@ -59,14 +89,21 @@ public class ItemDisplayUtil {
     private static Component createItemHoverText(ItemStack item) {
         List<Component> lines = new ArrayList<>();
         
-        // Add item name with proper color
-        String itemName = getItemName(item);
-        NamedTextColor nameColor = determineRarityColor(item);
-        
-        lines.add(Component.text(itemName)
-            .color(nameColor)
-            .decoration(TextDecoration.ITALIC, false)
-            .decoration(TextDecoration.BOLD, false));
+        // Add item name - preserve original formatting if it has custom display name
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            // Use the original display name component with all formatting
+            Component displayNameComponent = item.getItemMeta().displayName()
+                .decoration(TextDecoration.ITALIC, false)
+                .decoration(TextDecoration.BOLD, false);
+            lines.add(displayNameComponent);
+        } else {
+            // For items without custom names, use default formatting
+            String itemName = getItemName(item);
+            lines.add(Component.text(itemName)
+                .color(NamedTextColor.WHITE)
+                .decoration(TextDecoration.ITALIC, false)
+                .decoration(TextDecoration.BOLD, false));
+        }
         
         // Add enchantment information if item is enchanted
         if (item.hasItemMeta() && item.getItemMeta().hasEnchants()) {
@@ -190,36 +227,6 @@ public class ItemDisplayUtil {
             case 10: return "X";
             default: return String.valueOf(level);
         }
-    }
-    
-    /**
-     * Determines color based on item rarity
-     * @param item The item to determine color for
-     * @return NamedTextColor based on item rarity
-     */
-    private static NamedTextColor determineRarityColor(ItemStack item) {
-        if (item.hasItemMeta() && item.getItemMeta().hasEnchants()) {
-            return NamedTextColor.AQUA; // Enchanted items are aqua
-        }
-        
-        String materialName = item.getType().name();
-        
-        // Check for special materials
-        if (materialName.contains("NETHERITE")) {
-            return NamedTextColor.DARK_PURPLE;
-        } else if (materialName.contains("DIAMOND")) {
-            return NamedTextColor.AQUA;
-        } else if (materialName.contains("GOLD") || materialName.contains("GILDED")) {
-            return NamedTextColor.GOLD;
-        } else if (materialName.contains("IRON")) {
-            return NamedTextColor.WHITE;
-        } else if (materialName.contains("STONE") || materialName.contains("CHAIN")) {
-            return NamedTextColor.GRAY;
-        } else if (materialName.contains("WOOD") || materialName.contains("LEATHER")) {
-            return NamedTextColor.YELLOW;
-        }
-        
-        return NamedTextColor.WHITE; // Default color
     }
     
     /**

@@ -1,13 +1,13 @@
 package com.nonxedy.nonchat.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utility for detecting and replacing item placeholders in chat messages
@@ -53,32 +53,9 @@ public class ItemDetector {
             // Get held item
             ItemStack heldItem = player.getInventory().getItemInMainHand();
             
-            if (heldItem.getType().isAir()) {
-                // If player isn't holding anything, just use plain text
-                builder.append(Component.text("No item"));
-            } else {
-                // Get item name and determine color
-                String itemName = ItemDisplayUtil.getItemName(heldItem);
-                
-                // Create a component with proper color for just the item name
-                Component nameComponent;
-                if (heldItem.hasItemMeta() && heldItem.getItemMeta().hasDisplayName()) {
-                    // Use the original item name display component 
-                    // (preserving formatting exactly as it appears in-game)
-                    nameComponent = heldItem.getItemMeta().displayName();
-                } else {
-                    // For items without custom names, use a clean format
-                    nameComponent = Component.text(itemName);
-                }
-                
-                // Create the full item component with hover event
-                Component itemComponent = nameComponent.hoverEvent(
-                    ItemDisplayUtil.createItemComponent(heldItem, "{item}").hoverEvent()
-                );
-                
-                // Add the item component
-                builder.append(itemComponent);
-            }
+            // Use the new bracketed item component method
+            Component itemComponent = ItemDisplayUtil.createBracketedItemComponent(heldItem);
+            builder.append(itemComponent);
             
             // Update lastEnd and set flag
             lastEnd = matcher.end();

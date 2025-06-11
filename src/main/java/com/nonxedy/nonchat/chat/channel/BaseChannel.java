@@ -252,16 +252,10 @@ public class BaseChannel implements Channel {
             
             String placeholder = matcher.group().toLowerCase();
             if (placeholder.equals("[item]")) {
-                // Process item
+                // Process item using the new bracketed method
                 ItemStack heldItem = player.getInventory().getItemInMainHand();
-                if (heldItem == null || heldItem.getType().isAir()) {
-                    builder.append(Component.text("No item"));
-                } else {
-                    String itemName = ItemDisplayUtil.getItemName(heldItem);
-                    Component itemComponent = Component.text(itemName)
-                        .hoverEvent(ItemDisplayUtil.createItemHoverEvent(heldItem));
-                    builder.append(itemComponent);
-                }
+                Component itemComponent = ItemDisplayUtil.createBracketedItemComponent(heldItem);
+                builder.append(itemComponent);
             } else if (placeholder.equals("[ping]")) {
                 // Process ping
                 int ping = player.getPing();
