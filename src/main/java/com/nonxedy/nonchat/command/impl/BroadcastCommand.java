@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.ColorUtil;
 
@@ -26,10 +26,10 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
     // Reference to plugin messages for localization
     private final PluginMessages messages;
     // Reference to main plugin instance
-    private final nonchat plugin;
+    private final Nonchat plugin;
 
     // Initialize command with required dependencies
-    public BroadcastCommand(PluginMessages messages, nonchat plugin) {
+    public BroadcastCommand(PluginMessages messages, Nonchat plugin) {
         this.messages = messages;
         this.plugin = plugin;
     }

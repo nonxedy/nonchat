@@ -1,18 +1,20 @@
 package com.nonxedy.nonchat.integration;
 
-import com.nonxedy.nonchat.nonchat;
+import org.bukkit.entity.Player;
+
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.api.ChannelAPI;
+
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.Subscribe;
 import github.scarsz.discordsrv.api.events.DiscordGuildMessagePreProcessEvent;
 import github.scarsz.discordsrv.api.events.GameChatMessagePreProcessEvent;
-import org.bukkit.entity.Player;
 
 public class DiscordSRVIntegration {
-    private final nonchat plugin;
+    private final Nonchat plugin;
     
-    public DiscordSRVIntegration(nonchat plugin) {
+    public DiscordSRVIntegration(Nonchat plugin) {
         this.plugin = plugin;
         DiscordSRV.api.subscribe(this);
     }

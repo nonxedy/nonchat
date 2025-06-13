@@ -1,20 +1,20 @@
 package com.nonxedy.nonchat.api;
 
-import org.bukkit.entity.Player;
-import org.bukkit.Bukkit;
-
-import com.nonxedy.nonchat.nonchat;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.HashMap;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import com.nonxedy.nonchat.Nonchat;
 
 /**
  * API for interacting with the nonchat plugin's channel system.
@@ -22,9 +22,9 @@ import java.util.HashMap;
  * manipulate the chat channels.
  */
 public class ChannelAPI {
-    private static nonchat plugin;
+    private static Nonchat plugin;
 
-    public static void initialize(nonchat instance) {
+    public static void initialize(Nonchat instance) {
         plugin = instance;
     }
 

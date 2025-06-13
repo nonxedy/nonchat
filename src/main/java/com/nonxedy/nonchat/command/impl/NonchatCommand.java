@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.ColorUtil;
@@ -24,7 +24,7 @@ import net.kyori.adventure.text.Component;
 public class NonchatCommand implements CommandExecutor, TabCompleter {
 
     // Store reference to main plugin instance
-    private final nonchat plugin;
+    private final Nonchat plugin;
     // Store reference to plugin messages configuration
     private final PluginMessages messages;
     // Store reference to config service for reloading
@@ -33,7 +33,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     /**
      * Constructor to initialize command with dependencies
      */
-    public NonchatCommand(nonchat plugin, ConfigService configService) {
+    public NonchatCommand(Nonchat plugin, ConfigService configService) {
         this.plugin = plugin;
         this.configService = configService;
         this.messages = configService.getMessages();
@@ -108,8 +108,8 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         plugin.reloadConfig();
         
         // These methods need to be added to the nonchat class if not already there
-        if (plugin instanceof nonchat) {
-            ((nonchat) plugin).reloadServices();
+        if (plugin instanceof Nonchat) {
+            ((Nonchat) plugin).reloadServices();
         }
     }
 

@@ -13,10 +13,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import com.nonxedy.nonchat.Nonchat;
+import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.core.ChatManager;
-import com.nonxedy.nonchat.nonchat;
-import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.util.ColorUtil;
 
 /**
@@ -28,9 +28,9 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     
     private final ChatManager chatManager;
     private final PluginMessages messages;
-    private final nonchat plugin;
+    private final Nonchat plugin;
     
-    public ChannelCommand(nonchat plugin, ChatManager chatManager, PluginMessages messages) {
+    public ChannelCommand(Nonchat plugin, ChatManager chatManager, PluginMessages messages) {
         this.plugin = plugin;
         this.chatManager = chatManager;
         this.messages = messages;

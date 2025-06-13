@@ -12,7 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.ColorUtil;
@@ -23,12 +23,12 @@ import com.nonxedy.nonchat.util.ColorUtil;
  */
 public class MeCommand implements CommandExecutor, TabCompleter {
 
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
 
     // Constructor to initialize all required dependencies
-    public MeCommand(nonchat plugin, PluginConfig config, PluginMessages messages) {
+    public MeCommand(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;

@@ -1,15 +1,16 @@
 package com.nonxedy.nonchat.listener;
 
-import com.nonxedy.nonchat.nonchat;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.core.ChatManager;
 
+import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.Subscribe;
 import github.scarsz.discordsrv.api.events.GameChatMessagePreProcessEvent;
-import github.scarsz.discordsrv.DiscordSRV;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.event.Listener;
 
 /**
  * Listener for DiscordSRV events
@@ -18,9 +19,9 @@ import org.bukkit.event.Listener;
  */
 public class DiscordSRVListener implements Listener {
 
-    private final nonchat plugin;
+    private final Nonchat plugin;
 
-    public DiscordSRVListener(nonchat plugin) {
+    public DiscordSRVListener(Nonchat plugin) {
         this.plugin = plugin;
         
         // Register with DiscordSRV's API

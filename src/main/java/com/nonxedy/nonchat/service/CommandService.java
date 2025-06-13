@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.command.impl.BroadcastCommand;
 import com.nonxedy.nonchat.command.impl.ChannelCommand;
 import com.nonxedy.nonchat.command.impl.ClearCommand;
@@ -24,7 +24,7 @@ import com.nonxedy.nonchat.command.impl.SpyCommand;
  * Service for registering and managing plugin commands.
  */
 public class CommandService {
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final ChatService chatService;
     private final ConfigService configService;
     private final Map<String, CommandExecutor> commands;
@@ -36,7 +36,7 @@ public class CommandService {
      * @param chatService Chat service
      * @param configService Configuration service
      */
-    public CommandService(nonchat plugin, ChatService chatService, ConfigService configService) {
+    public CommandService(Nonchat plugin, ChatService chatService, ConfigService configService) {
         this.plugin = plugin;
         this.chatService = chatService;
         this.configService = configService;

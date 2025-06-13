@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.ColorUtil;
@@ -24,7 +24,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 public class SpyCommand implements CommandExecutor {
 
     // Plugin instance reference
-    private final nonchat plugin;
+    private final Nonchat plugin;
     // Messages configuration reference
     private final PluginMessages messages;
     // Plugin configuration reference
@@ -33,7 +33,7 @@ public class SpyCommand implements CommandExecutor {
     private final Set<Player> spyPlayers;
 
     // Constructor initializes all necessary dependencies
-    public SpyCommand(nonchat plugin, PluginMessages messages, PluginConfig pluginConfig) {
+    public SpyCommand(Nonchat plugin, PluginMessages messages, PluginConfig pluginConfig) {
         this.plugin = plugin;
         this.messages = messages;
         this.pluginConfig = pluginConfig;

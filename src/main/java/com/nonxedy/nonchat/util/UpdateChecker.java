@@ -1,21 +1,21 @@
 package com.nonxedy.nonchat.util;
 
-import com.google.gson.JsonParser;
-import com.nonxedy.nonchat.nonchat;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 
-import net.kyori.adventure.text.Component;
-
-import com.google.gson.JsonObject;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.concurrent.CompletableFuture;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nonxedy.nonchat.Nonchat;
+
+import net.kyori.adventure.text.Component;
 
 /**
  * Handles version checking and update notifications for the plugin
@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 public class UpdateChecker implements Listener {
 
     // Initialize class variables
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final String currentVersion;
     /** Modrinth API endpoint for version checking */
     private static final String MODRINTH_API = "https://api.modrinth.com/v2/project/nonchat/version";
@@ -35,12 +35,12 @@ public class UpdateChecker implements Listener {
     private boolean updateAvailable = false;
 
     // Constructor to initialize class variables
-    public UpdateChecker(nonchat plugin) {
+    public UpdateChecker(Nonchat plugin) {
         this.plugin = plugin;
         this.currentVersion = plugin.getDescription().getVersion();
         
-        if (plugin instanceof nonchat) {
-            nonchat nonchatPlugin = (nonchat) plugin;
+        if (plugin instanceof Nonchat) {
+            Nonchat nonchatPlugin = (Nonchat) plugin;
             if (!nonchatPlugin.getConfigService().getConfig().isUpdateCheckerEnabled()) {
                 plugin.logResponse("Update checker is disabled in config");
                 return;
