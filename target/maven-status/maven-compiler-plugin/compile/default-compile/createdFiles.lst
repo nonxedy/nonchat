@@ -28,6 +28,7 @@ com/nonxedy/nonchat/listener/BukkitChatListener.class
 com/nonxedy/nonchat/listener/PaperChatListener.class
 com/nonxedy/nonchat/service/CommandService.class
 com/nonxedy/nonchat/command/impl/MessageCommand.class
+com/nonxedy/nonchat/command/base/BaseCommand.class
 com/nonxedy/nonchat/api/MessageProcessor.class
 com/nonxedy/nonchat/placeholders/NonchatExpansion.class
 com/nonxedy/nonchat/util/BroadcastMessage.class

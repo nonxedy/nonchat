@@ -1,17 +1,17 @@
 package com.nonxedy.nonchat.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * Utility for detecting and replacing item placeholders in chat messages
- * Similar to LinkDetector but for [item] placeholders
+ * Uses client-side localization for proper translation
  */
 public class ItemDetector {
     // Pattern to match the [item] placeholder
@@ -19,7 +19,7 @@ public class ItemDetector {
     
     /**
      * Scans the text for [item] placeholders and replaces them with 
-     * clickable, hoverable item information
+     * clickable, hoverable item information with client-side localization
      *
      * @param player The player who sent the message
      * @param text The message text to process
@@ -44,56 +44,33 @@ public class ItemDetector {
         
         // Loop through all matches
         while (matcher.find()) {
-            // Add the text before the [item] placeholder
+            // Add the text before the [item] placeholder (with link detection)
             if (matcher.start() > lastEnd) {
                 String textBefore = text.substring(lastEnd, matcher.start());
-                builder.append(Component.text(textBefore));
+                builder.append(LinkDetector.makeLinksClickable(textBefore));
             }
             
             // Get held item
             ItemStack heldItem = player.getInventory().getItemInMainHand();
             
-            if (heldItem.getType().isAir()) {
-                // If player isn't holding anything, just use plain text
-                builder.append(Component.text("No item"));
-            } else {
-                // Get item name and determine color
-                String itemName = ItemDisplayUtil.getItemName(heldItem);
-                
-                // Create a component with proper color for just the item name
-                Component nameComponent;
-                if (heldItem.hasItemMeta() && heldItem.getItemMeta().hasDisplayName()) {
-                    // Use the original item name display component 
-                    // (preserving formatting exactly as it appears in-game)
-                    nameComponent = heldItem.getItemMeta().displayName();
-                } else {
-                    // For items without custom names, use a clean format
-                    nameComponent = Component.text(itemName);
-                }
-                
-                // Create the full item component with hover event
-                Component itemComponent = nameComponent.hoverEvent(
-                    ItemDisplayUtil.createItemComponent(heldItem, "{item}").hoverEvent()
-                );
-                
-                // Add the item component
-                builder.append(itemComponent);
-            }
+            // Use the new bracketed item component method with client-side localization
+            Component itemComponent = ItemDisplayUtil.createBracketedItemComponent(heldItem);
+            builder.append(itemComponent);
             
             // Update lastEnd and set flag
             lastEnd = matcher.end();
             foundItem = true;
         }
         
-        // Add any remaining text after the last match
+        // Add any remaining text after the last match (with link detection)
         if (lastEnd < text.length()) {
             String remainingText = text.substring(lastEnd);
-            builder.append(Component.text(remainingText));
+            builder.append(LinkDetector.makeLinksClickable(remainingText));
         }
         
-        // If no items were found, return the original text
+        // If no items were found, return the original text with link detection
         if (!foundItem) {
-            return Component.text(text);
+            return LinkDetector.makeLinksClickable(text);
         }
         
         // Return the built component
