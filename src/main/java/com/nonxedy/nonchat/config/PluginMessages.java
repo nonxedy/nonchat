@@ -1,6 +1,6 @@
 package com.nonxedy.nonchat.config;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.LanguageManager;
 import com.nonxedy.nonchat.util.MessageFormatter;
 
@@ -13,10 +13,10 @@ import net.kyori.adventure.text.Component;
 public class PluginMessages {
     private final MessageFormatter formatter;
     private final LanguageManager languageManager;
-    private final nonchat plugin;
+    private final Nonchat plugin;
 
     // Constructor initializes the messages system
-    public PluginMessages(nonchat plugin) {
+    public PluginMessages(Nonchat plugin) {
         this.plugin = plugin;
         this.languageManager = new LanguageManager(plugin.getDataFolder());
         this.formatter = new MessageFormatter(this);

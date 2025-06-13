@@ -10,7 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 
 import net.kyori.adventure.text.Component;
@@ -20,14 +20,14 @@ import net.kyori.adventure.text.Component;
  * Handles scheduling, sending, and managing broadcast messages
  */
 public class AutoBroadcastSender {
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final Map<String, BukkitTask> activeTasks;
     private final List<BroadcastMessage> randomMessagePool;
     private BukkitTask randomBroadcastTask;
 
     // Constructor initializes the sender with plugin and config references
-    public AutoBroadcastSender(nonchat plugin, PluginConfig config) {
+    public AutoBroadcastSender(Nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.activeTasks = new HashMap<>();

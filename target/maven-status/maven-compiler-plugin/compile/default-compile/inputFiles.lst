@@ -32,7 +32,7 @@ c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\lis
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\listener\DiscordSRVListener.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\listener\JoinQuitListener.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\listener\PaperChatListener.java
-c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\nonchat.java
+c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\Nonchat.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\placeholders\NonchatExpansion.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\service\ChatService.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\service\CommandService.java
@@ -49,10 +49,12 @@ c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\uti
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\IntegrationUtil.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\ItemDetector.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\ItemDisplayUtil.java
+c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\ItemLocalizationUtil.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\LanguageManager.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\LinkDetector.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\MessageFormatter.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\Metrics.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\PingDetector.java
+c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\TranslationUtil.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\UpdateChecker.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\util\WordBlocker.java

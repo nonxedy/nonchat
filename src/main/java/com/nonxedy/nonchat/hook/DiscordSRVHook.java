@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.Subscribe;
@@ -18,11 +18,11 @@ import github.scarsz.discordsrv.util.DiscordUtil;
  */
 public class DiscordSRVHook {
 
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private DiscordSRV discordSRV;
     private boolean isHooked = false;
 
-    public DiscordSRVHook(nonchat plugin) {
+    public DiscordSRVHook(Nonchat plugin) {
         this.plugin = plugin;
         try {
             Plugin discordSRVPlugin = Bukkit.getPluginManager().getPlugin("DiscordSRV");

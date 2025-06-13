@@ -6,7 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.ColorUtil;
 
@@ -21,12 +21,12 @@ public class ClearCommand implements CommandExecutor {
     
     // Fields to store plugin messages and main class instance
     private final PluginMessages messages;
-    private final nonchat plugin;
+    private final Nonchat plugin;
     // Constant defining number of empty lines for chat clearing
     private static final int CLEAR_LINES = 100;
 
     // Class constructor accepting required dependencies
-    public ClearCommand(PluginMessages messages, nonchat plugin) {
+    public ClearCommand(PluginMessages messages, Nonchat plugin) {
         this.messages = messages;
         this.plugin = plugin;
     }

@@ -13,7 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
@@ -29,7 +29,7 @@ import com.nonxedy.nonchat.util.WordBlocker;
 import net.kyori.adventure.text.Component;
 
 public class ChatManager {
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
     private final ChannelManager channelManager;
@@ -37,7 +37,7 @@ public class ChatManager {
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
     private IgnoreCommand ignoreCommand;
 
-    public ChatManager(nonchat plugin, PluginConfig config, PluginMessages messages) {
+    public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;

@@ -13,7 +13,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ChatService;
@@ -29,7 +29,7 @@ import net.kyori.adventure.text.Component;
 public class MessageCommand implements CommandExecutor, TabCompleter {
 
     // Required dependencies
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
     private final SpyCommand spyCommand;
@@ -37,7 +37,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
     private IgnoreCommand ignoreCommand;
 
     // Constructor to initialize all required dependencies
-    public MessageCommand(nonchat plugin, PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
+    public MessageCommand(Nonchat plugin, PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;

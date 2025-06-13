@@ -3,7 +3,6 @@ package com.nonxedy.nonchat.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,8 +13,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
- * Utility class for creating item displays in chat
- * Extracts and formats item information for chat display
+ * Utility class for creating item displays in chat with client-side localization
  */
 public class ItemDisplayUtil {
 
@@ -30,21 +28,24 @@ public class ItemDisplayUtil {
             return Component.text("No item");
         }
         
-        String itemName = getItemName(item);
-        String formattedMessage = format.replace("{item}", itemName);
-        
-        Component component = ColorUtil.parseComponent(formattedMessage);
-        return component.hoverEvent(createItemHoverEvent(item));
+        Component itemComponent = ItemLocalizationUtil.createTranslatableItemComponent(item);
+        return itemComponent.hoverEvent(createItemHoverEvent(item));
     }
     
     /**
      * Creates a formatted item component with brackets for chat display
+     * Uses client-side translation for proper localization
      * @param item The item to display
      * @return Component with item name in brackets and hover event
      */
     public static Component createBracketedItemComponent(ItemStack item) {
         if (item == null || item.getType().isAir()) {
-            return Component.text("[No item]").color(NamedTextColor.GRAY);
+            // Use translation utility for "No item" text
+            Component noItemComponent = TranslationUtil.getNoItemComponent();
+            return Component.text("[")
+                .append(noItemComponent)
+                .append(Component.text("]"))
+                .color(NamedTextColor.GRAY);
         }
         
         // Check if item has custom display name with formatting
@@ -60,9 +61,12 @@ public class ItemDisplayUtil {
             
             return itemComponent;
         } else {
-            // For items without custom names, use default white color
-            String itemName = getItemName(item);
-            Component itemComponent = Component.text("[" + itemName + "]")
+            // Use translatable component for automatic client-side localization
+            Component translatableComponent = ItemLocalizationUtil.createTranslatableItemComponent(item);
+            
+            Component itemComponent = Component.text("[")
+                .append(translatableComponent)
+                .append(Component.text("]"))
                 .color(NamedTextColor.WHITE)
                 .hoverEvent(createItemHoverEvent(item));
             
@@ -82,7 +86,7 @@ public class ItemDisplayUtil {
     }
     
     /**
-     * Creates a component containing item information
+     * Creates a component containing item information with client-side localization
      * @param item The item to create component for
      * @return Component with item information
      */
@@ -97,12 +101,12 @@ public class ItemDisplayUtil {
                 .decoration(TextDecoration.BOLD, false);
             lines.add(displayNameComponent);
         } else {
-            // For items without custom names, use default formatting
-            String itemName = getItemName(item);
-            lines.add(Component.text(itemName)
+            // Use translatable component for automatic client-side localization
+            Component translatableComponent = ItemLocalizationUtil.createTranslatableItemComponent(item)
                 .color(NamedTextColor.WHITE)
                 .decoration(TextDecoration.ITALIC, false)
-                .decoration(TextDecoration.BOLD, false));
+                .decoration(TextDecoration.BOLD, false);
+            lines.add(translatableComponent);
         }
         
         // Add enchantment information if item is enchanted
@@ -110,16 +114,19 @@ public class ItemDisplayUtil {
             // Add a blank line after name
             lines.add(Component.text(""));
             
-            // Get all enchantments
+            // Get all enchantments with translatable names
             item.getEnchantments().forEach((enchantment, level) -> {
-                // Format enchantment name
-                String enchName = formatEnchantmentName(enchantment);
+                // Use translatable component for enchantment name
+                Component enchantmentComponent = ItemLocalizationUtil.getLocalizedEnchantmentComponent(enchantment);
                 String enchLevel = formatEnchantmentLevel(level);
                 
                 // Add enchantment line
-                lines.add(Component.text(enchName + " " + enchLevel)
+                Component enchantmentLine = enchantmentComponent
+                    .append(Component.text(" " + enchLevel))
                     .color(NamedTextColor.GRAY)
-                    .decoration(TextDecoration.ITALIC, false));
+                    .decoration(TextDecoration.ITALIC, false);
+                
+                lines.add(enchantmentLine);
             });
         }
         
@@ -133,9 +140,7 @@ public class ItemDisplayUtil {
                 
                 // Add each lore line
                 for (String loreLine : lore) {
-                    // Clean up legacy color codes
-                    String cleanLine = loreLine;
-                    Component loreComponent = ColorUtil.parseComponent(cleanLine);
+                    Component loreComponent = ColorUtil.parseComponent(loreLine);
                     lines.add(loreComponent);
                 }
             }
@@ -156,9 +161,9 @@ public class ItemDisplayUtil {
     }
     
     /**
-     * Gets the display name of an item
+     * Gets the display name of an item (fallback method)
      * @param item The item to get name for
-     * @return Item display name or material name if no display name
+     * @return Item display name or formatted material name if no display name
      */
     public static String getItemName(ItemStack item) {
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
@@ -170,42 +175,28 @@ public class ItemDisplayUtil {
     }
     
     /**
-     * Formats a material name to be more readable
+     * Formats a material name to be more readable (fallback)
      * @param materialName The material name to format
      * @return Formatted material name
      */
     private static String formatMaterialName(String materialName) {
-        return materialName.replace('_', ' ').toLowerCase();
-    }
-    
-    /**
-     * Formats an enchantment name to be more readable
-     * @param enchantment The enchantment to format
-     * @return Formatted enchantment name
-     */
-    private static String formatEnchantmentName(Enchantment enchantment) {
-        String name = enchantment.getKey().getKey();
-        // Replace underscores with spaces
-        name = name.replace('_', ' ');
+        String[] words = materialName.toLowerCase().split("_");
+        StringBuilder result = new StringBuilder();
         
-        // Capitalize first letter of each word
-        StringBuilder formattedName = new StringBuilder();
-        boolean capitalizeNext = true;
-        for (char c : name.toCharArray()) {
-            if (c == ' ') {
-                capitalizeNext = true;
-                formattedName.append(c);
-            } else {
-                if (capitalizeNext) {
-                    formattedName.append(Character.toUpperCase(c));
-                    capitalizeNext = false;
-                } else {
-                    formattedName.append(c);
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                result.append(" ");
+            }
+            // Capitalize first letter of each word
+            if (words[i].length() > 0) {
+                result.append(Character.toUpperCase(words[i].charAt(0)));
+                if (words[i].length() > 1) {
+                    result.append(words[i].substring(1));
                 }
             }
         }
         
-        return formattedName.toString();
+        return result.toString();
     }
     
     /**

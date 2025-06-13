@@ -40,7 +40,7 @@ import com.nonxedy.nonchat.util.UpdateChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
-public class nonchat extends JavaPlugin {
+public class Nonchat extends JavaPlugin {
     private ChatService chatService;
     private CommandService commandService;
     private ConfigService configService;

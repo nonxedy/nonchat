@@ -3,7 +3,7 @@ package com.nonxedy.nonchat.placeholders;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.ColorUtil;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -14,10 +14,10 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
  */
 public class NonchatExpansion extends PlaceholderExpansion {
 
-    private final nonchat plugin;
+    private final Nonchat plugin;
 
     // Constructor initializes plugin reference
-    public NonchatExpansion(nonchat plugin) {
+    public NonchatExpansion(Nonchat plugin) {
         this.plugin = plugin;
     }
 

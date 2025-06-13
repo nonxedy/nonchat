@@ -10,7 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.BroadcastMessage;
 import com.nonxedy.nonchat.util.ColorUtil;
@@ -18,13 +18,13 @@ import com.nonxedy.nonchat.util.ColorUtil;
 import net.kyori.adventure.text.Component;
 
 public class BroadcastManager {
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final Map<String, BukkitTask> activeTasks;
     private final List<BroadcastMessage> randomMessagePool;
     private BukkitTask randomBroadcastTask;
 
-    public BroadcastManager(nonchat plugin, PluginConfig config) {
+    public BroadcastManager(Nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.activeTasks = new HashMap<>();

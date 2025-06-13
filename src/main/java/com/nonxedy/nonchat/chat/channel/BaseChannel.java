@@ -246,13 +246,13 @@ public class BaseChannel implements Channel {
         while (matcher.find()) {
             // Add text before placeholder
             if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
-                builder.append(Component.text(parts[partIndex]));
+                builder.append(LinkDetector.makeLinksClickable(parts[partIndex]));
             }
             partIndex++;
             
             String placeholder = matcher.group().toLowerCase();
             if (placeholder.equals("[item]")) {
-                // Process item using the new bracketed method
+                // Process item using the new bracketed method with client-side localization
                 ItemStack heldItem = player.getInventory().getItemInMainHand();
                 Component itemComponent = ItemDisplayUtil.createBracketedItemComponent(heldItem);
                 builder.append(itemComponent);
@@ -273,7 +273,7 @@ public class BaseChannel implements Channel {
         
         // Add remaining text
         if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
-            builder.append(Component.text(parts[partIndex]));
+            builder.append(LinkDetector.makeLinksClickable(parts[partIndex]));
         }
         
         return builder.build();

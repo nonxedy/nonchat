@@ -13,7 +13,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.nonchat;
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.ColorUtil;
@@ -26,11 +26,11 @@ public class RollCommand implements CommandExecutor, TabCompleter {
     
     // Random number generator
     private final Random random = new Random();
-    private final nonchat plugin;
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
 
-    public RollCommand(nonchat plugin, PluginConfig config, PluginMessages messages) {
+    public RollCommand(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
