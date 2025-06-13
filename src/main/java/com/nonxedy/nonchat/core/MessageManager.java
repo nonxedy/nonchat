@@ -11,6 +11,7 @@ import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
 
 import net.kyori.adventure.text.Component;

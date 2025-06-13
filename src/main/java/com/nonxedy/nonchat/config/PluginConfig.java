@@ -100,22 +100,18 @@ public class PluginConfig {
         // Default channel setting
         config.set("default-channel", "local");
         
-        // Interactive chat settings
-        config.set("interactive-chat.item.enabled", true);
-        config.set("interactive-chat.item.format", "&7*{player} shows: ");
-        
         // Death settings
         config.set("death.enabled", true);
-        config.set("death.format", "{prefix} §f{player}§r {suffix}§f died");
+        config.set("death.format", "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died");
         config.set("death.show-coordinates", true);
         
         // Join/Quit messages settings
         config.set("join-messages.enabled", true);
-        config.set("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
+        config.set("join-messages.format", "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
         config.set("quit-messages.enabled", true);
-        config.set("quit-messages.format", "§8(§c-§8) {prefix} §f{player}§r {suffix}");
+        config.set("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
         
-        // Private chat settings
+        // Private chat settings (оставляем как есть)
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
@@ -123,23 +119,24 @@ public class PluginConfig {
         config.set("chat-bubbles.enabled", true);
         config.set("chat-bubbles.duration", 5);
         config.set("chat-bubbles.height", 2.5);
+        config.set("chat-bubbles.show-in-private-channels", false);
         
         // Create default channel configurations
         createDefaultChannels();
         
         // Roleplay commands
         config.set("roleplay-commands.me.enabled", true);
-        config.set("roleplay-commands.me.format", "&7*{player}: {message}");
+        config.set("roleplay-commands.me.format", "&7*%player_name%: {message}");
         config.set("roleplay-commands.roll.enabled", true);
-        config.set("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
+        config.set("roleplay-commands.roll.format", "&7*%player_name% rolled a {number}");
         
         // Hover text
         config.set("hover-text.enabled", true);
         List<String> defaultHoverFormat = Arrays.asList(
-            "&#FFAFFB⭐ {player}", 
-            "&#FFAFFB► Rank: &#FFFFFF{prefix}",
-            "&#FFAFFB► Balance: &#FFFFFF${balance}",
-            "&#FFAFFB► Level: &#FFFFFF{level}",
+            "&#FFAFFB⭐ %player_name%", 
+            "&#FFAFFB► Rank: &#FFFFFF%luckperms_prefix%",
+            "&#FFAFFB► Balance: &#FFFFFF$%vault_eco_balance%",
+            "&#FFAFFB► Level: &#FFFFFF%player_level%",
             "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%",
             "&#FFAFFB► Location: &#FFFFFF%player_world%",
             "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms"
@@ -166,7 +163,7 @@ public class PluginConfig {
         // Configure global chat channel
         config.set("channels.global.enabled", true);
         config.set("channels.global.display-name", "Global");
-        config.set("channels.global.format", "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("channels.global.format", "§7(§6G§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}");
         config.set("channels.global.radius", -1);
         config.set("channels.global.character", "!");
         config.set("channels.global.send-permission", "");
@@ -174,11 +171,11 @@ public class PluginConfig {
         config.set("channels.global.cooldown", 0);
         config.set("channels.global.min-length", 0);
         config.set("channels.global.max-length", -1);
-    
+
         // Configure local chat channel
         config.set("channels.local.enabled", true);
         config.set("channels.local.display-name", "Local");
-        config.set("channels.local.format", "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("channels.local.format", "§7(§6L§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}");
         config.set("channels.local.radius", 100);
         config.set("channels.local.character", "");
         config.set("channels.local.send-permission", "");
@@ -190,7 +187,7 @@ public class PluginConfig {
         // Configure staff chat channel
         config.set("channels.staff.enabled", true);
         config.set("channels.staff.display-name", "Staff");
-        config.set("channels.staff.format", "§7(§bSC§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}");
+        config.set("channels.staff.format", "§7(§bSC§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}");
         config.set("channels.staff.radius", -1);
         config.set("channels.staff.character", "*");
         config.set("channels.staff.send-permission", "nonchat.chat.staff");
@@ -240,7 +237,7 @@ public class PluginConfig {
      */
     @NotNull
     public String getDeathFormat() {
-        return config.getString("death.format", "{prefix} §f{player}§r {suffix}§f died");
+        return config.getString("death.format", "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died");
     }
     
     /**
@@ -257,7 +254,7 @@ public class PluginConfig {
      */
     @NotNull
     public String getJoinFormat() {
-        return config.getString("join-messages.format", "§8(§a+§8) {prefix} §f{player}§r {suffix}");
+        return config.getString("join-messages.format", "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
     }
     
     /**
@@ -274,7 +271,7 @@ public class PluginConfig {
      */
     @NotNull
     public String getQuitFormat() {
-        return config.getString("quit-messages.format", "§8(§c-§8) {prefix} §f{player}§r {suffix}");
+        return config.getString("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
     }
 
     /**
@@ -377,6 +374,15 @@ public class PluginConfig {
     public double getChatBubblesHeight() {
         return config.getDouble("chat-bubbles.height", 2.5);
     }
+
+    /**
+     * Checks if chat bubbles should be shown in private channels
+     * @return true if bubbles should show in private channels
+     */
+    public boolean shouldShowBubblesInPrivateChannels() {
+        return config.getBoolean("chat-bubbles.show-in-private-channels", false);
+    }
+
 
     /**
      * Gets list of banned words
@@ -564,7 +570,7 @@ public class PluginConfig {
      * @return Format string
      */
     public String getMeFormat() {
-        return config.getString("roleplay-commands.me.format", "&f{player}&7: &f{message}");
+        return config.getString("roleplay-commands.me.format", "&7*%player_name%: {message}");
     }
 
     /**
@@ -580,16 +586,7 @@ public class PluginConfig {
      * @return Format string
      */
     public String getRollFormat() {
-        return config.getString("roleplay-commands.roll.format", "&7*{player} rolled a {number}");
-    }
-    
-    /**
-     * Gets item display format for [item] placeholders
-     * @return Format string
-     */
-    public String getItemFormat() {
-        String defaultFormat = "&7*{player} shows: ";
-        return config.getString("interactive-chat.item.format", defaultFormat);
+        return config.getString("roleplay-commands.roll.format", "&7*%player_name% rolled a {number}");
     }
 
     /**

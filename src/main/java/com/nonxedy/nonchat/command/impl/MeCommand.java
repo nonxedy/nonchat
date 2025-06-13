@@ -101,7 +101,6 @@ public class MeCommand implements CommandExecutor, TabCompleter {
 
         String message = String.join(" ", args);
         String formattedMessage = config.getMeFormat()
-            .replace("{player}", sender.getName())
             .replace("{message}", message);
 
         plugin.getServer().broadcast(ColorUtil.parseComponent(formattedMessage));

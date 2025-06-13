@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,8 +17,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.BubblePacketUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
 
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.user.User;
+import me.clip.placeholderapi.PlaceholderAPI;
 
 /**
  * Handles player join and quit events
@@ -43,27 +43,18 @@ public class JoinQuitListener implements Listener {
         }
         
         Player player = event.getPlayer();
+        String joinFormat = config.getJoinFormat();
         
-        String prefix = "";
-        String suffix = "";
-        
-        try {
-            User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
-            if (user != null) {
-                String lpPrefix = user.getCachedData().getMetaData().getPrefix();
-                String lpSuffix = user.getCachedData().getMetaData().getSuffix();
-                
-                prefix = lpPrefix == null ? "" : ColorUtil.parseColor(lpPrefix);
-                suffix = lpSuffix == null ? "" : ColorUtil.parseColor(lpSuffix);
+        // Apply PlaceholderAPI if available
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                joinFormat = PlaceholderAPI.setPlaceholders(player, joinFormat);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[nonchat] Error processing join message placeholders: " + e.getMessage());
             }
-        } catch (Exception e) {
-            // If LuckPerms is not available or there's an error, continue with empty prefix/suffix
         }
         
-        event.joinMessage(ColorUtil.parseComponent(config.getJoinFormat()
-            .replace("{prefix}", prefix)
-            .replace("{player}", player.getName())
-            .replace("{suffix}", suffix)));
+        event.joinMessage(ColorUtil.parseComponent(joinFormat));
     }
     
     /**
@@ -82,26 +73,17 @@ public class JoinQuitListener implements Listener {
         }
         
         Player player = event.getPlayer();
+        String quitFormat = config.getQuitFormat();
         
-        String prefix = "";
-        String suffix = "";
-        
-        try {
-            User user = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId());
-            if (user != null) {
-                String lpPrefix = user.getCachedData().getMetaData().getPrefix();
-                String lpSuffix = user.getCachedData().getMetaData().getSuffix();
-                
-                prefix = lpPrefix == null ? "" : ColorUtil.parseColor(lpPrefix);
-                suffix = lpSuffix == null ? "" : ColorUtil.parseColor(lpSuffix);
+        // Apply PlaceholderAPI if available
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                quitFormat = PlaceholderAPI.setPlaceholders(player, quitFormat);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[nonchat] Error processing quit message placeholders: " + e.getMessage());
             }
-        } catch (Exception e) {
-            // If LuckPerms is not available or there's an error, continue with empty prefix/suffix
         }
         
-        event.quitMessage(ColorUtil.parseComponent(config.getQuitFormat()
-            .replace("{prefix}", prefix)
-            .replace("{player}", player.getName())
-            .replace("{suffix}", suffix)));
+        event.quitMessage(ColorUtil.parseComponent(quitFormat));
     }
 }

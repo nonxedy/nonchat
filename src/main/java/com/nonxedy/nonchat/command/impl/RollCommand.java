@@ -86,7 +86,6 @@ public class RollCommand implements CommandExecutor, TabCompleter {
 
             int rolledNumber = random.nextInt(maxNumber) + 1;
             String format = config.getRollFormat()
-                .replace("{player}", sender.getName())
                 .replace("{number}", String.valueOf(rolledNumber));
 
             sender.getServer().broadcast(ColorUtil.parseComponent(format));
