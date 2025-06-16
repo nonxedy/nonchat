@@ -10,6 +10,7 @@ com/nonxedy/nonchat/listener/ChatListenerFactory.class
 com/nonxedy/nonchat/util/Metrics$MetricsBase.class
 com/nonxedy/nonchat/command/impl/ChannelCommand.class
 com/nonxedy/nonchat/service/ChatService.class
+com/nonxedy/nonchat/Nonchat$1.class
 com/nonxedy/nonchat/util/Debugger.class
 com/nonxedy/nonchat/util/Metrics$SimpleBarChart.class
 com/nonxedy/nonchat/util/Metrics$CustomChart.class
@@ -23,12 +24,12 @@ com/nonxedy/nonchat/util/LinkDetector.class
 com/nonxedy/nonchat/config/PluginConfig.class
 com/nonxedy/nonchat/integration/DiscordSRVIntegration.class
 com/nonxedy/nonchat/core/MessageManager.class
+com/nonxedy/nonchat/util/TranslationUtil.class
 com/nonxedy/nonchat/service/ConfigService.class
 com/nonxedy/nonchat/listener/BukkitChatListener.class
 com/nonxedy/nonchat/listener/PaperChatListener.class
 com/nonxedy/nonchat/service/CommandService.class
 com/nonxedy/nonchat/command/impl/MessageCommand.class
-com/nonxedy/nonchat/command/base/BaseCommand.class
 com/nonxedy/nonchat/api/MessageProcessor.class
 com/nonxedy/nonchat/placeholders/NonchatExpansion.class
 com/nonxedy/nonchat/util/BroadcastMessage.class
@@ -51,6 +52,7 @@ com/nonxedy/nonchat/command/impl/IgnoreCommand.class
 com/nonxedy/nonchat/util/ItemDetector.class
 com/nonxedy/nonchat/util/HoverTextUtil.class
 com/nonxedy/nonchat/chat/channel/ChannelManager.class
+com/nonxedy/nonchat/util/ItemLocalizationUtil.class
 com/nonxedy/nonchat/util/WordBlocker.class
 com/nonxedy/nonchat/util/BubblePacketUtil.class
 com/nonxedy/nonchat/api/IChatFormatter.class
@@ -61,9 +63,8 @@ com/nonxedy/nonchat/util/IntegrationUtil.class
 com/nonxedy/nonchat/util/Metrics$JsonObjectBuilder.class
 com/nonxedy/nonchat/listener/ChatListener.class
 com/nonxedy/nonchat/api/MessageFilter.class
-com/nonxedy/nonchat/nonchat$1.class
 com/nonxedy/nonchat/command/impl/MeCommand.class
-com/nonxedy/nonchat/nonchat.class
+com/nonxedy/nonchat/Nonchat.class
 com/nonxedy/nonchat/api/IMessageHandler.class
 com/nonxedy/nonchat/hook/DiscordSRVHook.class
 com/nonxedy/nonchat/core/ChatManager.class

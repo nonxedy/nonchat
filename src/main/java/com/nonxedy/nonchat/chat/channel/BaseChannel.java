@@ -20,8 +20,6 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.user.User;
 
 /**
  * Base implementation of the Channel interface with common functionality.
@@ -164,29 +162,28 @@ public class BaseChannel implements Channel {
     public Component formatMessage(Player player, String message) {
         String baseFormat = getFormat();
         
-        // Apply PlaceholderAPI if available
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            try {
-                baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
-            }
-        }
-
-        // Replace channel placeholder
-        baseFormat = baseFormat.replace("{channel}", getDisplayName());
-
-        // Split format into parts around {message}
+        // Split format into parts around {message} BEFORE processing placeholders
         String[] formatParts = baseFormat.split("\\{message\\}");
         String beforeMessage = formatParts[0];
         String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
 
-        // Check if we need to create hoverable player name
-        // Look for %player_name% in the before message part
         Component finalMessage;
+        
+        // Check for player name placeholder BEFORE PlaceholderAPI processing
         if (beforeMessage.contains("%player_name%")) {
-            // Split around %player_name% to create hoverable name
-            String[] nameParts = beforeMessage.split("%player_name%");
+            // Process PlaceholderAPI for everything except player name
+            String tempFormat = beforeMessage.replace("%player_name%", "{PLAYER_NAME_PLACEHOLDER}");
+            
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                try {
+                    tempFormat = PlaceholderAPI.setPlaceholders(player, tempFormat);
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
+                }
+            }
+            
+            // Split around our placeholder to create hoverable name
+            String[] nameParts = tempFormat.split("\\{PLAYER_NAME_PLACEHOLDER\\}");
             String beforeName = nameParts[0];
             String afterName = nameParts.length > 1 ? nameParts[1] : "";
             
@@ -198,36 +195,49 @@ public class BaseChannel implements Channel {
                 finalMessage = finalMessage.append(ColorUtil.parseComponent(afterName));
             }
         } else {
-            // No player name placeholder, just parse the before message
+            // Apply PlaceholderAPI normally if no player name placeholder
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                try {
+                    beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
+                }
+            }
             finalMessage = ColorUtil.parseComponent(beforeMessage);
         }
 
-        // Process the message for placeholders
-        Component messageComponent;
-
-        // Check what placeholders we have
-        boolean hasItem = message.toLowerCase().contains("[item]");
-        boolean hasPing = message.toLowerCase().contains("[ping]");
-
-        if (hasItem && hasPing) {
-            // Process both placeholders
-            messageComponent = processBothPlaceholders(player, message);
-        } else if (hasItem) {
-            messageComponent = ItemDetector.processItemPlaceholders(player, message);
-        } else if (hasPing) {
-            messageComponent = PingDetector.processPingPlaceholders(player, message);
-        } else {
-            messageComponent = LinkDetector.makeLinksClickable(message);
-        }
-
+        // Process message content
+        Component messageComponent = processMessageContent(player, message);
         finalMessage = finalMessage.append(messageComponent);
 
-        // Add after message part if it exists
+        // Add after message part
         if (!afterMessage.isEmpty()) {
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                try {
+                    afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("Error processing after message placeholders: " + e.getMessage());
+                }
+            }
             finalMessage = finalMessage.append(ColorUtil.parseComponent(afterMessage));
         }
 
         return finalMessage;
+    }
+
+    private Component processMessageContent(Player player, String message) {
+        boolean hasItem = message.toLowerCase().contains("[item]");
+        boolean hasPing = message.toLowerCase().contains("[ping]");
+
+        if (hasItem && hasPing) {
+            return processBothPlaceholders(player, message);
+        } else if (hasItem) {
+            return ItemDetector.processItemPlaceholders(player, message);
+        } else if (hasPing) {
+            return PingDetector.processPingPlaceholders(player, message);
+        } else {
+            return LinkDetector.makeLinksClickable(message);
+        }
     }
 
     /**
