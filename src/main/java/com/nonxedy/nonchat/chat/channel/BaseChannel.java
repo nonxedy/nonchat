@@ -20,8 +20,6 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.user.User;
 
 /**
  * Base implementation of the Channel interface with common functionality.
@@ -164,70 +162,41 @@ public class BaseChannel implements Channel {
     public Component formatMessage(Player player, String message) {
         String baseFormat = getFormat();
         
-        // Apply PlaceholderAPI if available
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            try {
-                baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
-            }
-        }
-
-        // Replace channel placeholder
-        baseFormat = baseFormat.replace("{channel}", getDisplayName());
-
         // Split format into parts around {message}
         String[] formatParts = baseFormat.split("\\{message\\}");
         String beforeMessage = formatParts[0];
         String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
 
-        // Check if we need to create hoverable player name
-        // Look for %player_name% in the before message part
-        Component finalMessage;
-        if (beforeMessage.contains("%player_name%")) {
-            // Split around %player_name% to create hoverable name
-            String[] nameParts = beforeMessage.split("%player_name%");
-            String beforeName = nameParts[0];
-            String afterName = nameParts.length > 1 ? nameParts[1] : "";
-            
-            // Build component with hoverable player name
-            finalMessage = ColorUtil.parseComponent(beforeName)
-                .append(hoverTextUtil.createHoverablePlayerName(player, player.getName()));
-            
-            if (!afterName.isEmpty()) {
-                finalMessage = finalMessage.append(ColorUtil.parseComponent(afterName));
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
+                afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
             }
-        } else {
-            // No player name placeholder, just parse the before message
-            finalMessage = ColorUtil.parseComponent(beforeMessage);
         }
 
-        // Process the message for placeholders
-        Component messageComponent;
+        // Process color codes after placeholders are expanded
+        Component finalMessage = ColorUtil.parseComponent(beforeMessage)
+            .append(processMessageContent(player, message))
+            .append(ColorUtil.parseComponent(afterMessage));
 
-        // Check what placeholders we have
+        return finalMessage;
+    }
+
+    private Component processMessageContent(Player player, String message) {
         boolean hasItem = message.toLowerCase().contains("[item]");
         boolean hasPing = message.toLowerCase().contains("[ping]");
 
         if (hasItem && hasPing) {
-            // Process both placeholders
-            messageComponent = processBothPlaceholders(player, message);
+            return processBothPlaceholders(player, message);
         } else if (hasItem) {
-            messageComponent = ItemDetector.processItemPlaceholders(player, message);
+            return ItemDetector.processItemPlaceholders(player, message);
         } else if (hasPing) {
-            messageComponent = PingDetector.processPingPlaceholders(player, message);
+            return PingDetector.processPingPlaceholders(player, message);
         } else {
-            messageComponent = LinkDetector.makeLinksClickable(message);
+            return LinkDetector.makeLinksClickable(message);
         }
-
-        finalMessage = finalMessage.append(messageComponent);
-
-        // Add after message part if it exists
-        if (!afterMessage.isEmpty()) {
-            finalMessage = finalMessage.append(ColorUtil.parseComponent(afterMessage));
-        }
-
-        return finalMessage;
     }
 
     /**

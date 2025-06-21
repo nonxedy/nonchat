@@ -1,13 +1,14 @@
 package com.nonxedy.nonchat.util;
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 
 /**
  * Creates hoverable text components with player information
@@ -41,8 +42,11 @@ public class HoverTextUtil {
             .map(line -> processLine(line, player))
             .collect(Collectors.joining("\n"));
 
-        return ColorUtil.parseComponent(originalText)
-            .hoverEvent(HoverEvent.showText(ColorUtil.parseComponent(hoverText)));
+        // Parse color codes in original text before creating hover component
+        Component nameComponent = ColorUtil.parseComponent(originalText);
+        Component hoverComponent = ColorUtil.parseComponent(hoverText);
+        
+        return nameComponent.hoverEvent(HoverEvent.showText(hoverComponent));
     }
 
     private String processLine(String text, Player player) {
