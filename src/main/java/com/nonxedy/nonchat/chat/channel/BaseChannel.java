@@ -6,9 +6,11 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
+import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.ColorUtil;
 import com.nonxedy.nonchat.util.HoverTextUtil;
 import com.nonxedy.nonchat.util.ItemDetector;
@@ -39,6 +41,7 @@ public class BaseChannel implements Channel {
     private boolean enabled;
     private static final Pattern mentionPattern = Pattern.compile("@(\\w+)");
     private IgnoreCommand ignoreCommand;
+    private ConfigService configService;
 
     /**
      * Creates a new BaseChannel with all properties.
@@ -185,6 +188,17 @@ public class BaseChannel implements Channel {
     }
 
     private Component processMessageContent(Player player, String message) {
+        // Check if interactive placeholders are globally disabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        if (plugin instanceof com.nonxedy.nonchat.Nonchat) {
+            com.nonxedy.nonchat.Nonchat nonchatPlugin = (com.nonxedy.nonchat.Nonchat) plugin;
+            boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
+            
+            if (!globalEnabled) {
+                return LinkDetector.makeLinksClickable(message);
+            }
+        }
+
         boolean hasItem = message.toLowerCase().contains("[item]");
         boolean hasPing = message.toLowerCase().contains("[ping]");
 
@@ -203,6 +217,17 @@ public class BaseChannel implements Channel {
      * Processes both item and ping placeholders in a message
      */
     private Component processBothPlaceholders(Player player, String message) {
+        // Check settings
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        boolean itemEnabled = true;
+        boolean pingEnabled = true;
+        
+        if (plugin instanceof com.nonxedy.nonchat.Nonchat) {
+            com.nonxedy.nonchat.Nonchat nonchatPlugin = (com.nonxedy.nonchat.Nonchat) plugin;
+            itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
+            pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
+        }
+        
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
     
@@ -221,12 +246,12 @@ public class BaseChannel implements Channel {
             partIndex++;
             
             String placeholder = matcher.group().toLowerCase();
-            if (placeholder.equals("[item]")) {
+            if (placeholder.equals("[item]") && itemEnabled) {
                 // Process item using the new bracketed method with client-side localization
                 ItemStack heldItem = player.getInventory().getItemInMainHand();
                 Component itemComponent = ItemDisplayUtil.createBracketedItemComponent(heldItem);
                 builder.append(itemComponent);
-            } else if (placeholder.equals("[ping]")) {
+            } else if (placeholder.equals("[ping]") && pingEnabled) {
                 // Process ping
                 int ping = player.getPing();
                 NamedTextColor color;
@@ -238,6 +263,9 @@ public class BaseChannel implements Channel {
                     color = NamedTextColor.RED;
                 }
                 builder.append(Component.text(ping + "ms").color(color));
+            } else {
+                // If placeholder is disabled, add it as plain text
+                builder.append(Component.text(matcher.group()));
             }
         }
         
@@ -255,5 +283,13 @@ public class BaseChannel implements Channel {
      */
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
         this.ignoreCommand = ignoreCommand;
+    }
+
+    /**
+     * Sets the config service instance.
+     * @param configService The config service instance
+     */
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
     }
 }

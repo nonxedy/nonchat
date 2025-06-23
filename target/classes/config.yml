@@ -60,6 +60,16 @@ update-checker: true # Enable/disable the update checker.
 # Default channel that players will use when they join
 default-channel: "local"
 
+# ==================================================
+# INTERACTIVE PLACEHOLDERS CONFIGURATION
+# Interactive placeholders are special placeholders like [item] and [ping]
+# that show interactive content in chat messages
+# ==================================================
+interactive-placeholders:
+  enabled: true # Enable/disable all interactive placeholders ([item], [ping])
+  item-enabled: true # Enable/disable [item] placeholder specifically
+  ping-enabled: true # Enable/disable [ping] placeholder specifically
+
 # The channels configuration.
 channels:
   global: # The ID of the channel
