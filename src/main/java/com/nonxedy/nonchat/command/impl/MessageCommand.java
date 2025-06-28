@@ -2,7 +2,10 @@ package com.nonxedy.nonchat.command.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -27,6 +30,7 @@ import net.kyori.adventure.text.Component;
  * Provides secure player-to-player communication
  */
 public class MessageCommand implements CommandExecutor, TabCompleter {
+    private final Map<UUID, UUID> lastMessaged = new HashMap<>();
 
     // Required dependencies
     private final Nonchat plugin;
@@ -54,6 +58,10 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         this.messages = configService.getMessages();
         this.spyCommand = null;
         this.ignoreCommand = null;
+    }
+
+    public Map<UUID, UUID> getLastMessaged() {
+        return lastMessaged;
     }
 
     /**
@@ -219,7 +227,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         String format = config.getPrivateChatFormat();
         // Handle console messages by using "Console" as sender name
         String senderName = sender instanceof Player ? sender.getName() : "Console";
-    
+
         // Create and send formatted message to sender
         Component senderMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
@@ -230,7 +238,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         if (plugin != null) {
             plugin.logResponse("Message sent to " + sender.getName());
         }
-    
+
         // Create and send formatted message to target
         Component targetMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
@@ -241,13 +249,18 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         if (plugin != null) {
             plugin.logResponse("Message sent to " + target.getName());
         }
-    
+
         // Notify spy players if spy system is enabled and sender is a player
         if (spyCommand != null && sender instanceof Player) {
             spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message));
             if (plugin != null) {
                 plugin.logResponse("Message sent to spy players");
             }
+        }
+
+        // Add last message sender to the map
+        if (sender instanceof Player) {
+            plugin.getMessageManager().getLastMessageSender().put(target.getUniqueId(), ((Player) sender).getUniqueId());
         }
     }
 

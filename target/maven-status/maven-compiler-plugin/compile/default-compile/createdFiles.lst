@@ -67,6 +67,7 @@ com/nonxedy/nonchat/command/impl/MeCommand.class
 com/nonxedy/nonchat/Nonchat.class
 com/nonxedy/nonchat/api/IMessageHandler.class
 com/nonxedy/nonchat/hook/DiscordSRVHook.class
+com/nonxedy/nonchat/command/impl/ReplyCommand.class
 com/nonxedy/nonchat/core/ChatManager.class
 com/nonxedy/nonchat/core/BroadcastManager.class
 com/nonxedy/nonchat/command/impl/BroadcastCommand.class

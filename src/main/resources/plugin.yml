@@ -22,6 +22,7 @@ permissions:
     default: op
     children:
       - nonchat.message
+      - nonchat.reply
       - nonchat.broadcast
       - nonchat.server
       - nonchat.reload
@@ -42,6 +43,9 @@ permissions:
       - nonchat.admin.channel.default
   nonchat.message:
     description: Allows /message command
+    default: true
+  nonchat.reply:
+    description: Allows /reply command
     default: true
   nonchat.broadcast:
     description: Allows /broadcast command
@@ -98,6 +102,12 @@ commands:
     aliases: [msg, tell, w, m, whisper]
     usage: /message <player> <message>
     permission: nonchat.message
+    permission-message: You do not have <permission> to use this command!
+  reply:
+    description: Reply to a player.
+    aliases: [r]
+    usage: /reply <message>
+    permission: nonchat.reply
     permission-message: You do not have <permission> to use this command!
   broadcast:
     description: Send a message to all players.

@@ -7,27 +7,33 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.ChatTypeUtil;
 import com.nonxedy.nonchat.util.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
 public class MessageManager {
+    private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
     private final SpyCommand spyCommand;
     private final Map<UUID, UUID> lastMessageSender;
     private IgnoreCommand ignoreCommand;
 
-    public MessageManager(PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
+    public MessageManager(Nonchat plugin, PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
+        this.plugin = plugin;
         this.config = config;
         this.messages = messages;
         this.spyCommand = spyCommand;
         this.lastMessageSender = new HashMap<>();
+    }
+
+    public Map<UUID, UUID> getLastMessageSender() {
+        return lastMessageSender;
     }
 
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
@@ -61,8 +67,9 @@ public class MessageManager {
     }
 
     public void replyToLastMessage(Player sender, String message) {
-        UUID lastSenderUUID = lastMessageSender.get(sender.getUniqueId());
+        UUID lastSenderUUID = getLastMessageSender().get(sender.getUniqueId());
         if (lastSenderUUID == null) {
+            plugin.logError("No last message sender found for player " + sender.getName());
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-reply-target")));
             return;
         }
