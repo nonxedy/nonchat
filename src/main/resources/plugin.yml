@@ -41,6 +41,7 @@ permissions:
       - nonchat.admin.channel.edit
       - nonchat.admin.channel.delete
       - nonchat.admin.channel.default
+      - nonchat.color
   nonchat.message:
     description: Allows /message command
     default: true
@@ -94,6 +95,9 @@ permissions:
     default: op
   nonchat.bypass.cooldown:
     description: Bypass chat channel cooldowns
+    default: op
+  nonchat.color:
+    description: Allows using colors and text formatting in chat
     default: op
 
 commands:

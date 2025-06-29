@@ -50,20 +50,23 @@ public class MessageManager {
         
         lastMessageSender.put(receiver.getUniqueId(), sender.getUniqueId());
 
+        // Process message with color permission for both sender and receiver
+        String processedMessage = sender.hasPermission("nonchat.color") ? message : ColorUtil.stripAllColors(message);
+        
         String senderFormat = config.getPrivateChatFormat()
             .replace("{sender}", sender.getName())
             .replace("{target}", receiver.getName())
-            .replace("{message}", message);
+            .replace("{message}", processedMessage);
             
         String receiverFormat = config.getPrivateChatFormat()
             .replace("{sender}", sender.getName())
             .replace("{target}", receiver.getName())
-            .replace("{message}", message);
+            .replace("{message}", processedMessage);
 
         sender.sendMessage(ColorUtil.parseComponent(senderFormat));
         receiver.sendMessage(ColorUtil.parseComponent(receiverFormat));
 
-        spyCommand.onPrivateMessage(sender, receiver, Component.text(message));
+        spyCommand.onPrivateMessage(sender, receiver, Component.text(processedMessage));
     }
 
     public void replyToLastMessage(Player sender, String message) {

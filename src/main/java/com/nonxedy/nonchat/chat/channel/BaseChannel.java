@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.service.ConfigService;
@@ -180,6 +181,7 @@ public class BaseChannel implements Channel {
         }
 
         // Process color codes after placeholders are expanded
+        // The format part (beforeMessage and afterMessage) should always be colored
         Component finalMessage = ColorUtil.parseComponent(beforeMessage)
             .append(processMessageContent(player, message))
             .append(ColorUtil.parseComponent(afterMessage));
@@ -195,7 +197,7 @@ public class BaseChannel implements Channel {
             boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
             
             if (!globalEnabled) {
-                return LinkDetector.makeLinksClickable(message);
+                return processMessageWithColorPermission(player, message);
             }
         }
 
@@ -205,16 +207,86 @@ public class BaseChannel implements Channel {
         if (hasItem && hasPing) {
             return processBothPlaceholders(player, message);
         } else if (hasItem) {
-            return ItemDetector.processItemPlaceholders(player, message);
+            return processItemPlaceholderWithColorPermission(player, message);
         } else if (hasPing) {
-            return PingDetector.processPingPlaceholders(player, message);
+            return processPingPlaceholderWithColorPermission(player, message);
         } else {
-            return LinkDetector.makeLinksClickable(message);
+            return processMessageWithColorPermission(player, message);
         }
     }
 
     /**
-     * Processes both item and ping placeholders in a message
+     * Processes message content with color permission check
+     */
+    private Component processMessageWithColorPermission(Player player, String message) {
+        // First make links clickable, then apply color permission
+        Component linkProcessed = LinkDetector.makeLinksClickable(message);
+        
+        // If player doesn't have color permission, strip colors from the message part
+        if (!player.hasPermission("nonchat.color")) {
+            String strippedMessage = ColorUtil.stripAllColors(message);
+            return LinkDetector.makeLinksClickable(strippedMessage);
+        }
+        
+        return linkProcessed;
+    }
+
+    /**
+     * Processes item placeholder with color permission check
+     */
+    private Component processItemPlaceholderWithColorPermission(Player player, String message) {
+        // Check if item placeholders are enabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        boolean itemEnabled = true;
+        
+        if (plugin instanceof Nonchat) {
+            Nonchat nonchatPlugin = (Nonchat) plugin;
+            itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
+        }
+        
+        if (!itemEnabled) {
+            return processMessageWithColorPermission(player, message);
+        }
+        
+        // Process item placeholder but respect color permissions for the rest of the message
+        if (!player.hasPermission("nonchat.color")) {
+            // Strip colors from message but keep item placeholder functionality
+            String messageWithoutColors = ColorUtil.stripAllColors(message);
+            return ItemDetector.processItemPlaceholders(player, messageWithoutColors);
+        }
+        
+        return ItemDetector.processItemPlaceholders(player, message);
+    }
+
+    /**
+     * Processes ping placeholder with color permission check
+     */
+    private Component processPingPlaceholderWithColorPermission(Player player, String message) {
+        // Check if ping placeholders are enabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        boolean pingEnabled = true;
+        
+        if (plugin instanceof Nonchat) {
+            Nonchat nonchatPlugin = (Nonchat) plugin;
+            pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
+        }
+        
+        if (!pingEnabled) {
+            return processMessageWithColorPermission(player, message);
+        }
+        
+        // Process ping placeholder but respect color permissions for the rest of the message
+        if (!player.hasPermission("nonchat.color")) {
+            // Strip colors from message but keep ping placeholder functionality
+            String messageWithoutColors = ColorUtil.stripAllColors(message);
+            return PingDetector.processPingPlaceholders(player, messageWithoutColors);
+        }
+        
+        return PingDetector.processPingPlaceholders(player, message);
+    }
+
+    /**
+     * Processes both item and ping placeholders with color permission check
      */
     private Component processBothPlaceholders(Player player, String message) {
         // Check settings
@@ -222,19 +294,23 @@ public class BaseChannel implements Channel {
         boolean itemEnabled = true;
         boolean pingEnabled = true;
         
-        if (plugin instanceof com.nonxedy.nonchat.Nonchat) {
-            com.nonxedy.nonchat.Nonchat nonchatPlugin = (com.nonxedy.nonchat.Nonchat) plugin;
+        if (plugin instanceof Nonchat) {
+            Nonchat nonchatPlugin = (Nonchat) plugin;
             itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }
+        
+        // Check color permission
+        boolean hasColorPermission = player.hasPermission("nonchat.color");
+        String processedMessage = hasColorPermission ? message : ColorUtil.stripAllColors(message);
         
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
     
         // Split by [item] and [ping] and process each part
-        String[] parts = message.split("(?i)\\[(item|ping)\\]");
+        String[] parts = processedMessage.split("(?i)\\[(item|ping)\\]");
         Pattern pattern = Pattern.compile("(?i)\\[(item|ping)\\]");
-        Matcher matcher = pattern.matcher(message);
+        Matcher matcher = pattern.matcher(processedMessage);
     
         int partIndex = 0;
     

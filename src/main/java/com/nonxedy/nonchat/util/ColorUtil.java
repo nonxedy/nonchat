@@ -3,6 +3,8 @@ package com.nonxedy.nonchat.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.entity.Player;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -15,6 +17,15 @@ import net.md_5.bungee.api.ChatColor;
 public class ColorUtil {
     // Pattern for matching hex color codes in &#RRGGBB format
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    
+    // Pattern for matching legacy color codes (&0-&f, &k-&r)
+    private static final Pattern LEGACY_COLOR_PATTERN = Pattern.compile("&[0-9a-fklmnor]");
+    
+    // Pattern for matching section symbol color codes (§0-§f, §k-§r)
+    private static final Pattern SECTION_COLOR_PATTERN = Pattern.compile("§[0-9a-fklmnor]");
+    
+    // Pattern for matching MiniMessage format tags
+    private static final Pattern MINIMESSAGE_PATTERN = Pattern.compile("<[^>]+>");
     
     // MiniMessage instance for parsing MiniMessage format
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -95,6 +106,20 @@ public class ColorUtil {
     }
     
     /**
+     * Converts color-coded text into Adventure API Component with permission check
+     * @param message The text to convert to Component
+     * @param player The player to check permissions for (null to skip permission check)
+     * @return Adventure Component with processed colors (or plain text if no permission)
+     */
+    public static Component parseComponent(String message, Player player) {
+        if (player != null && !player.hasPermission("nonchat.color")) {
+            // Strip all color codes if player doesn't have permission
+            return Component.text(stripAllColors(message));
+        }
+        return parseComponent(message);
+    }
+    
+    /**
      * Parses a string with MiniMessage format into an Adventure Component
      * Supports both MiniMessage format and legacy format
      * @param message The text with MiniMessage formatting
@@ -108,6 +133,20 @@ public class ColorUtil {
         
         // Parse with MiniMessage
         return MINI_MESSAGE.deserialize(preparedMessage);
+    }
+    
+    /**
+     * Parses a string with MiniMessage format into an Adventure Component with permission check
+     * @param message The text with MiniMessage formatting
+     * @param player The player to check permissions for (null to skip permission check)
+     * @return Parsed Adventure Component (or plain text if no permission)
+     */
+    public static Component parseMiniMessageComponent(String message, Player player) {
+        if (player != null && !player.hasPermission("nonchat.color")) {
+            // Strip all color codes if player doesn't have permission
+            return Component.text(stripAllColors(message));
+        }
+        return parseMiniMessageComponent(message);
     }
     
     /**
@@ -188,5 +227,57 @@ public class ColorUtil {
         result = result.replace("§r", "<reset>");
         
         return result;
+    }
+    
+    /**
+     * Strips all color codes and formatting from a message
+     * @param message The message to strip colors from
+     * @return Plain text without any color codes or formatting
+     */
+    public static String stripAllColors(String message) {
+        if (message == null) return "";
+        
+        String result = message;
+        
+        // Remove hex color codes (&#RRGGBB)
+        result = HEX_PATTERN.matcher(result).replaceAll("");
+        
+        // Remove legacy color codes (&0-&f, &k-&r)
+        result = LEGACY_COLOR_PATTERN.matcher(result).replaceAll("");
+        
+        // Remove section symbol color codes (§0-§f, §k-§r)
+        result = SECTION_COLOR_PATTERN.matcher(result).replaceAll("");
+        
+        // Remove MiniMessage format tags
+        result = MINIMESSAGE_PATTERN.matcher(result).replaceAll("");
+        
+        return result;
+    }
+    
+    /**
+     * Checks if a message contains any color codes or formatting
+     * @param message The message to check
+     * @return true if the message contains color codes, false otherwise
+     */
+    public static boolean hasColorCodes(String message) {
+        if (message == null) return false;
+        
+        return HEX_PATTERN.matcher(message).find() ||
+               LEGACY_COLOR_PATTERN.matcher(message).find() ||
+               SECTION_COLOR_PATTERN.matcher(message).find() ||
+               MINIMESSAGE_PATTERN.matcher(message).find();
+    }
+    
+    /**
+     * Processes a message with permission-based color filtering
+     * @param message The message to process
+     * @param player The player to check permissions for
+     * @return Processed message (colored if has permission, plain if not)
+     */
+    public static String processMessageWithPermission(String message, Player player) {
+        if (player != null && !player.hasPermission("nonchat.color")) {
+            return stripAllColors(message);
+        }
+        return parseColor(message);
     }
 }

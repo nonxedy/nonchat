@@ -9,6 +9,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
+import com.nonxedy.nonchat.util.ColorUtil;
 
 public class ChatService implements IMessageHandler {
     private final ChatManager chatManager;
@@ -47,13 +48,21 @@ public class ChatService implements IMessageHandler {
 
     @Override
     public void handleBroadcast(CommandSender sender, String message) {
+        // Broadcasts should always support colors (admin command)
         broadcastManager.broadcast(sender, message);
     }
 
     @Override
     public void handleStaffChat(Player sender, String message) {
-        // Instead of using the old staff chat format, we'll use the chat manager with the staff chat prefix
-        chatManager.processChat(sender, "@" + message);
+        // Check if player is trying to use colors without permission in staff chat
+        if (!sender.hasPermission("nonchat.color") && ColorUtil.hasColorCodes(message)) {
+            // Strip colors from staff chat message if no permission
+            String strippedMessage = ColorUtil.stripAllColors(message);
+            chatManager.processChat(sender, "@" + strippedMessage);
+        } else {
+            // Instead of using the old staff chat format, we'll use the chat manager with the staff chat prefix
+            chatManager.processChat(sender, "@" + message);
+        }
     }
     
     /**
