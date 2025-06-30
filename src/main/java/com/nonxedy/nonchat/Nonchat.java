@@ -94,7 +94,7 @@ public class Nonchat extends JavaPlugin {
         
         // Initialize core managers
         this.chatManager = new ChatManager(this, configService.getConfig(), configService.getMessages());
-        this.messageManager = new MessageManager(configService.getConfig(), configService.getMessages(), spyCommand);
+        this.messageManager = new MessageManager(this, configService.getConfig(), configService.getMessages(), spyCommand);
         this.broadcastManager = new BroadcastManager(this, configService.getConfig());
         
         // Set ignore command in managers
@@ -286,5 +286,9 @@ public class Nonchat extends JavaPlugin {
 
     public ChatManager getChatManager() {
         return chatManager;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 }

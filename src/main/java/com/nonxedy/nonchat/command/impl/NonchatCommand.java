@@ -181,7 +181,10 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             .append(ColorUtil.parseComponent(messages.getString("roll-command")))
             .append(Component.newline())
             // Add channel command description
-            .append(ColorUtil.parseComponent(messages.getString("channel-command")));
+            .append(ColorUtil.parseComponent(messages.getString("channel-command"))
+            .append(Component.newline())
+            // Add channel command description
+            .append(ColorUtil.parseComponent(messages.getString("reply-command"))));
     }
 
     /**

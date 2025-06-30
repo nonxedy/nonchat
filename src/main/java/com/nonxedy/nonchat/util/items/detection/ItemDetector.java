@@ -3,8 +3,12 @@ package com.nonxedy.nonchat.util.items.detection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+
+import com.nonxedy.nonchat.Nonchat;
 
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.items.display.ItemDisplayUtil;
@@ -31,6 +35,18 @@ public class ItemDetector {
     public static Component processItemPlaceholders(Player player, String text) {
         if (text == null || text.isEmpty()) {
             return Component.text(text);
+        }
+        
+        // Check if interactive placeholders are enabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        if (plugin instanceof Nonchat) {
+            Nonchat nonchatPlugin = (Nonchat) plugin;
+            boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
+            boolean itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
+            
+            if (!globalEnabled || !itemEnabled) {
+                return LinkDetector.makeLinksClickable(text);
+            }
         }
         
         // Initialize the component with an empty text

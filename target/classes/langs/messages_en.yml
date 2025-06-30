@@ -14,6 +14,7 @@
 # System messages.
 no-permission: "&#ff0000You do not have permission!"
 player-only: "&#ff0000Only players can use this command!"
+player-offline: "&#ff0000Player is offline!"
 blocked-words: "&#ff0000You are not allowed to use this word!"
 message-filtered: "&#ff0000Your message was filtered by a channel filter."
 mentioned: "&#ffffffYou were mentioned in chat by &#84FFB8{player}!"
@@ -38,6 +39,7 @@ spy-command: "&#FFAFFB/spy&#ffffff - enable/disable spy mode"
 me-command: "&#FFAFFB/me <message>&#ffffff - sent a message from your character"
 roll-command: "&#FFAFFB/roll <maximum number>&#ffffff - roll a dice"
 channel-command: "&#FFAFFB/channel help&#ffffff - show channel commands"
+reply-command: "&#FFAFFB/reply <message>&#ffffff - reply to the last player"
 
 # Clear Chat.
 clear-chat: "&#FFAFFBChat clearing..."
@@ -48,6 +50,10 @@ broadcast: "&#FFAFFBBroadcast: &#ffffff{message}"
 
 # Message.
 invalid-usage-message: "&#ffffffUse: &#FFAFFB/m <player> <message>"
+
+# Reply.
+no-reply-target: "&#ff0000You have no target to reply."
+invalid-usage-reply: "&#ffffffUse: &#FFAFFB/reply <message>"
 
 # Ignore.
 ignored-player: "&#84FFB8You started ignored the player {player}."

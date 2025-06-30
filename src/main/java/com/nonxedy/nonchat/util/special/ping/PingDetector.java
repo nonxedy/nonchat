@@ -3,7 +3,14 @@ package com.nonxedy.nonchat.util.special.ping;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
+import com.nonxedy.nonchat.Nonchat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -28,6 +35,18 @@ public class PingDetector {
     public static Component processPingPlaceholders(Player player, String text) {
         if (text == null || text.isEmpty()) {
             return Component.text(text);
+        }
+        
+        // Check if interactive placeholders are enabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        if (plugin instanceof Nonchat) {
+            Nonchat nonchatPlugin = (Nonchat) plugin;
+            boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
+            boolean pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
+            
+            if (!globalEnabled || !pingEnabled) {
+                return Component.text(text);
+            }
         }
         
         TextComponent.Builder builder = Component.text().content("");

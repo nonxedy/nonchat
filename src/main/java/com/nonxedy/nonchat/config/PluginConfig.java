@@ -84,7 +84,7 @@ public class PluginConfig {
         }
     }
 
-    /**
+        /**
      * Sets all default configuration values
      */
     private void setDefaultValues() {
@@ -99,6 +99,11 @@ public class PluginConfig {
         
         // Default channel setting
         config.set("default-channel", "local");
+        
+        // Interactive placeholders configuration
+        config.set("interactive-placeholders.enabled", true);
+        config.set("interactive-placeholders.item-enabled", true);
+        config.set("interactive-placeholders.ping-enabled", true);
         
         // Death settings
         config.set("death.enabled", true);
@@ -214,6 +219,58 @@ public class PluginConfig {
     public String getDefaultChannel() {
         return defaultChannel;
     }
+
+    /**
+     * Checks if interactive placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isInteractivePlaceholdersEnabled() {
+        return config.getBoolean("interactive-placeholders.enabled", true);
+    }
+
+    /**
+     * Checks if item placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isItemPlaceholdersEnabled() {
+        return config.getBoolean("interactive-placeholders.item-enabled", true);
+    }
+
+    /**
+     * Checks if ping placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isPingPlaceholdersEnabled() {
+        return config.getBoolean("interactive-placeholders.ping-enabled", true);
+    }
+
+    /**
+     * Sets interactive placeholders enabled state
+     * @param enabled New enabled state
+     */
+    public void setInteractivePlaceholdersEnabled(boolean enabled) {
+        config.set("interactive-placeholders.enabled", enabled);
+        saveConfig();
+    }
+
+    /**
+     * Sets item placeholders enabled state
+     * @param enabled New enabled state
+     */
+    public void setItemPlaceholdersEnabled(boolean enabled) {
+        config.set("interactive-placeholders.item-enabled", enabled);
+        saveConfig();
+    }
+
+    /**
+     * Sets ping placeholders enabled state
+     * @param enabled New enabled state
+     */
+    public void setPingPlaceholdersEnabled(boolean enabled) {
+        config.set("interactive-placeholders.ping-enabled", enabled);
+        saveConfig();
+    }
+
     
     /**
      * Checks if custom death messages are enabled

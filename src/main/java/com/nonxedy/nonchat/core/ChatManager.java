@@ -60,6 +60,12 @@ public class ChatManager {
             return;
         }
     
+        // Check if player is trying to use colors without permission
+        if (!player.hasPermission("nonchat.color") && ColorUtil.hasColorCodes(messageContent)) {
+            // Strip colors but continue processing the message
+            messageContent = ColorUtil.stripAllColors(messageContent);
+        }
+    
         // Determine which channel to use based on message prefix or player's active channel
         Channel channel;
         String finalMessage;
@@ -95,14 +101,16 @@ public class ChatManager {
             return;
         }
         
-        // Check message length restrictions
-        if (finalMessage.length() < channel.getMinLength()) {
+        // Check message length restrictions (use stripped message for length check)
+        String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage : ColorUtil.stripAllColors(finalMessage);
+        
+        if (messageForLengthCheck.length() < channel.getMinLength()) {
             player.sendMessage(ColorUtil.parseComponent(messages.getString("message-too-short")
                 .replace("{min}", String.valueOf(channel.getMinLength()))));
             return;
         }
         
-        if (channel.getMaxLength() > 0 && finalMessage.length() > channel.getMaxLength()) {
+        if (channel.getMaxLength() > 0 && messageForLengthCheck.length() > channel.getMaxLength()) {
             player.sendMessage(ColorUtil.parseComponent(messages.getString("message-too-long")
                 .replace("{max}", String.valueOf(channel.getMaxLength()))));
             return;
@@ -143,7 +151,9 @@ public class ChatManager {
         if (shouldShowBubble) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 removeBubble(player);
-                createBubble(player, messageToSend);
+                // For bubbles, use the message without colors if player doesn't have permission
+                String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
+                createBubble(player, bubbleMessage);
             });
         }
     
@@ -222,7 +232,9 @@ public class ChatManager {
     private boolean handleBlockedWords(Player player, String message) {
         if (!player.hasPermission("nonchat.antiblockedwords")) {
             WordBlocker wordBlocker = config.getWordBlocker();
-            if (!wordBlocker.isMessageAllowed(message)) {
+            // Check blocked words on the message without color codes
+            String messageToCheck = ColorUtil.stripAllColors(message);
+            if (!wordBlocker.isMessageAllowed(messageToCheck)) {
                 player.sendMessage(ColorUtil.parseComponent(messages.getString("blocked-words")));
                 return true;
             }
@@ -231,8 +243,9 @@ public class ChatManager {
     }
 
     private void handleMentions(Player sender, String message) {
-        // Find all mentions in the message
-        Matcher mentionMatcher = mentionPattern.matcher(message);
+        // Find all mentions in the message (strip colors first to avoid false matches)
+        String messageToCheck = ColorUtil.stripAllColors(message);
+        Matcher mentionMatcher = mentionPattern.matcher(messageToCheck);
         
         // Collect all the names found into a list and process with Stream API
         List<String> mentionedNames = new ArrayList<>();

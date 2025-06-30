@@ -122,4 +122,29 @@ public class ConfigService implements IConfigurable {
     public Set<String> getKeys(boolean deep) {
         return config.getKeys(deep);
     }
+
+    /**
+     * Checks if interactive placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isInteractivePlaceholdersEnabled() {
+        return config.isInteractivePlaceholdersEnabled();
+    }
+
+    /**
+     * Checks if item placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isItemPlaceholdersEnabled() {
+        return config.isItemPlaceholdersEnabled();
+    }
+
+    /**
+     * Checks if ping placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isPingPlaceholdersEnabled() {
+        return config.isPingPlaceholdersEnabled();
+    }
+
 }
