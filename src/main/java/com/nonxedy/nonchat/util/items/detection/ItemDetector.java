@@ -1,10 +1,13 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.items.detection;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
+import com.nonxedy.nonchat.util.items.display.ItemDisplayUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

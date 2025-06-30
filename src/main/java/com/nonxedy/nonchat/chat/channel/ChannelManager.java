@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.util.HoverTextUtil;
-import org.bukkit.Bukkit;
+import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
 
 /**
  * Manages all chat channels in the nonchat plugin.

@@ -1,13 +1,13 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.special.ping;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utility for detecting and replacing ping placeholders in chat messages

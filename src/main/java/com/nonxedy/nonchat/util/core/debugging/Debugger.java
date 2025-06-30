@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.core.debugging;
 
 import java.io.File;
 import java.io.IOException;

@@ -17,7 +17,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.core.ChatManager;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 /**
  * Command for managing chat channels.

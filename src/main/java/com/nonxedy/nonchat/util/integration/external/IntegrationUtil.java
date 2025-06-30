@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.integration.external;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.luckperms.api.LuckPerms;

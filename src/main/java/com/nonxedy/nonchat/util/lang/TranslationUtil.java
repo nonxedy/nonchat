@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.lang;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;

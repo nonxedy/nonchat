@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.items.localization;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;

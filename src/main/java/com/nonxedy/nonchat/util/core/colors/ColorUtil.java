@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.core.colors;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

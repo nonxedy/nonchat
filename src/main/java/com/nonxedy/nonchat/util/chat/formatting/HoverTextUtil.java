@@ -1,13 +1,17 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.chat.formatting;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Creates hoverable text components with player information

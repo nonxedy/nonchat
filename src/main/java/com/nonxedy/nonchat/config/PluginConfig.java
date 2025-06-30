@@ -13,11 +13,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.util.BroadcastMessage;
-import com.nonxedy.nonchat.util.CapsFilter;
-import com.nonxedy.nonchat.util.ChatTypeUtil;
-import com.nonxedy.nonchat.util.HoverTextUtil;
-import com.nonxedy.nonchat.util.WordBlocker;
+import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
+import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
+import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
+import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
+import com.nonxedy.nonchat.util.core.broadcast.BroadcastMessage;
 
 /**
  * Central configuration manager for the NonChat plugin

@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.core.updates;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -14,6 +14,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nonxedy.nonchat.Nonchat;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 

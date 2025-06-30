@@ -32,10 +32,10 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
-import com.nonxedy.nonchat.util.BubblePacketUtil;
-import com.nonxedy.nonchat.util.Debugger;
-import com.nonxedy.nonchat.util.Metrics;
-import com.nonxedy.nonchat.util.UpdateChecker;
+import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.core.debugging.Debugger;
+import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
+import com.nonxedy.nonchat.util.integration.metrics.Metrics;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;

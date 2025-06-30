@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.core.broadcast;
 
 /**
  * Manages automated broadcast messages with timing control

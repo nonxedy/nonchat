@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.chat.formatting;
 
 /**
  * Represents a chat type configuration with formatting and behavior settings

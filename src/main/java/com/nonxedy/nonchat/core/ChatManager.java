@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,11 +21,11 @@ import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.BubblePacketUtil;
-import com.nonxedy.nonchat.util.CapsFilter;
-import com.nonxedy.nonchat.util.ChatTypeUtil;
-import com.nonxedy.nonchat.util.ColorUtil;
-import com.nonxedy.nonchat.util.WordBlocker;
+import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
+import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
+import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
+import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -234,7 +235,7 @@ public class ChatManager {
         Matcher mentionMatcher = mentionPattern.matcher(message);
         
         // Collect all the names found into a list and process with Stream API
-        java.util.List<String> mentionedNames = new java.util.ArrayList<>();
+        List<String> mentionedNames = new ArrayList<>();
         while (mentionMatcher.find()) {
             mentionedNames.add(mentionMatcher.group(1));
         }

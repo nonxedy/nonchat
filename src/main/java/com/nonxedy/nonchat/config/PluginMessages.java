@@ -1,8 +1,8 @@
 package com.nonxedy.nonchat.config;
 
 import com.nonxedy.nonchat.Nonchat;
-import com.nonxedy.nonchat.util.LanguageManager;
-import com.nonxedy.nonchat.util.MessageFormatter;
+import com.nonxedy.nonchat.util.chat.formatting.MessageFormatter;
+import com.nonxedy.nonchat.util.lang.LanguageManager;
 
 import net.kyori.adventure.text.Component;
 

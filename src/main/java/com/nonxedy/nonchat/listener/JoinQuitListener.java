@@ -14,8 +14,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.util.BubblePacketUtil;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 

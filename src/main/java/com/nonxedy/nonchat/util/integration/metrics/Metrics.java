@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.integration.metrics;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

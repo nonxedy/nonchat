@@ -9,19 +9,17 @@ import org.bukkit.inventory.ItemStack;
 
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
-import com.nonxedy.nonchat.util.ColorUtil;
-import com.nonxedy.nonchat.util.HoverTextUtil;
-import com.nonxedy.nonchat.util.ItemDetector;
-import com.nonxedy.nonchat.util.ItemDisplayUtil;
-import com.nonxedy.nonchat.util.LinkDetector;
-import com.nonxedy.nonchat.util.PingDetector;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
+import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.items.detection.ItemDetector;
+import com.nonxedy.nonchat.util.items.display.ItemDisplayUtil;
+import com.nonxedy.nonchat.util.special.ping.PingDetector;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.user.User;
 
 /**
  * Base implementation of the Channel interface with common functionality.

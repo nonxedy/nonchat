@@ -9,7 +9,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.IConfigurable;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.LanguageManager;
+import com.nonxedy.nonchat.util.lang.LanguageManager;
 
 public class ConfigService implements IConfigurable {
     private final Nonchat plugin;

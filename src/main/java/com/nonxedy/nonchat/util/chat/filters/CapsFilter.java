@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.chat.filters;
 
 /**
  * Filters excessive capitalization in chat messages

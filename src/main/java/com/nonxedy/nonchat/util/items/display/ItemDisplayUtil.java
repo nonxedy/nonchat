@@ -1,10 +1,14 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.items.display;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.items.localization.ItemLocalizationUtil;
+import com.nonxedy.nonchat.util.lang.TranslationUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
