@@ -50,13 +50,13 @@ permissions:
     default: true
   nonchat.broadcast:
     description: Allows /broadcast command
-    default: false
+    default: op
   nonchat.reload:
     description: Allows /nonchat reload command
-    default: false
+    default: op
   nonchat.help:
     description: Allows /nonchat help command
-    default: op
+    default: true
   nonchat.clear:
     description: Allows /clear command
     default: false
@@ -65,10 +65,10 @@ permissions:
     default: true
   nonchat.spy:
     description: Allows /spy command
-    default: false
+    default: op
   nonchat.antiblockedwords:
     description: Allows to sent blocked words
-    default: false
+    default: op
   nonchat.bubblechat:
     description: Allows to use bubble chat
     default: true
