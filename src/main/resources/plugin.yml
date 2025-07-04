@@ -56,7 +56,7 @@ permissions:
     default: false
   nonchat.help:
     description: Allows /nonchat help command
-    default: true
+    default: op
   nonchat.clear:
     description: Allows /clear command
     default: false
