@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.core.MessageManager;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 public class ReplyCommand implements CommandExecutor, TabCompleter {
     private final Nonchat plugin;
