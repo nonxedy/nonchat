@@ -100,6 +100,9 @@ public class PluginConfig {
         // Default channel setting
         config.set("default-channel", "local");
         
+        // Message delivery notifications
+        config.set("message-delivery.notify-undelivered", true);
+        
         // Interactive placeholders configuration
         config.set("interactive-placeholders.enabled", true);
         config.set("interactive-placeholders.item-enabled", true);
@@ -218,6 +221,23 @@ public class PluginConfig {
     @NotNull
     public String getDefaultChannel() {
         return defaultChannel;
+    }
+
+    /**
+     * Checks if undelivered message notifications are enabled
+     * @return true if notifications are enabled
+     */
+    public boolean isUndeliveredMessageNotificationEnabled() {
+        return config.getBoolean("message-delivery.notify-undelivered", true);
+    }
+
+    /**
+     * Sets undelivered message notification enabled state
+     * @param enabled New enabled state
+     */
+    public void setUndeliveredMessageNotificationEnabled(boolean enabled) {
+        config.set("message-delivery.notify-undelivered", enabled);
+        saveConfig();
     }
 
     /**

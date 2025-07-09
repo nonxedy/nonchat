@@ -48,6 +48,15 @@ public class MessageManager {
             return;
         }
         
+        // Check if receiver is online and available to receive the message
+        if (receiver == null || !receiver.isOnline()) {
+            // Only show notification if enabled in config
+            if (config.isUndeliveredMessageNotificationEnabled()) {
+                sender.sendMessage(ColorUtil.parseComponent(messages.getString("message-not-delivered")));
+            }
+            return;
+        }
+        
         lastMessageSender.put(receiver.getUniqueId(), sender.getUniqueId());
 
         // Process message with color permission for both sender and receiver

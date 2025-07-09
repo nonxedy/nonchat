@@ -147,4 +147,19 @@ public class ConfigService implements IConfigurable {
         return config.isPingPlaceholdersEnabled();
     }
 
+    /**
+     * Checks if undelivered message notifications are enabled
+     * @return true if notifications are enabled
+     */
+    public boolean isUndeliveredMessageNotificationEnabled() {
+        return config.isUndeliveredMessageNotificationEnabled();
+    }
+
+    /**
+     * Sets undelivered message notification enabled state
+     * @param enabled New enabled state
+     */
+    public void setUndeliveredMessageNotificationEnabled(boolean enabled) {
+        config.setUndeliveredMessageNotificationEnabled(enabled);
+    }
 }

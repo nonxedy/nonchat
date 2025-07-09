@@ -159,7 +159,12 @@ public class ChatManager {
     
         handleMentions(player, messageToSend);
         Component formattedMessage = channel.formatMessage(player, messageToSend);
-        broadcastMessage(player, formattedMessage, channel, messageToSend);
+        boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, messageToSend);
+
+        // Check if undelivered message notifications are enabled and notify if message wasn't delivered
+        if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("message-not-delivered")));
+        }
 
         // Record message sent for cooldown tracking
         channelManager.recordMessageSent(player);
@@ -280,20 +285,33 @@ public class ChatManager {
         mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
     }
 
-    private void broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
+    /**
+     * Broadcasts a message to all eligible recipients and returns whether it was delivered to any players.
+     * @param sender The player sending the message
+     * @param message The formatted message component
+     * @param channel The channel being used
+     * @param originalMessage The original message content
+     * @return true if the message was delivered to at least one player, false otherwise
+     */
+    private boolean broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
         // Always send to console
         Bukkit.getConsoleSender().sendMessage(message);
 
-        // Send to players using Stream API
-        Bukkit.getOnlinePlayers().stream()
+        // Count how many players received the message
+        long recipientCount = Bukkit.getOnlinePlayers().stream()
             // Skip players ignoring the sender
             .filter(recipient -> ignoreCommand == null || !ignoreCommand.isIgnoring(recipient, sender))
             // Check channel-specific conditions
             .filter(recipient -> channel.canReceive(recipient))
             // For local channels, also check range
             .filter(recipient -> channel.isGlobal() || channel.isInRange(sender, recipient))
-            // Send message to filtered recipients
-            .forEach(recipient -> recipient.sendMessage(message));
+            // Send message to filtered recipients and count them
+            .peek(recipient -> recipient.sendMessage(message))
+            .count();
+
+        // Return true if at least one player (other than sender) received the message
+        // We subtract 1 because the sender is also counted in the recipients
+        return recipientCount > 1;
     }
     
     /**

@@ -35,10 +35,15 @@ public class ChatService implements IMessageHandler {
     public void handlePrivateMessage(Player sender, Player receiver, String message) {
         if (ignoreCommand != null) {
             if (ignoreCommand.isIgnoring(receiver, sender)) {
+                // Only show notification if enabled in config
+                if (config.isUndeliveredMessageNotificationEnabled()) {
+                    // TODO: This would need access to messages, but we'll let MessageManager handle it
+                }
                 return;
             }
             
             if (ignoreCommand.isIgnoring(sender, receiver)) {
+                // This would need access to messages, but we'll let MessageManager handle it
                 return;
             }
         }

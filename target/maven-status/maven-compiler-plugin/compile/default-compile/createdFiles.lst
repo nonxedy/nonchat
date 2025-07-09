@@ -47,6 +47,7 @@ com\nonxedy\nonchat\listener\ChatListener.class
 com\nonxedy\nonchat\config\PluginConfig.class
 com\nonxedy\nonchat\integration\DiscordSRVIntegration.class
 com\nonxedy\nonchat\util\integration\metrics\Metrics$SimplePie.class
+com\nonxedy\nonchat\api\INotificationSettings.class
 com\nonxedy\nonchat\util\core\debugging\Debugger.class
 com\nonxedy\nonchat\listener\PaperChatListener.class
 com\nonxedy\nonchat\util\integration\metrics\Metrics$SimpleBarChart.class

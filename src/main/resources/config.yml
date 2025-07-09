@@ -61,6 +61,13 @@ update-checker: true # Enable/disable the update checker.
 default-channel: "local"
 
 # ==================================================
+# MESSAGE DELIVERY NOTIFICATIONS
+# Controls whether players are notified when their messages are not delivered
+# ==================================================
+message-delivery:
+  notify-undelivered: true # Enable/disable notifications when messages are not delivered
+
+# ==================================================
 # INTERACTIVE PLACEHOLDERS CONFIGURATION
 # Interactive placeholders are special placeholders like [item] and [ping]
 # that show interactive content in chat messages

@@ -3,6 +3,7 @@ c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api\IChatFormatter.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api\IConfigurable.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api\IMessageHandler.java
+c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api\INotificationSettings.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api\MessageFilter.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\api\MessageProcessor.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\chat\channel\BaseChannel.java
@@ -14,6 +15,7 @@ c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\com
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\command\impl\MeCommand.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\command\impl\MessageCommand.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\command\impl\NonchatCommand.java
+c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\command\impl\ReplyCommand.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\command\impl\RollCommand.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\command\impl\SpyCommand.java
 c:\Users\Admin\Desktop\My projects\nonchat\src\main\java\com\nonxedy\nonchat\config\PluginConfig.java
