@@ -12,7 +12,6 @@ depend:
   - PlaceholderAPI
 
 softdepend:
-  - ProtocolLib
   - DiscordSRV
   - Vault
 
