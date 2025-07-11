@@ -25,6 +25,7 @@ com\nonxedy\nonchat\command\impl\ChannelCommand.class
 com\nonxedy\nonchat\api\IChatFormatter.class
 com\nonxedy\nonchat\service\ChatService.class
 com\nonxedy\nonchat\util\chat\filters\WordBlocker.class
+com\nonxedy\nonchat\command\impl\ReplyCommand.class
 com\nonxedy\nonchat\util\special\ignore\IgnoreManager.class
 com\nonxedy\nonchat\core\ChatManager.class
 com\nonxedy\nonchat\api\ChannelAPI.class

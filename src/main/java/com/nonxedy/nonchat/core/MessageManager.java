@@ -1,8 +1,8 @@
 package com.nonxedy.nonchat.core;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -17,19 +17,19 @@ import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import net.kyori.adventure.text.Component;
 
 public class MessageManager {
+
     private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
     private final SpyCommand spyCommand;
-    private final Map<UUID, UUID> lastMessageSender;
-    private IgnoreCommand ignoreCommand;
+    private final Map<UUID, UUID> lastMessageSender = new ConcurrentHashMap<>();
+    private volatile IgnoreCommand ignoreCommand;
 
     public MessageManager(Nonchat plugin, PluginConfig config, PluginMessages messages, SpyCommand spyCommand) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
         this.spyCommand = spyCommand;
-        this.lastMessageSender = new HashMap<>();
     }
 
     public Map<UUID, UUID> getLastMessageSender() {
@@ -41,13 +41,13 @@ public class MessageManager {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
             return;
         }
-        
+
         if (ignoreCommand != null && ignoreCommand.isIgnoring(sender, receiver)) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
                     .replace("%player%", receiver.getName())));
             return;
         }
-        
+
         // Check if receiver is online and available to receive the message
         if (receiver == null || !receiver.isOnline()) {
             // Only show notification if enabled in config
@@ -56,21 +56,21 @@ public class MessageManager {
             }
             return;
         }
-        
+
         lastMessageSender.put(receiver.getUniqueId(), sender.getUniqueId());
 
         // Process message with color permission for both sender and receiver
         String processedMessage = sender.hasPermission("nonchat.color") ? message : ColorUtil.stripAllColors(message);
-        
+
         String senderFormat = config.getPrivateChatFormat()
-            .replace("{sender}", sender.getName())
-            .replace("{target}", receiver.getName())
-            .replace("{message}", processedMessage);
-            
+                .replace("{sender}", sender.getName())
+                .replace("{target}", receiver.getName())
+                .replace("{message}", processedMessage);
+
         String receiverFormat = config.getPrivateChatFormat()
-            .replace("{sender}", sender.getName())
-            .replace("{target}", receiver.getName())
-            .replace("{message}", processedMessage);
+                .replace("{sender}", sender.getName())
+                .replace("{target}", receiver.getName())
+                .replace("{message}", processedMessage);
 
         sender.sendMessage(ColorUtil.parseComponent(senderFormat));
         receiver.sendMessage(ColorUtil.parseComponent(receiverFormat));
@@ -103,9 +103,10 @@ public class MessageManager {
     public void clearLastMessageSender(Player player) {
         lastMessageSender.remove(player.getUniqueId());
     }
-    
+
     /**
      * Sets the ignore command instance.
+     *
      * @param ignoreCommand The ignore command instance
      */
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
