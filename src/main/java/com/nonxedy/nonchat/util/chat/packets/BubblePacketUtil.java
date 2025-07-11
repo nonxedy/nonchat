@@ -2,6 +2,7 @@ package com.nonxedy.nonchat.util.chat.packets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,21 +10,23 @@ import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
 /**
- * Manages chat bubble display using armor stands
+ * Manages chat bubble display using armor stands with object pooling
  * Handles creation, removal and updating of floating text displays
  */
 public class BubblePacketUtil {
     private static final int MAX_LINE_LENGTH = 40;
     private static final double LINE_SPACING = 0.25;
+    private static final ObjectPool<ArmorStand> armorStandPool = new ObjectPool<>(50);
     
     /**
-     * Creates and configures multiple chat bubble armor stands for multiline text
+     * Creates and configures multiple chat bubble armor stands for multiline text using pooled armor stands
      * @param player The player to create bubbles for
      * @param text The text to display in bubbles
      * @param location The base location to spawn bubbles at
@@ -36,16 +39,16 @@ public class BubblePacketUtil {
         for (int i = 0; i < lines.size(); i++) {
             Location lineLocation = location.clone().add(0, (lines.size() - 1 - i) * LINE_SPACING, 0);
             
-            ArmorStand bubble = (ArmorStand) lineLocation.getWorld().spawnEntity(lineLocation, EntityType.ARMOR_STAND);
+            ArmorStand bubble = armorStandPool.acquire(() -> {
+                ArmorStand as = (ArmorStand) lineLocation.getWorld().spawnEntity(lineLocation, EntityType.ARMOR_STAND);
+                configureArmorStand(as);
+                return as;
+            });
+            
+            bubble.teleport(lineLocation);
             
             Component component = ColorUtil.parseComponent(lines.get(i));
-            
             bubble.customName(component);
-            bubble.setCustomNameVisible(true);
-            bubble.setInvisible(true);
-            bubble.setGravity(false);
-            bubble.setMarker(true);
-            bubble.setSmall(true);
             
             bubbleStands.add(bubble);
         }
@@ -53,45 +56,84 @@ public class BubblePacketUtil {
         return bubbleStands;
     }
     
-    /**
-     * Legacy method for single-line bubbles (for backward compatibility)
-     */
+    private static void configureArmorStand(ArmorStand as) {
+        as.setCustomNameVisible(true);
+        as.setInvisible(true);
+        as.setGravity(false);
+        as.setMarker(true);
+        as.setSmall(true);
+        // Clear any equipment that might have been set
+        as.getEquipment().clear();
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            as.setDisabledSlots(slot);
+        }
+    }
+    
     public static ArmorStand spawnBubble(Player player, String text, Location location) {
-        ArmorStand bubble = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+        ArmorStand bubble = armorStandPool.acquire(() -> {
+            ArmorStand as = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
+            configureArmorStand(as);
+            return as;
+        });
         
         Component component = ColorUtil.parseComponent(text);
-        
         bubble.customName(component);
-        bubble.setCustomNameVisible(true);
-        bubble.setInvisible(true);
-        bubble.setGravity(false);
-        bubble.setMarker(true);
-        bubble.setSmall(true);
+        bubble.teleport(location);
         
         return bubble;
     }
     
+    public static void removeBubble(ArmorStand bubble) {
+        if (bubble != null && !bubble.isDead()) {
+            armorStandPool.release(bubble);
+        }
+    }
+    
+    public static void removeBubbles(List<ArmorStand> bubbles) {
+        if (bubbles != null) {
+            bubbles.forEach(BubblePacketUtil::removeBubble);
+        }
+    }
+
     /**
-     * Splits text into lines of specified maximum length
-     * @param text Text to split
-     * @param maxLength Maximum length of each line
-     * @return List of text lines
+     * Updates the position of a single chat bubble
+     * @param bubble The armor stand to move
+     * @param location New location for the bubble
      */
+    public static void updateBubbleLocation(ArmorStand bubble, Location location) {
+        if (bubble != null && !bubble.isDead()) {
+            bubble.teleport(location);
+        }
+    }
+    
+    /**
+     * Updates the positions of multiple chat bubbles
+     * @param bubbles List of armor stands to move
+     * @param baseLocation Base location for the bubbles
+     */
+    public static void updateBubblesLocation(List<ArmorStand> bubbles, Location baseLocation) {
+        if (bubbles != null) {
+            for (int i = 0; i < bubbles.size(); i++) {
+                ArmorStand bubble = bubbles.get(i);
+                if (bubble != null && !bubble.isDead()) {
+                    Location lineLocation = baseLocation.clone().add(0, (bubbles.size() - 1 - i) * LINE_SPACING, 0);
+                    bubble.teleport(lineLocation);
+                }
+            }
+        }
+    }
+
     private static List<String> splitTextIntoLines(String text, int maxLength) {
         List<String> lines = new ArrayList<>();
-
         Pattern colorPattern = Pattern.compile("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}");
         String currentColor = "";
-        
         String processedText = ColorUtil.parseColor(text);
-
         String[] words = processedText.split(" ");
         StringBuilder currentLine = new StringBuilder();
 
         for (String word : words) {
             String wordWithoutColors = word.replaceAll("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}", "");
             int visibleLength = wordWithoutColors.length();
-
             String lineWithoutColors = currentLine.toString().replaceAll("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}", "");
             int currentVisibleLength = lineWithoutColors.length();
 
@@ -103,19 +145,16 @@ public class BubblePacketUtil {
             } else {
                 if (currentLine.length() > 0) {
                     lines.add(currentLine.toString());
-
                     Matcher matcher = colorPattern.matcher(currentLine.toString());
                     currentColor = "";
                     while (matcher.find()) {
                         currentColor = matcher.group();
                     }
-
                     currentLine = new StringBuilder(currentColor);
                 }
 
                 if (visibleLength > maxLength) {
                     StringBuilder remainingWord = new StringBuilder(word);
-
                     while (remainingWord.length() > 0) {
                         StringBuilder colorCodes = new StringBuilder();
                         int i = 0;
@@ -163,7 +202,6 @@ public class BubblePacketUtil {
                         }
 
                         lines.add(linePart.toString());
-
                         Matcher matcher = colorPattern.matcher(linePart.toString());
                         while (matcher.find()) {
                             currentColor = matcher.group();
@@ -195,50 +233,31 @@ public class BubblePacketUtil {
     }
     
     /**
-     * Removes a single chat bubble from the world
-     * @param bubble The armor stand to remove
+     * Simple object pool implementation for ArmorStand entities
      */
-    public static void removeBubble(ArmorStand bubble) {
-        if (bubble != null && !bubble.isDead()) {
-            bubble.remove();
+    private static class ObjectPool<T> {
+        private final List<T> pool = new ArrayList<>();
+        private final int maxSize;
+        
+        public ObjectPool(int maxSize) {
+            this.maxSize = maxSize;
         }
-    }
-    
-    /**
-     * Removes multiple chat bubbles from the world
-     * @param bubbles List of armor stands to remove
-     */
-    public static void removeBubbles(List<ArmorStand> bubbles) {
-        if (bubbles != null) {
-            for (ArmorStand bubble : bubbles) {
-                removeBubble(bubble);
+        
+        public T acquire(Supplier<T> creator) {
+            synchronized (pool) {
+                if (!pool.isEmpty()) {
+                    return pool.remove(pool.size() - 1);
+                }
             }
+            return creator.get();
         }
-    }
-
-    /**
-     * Updates the position of a single chat bubble
-     * @param bubble The armor stand to move
-     * @param location New location for the bubble
-     */
-    public static void updateBubbleLocation(ArmorStand bubble, Location location) {
-        if (bubble != null && !bubble.isDead()) {
-            bubble.teleport(location);
-        }
-    }
-    
-    /**
-     * Updates the positions of multiple chat bubbles
-     * @param bubbles List of armor stands to move
-     * @param baseLocation Base location for the bubbles
-     */
-    public static void updateBubblesLocation(List<ArmorStand> bubbles, Location baseLocation) {
-        if (bubbles != null) {
-            for (int i = 0; i < bubbles.size(); i++) {
-                ArmorStand bubble = bubbles.get(i);
-                if (bubble != null && !bubble.isDead()) {
-                    Location lineLocation = baseLocation.clone().add(0, (bubbles.size() - 1 - i) * LINE_SPACING, 0);
-                    bubble.teleport(lineLocation);
+        
+        public void release(T obj) {
+            synchronized (pool) {
+                if (pool.size() < maxSize) {
+                    pool.add(obj);
+                } else if (obj instanceof ArmorStand) {
+                    ((ArmorStand) obj).remove();
                 }
             }
         }
