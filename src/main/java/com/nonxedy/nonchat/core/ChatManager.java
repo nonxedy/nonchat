@@ -62,7 +62,7 @@ public class ChatManager {
 
             CapsFilter capsFilter = config.getCapsFilter();
             if (capsFilter.shouldFilter(messageContent)) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("caps-filter")
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
                         .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
                 return;
             }
@@ -98,13 +98,13 @@ public class ChatManager {
 
             // Check if channel is enabled
             if (!channel.isEnabled()) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("chat-disabled")));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("chat-disabled")));
                 return;
             }
 
             // Check if player has permission to use this channel
             if (!channel.canSend(player)) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
                 return;
             }
 
@@ -112,13 +112,13 @@ public class ChatManager {
             String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage : ColorUtil.stripAllColors(finalMessage);
 
             if (messageForLengthCheck.length() < channel.getMinLength()) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("message-too-short")
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-short")
                         .replace("{min}", String.valueOf(channel.getMinLength()))));
                 return;
             }
 
             if (channel.getMaxLength() > 0 && messageForLengthCheck.length() > channel.getMaxLength()) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("message-too-long")
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-long")
                         .replace("{max}", String.valueOf(channel.getMaxLength()))));
                 return;
             }
@@ -137,7 +137,7 @@ public class ChatManager {
 
             // Check if message should be filtered by registered filters
             if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("message-filtered")));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-filtered")));
                 return;
             }
 
@@ -170,7 +170,7 @@ public class ChatManager {
 
             // Check if undelivered message notifications are enabled and notify if message wasn't delivered
             if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("message-not-delivered")));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
             }
 
         } finally {
@@ -257,7 +257,7 @@ public class ChatManager {
             // Check blocked words on the message without color codes
             String messageToCheck = ColorUtil.stripAllColors(message);
             if (!wordBlocker.isMessageAllowed(messageToCheck)) {
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("blocked-words")));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
                 return true;
             }
         }

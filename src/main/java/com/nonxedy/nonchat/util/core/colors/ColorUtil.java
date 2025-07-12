@@ -1,5 +1,10 @@
 package com.nonxedy.nonchat.util.core.colors;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,6 +14,32 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
+
+/**
+ * Simple LRU cache implementation
+ */
+class LRUCache<K,V> {
+    private final Map<K,V> cache;
+    private final int maxSize;
+    
+    public LRUCache(int maxSize) {
+        this.maxSize = maxSize;
+        this.cache = Collections.synchronizedMap(
+            new LinkedHashMap<K,V>(maxSize, 0.75f, true) {
+                protected boolean removeEldestEntry(Entry<K,V> eldest) {
+                    return cache.size() > maxSize;
+                }
+            });
+    }
+    
+    public V get(K key) {
+        return cache.get(key);
+    }
+    
+    public void put(K key, V value) {
+        cache.put(key, value);
+    }
+}
 
 /**
  * Provides color code processing and text formatting for chat messages
@@ -36,27 +67,36 @@ public class ColorUtil {
      * @param message The text containing color codes
      * @return Processed string with color codes converted
      */
+    private static final LRUCache<String, String> COLOR_CACHE = new LRUCache<>(1000);
+    private static final Map<String, Component> COMPONENT_CACHE = 
+        Collections.synchronizedMap(new WeakHashMap<>());
+
     public static String parseColor(String message) {
-        // Return empty string if message is null
         if (message == null) return "";
         
-        // Create a matcher to find hex color patterns in the message
+        // Check cache first
+        String cached = COLOR_CACHE.get(message);
+        if (cached != null) return cached;
+        
         Matcher matcher = HEX_PATTERN.matcher(message);
-        // Create a string buffer with extra capacity for color code conversions
-        StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
+        StringBuilder buffer = new StringBuilder(message.length() + 32);
 
-        // Process each hex color code found in the message
         while (matcher.find()) {
-            // Extract the hex color value without the &# prefix
             String group = matcher.group(1);
-            // Replace the &#RRGGBB with the actual ChatColor format
             matcher.appendReplacement(buffer, ChatColor.of("#" + group).toString());
         }
-        // Add the remaining text after the last match
         matcher.appendTail(buffer);
+        
+        String result = ChatColor.translateAlternateColorCodes('&', buffer.toString());
+        COLOR_CACHE.put(message, result);
+        return result;
+    }
 
-        // Convert standard & color codes and return the fully colored string
-        return ChatColor.translateAlternateColorCodes('&', buffer.toString());
+    public static Component parseComponentCached(String message) {
+        if (message == null) return Component.empty();
+        
+        return COMPONENT_CACHE.computeIfAbsent(message, 
+            m -> parseMiniMessageComponent(prepareMixedFormatMessage(m)));
     }
 
     /**

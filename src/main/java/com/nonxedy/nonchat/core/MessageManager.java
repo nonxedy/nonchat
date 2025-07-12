@@ -38,7 +38,7 @@ public class MessageManager {
 
     public void sendPrivateMessage(Player sender, Player receiver, String message) {
         if (ignoreCommand != null && ignoreCommand.isIgnoring(receiver, sender)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
             return;
         }
 
@@ -52,7 +52,7 @@ public class MessageManager {
         if (receiver == null || !receiver.isOnline()) {
             // Only show notification if enabled in config
             if (config.isUndeliveredMessageNotificationEnabled()) {
-                sender.sendMessage(ColorUtil.parseComponent(messages.getString("message-not-delivered")));
+                sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
             }
             return;
         }
@@ -88,7 +88,7 @@ public class MessageManager {
 
         Player receiver = Bukkit.getPlayer(lastSenderUUID);
         if (receiver == null || !receiver.isOnline()) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-offline")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-offline")));
             return;
         }
 
