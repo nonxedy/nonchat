@@ -226,6 +226,15 @@ public class ChatManager {
                         Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
                         BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
                     });
+            
+            // Clean up bubbles for offline players
+            bubbles.entrySet().removeIf(entry -> {
+                if (!entry.getKey().isOnline()) {
+                    BubblePacketUtil.removeBubbles(entry.getValue());
+                    return true;
+                }
+                return false;
+            });
         }, 1L, 1L);
     }
 
@@ -505,5 +514,14 @@ public class ChatManager {
      */
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
         this.ignoreCommand = ignoreCommand;
+    }
+    
+    /**
+     * Cleanup method to remove all bubbles when plugin is disabled
+     */
+    public void cleanup() {
+        bubbles.values().forEach(BubblePacketUtil::removeBubbles);
+        bubbles.clear();
+        playerLocks.clear();
     }
 }

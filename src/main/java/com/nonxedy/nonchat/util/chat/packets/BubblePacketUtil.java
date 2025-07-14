@@ -85,6 +85,7 @@ public class BubblePacketUtil {
     
     public static void removeBubble(ArmorStand bubble) {
         if (bubble != null && !bubble.isDead()) {
+            bubble.remove(); // Принудительно удаляем из мира
             armorStandPool.release(bubble);
         }
     }
@@ -92,6 +93,7 @@ public class BubblePacketUtil {
     public static void removeBubbles(List<ArmorStand> bubbles) {
         if (bubbles != null) {
             bubbles.forEach(BubblePacketUtil::removeBubble);
+            bubbles.clear(); // Очищаем список после удаления
         }
     }
 
@@ -113,6 +115,9 @@ public class BubblePacketUtil {
      */
     public static void updateBubblesLocation(List<ArmorStand> bubbles, Location baseLocation) {
         if (bubbles != null) {
+            // Удаляем мертвые armor stands из списка
+            bubbles.removeIf(bubble -> bubble == null || bubble.isDead());
+            
             for (int i = 0; i < bubbles.size(); i++) {
                 ArmorStand bubble = bubbles.get(i);
                 if (bubble != null && !bubble.isDead()) {
@@ -246,20 +251,63 @@ public class BubblePacketUtil {
         public T acquire(Supplier<T> creator) {
             synchronized (pool) {
                 if (!pool.isEmpty()) {
-                    return pool.remove(pool.size() - 1);
+                    T obj = pool.remove(pool.size() - 1);
+                    // Проверяем, что объект все еще валиден
+                    if (obj instanceof ArmorStand) {
+                        ArmorStand as = (ArmorStand) obj;
+                        if (as.isDead()) {
+                            // Если объект мертв, создаем новый
+                            return creator.get();
+                        }
+                    }
+                    return obj;
                 }
             }
             return creator.get();
         }
         
         public void release(T obj) {
-            synchronized (pool) {
-                if (pool.size() < maxSize) {
-                    pool.add(obj);
-                } else if (obj instanceof ArmorStand) {
-                    ((ArmorStand) obj).remove();
+            if (obj instanceof ArmorStand) {
+                ArmorStand as = (ArmorStand) obj;
+                // Не добавляем в пул мертвые объекты
+                if (as.isDead()) {
+                    return;
+                }
+                
+                // Сбрасываем состояние armor stand перед возвратом в пул
+                as.setCustomNameVisible(false);
+                as.customName(null);
+                
+                synchronized (pool) {
+                    if (pool.size() < maxSize) {
+                        pool.add(obj);
+                    } else {
+                        // Если пул полон, удаляем объект
+                        as.remove();
+                    }
                 }
             }
         }
+        
+        /**
+         * Очищает пул и удаляет все объекты
+         */
+        public void clear() {
+            synchronized (pool) {
+                pool.forEach(obj -> {
+                    if (obj instanceof ArmorStand) {
+                        ((ArmorStand) obj).remove();
+                    }
+                });
+                pool.clear();
+            }
+        }
+    }
+    
+    /**
+     * Очищает пул armor stands (вызывается при отключении плагина)
+     */
+    public static void clearPool() {
+        armorStandPool.clear();
     }
 }
