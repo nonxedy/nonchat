@@ -89,7 +89,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Check if sender has permission to use private messaging
         if (!sender.hasPermission("nonchat.message")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             }
@@ -98,7 +98,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Validate command arguments (need at least target player and message)
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-message")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-message")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
             }
@@ -108,7 +108,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         // Get target player and verify they are online
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-not-found")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player that is not online.");
             }
@@ -117,7 +117,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Check if target player has ignored the sender
         if (isIgnored(sender, target)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
             }

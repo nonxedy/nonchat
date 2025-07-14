@@ -42,7 +42,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         plugin.logCommand(command.getName(), args);
         
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-only")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
             return true;
         }
         
@@ -79,7 +79,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     
     private boolean handleSetChannel(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-set-usage")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-set-usage")));
             return true;
         }
         
@@ -99,7 +99,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         }
         
         if (!channel.canSend(player)) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             return true;
         }
         
@@ -119,11 +119,11 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         Channel currentChannel = chatManager.getPlayerChannel(player);
         
         if (channels.isEmpty()) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-channels")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-channels")));
             return true;
         }
         
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-list-header")));
+        player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-list-header")));
         
         for (Channel channel : channels) {
             String entryMessage = messages.getString("channel-list-entry")
@@ -146,7 +146,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     
     private boolean handleChannelInfo(Player player, String[] args) {
         if (args.length < 2) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-info-usage")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-info-usage")));
             return true;
         }
         
@@ -185,12 +185,12 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     private boolean handleCreateChannel(Player player, String[] args) {
         // Check permission
         if (!player.hasPermission("nonchat.admin.channel.create")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             return true;
         }
         
         if (args.length < 3) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-create-usage")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-create-usage")));
             return true;
         }
         
@@ -199,7 +199,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         
         // Validate channel ID
         if (!channelId.matches("^[a-z0-9-]+$")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-invalid-id")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-invalid-id")));
             return true;
         }
         
@@ -237,28 +237,28 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                 try {
                     radius = Integer.parseInt(arg.substring(7));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("cooldown:")) {
                 try {
                     cooldown = Integer.parseInt(arg.substring(9));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("min:")) {
                 try {
                     minLength = Integer.parseInt(arg.substring(4));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("max:")) {
                 try {
                     maxLength = Integer.parseInt(arg.substring(4));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             }
@@ -287,12 +287,12 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     private boolean handleEditChannel(Player player, String[] args) {
         // Check permission
         if (!player.hasPermission("nonchat.admin.channel.edit")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             return true;
         }
         
         if (args.length < 3) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-edit-usage")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-edit-usage")));
             return true;
         }
         
@@ -337,7 +337,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                 try {
                     radius = Integer.parseInt(arg.substring(7));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("enabled:")) {
@@ -346,21 +346,21 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                 try {
                     cooldown = Integer.parseInt(arg.substring(9));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("min:")) {
                 try {
                     minLength = Integer.parseInt(arg.substring(4));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("max:")) {
                 try {
                     maxLength = Integer.parseInt(arg.substring(4));
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-number")));
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             }
@@ -387,12 +387,12 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     private boolean handleDeleteChannel(Player player, String[] args) {
         // Check permission
         if (!player.hasPermission("nonchat.admin.channel.delete")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             return true;
         }
         
         if (args.length < 2) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-delete-usage")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-delete-usage")));
             return true;
         }
         
@@ -421,12 +421,12 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     private boolean handleSetDefaultChannel(Player player, String[] args) {
         // Check permission
         if (!player.hasPermission("nonchat.admin.channel.default")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             return true;
         }
         
         if (args.length < 2) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-default-usage")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-default-usage")));
             return true;
         }
         
@@ -453,23 +453,23 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
     }
     
     private void sendHelp(Player player) {
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-header")));
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-set")));
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-list")));
-        player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-info")));
+        player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-header")));
+        player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-set")));
+        player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-list")));
+        player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-info")));
         
         // Only show admin commands if player has permission
         if (player.hasPermission("nonchat.admin.channel.create")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-create")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-create")));
         }
         if (player.hasPermission("nonchat.admin.channel.edit")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-edit")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-edit")));
         }
         if (player.hasPermission("nonchat.admin.channel.delete")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-delete")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-delete")));
         }
         if (player.hasPermission("nonchat.admin.channel.default")) {
-            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-help-default")));
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-help-default")));
         }
     }
     

@@ -73,7 +73,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private boolean handleReloadCommand(CommandSender sender) {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.reload")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("Permission denied: nonchat.reload");
             return true;
         }
@@ -81,18 +81,18 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Perform the reload
         try {
             // Send reload start message
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("reloading")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reloading")));
             plugin.logResponse("Initiating config reload...");
 
             // Execute reload operations
             executeReload();
             
             // Send success message
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("reloaded")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reloaded")));
             plugin.logResponse("Configuration reload successful");
         } catch (Exception e) {
             // Handle any errors during reload
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("reload-failed")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reload-failed")));
             plugin.logError("Configuration reload failed: " + e.getMessage());
             e.printStackTrace();
         }
@@ -119,7 +119,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private boolean handleHelpCommand(CommandSender sender) {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.help")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             plugin.logError("Permission denied: nonchat.help");
             return true;
         }
@@ -136,7 +136,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         try {
             // Create and send the help message
             Component helpMessage = Component.empty()
-                .append(ColorUtil.parseComponent(messages.getString("help")))
+                .append(ColorUtil.parseComponentCached(messages.getString("help")))
                 .append(Component.newline())
                 .append(getCommandsList());
 
@@ -154,37 +154,37 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Create an empty component and append all command descriptions
         return Component.empty()
             // Add reload command description
-            .append(ColorUtil.parseComponent(messages.getString("nreload")))
+            .append(ColorUtil.parseComponentCached(messages.getString("nreload")))
             .append(Component.newline())
             // Add help command description
-            .append(ColorUtil.parseComponent(messages.getString("help-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("help-command")))
             .append(Component.newline())
             // Add server command description
-            .append(ColorUtil.parseComponent(messages.getString("server-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("server-command")))
             .append(Component.newline())
             // Add message command description
-            .append(ColorUtil.parseComponent(messages.getString("message-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("message-command")))
             .append(Component.newline())
             // Add broadcast command description
-            .append(ColorUtil.parseComponent(messages.getString("broadcast-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("broadcast-command")))
             .append(Component.newline())
             // Add ignore command description
-            .append(ColorUtil.parseComponent(messages.getString("ignore-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("ignore-command")))
             .append(Component.newline())
             // Add spy command description
-            .append(ColorUtil.parseComponent(messages.getString("spy-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("spy-command")))
             .append(Component.newline())
             // Add me command description
-            .append(ColorUtil.parseComponent(messages.getString("me-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("me-command")))
             .append(Component.newline())
             // Add roll command description
-            .append(ColorUtil.parseComponent(messages.getString("roll-command")))
+            .append(ColorUtil.parseComponentCached(messages.getString("roll-command")))
             .append(Component.newline())
             // Add channel command description
-            .append(ColorUtil.parseComponent(messages.getString("channel-command"))
+            .append(ColorUtil.parseComponentCached(messages.getString("channel-command"))
             .append(Component.newline())
             // Add channel command description
-            .append(ColorUtil.parseComponent(messages.getString("reply-command"))));
+            .append(ColorUtil.parseComponentCached(messages.getString("reply-command"))));
     }
 
     /**

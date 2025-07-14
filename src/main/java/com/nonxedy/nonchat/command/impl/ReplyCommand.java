@@ -33,12 +33,12 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
         plugin.logCommand(command.getName(), args);
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-only")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
             return true;
         }
 
         if (!sender.hasPermission("nonchat.reply")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             }
@@ -46,7 +46,7 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 1) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-reply")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-reply")));
             return true;
         }
 

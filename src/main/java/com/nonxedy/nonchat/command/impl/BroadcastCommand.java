@@ -70,7 +70,7 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      * @param sender Command sender
      */
     private void sendNoPermissionMessage(CommandSender sender) {
-        sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+        sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
         plugin.logError("Sender doesn't have broadcast permission");
     }
 
@@ -79,7 +79,7 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      * @param sender Command sender
      */
     private void sendUsageMessage(CommandSender sender) {
-        sender.sendMessage(ColorUtil.parseComponent(messages.getString("broadcast-command")));
+        sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("broadcast-command")));
         plugin.logError("Invalid usage: /bc <message>");
     }
 
