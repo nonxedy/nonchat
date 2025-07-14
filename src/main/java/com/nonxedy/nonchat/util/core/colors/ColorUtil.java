@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.K;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -93,10 +94,43 @@ public class ColorUtil {
     }
 
     public static Component parseComponentCached(String message) {
-        if (message == null) return Component.empty();
+        if (message == null || message.isEmpty()) return Component.empty();
         
-        return COMPONENT_CACHE.computeIfAbsent(message, 
-            m -> parseMiniMessageComponent(prepareMixedFormatMessage(m)));
+        return COMPONENT_CACHE.computeIfAbsent(message, m -> {
+            if (m.contains("<#") || 
+                m.contains("<gradient") || 
+                m.contains("<rainbow") ||
+                m.contains("<bold") ||
+                m.contains("<italic") ||
+                m.contains("<underlined") ||
+                m.contains("<strikethrough") ||
+                m.contains("<obfuscated") ||
+                m.contains("<reset") ||
+                m.contains("<color") ||
+                // legacy color codes in MiniMessage
+                m.contains("<black") ||
+                m.contains("<dark_blue") ||
+                m.contains("<dark_green") ||
+                m.contains("<dark_aqua") ||
+                m.contains("<dark_red") ||
+                m.contains("<dark_purple") ||
+                m.contains("<gold") ||
+                m.contains("<gray") ||
+                m.contains("<dark_gray") ||
+                m.contains("<blue") ||
+                m.contains("<aqua") ||
+                m.contains("<red") ||
+                m.contains("<light_purple") ||
+                m.contains("<yellow") ||
+                m.contains("<white")) {
+                // Parse with MiniMessage if it contains MiniMessage format tags
+                return parseMiniMessageComponent(prepareMixedFormatMessage(m));
+            } else {
+                // Otherwise use legacy format parsing
+                String legacyMessage = parseColor(m);
+                return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
+            }
+        });
     }
 
     /**
