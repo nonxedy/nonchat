@@ -9,14 +9,9 @@ import org.bukkit.entity.Player;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 
 /**
@@ -55,7 +50,9 @@ public class HoverTextUtil {
         Component nameComponent = ColorUtil.parseComponent(originalText);
         Component hoverComponent = ColorUtil.parseComponent(hoverText);
         
-        return nameComponent.hoverEvent(HoverEvent.showText(hoverComponent));
+        return nameComponent
+            .hoverEvent(HoverEvent.showText(hoverComponent))
+            .clickEvent(ClickEvent.runCommand("/m " + player.getName()));
     }
 
     private String processLine(String text, Player player) {
