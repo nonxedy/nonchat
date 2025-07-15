@@ -160,6 +160,7 @@ public class PluginConfig {
         config.set("caps-filter.min-length", 4);
         
         // Broadcast settings
+        config.set("broadcast.format", "\n§#FFAFFBBroadcast: §f{message}\n");
         config.set("broadcast.random", true);
         config.set("broadcast.example.enabled", true);
         config.set("broadcast.example.message", "This message will be sent every 60 seconds");
@@ -375,6 +376,24 @@ public class PluginConfig {
      */
     public boolean isBroadcastEnabled() {
         return config.getBoolean("broadcast.enabled", true);
+    }
+
+    /**
+     * Gets broadcast command format
+     * @return Broadcast command format string
+     */
+    @NotNull
+    public String getBroadcastFormat() {
+        return config.getString("broadcast.format", "\n§#FFAFFBBroadcast: §f{message}\n");
+    }
+
+    /**
+     * Sets broadcast command format
+     * @param format New format string
+     */
+    public void setBroadcastFormat(String format) {
+        config.set("broadcast.format", format);
+        saveConfig();
     }
 
     /**

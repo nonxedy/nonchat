@@ -68,7 +68,7 @@ public class CommandService {
         registerCommand("r", new ReplyCommand(plugin, plugin.getMessageManager(), configService.getMessages()));
     
         // Chat management commands
-        registerCommand("broadcast", new BroadcastCommand(configService.getMessages(), plugin));
+        registerCommand("broadcast", new BroadcastCommand(configService.getMessages(), plugin, configService.getConfig()));
         registerCommand("spy", spyCommand);
         registerCommand("clear", new ClearCommand(configService.getMessages(), plugin));
         registerCommand("ignore", ignoreCommand);

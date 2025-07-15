@@ -139,10 +139,11 @@ spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command f
 # ==================================================
 # BROADCAST CONFIGURATION
 # Broadcast messages are messages that are sent to all players on the server.
-# These messages are sent by the server and are not sent by players.
 # ==================================================
 
 broadcast:
+  # Format for broadcast messages.
+  format: "\n§#FFAFFBBroadcast: §f{message}\n" # Use {message} for the message content, use \n for new line
 
   # Enable random auto broadcast messages.
   random: true

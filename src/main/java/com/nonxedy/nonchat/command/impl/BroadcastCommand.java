@@ -12,6 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
+import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
@@ -27,11 +28,14 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
     private final PluginMessages messages;
     // Reference to main plugin instance
     private final Nonchat plugin;
+    // Reference to plugin configuration
+    private final PluginConfig config;
 
     // Initialize command with required dependencies
-    public BroadcastCommand(PluginMessages messages, Nonchat plugin) {
+    public BroadcastCommand(PluginMessages messages, Nonchat plugin, PluginConfig config) {
         this.messages = messages;
         this.plugin = plugin;
+        this.config = config;
     }
 
     /**
@@ -84,22 +88,21 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Broadcasts formatted message to all players
+     * Broadcasts formatted message to all players using configurable format
      * @param message Message to broadcast
      */
     private void broadcastMessage(String message) {
         try {
+            // Get the broadcast format from config and replace {message} placeholder
+            String broadcastFormat = config.getBroadcastFormat();
+            String formattedMessage = broadcastFormat.replace("{message}", message);
+            
             // Create formatted message component
-            Component broadcastComponent = ColorUtil.parseComponent(
-                messages.getString("broadcast")
-                    .replace("{message}", message)
-            );
+            Component broadcastComponent = ColorUtil.parseComponent(formattedMessage);
 
             // Send to all online players with spacing
             plugin.getServer().getOnlinePlayers().forEach(player -> {
-                player.sendMessage(Component.empty());
                 player.sendMessage(broadcastComponent);
-                player.sendMessage(Component.empty());
             });
 
             // Send to server console
