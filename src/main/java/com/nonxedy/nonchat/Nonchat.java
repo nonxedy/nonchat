@@ -110,8 +110,8 @@ public class Nonchat extends JavaPlugin {
 
         // Initialize debug system if enabled
         if (configService.getConfig().isDebug()) {
-            this.debugger = new Debugger(this);
-            debugger.log("Services initialized successfully");
+            this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
+            debugger.info("Core", "Services initialized successfully");
         }
     }
 
@@ -129,7 +129,7 @@ public class Nonchat extends JavaPlugin {
 
         // Log successful listener registration
         if (debugger != null) {
-            debugger.log("Event listeners registered successfully");
+            debugger.info("Events", "Event listeners registered successfully");
         }
     }
 
@@ -159,7 +159,7 @@ public class Nonchat extends JavaPlugin {
             getLogger().info("Initializing update checker...");
             new UpdateChecker(this);
             if (debugger != null) {
-                debugger.log("Update checker initialized");
+                debugger.info("Updates", "Update checker initialized");
             }
         }
     }
@@ -232,7 +232,7 @@ public class Nonchat extends JavaPlugin {
         // Reinitialize debugger if needed
         if (configService != null && configService.getConfig().isDebug()) {
             if (debugger == null) {
-                debugger = new Debugger(this);
+                debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
             }
         } else {
             debugger = null;
@@ -261,25 +261,25 @@ public class Nonchat extends JavaPlugin {
 
     public void logCommand(String command, String[] args) {
         if (debugger != null) {
-            debugger.log("Command: " + command + " Args: " + Arrays.toString(args));
+            debugger.debug("Commands", command + " Args: " + Arrays.toString(args));
         }
     }
 
     public void logResponse(String response) {
         if (debugger != null) {
-            debugger.log("Response: " + response);
+            debugger.debug("API", "Response: " + response);
         }
     }
 
     public void logError(String error) {
         if (debugger != null) {
-            debugger.log("Error: " + error);
+            debugger.error("System", "Error occurred", new Exception(error));
         }
     }
 
     public void logPlaceholder(String placeholder, String result) {
         if (debugger != null) {
-            debugger.log("Placeholder: " + placeholder + " -> " + result);
+            debugger.debug("Placeholders", placeholder + " -> " + result);
         }
     }
 

@@ -644,12 +644,20 @@ public class PluginConfig {
     }
 
     /**
+     * Gets debug log retention days from config
+     * @return Number of days to keep debug logs (default 7)
+     */
+    public int getDebugLogRetentionDays() {
+        return config.getInt("debug-log-retention-days", 7);
+    }
+
+    /**
      * Sets debug mode state
      * @param debug New debug state
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
-        config.set("debug", debug);
+        config.set("debug", debug); 
         saveConfig();
     }
 

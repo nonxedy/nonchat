@@ -1,101 +1,227 @@
 package com.nonxedy.nonchat.util.core.debugging;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.nonxedy.nonchat.Nonchat;
 
 /**
- * Handles debug logging in YAML format with timestamps
- * Provides functionality to log, clear, and manage debug entries
+ * Advanced debug logger with JSON format, rotation and levels
  */
 public class Debugger {
-    private final Nonchat plugin;
-    private final File logFile;
-    private FileConfiguration debugConfig;
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final Plugin plugin;
+    private final File logsFolder;
+    private final int logRetentionDays;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final Gson gson = new GsonBuilder().create();
 
-    // Constructor initializes debugger with plugin reference
-    public Debugger(Nonchat plugin) {
+    /**
+     * Constructor sets up debugger with rotation settings
+     * @param plugin Plugin instance
+     * @param retentionDays How many days to keep logs (default 7)
+     */
+    public Debugger(Nonchat plugin, int retentionDays) {
         this.plugin = plugin;
-        // Set debug file path in plugin's data folder
-        this.logFile = new File(plugin.getDataFolder(), "debug.yml");
-        // Create and initialize debug file
-        initializeDebugFile();
+        this.logsFolder = new File(plugin.getDataFolder(), "debug_logs");
+        this.logRetentionDays = retentionDays > 0 ? retentionDays : 7;
+        initialize();
     }
 
-    /**
-     * Creates and initializes the debug file if it doesn't exist
-     * Sets up initial configuration and timestamp
-     */
-    private void initializeDebugFile() {
-        // Check if debug file exists
-        if (!logFile.exists()) {
-            // Create plugin directory if needed
-            plugin.getDataFolder().mkdirs();
-            try {
-                // Create new debug file
-                logFile.createNewFile();
-                // Load configuration
-                debugConfig = YamlConfiguration.loadConfiguration(logFile);
-                // Set creation timestamp
-                debugConfig.set("created", LocalDateTime.now().format(TIME_FORMAT));
-                // Save configuration to file
-                debugConfig.save(logFile);
-            } catch (IOException e) {
-                // Log error if file creation fails
-                plugin.getLogger().log(Level.SEVERE, "Failed to create debug file", e);
-            }
+    private void initialize() {
+        if (!logsFolder.exists()) {
+            logsFolder.mkdirs();
         }
-        // Load existing configuration
-        debugConfig = YamlConfiguration.loadConfiguration(logFile);
+        rotateLogs();
     }
 
-    /**
-     * Adds a new timestamped log entry to the debug file
-     * @param message The debug message to log
-     */
-    public void log(String message) {
+    private synchronized void rotateLogs() {
         try {
-            // Get current timestamp
-            String timestamp = LocalDateTime.now().format(TIME_FORMAT);
-            // Get existing log content
-            String currentLog = debugConfig.getString("log", "");
-            // Format new log entry with timestamp
-            String newLog = String.format("%s[%s] %s", 
-                currentLog.isEmpty() ? "" : currentLog + "\n", 
-                timestamp, 
-                message);
+            // Delete logs older than retention period
+            LocalDate cutoffDate = LocalDate.now().minusDays(logRetentionDays);
             
-            // Save new log entry
-            debugConfig.set("log", newLog);
-            debugConfig.save(logFile);
+            File[] logFiles = logsFolder.listFiles((dir, name) -> 
+                name.startsWith("debug_") && name.endsWith(".log"));
+            
+            if (logFiles != null) {
+                for (File logFile : logFiles) {
+                    String dateStr = logFile.getName().substring(6, 16);
+                    LocalDate logDate = LocalDate.parse(dateStr, dateFormatter);
+                    
+                    if (logDate.isBefore(cutoffDate)) {
+                        Files.delete(logFile.toPath());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to rotate debug logs: " + e.getMessage());
+        }
+    }
+
+    private File getCurrentLogFile() {
+        String fileName = "debug_" + LocalDate.now().format(dateFormatter) + ".log";
+        return new File(logsFolder, fileName);
+    }
+
+    private synchronized void writeLogEntry(Map<String, Object> logData) {
+        if (!plugin.getConfig().getBoolean("debug", false)) {
+            return;
+        }
+
+        File logFile = getCurrentLogFile();
+        
+        try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
+            writer.println("=== " + LocalDateTime.now().format(timeFormatter) + " ===");
+            writer.println("Level: " + logData.get("level"));
+            writer.println("Module: " + logData.get("module"));
+            writer.println("Message: " + logData.get("message"));
+            
+            if (logData.containsKey("exception")) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> excData = (Map<String, Object>) logData.get("exception");
+                writer.println("\nException: ");
+                writer.println("Type: " + excData.get("type"));
+                writer.println("Message: " + excData.get("message"));
+                writer.println("Stacktrace:");
+                @SuppressWarnings("unchecked")
+                List<String> stacktrace = (List<String>) excData.get("stacktrace");
+                for (String trace : stacktrace) {
+                    writer.println("  " + trace);
+                }
+            }
+            writer.println(); // Empty line between entries
         } catch (IOException e) {
-            // Log error if writing fails
-            plugin.getLogger().log(Level.SEVERE, "Failed to write to debug file", e);
+            plugin.getLogger().warning("Failed to write debug log: " + e.getMessage());
         }
     }
 
     /**
-     * Clears all debug entries and records the clearing time
+     * Debug level message 
+     * @param module Module name
+     * @param message Debug message
      */
-    public void clear() {
+    public void debug(String module, String message) {
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("level", "DEBUG");
+        logData.put("module", module);
+        logData.put("message", message);
+        writeLogEntry(logData);
+    }
+
+    /**
+     * Info level message
+     * @param module Module name
+     * @param message Info message
+     */
+    public void info(String module, String message) {
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("level", "INFO"); 
+        logData.put("module", module);
+        logData.put("message", message);
+        writeLogEntry(logData);
+    }
+
+    /**
+     * Warning level message
+     * @param module Module name
+     * @param message Warning message
+     */
+    public void warn(String module, String message) {
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("level", "WARN");
+        logData.put("module", module);
+        logData.put("message", message);
+        writeLogEntry(logData);
+    }
+
+    /**
+     * Error level message with exception
+     * @param module Module name  
+     * @param message Error message
+     * @param exception Exception object
+     */
+    public void error(String module, String message, Throwable exception) {
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("level", "ERROR");
+        logData.put("module", module);
+        logData.put("message", message);
+        
+        if (exception != null) {
+            Map<String, Object> excData = new HashMap<>();
+            excData.put("type", exception.getClass().getSimpleName());
+            excData.put("message", exception.getMessage());
+            
+            List<String> stackTrace = new LinkedList<>();
+            for (StackTraceElement elem : exception.getStackTrace()) {
+                stackTrace.add(elem.toString());
+            }
+            excData.put("stacktrace", stackTrace);
+            
+            logData.put("exception", excData);
+        }
+        
+        writeLogEntry(logData);
+    }
+
+    /**
+     * Cleans up all debug logs
+     */
+    public void cleanupAllLogs() {
         try {
-            // Remove all log entries
-            debugConfig.set("log", "");
-            // Record when log was cleared
-            debugConfig.set("last_cleared", LocalDateTime.now().format(TIME_FORMAT));
-            // Save changes to file
-            debugConfig.save(logFile);
+            File[] logFiles = logsFolder.listFiles((dir, name) -> 
+                name.startsWith("debug_") && name.endsWith(".log"));
+            
+            if (logFiles != null) {
+                for (File logFile : logFiles) {
+                    Files.delete(logFile.toPath());
+                }
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to clean debug logs: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gets recent debug entries
+     * @param count Number of entries to retrieve
+     * @return List of log entries as JSON strings
+     */
+    public List<String> getRecentLogs(int count) {
+        List<String> logs = new LinkedList<>();
+        File logFile = getCurrentLogFile();
+        
+        if (!logFile.exists()) return logs;
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logs.add(line);
+                if (logs.size() > count * 2) {
+                    logs.remove(0); // keep only latest
+                }
+            }
+            
+            // Return the last 'count' entries
+            return logs.subList(Math.max(0, logs.size() - count), logs.size());
         } catch (IOException e) {
-            // Log error if clearing fails
-            plugin.getLogger().log(Level.SEVERE, "Failed to clear debug file", e);
+            plugin.getLogger().warning("Failed to read debug logs: " + e.getMessage());
+            return List.of();
         }
     }
 }
