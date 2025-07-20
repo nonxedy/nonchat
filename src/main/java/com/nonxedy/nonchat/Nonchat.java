@@ -69,14 +69,11 @@ public class Nonchat extends JavaPlugin {
         registerListeners();
         setupIntegrations();
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-            @Override
-            public void run() {
-                for (World world : Bukkit.getWorlds()) {
-                    for (Entity entity : world.getEntities()) {
-                        if (entity instanceof ArmorStand) {
-                            entity.remove();
-                        }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            for (World world : Bukkit.getWorlds()) {
+                for (Entity entity : world.getEntities()) {
+                    if (entity instanceof ArmorStand) {
+                        entity.remove();
                     }
                 }
             }
