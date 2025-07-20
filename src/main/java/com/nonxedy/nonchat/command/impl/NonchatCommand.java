@@ -57,13 +57,16 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Process subcommands
         String subCommand = args[0].toLowerCase();
         switch (subCommand) {
-            case "reload":
+            case "reload" -> {
                 return handleReloadCommand(sender);
-            case "help":
+            }
+            case "help" -> {
                 return handleHelpCommand(sender);
-            default:
+            }
+            default -> {
                 sendHelpMessage(sender);
                 return true;
+            }
         }
     }
 
@@ -94,7 +97,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             // Handle any errors during reload
             sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reload-failed")));
             plugin.logError("Configuration reload failed: " + e.getMessage());
-            e.printStackTrace();
         }
 
         return true;
@@ -108,8 +110,8 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         plugin.reloadConfig();
         
         // These methods need to be added to the nonchat class if not already there
-        if (plugin instanceof Nonchat) {
-            ((Nonchat) plugin).reloadServices();
+        if (plugin instanceof Nonchat nonchat) {
+            nonchat.reloadServices();
         }
     }
 

@@ -37,8 +37,7 @@ public class DiscordSRVHook {
                 plugin.logError("DiscordSRV plugin not found or is disabled. DiscordSRV integration will not be available.");
             }
         } catch (Exception e) {
-            plugin.getLogger().severe("Failed to hook into DiscordSRV: " + e.getMessage());
-            e.printStackTrace();
+            plugin.logError("Failed to hook into DiscordSRV: " + e.getMessage());
         }
     }
 

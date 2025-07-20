@@ -55,11 +55,11 @@ public class DeathCoordinates implements Listener {
      * @return Formatted dimension name
      */
     private String formatDimension(Environment dimension) {
-        switch (dimension) {
-            case NORMAL: return "Overworld";
-            case NETHER: return "Nether";
-            case THE_END: return "The End";
-            default: return dimension.toString();
-        }
+        return switch (dimension) {
+            case NORMAL -> "Overworld";
+            case NETHER -> "Nether";
+            case THE_END -> "The End";
+            default -> dimension.toString();
+        };
     }
 }

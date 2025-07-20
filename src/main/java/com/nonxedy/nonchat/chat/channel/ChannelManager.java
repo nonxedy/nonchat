@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -75,7 +76,7 @@ public class ChannelManager {
             );
             
             if (config.isDebug()) {
-                Bukkit.getLogger().info("Loaded channel: " + channelId + ", max-length: " + maxLength);
+                Bukkit.getLogger().log(Level.INFO, "Loaded channel: {0}, max-length: {1}", new Object[]{channelId, maxLength});
             }
             
             channels.put(channelId, channel);

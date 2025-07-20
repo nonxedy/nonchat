@@ -1,6 +1,7 @@
 package com.nonxedy.nonchat.util.chat.formatting;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -74,7 +75,7 @@ public class HoverTextUtil {
                 processed = PlaceholderAPI.setPlaceholders(player, processed);
             } catch (Exception e) {
                 // Log the error but don't crash
-                Bukkit.getLogger().warning("[nonchat] Error processing placeholder: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing placeholder: {0}", e.getMessage());
             }
         }
     

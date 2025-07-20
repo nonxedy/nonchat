@@ -151,6 +151,7 @@ public class ConfigService implements IConfigurable {
      * Checks if undelivered message notifications are enabled
      * @return true if notifications are enabled
      */
+    @Override
     public boolean isUndeliveredMessageNotificationEnabled() {
         return config.isUndeliveredMessageNotificationEnabled();
     }
@@ -159,6 +160,7 @@ public class ConfigService implements IConfigurable {
      * Sets undelivered message notification enabled state
      * @param enabled New enabled state
      */
+    @Override
     public void setUndeliveredMessageNotificationEnabled(boolean enabled) {
         config.setUndeliveredMessageNotificationEnabled(enabled);
     }

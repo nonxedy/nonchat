@@ -36,8 +36,8 @@ public class PaperChatListener extends ChatListener {
                 } else if (chatManager != null) {
                     chatManager.processChat(player, message);
                 }
-            } catch (Exception ex) {
-                plugin.getLogger().warning("Async chat processing failed: " + ex.getMessage());
+            } catch (Exception e) {
+                plugin.logError("Async chat processing failed: " + e.getMessage());
             }
         });
     }

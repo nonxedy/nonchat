@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat.chat.channel;
 
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -176,7 +177,7 @@ public class BaseChannel implements Channel {
                 beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
                 afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing format placeholders: {0}", e.getMessage());
             }
         }
 
@@ -192,8 +193,7 @@ public class BaseChannel implements Channel {
     private Component processMessageContent(Player player, String message) {
         // Check if interactive placeholders are globally disabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
-        if (plugin instanceof com.nonxedy.nonchat.Nonchat) {
-            com.nonxedy.nonchat.Nonchat nonchatPlugin = (com.nonxedy.nonchat.Nonchat) plugin;
+        if (plugin instanceof Nonchat nonchatPlugin) {
             boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
             
             if (!globalEnabled) {
@@ -239,8 +239,7 @@ public class BaseChannel implements Channel {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
         
-        if (plugin instanceof Nonchat) {
-            Nonchat nonchatPlugin = (Nonchat) plugin;
+        if (plugin instanceof Nonchat nonchatPlugin) {
             itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
         }
         
@@ -266,8 +265,7 @@ public class BaseChannel implements Channel {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean pingEnabled = true;
         
-        if (plugin instanceof Nonchat) {
-            Nonchat nonchatPlugin = (Nonchat) plugin;
+        if (plugin instanceof Nonchat nonchatPlugin) {
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }
         
@@ -294,8 +292,7 @@ public class BaseChannel implements Channel {
         boolean itemEnabled = true;
         boolean pingEnabled = true;
         
-        if (plugin instanceof Nonchat) {
-            Nonchat nonchatPlugin = (Nonchat) plugin;
+        if (plugin instanceof Nonchat nonchatPlugin) {
             itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }

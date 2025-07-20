@@ -60,24 +60,17 @@ public class NonchatExpansion extends PlaceholderExpansion {
             return "";
         }
     
-        switch (identifier) {
-            case "spy_enabled":
-                return plugin.getSpyCommand().isSpying(player) ? 
+        return switch (identifier) {
+            case "spy_enabled" -> plugin.getSpyCommand().isSpying(player) ? 
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.spy.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.spy.disabled"));
-                
-            case "bubble_enabled":
-                return plugin.getConfigService().getConfig().isChatBubblesEnabled() ?
+            case "bubble_enabled" -> plugin.getConfigService().getConfig().isChatBubblesEnabled() ?
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.bubble.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.bubble.disabled"));
-                
-            case "caps_filter_enabled":
-                return plugin.getConfigService().getConfig().isCapsFilterEnabled() ?
+            case "caps_filter_enabled" -> plugin.getConfigService().getConfig().isCapsFilterEnabled() ?
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.caps-filter.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.caps-filter.disabled"));
-                
-            default:
-                return null;
-        }
+            default -> null;
+        };
     }
 }

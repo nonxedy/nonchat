@@ -252,11 +252,8 @@ public class BubblePacketUtil {
             synchronized (pool) {
                 if (!pool.isEmpty()) {
                     T obj = pool.remove(pool.size() - 1);
-                    // Проверяем, что объект все еще валиден
-                    if (obj instanceof ArmorStand) {
-                        ArmorStand as = (ArmorStand) obj;
+                    if (obj instanceof ArmorStand as) {
                         if (as.isDead()) {
-                            // Если объект мертв, создаем новый
                             return creator.get();
                         }
                     }
@@ -267,14 +264,11 @@ public class BubblePacketUtil {
         }
         
         public void release(T obj) {
-            if (obj instanceof ArmorStand) {
-                ArmorStand as = (ArmorStand) obj;
-                // Не добавляем в пул мертвые объекты
+            if (obj instanceof ArmorStand as) {
                 if (as.isDead()) {
                     return;
                 }
                 
-                // Сбрасываем состояние armor stand перед возвратом в пул
                 as.setCustomNameVisible(false);
                 as.customName(null);
                 
@@ -282,21 +276,17 @@ public class BubblePacketUtil {
                     if (pool.size() < maxSize) {
                         pool.add(obj);
                     } else {
-                        // Если пул полон, удаляем объект
                         as.remove();
                     }
                 }
             }
         }
         
-        /**
-         * Очищает пул и удаляет все объекты
-         */
         public void clear() {
             synchronized (pool) {
                 pool.forEach(obj -> {
-                    if (obj instanceof ArmorStand) {
-                        ((ArmorStand) obj).remove();
+                    if (obj instanceof ArmorStand armorStand) {
+                        armorStand.remove();
                     }
                 });
                 pool.clear();
@@ -304,9 +294,6 @@ public class BubblePacketUtil {
         }
     }
     
-    /**
-     * Очищает пул armor stands (вызывается при отключении плагина)
-     */
     public static void clearPool() {
         armorStandPool.clear();
     }

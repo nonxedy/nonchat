@@ -57,23 +57,31 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         String subCommand = args[0].toLowerCase();
         
         switch (subCommand) {
-            case "set":
+            case "set" -> {
                 return handleSetChannel(player, args);
-            case "list":
+            }
+            case "list" -> {
                 return handleListChannels(player);
-            case "info":
+            }
+            case "info" -> {
                 return handleChannelInfo(player, args);
-            case "create":
+            }
+            case "create" -> {
                 return handleCreateChannel(player, args);
-            case "delete":
+            }
+            case "delete" -> {
                 return handleDeleteChannel(player, args);
-            case "edit":
+            }
+            case "edit" -> {
                 return handleEditChannel(player, args);
-            case "default":
+            }
+            case "default" -> {
                 return handleSetDefaultChannel(player, args);
-            default:
+            }
+            default -> {
                 sendHelp(player);
                 return true;
+            }
         }
     }
     
@@ -335,7 +343,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                 receivePermission = arg.substring(8);
             } else if (arg.startsWith("radius:")) {
                 try {
-                    radius = Integer.parseInt(arg.substring(7));
+                    radius = Integer.valueOf(arg.substring(7));
                 } catch (NumberFormatException e) {
                     player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
@@ -344,21 +352,21 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                 enabled = arg.substring(8).equalsIgnoreCase("true");
             } else if (arg.startsWith("cooldown:")) {
                 try {
-                    cooldown = Integer.parseInt(arg.substring(9));
+                    cooldown = Integer.valueOf(arg.substring(9));
                 } catch (NumberFormatException e) {
                     player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("min:")) {
                 try {
-                    minLength = Integer.parseInt(arg.substring(4));
+                    minLength = Integer.valueOf(arg.substring(4));
                 } catch (NumberFormatException e) {
                     player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;
                 }
             } else if (arg.startsWith("max:")) {
                 try {
-                    maxLength = Integer.parseInt(arg.substring(4));
+                    maxLength = Integer.valueOf(arg.substring(4));
                 } catch (NumberFormatException e) {
                     player.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-number")));
                     return true;

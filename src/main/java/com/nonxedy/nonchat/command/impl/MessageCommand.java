@@ -139,8 +139,8 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         
         // Use service if available, otherwise use direct method
         if (chatService != null) {
-            if (sender instanceof Player) {
-                chatService.handlePrivateMessage((Player)sender, target, message);
+            if (sender instanceof Player player) {
+                chatService.handlePrivateMessage(player, target, message);
             } else {
                 sendPrivateMessage(sender, target, message);
             }
@@ -259,8 +259,8 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         }
 
         // Add last message sender to the map
-        if (sender instanceof Player) {
-            plugin.getMessageManager().getLastMessageSender().put(target.getUniqueId(), ((Player) sender).getUniqueId());
+        if (sender instanceof Player player) {
+            plugin.getMessageManager().getLastMessageSender().put(target.getUniqueId(), player.getUniqueId());
         }
     }
 

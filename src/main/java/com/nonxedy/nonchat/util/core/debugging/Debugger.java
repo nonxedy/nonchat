@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.plugin.Plugin;
 
@@ -69,8 +70,8 @@ public class Debugger {
                     }
                 }
             }
-        } catch (Exception e) {
-            plugin.getLogger().warning("Failed to rotate debug logs: " + e.getMessage());
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to rotate debug logs: {0}", e.getMessage());
         }
     }
 
@@ -107,7 +108,7 @@ public class Debugger {
             }
             writer.println(); // Empty line between entries
         } catch (IOException e) {
-            plugin.getLogger().warning("Failed to write debug log: " + e.getMessage());
+            plugin.getLogger().log(Level.WARNING, "Failed to write debug log: {0}", e.getMessage());
         }
     }
 
@@ -192,8 +193,8 @@ public class Debugger {
                     Files.delete(logFile.toPath());
                 }
             }
-        } catch (Exception e) {
-            plugin.getLogger().warning("Failed to clean debug logs: " + e.getMessage());
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to clean debug logs: {0}", e.getMessage());
         }
     }
 
@@ -220,7 +221,7 @@ public class Debugger {
             // Return the last 'count' entries
             return logs.subList(Math.max(0, logs.size() - count), logs.size());
         } catch (IOException e) {
-            plugin.getLogger().warning("Failed to read debug logs: " + e.getMessage());
+            plugin.getLogger().log(Level.WARNING, "Failed to read debug logs: {0}", e.getMessage());
             return List.of();
         }
     }

@@ -95,8 +95,8 @@ public class CommandService {
         PluginCommand pluginCommand = plugin.getCommand(name);
         if (pluginCommand != null) {
             pluginCommand.setExecutor(executor);
-            if (executor instanceof TabCompleter) {
-                pluginCommand.setTabCompleter((TabCompleter) executor);
+            if (executor instanceof TabCompleter tabCompleter) {
+                pluginCommand.setTabCompleter(tabCompleter);
             }
             plugin.logResponse("Registered traditional command: " + name);
         } else {

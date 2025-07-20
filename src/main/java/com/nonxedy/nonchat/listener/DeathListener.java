@@ -1,5 +1,7 @@
 package com.nonxedy.nonchat.listener;
 
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,8 +13,6 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.model.user.User;
 
 /**
  * Handles player death events and customizes death messages
@@ -53,7 +53,7 @@ public class DeathListener implements Listener {
             try {
                 deathFormat = PlaceholderAPI.setPlaceholders(player, deathFormat);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[nonchat] Error processing death message placeholders: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing death message placeholders: {0}", e.getMessage());
             }
         }
 
