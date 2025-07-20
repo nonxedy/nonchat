@@ -1,5 +1,8 @@
 package com.nonxedy.nonchat.util.lang;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
@@ -45,8 +48,8 @@ public class TranslationUtil {
                 Object config = configService.getClass().getMethod("getConfig").invoke(configService);
                 return (String) config.getClass().getMethod("getLanguage").invoke(config);
             }
-        } catch (Exception e) {
-            // Fallback to English
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+            Bukkit.getLogger().log(Level.WARNING, "Failed to get plugin language: {0}", e.getMessage());
         }
         return "en";
     }

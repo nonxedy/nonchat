@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -65,7 +67,7 @@ public class LanguageManager {
             try (InputStream in = getClass().getResourceAsStream("/langs/" + filename)) {
                 Files.copy(in, langFile.toPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.WARNING, "Failed to create language file: {0}", e.getMessage());
             }
         }
     }

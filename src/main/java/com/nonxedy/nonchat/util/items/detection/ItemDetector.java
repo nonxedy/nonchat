@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import com.nonxedy.nonchat.Nonchat;
-
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.items.display.ItemDisplayUtil;
 
@@ -39,8 +38,7 @@ public class ItemDetector {
         
         // Check if interactive placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
-        if (plugin instanceof Nonchat) {
-            Nonchat nonchatPlugin = (Nonchat) plugin;
+        if (plugin instanceof Nonchat nonchatPlugin) {
             boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
             boolean itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
             

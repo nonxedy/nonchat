@@ -102,7 +102,6 @@ public class UpdateChecker implements Listener {
                 future.complete(this.updateAvailable);
             } catch (Exception e) {
                 plugin.logError("Failed to check for updates: " + e.getMessage());
-                e.printStackTrace();
                 future.complete(false);
             }
         });
