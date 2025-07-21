@@ -24,7 +24,6 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
-import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
@@ -208,12 +207,8 @@ public class ChatManager {
 
         // If channel has send permission requirements, it's also considered private
         String sendPermission = channel.getSendPermission();
-        if (sendPermission != null && !sendPermission.isEmpty()) {
-            return false;
-        }
-
         // Channel is public if it doesn't require any special permissions
-        return true;
+        return !(sendPermission != null && !sendPermission.isEmpty());
     }
 
     private void startBubbleUpdater() {
@@ -489,22 +484,6 @@ public class ChatManager {
 
     public ChannelManager getChannelManager() {
         return channelManager;
-    }
-
-    /**
-     * For backward compatibility with existing ChatTypeUtil system.
-     *
-     * @param message The message to check
-     * @param chats Map of chat types
-     * @return The appropriate chat type
-     */
-    @Deprecated
-    private ChatTypeUtil determineChat(String message, Map<String, ChatTypeUtil> chats) {
-        if (message.length() > 0) {
-            char firstChar = message.charAt(0);
-            return config.getChatTypeByChar(firstChar);
-        }
-        return config.getDefaultChatType();
     }
 
     /**
