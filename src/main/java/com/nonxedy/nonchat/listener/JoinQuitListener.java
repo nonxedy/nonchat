@@ -3,6 +3,7 @@ package com.nonxedy.nonchat.listener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
@@ -14,8 +15,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.util.BubblePacketUtil;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 
@@ -50,7 +51,7 @@ public class JoinQuitListener implements Listener {
             try {
                 joinFormat = PlaceholderAPI.setPlaceholders(player, joinFormat);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[nonchat] Error processing join message placeholders: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing join message placeholders: {0}", e.getMessage());
             }
         }
         
@@ -80,7 +81,7 @@ public class JoinQuitListener implements Listener {
             try {
                 quitFormat = PlaceholderAPI.setPlaceholders(player, quitFormat);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[nonchat] Error processing quit message placeholders: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing quit message placeholders: {0}", e.getMessage());
             }
         }
         

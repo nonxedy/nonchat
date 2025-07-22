@@ -1,10 +1,14 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.items.display;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.items.localization.ItemLocalizationUtil;
+import com.nonxedy.nonchat.util.lang.TranslationUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -205,19 +209,19 @@ public class ItemDisplayUtil {
      * @return Formatted level as Roman numeral
      */
     private static String formatEnchantmentLevel(int level) {
-        switch (level) {
-            case 1: return "I";
-            case 2: return "II";
-            case 3: return "III";
-            case 4: return "IV";
-            case 5: return "V";
-            case 6: return "VI";
-            case 7: return "VII";
-            case 8: return "VIII";
-            case 9: return "IX";
-            case 10: return "X";
-            default: return String.valueOf(level);
-        }
+        return switch (level) {
+            case 1 -> "I";
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            case 6 -> "VI";
+            case 7 -> "VII";
+            case 8 -> "VIII";
+            case 9 -> "IX";
+            case 10 -> "X";
+            default -> String.valueOf(level);
+        };
     }
     
     /**

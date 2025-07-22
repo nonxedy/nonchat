@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -66,7 +66,7 @@ public class ClearCommand implements CommandExecutor {
         // Check for nonchat.clear permission
         if (!sender.hasPermission("nonchat.clear")) {
             // Send no permission message
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             // Log attempt to execute command without permission
             plugin.logError("Player attempted to clear chat without permission");
             return false;
@@ -97,6 +97,6 @@ public class ClearCommand implements CommandExecutor {
     // Sends chat clear notification
     private void sendClearNotification() {
         // Send message to all players that chat was cleared
-        Bukkit.broadcast(ColorUtil.parseComponent(messages.getString("chat-cleared")));
+        Bukkit.broadcast(ColorUtil.parseComponentCached(messages.getString("chat-cleared")));
     }
 }

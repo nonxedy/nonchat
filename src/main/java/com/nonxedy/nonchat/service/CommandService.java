@@ -17,6 +17,7 @@ import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.MeCommand;
 import com.nonxedy.nonchat.command.impl.MessageCommand;
 import com.nonxedy.nonchat.command.impl.NonchatCommand;
+import com.nonxedy.nonchat.command.impl.ReplyCommand;
 import com.nonxedy.nonchat.command.impl.RollCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 
@@ -61,9 +62,13 @@ public class CommandService {
         registerCommand("tell", messageCommand);
         registerCommand("w", messageCommand);
         registerCommand("message", messageCommand);
+
+        // Reply commands
+        registerCommand("reply", new ReplyCommand(plugin, plugin.getMessageManager(),  configService.getMessages()));
+        registerCommand("r", new ReplyCommand(plugin, plugin.getMessageManager(), configService.getMessages()));
     
         // Chat management commands
-        registerCommand("broadcast", new BroadcastCommand(configService.getMessages(), plugin));
+        registerCommand("broadcast", new BroadcastCommand(configService.getMessages(), plugin, configService.getConfig()));
         registerCommand("spy", spyCommand);
         registerCommand("clear", new ClearCommand(configService.getMessages(), plugin));
         registerCommand("ignore", ignoreCommand);
@@ -90,8 +95,8 @@ public class CommandService {
         PluginCommand pluginCommand = plugin.getCommand(name);
         if (pluginCommand != null) {
             pluginCommand.setExecutor(executor);
-            if (executor instanceof TabCompleter) {
-                pluginCommand.setTabCompleter((TabCompleter) executor);
+            if (executor instanceof TabCompleter tabCompleter) {
+                pluginCommand.setTabCompleter(tabCompleter);
             }
             plugin.logResponse("Registered traditional command: " + name);
         } else {

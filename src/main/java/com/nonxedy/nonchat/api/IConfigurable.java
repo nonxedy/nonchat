@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.bukkit.configuration.ConfigurationSection;
 
-public interface IConfigurable {
+public interface IConfigurable extends INotificationSettings {
     void load();
     void save();
     void reload();

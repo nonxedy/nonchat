@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.chat.filters;
 
 import java.util.List;
 

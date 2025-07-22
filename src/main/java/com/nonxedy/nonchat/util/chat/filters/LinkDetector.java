@@ -1,9 +1,9 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.chat.filters;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;

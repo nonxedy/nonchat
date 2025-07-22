@@ -1,12 +1,46 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.core.colors;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.K;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
+
+/**
+ * Simple LRU cache implementation
+ */
+class LRUCache<K,V> {
+    private final Map<K,V> cache;
+    private final int maxSize;
+    
+    public LRUCache(int maxSize) {
+        this.maxSize = maxSize;
+        this.cache = Collections.synchronizedMap(
+            new LinkedHashMap<K,V>(maxSize, 0.75f, true) {
+                protected boolean removeEldestEntry(Entry<K,V> eldest) {
+                    return cache.size() > maxSize;
+                }
+            });
+    }
+    
+    public V get(K key) {
+        return cache.get(key);
+    }
+    
+    public void put(K key, V value) {
+        cache.put(key, value);
+    }
+}
 
 /**
  * Provides color code processing and text formatting for chat messages
@@ -15,6 +49,15 @@ import net.md_5.bungee.api.ChatColor;
 public class ColorUtil {
     // Pattern for matching hex color codes in &#RRGGBB format
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    
+    // Pattern for matching legacy color codes (&0-&f, &k-&r)
+    private static final Pattern LEGACY_COLOR_PATTERN = Pattern.compile("&[0-9a-fklmnor]");
+    
+    // Pattern for matching section symbol color codes (§0-§f, §k-§r)
+    private static final Pattern SECTION_COLOR_PATTERN = Pattern.compile("§[0-9a-fklmnor]");
+    
+    // Pattern for matching MiniMessage format tags
+    private static final Pattern MINIMESSAGE_PATTERN = Pattern.compile("<[^>]+>");
     
     // MiniMessage instance for parsing MiniMessage format
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
@@ -25,27 +68,69 @@ public class ColorUtil {
      * @param message The text containing color codes
      * @return Processed string with color codes converted
      */
+    private static final LRUCache<String, String> COLOR_CACHE = new LRUCache<>(1000);
+    private static final Map<String, Component> COMPONENT_CACHE = 
+        Collections.synchronizedMap(new WeakHashMap<>());
+
     public static String parseColor(String message) {
-        // Return empty string if message is null
         if (message == null) return "";
         
-        // Create a matcher to find hex color patterns in the message
+        // Check cache first
+        String cached = COLOR_CACHE.get(message);
+        if (cached != null) return cached;
+        
         Matcher matcher = HEX_PATTERN.matcher(message);
-        // Create a string buffer with extra capacity for color code conversions
-        StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
+        StringBuilder buffer = new StringBuilder(message.length() + 32);
 
-        // Process each hex color code found in the message
         while (matcher.find()) {
-            // Extract the hex color value without the &# prefix
             String group = matcher.group(1);
-            // Replace the &#RRGGBB with the actual ChatColor format
             matcher.appendReplacement(buffer, ChatColor.of("#" + group).toString());
         }
-        // Add the remaining text after the last match
         matcher.appendTail(buffer);
+        
+        String result = ChatColor.translateAlternateColorCodes('&', buffer.toString());
+        COLOR_CACHE.put(message, result);
+        return result;
+    }
 
-        // Convert standard & color codes and return the fully colored string
-        return ChatColor.translateAlternateColorCodes('&', buffer.toString());
+    public static Component parseComponentCached(String message) {
+        if (message == null || message.isEmpty()) return Component.empty();
+        
+        return COMPONENT_CACHE.computeIfAbsent(message, m -> {
+            if (m.contains("<#") || 
+                m.contains("<gradient") || 
+                m.contains("<rainbow") ||
+                m.contains("<bold") ||
+                m.contains("<italic") ||
+                m.contains("<underlined") ||
+                m.contains("<strikethrough") ||
+                m.contains("<obfuscated") ||
+                m.contains("<reset") ||
+                m.contains("<color") ||
+                // legacy color codes in MiniMessage
+                m.contains("<black") ||
+                m.contains("<dark_blue") ||
+                m.contains("<dark_green") ||
+                m.contains("<dark_aqua") ||
+                m.contains("<dark_red") ||
+                m.contains("<dark_purple") ||
+                m.contains("<gold") ||
+                m.contains("<gray") ||
+                m.contains("<dark_gray") ||
+                m.contains("<blue") ||
+                m.contains("<aqua") ||
+                m.contains("<red") ||
+                m.contains("<light_purple") ||
+                m.contains("<yellow") ||
+                m.contains("<white")) {
+                // Parse with MiniMessage if it contains MiniMessage format tags
+                return parseMiniMessageComponent(prepareMixedFormatMessage(m));
+            } else {
+                // Otherwise use legacy format parsing
+                String legacyMessage = parseColor(m);
+                return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
+            }
+        });
     }
 
     /**
@@ -95,6 +180,20 @@ public class ColorUtil {
     }
     
     /**
+     * Converts color-coded text into Adventure API Component with permission check
+     * @param message The text to convert to Component
+     * @param player The player to check permissions for (null to skip permission check)
+     * @return Adventure Component with processed colors (or plain text if no permission)
+     */
+    public static Component parseComponent(String message, Player player) {
+        if (player != null && !player.hasPermission("nonchat.color")) {
+            // Strip all color codes if player doesn't have permission
+            return Component.text(stripAllColors(message));
+        }
+        return parseComponent(message);
+    }
+    
+    /**
      * Parses a string with MiniMessage format into an Adventure Component
      * Supports both MiniMessage format and legacy format
      * @param message The text with MiniMessage formatting
@@ -108,6 +207,20 @@ public class ColorUtil {
         
         // Parse with MiniMessage
         return MINI_MESSAGE.deserialize(preparedMessage);
+    }
+    
+    /**
+     * Parses a string with MiniMessage format into an Adventure Component with permission check
+     * @param message The text with MiniMessage formatting
+     * @param player The player to check permissions for (null to skip permission check)
+     * @return Parsed Adventure Component (or plain text if no permission)
+     */
+    public static Component parseMiniMessageComponent(String message, Player player) {
+        if (player != null && !player.hasPermission("nonchat.color")) {
+            // Strip all color codes if player doesn't have permission
+            return Component.text(stripAllColors(message));
+        }
+        return parseMiniMessageComponent(message);
     }
     
     /**
@@ -188,5 +301,57 @@ public class ColorUtil {
         result = result.replace("§r", "<reset>");
         
         return result;
+    }
+    
+    /**
+     * Strips all color codes and formatting from a message
+     * @param message The message to strip colors from
+     * @return Plain text without any color codes or formatting
+     */
+    public static String stripAllColors(String message) {
+        if (message == null) return "";
+        
+        String result = message;
+        
+        // Remove hex color codes (&#RRGGBB)
+        result = HEX_PATTERN.matcher(result).replaceAll("");
+        
+        // Remove legacy color codes (&0-&f, &k-&r)
+        result = LEGACY_COLOR_PATTERN.matcher(result).replaceAll("");
+        
+        // Remove section symbol color codes (§0-§f, §k-§r)
+        result = SECTION_COLOR_PATTERN.matcher(result).replaceAll("");
+        
+        // Remove MiniMessage format tags
+        result = MINIMESSAGE_PATTERN.matcher(result).replaceAll("");
+        
+        return result;
+    }
+    
+    /**
+     * Checks if a message contains any color codes or formatting
+     * @param message The message to check
+     * @return true if the message contains color codes, false otherwise
+     */
+    public static boolean hasColorCodes(String message) {
+        if (message == null) return false;
+        
+        return HEX_PATTERN.matcher(message).find() ||
+               LEGACY_COLOR_PATTERN.matcher(message).find() ||
+               SECTION_COLOR_PATTERN.matcher(message).find() ||
+               MINIMESSAGE_PATTERN.matcher(message).find();
+    }
+    
+    /**
+     * Processes a message with permission-based color filtering
+     * @param message The message to process
+     * @param player The player to check permissions for
+     * @return Processed message (colored if has permission, plain if not)
+     */
+    public static String processMessageWithPermission(String message, Player player) {
+        if (player != null && !player.hasPermission("nonchat.color")) {
+            return stripAllColors(message);
+        }
+        return parseColor(message);
     }
 }

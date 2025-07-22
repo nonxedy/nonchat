@@ -1,32 +1,44 @@
 package com.nonxedy.nonchat.listener;
 
-import com.nonxedy.nonchat.core.ChatManager;
-import com.nonxedy.nonchat.service.ChatService;
-import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import java.util.concurrent.CompletableFuture;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 
+import com.nonxedy.nonchat.Nonchat;
+import com.nonxedy.nonchat.core.ChatManager;
+import com.nonxedy.nonchat.service.ChatService;
+
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+
 public class PaperChatListener extends ChatListener {
-    
-    public PaperChatListener(ChatManager chatManager, ChatService chatService) {
+
+    private final Nonchat plugin;
+
+    public PaperChatListener(Nonchat plugin, ChatManager chatManager, ChatService chatService) {
         super(chatManager, chatService);
+        this.plugin = plugin;
     }
-    
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onAsyncChat(AsyncChatEvent event) {
-        // Cancel the default event handling
         event.setCancelled(true);
-        
-        // Extract the message content from the component
+
+        Player player = event.getPlayer();
         String message = PlainTextComponentSerializer.plainText().serialize(event.message());
-        
-        // Use service if available, otherwise use manager directly
-        if (chatService != null) {
-            chatService.handleChat(event.getPlayer(), message);
-        } else if (chatManager != null) {
-            chatManager.processChat(event.getPlayer(), message);
-        }
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (chatService != null) {
+                    chatService.handleChat(player, message);
+                } else if (chatManager != null) {
+                    chatManager.processChat(player, message);
+                }
+            } catch (Exception e) {
+                plugin.logError("Async chat processing failed: " + e.getMessage());
+            }
+        });
     }
 }

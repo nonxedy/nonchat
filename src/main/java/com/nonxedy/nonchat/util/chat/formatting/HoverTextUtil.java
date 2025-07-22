@@ -1,13 +1,19 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.chat.formatting;
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
+
+import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 
 /**
  * Creates hoverable text components with player information
@@ -41,8 +47,13 @@ public class HoverTextUtil {
             .map(line -> processLine(line, player))
             .collect(Collectors.joining("\n"));
 
-        return ColorUtil.parseComponent(originalText)
-            .hoverEvent(HoverEvent.showText(ColorUtil.parseComponent(hoverText)));
+        // Parse color codes in original text before creating hover component
+        Component nameComponent = ColorUtil.parseComponent(originalText);
+        Component hoverComponent = ColorUtil.parseComponent(hoverText);
+        
+        return nameComponent
+            .hoverEvent(HoverEvent.showText(hoverComponent))
+            .clickEvent(ClickEvent.suggestCommand("/m " + player.getName()));
     }
 
     private String processLine(String text, Player player) {
@@ -64,7 +75,7 @@ public class HoverTextUtil {
                 processed = PlaceholderAPI.setPlaceholders(player, processed);
             } catch (Exception e) {
                 // Log the error but don't crash
-                Bukkit.getLogger().warning("[nonchat] Error processing placeholder: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing placeholder: {0}", e.getMessage());
             }
         }
     

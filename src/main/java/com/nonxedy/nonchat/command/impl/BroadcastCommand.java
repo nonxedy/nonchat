@@ -12,8 +12,9 @@ import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
+import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -27,11 +28,14 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
     private final PluginMessages messages;
     // Reference to main plugin instance
     private final Nonchat plugin;
+    // Reference to plugin configuration
+    private final PluginConfig config;
 
     // Initialize command with required dependencies
-    public BroadcastCommand(PluginMessages messages, Nonchat plugin) {
+    public BroadcastCommand(PluginMessages messages, Nonchat plugin, PluginConfig config) {
         this.messages = messages;
         this.plugin = plugin;
+        this.config = config;
     }
 
     /**
@@ -70,7 +74,7 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      * @param sender Command sender
      */
     private void sendNoPermissionMessage(CommandSender sender) {
-        sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+        sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
         plugin.logError("Sender doesn't have broadcast permission");
     }
 
@@ -79,27 +83,26 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      * @param sender Command sender
      */
     private void sendUsageMessage(CommandSender sender) {
-        sender.sendMessage(ColorUtil.parseComponent(messages.getString("broadcast-command")));
+        sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("broadcast-command")));
         plugin.logError("Invalid usage: /bc <message>");
     }
 
     /**
-     * Broadcasts formatted message to all players
+     * Broadcasts formatted message to all players using configurable format
      * @param message Message to broadcast
      */
     private void broadcastMessage(String message) {
         try {
+            // Get the broadcast format from config and replace {message} placeholder
+            String broadcastFormat = config.getBroadcastFormat();
+            String formattedMessage = broadcastFormat.replace("{message}", message);
+            
             // Create formatted message component
-            Component broadcastComponent = ColorUtil.parseComponent(
-                messages.getString("broadcast")
-                    .replace("{message}", message)
-            );
+            Component broadcastComponent = ColorUtil.parseComponent(formattedMessage);
 
             // Send to all online players with spacing
             plugin.getServer().getOnlinePlayers().forEach(player -> {
-                player.sendMessage(Component.empty());
                 player.sendMessage(broadcastComponent);
-                player.sendMessage(Component.empty());
             });
 
             // Send to server console

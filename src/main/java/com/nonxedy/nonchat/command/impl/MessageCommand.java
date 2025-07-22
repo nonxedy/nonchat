@@ -2,7 +2,10 @@ package com.nonxedy.nonchat.command.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -18,7 +21,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.ConfigService;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -27,6 +30,7 @@ import net.kyori.adventure.text.Component;
  * Provides secure player-to-player communication
  */
 public class MessageCommand implements CommandExecutor, TabCompleter {
+    private final Map<UUID, UUID> lastMessaged = new HashMap<>();
 
     // Required dependencies
     private final Nonchat plugin;
@@ -56,6 +60,10 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         this.ignoreCommand = null;
     }
 
+    public Map<UUID, UUID> getLastMessaged() {
+        return lastMessaged;
+    }
+
     /**
      * Handles private message command execution
      * @param sender Command sender
@@ -81,7 +89,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Check if sender has permission to use private messaging
         if (!sender.hasPermission("nonchat.message")) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("no-permission")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
             }
@@ -90,7 +98,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Validate command arguments (need at least target player and message)
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("invalid-usage-message")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("invalid-usage-message")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to use the message command with invalid arguments.");
             }
@@ -100,7 +108,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         // Get target player and verify they are online
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("player-not-found")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-not-found")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player that is not online.");
             }
@@ -109,7 +117,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Check if target player has ignored the sender
         if (isIgnored(sender, target)) {
-            sender.sendMessage(ColorUtil.parseComponent(messages.getString("ignored-by-target")));
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("ignored-by-target")));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player that has ignored them.");
             }
@@ -131,8 +139,8 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         
         // Use service if available, otherwise use direct method
         if (chatService != null) {
-            if (sender instanceof Player) {
-                chatService.handlePrivateMessage((Player)sender, target, message);
+            if (sender instanceof Player player) {
+                chatService.handlePrivateMessage(player, target, message);
             } else {
                 sendPrivateMessage(sender, target, message);
             }
@@ -219,7 +227,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         String format = config.getPrivateChatFormat();
         // Handle console messages by using "Console" as sender name
         String senderName = sender instanceof Player ? sender.getName() : "Console";
-    
+
         // Create and send formatted message to sender
         Component senderMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
@@ -230,7 +238,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         if (plugin != null) {
             plugin.logResponse("Message sent to " + sender.getName());
         }
-    
+
         // Create and send formatted message to target
         Component targetMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
@@ -241,13 +249,18 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         if (plugin != null) {
             plugin.logResponse("Message sent to " + target.getName());
         }
-    
+
         // Notify spy players if spy system is enabled and sender is a player
         if (spyCommand != null && sender instanceof Player) {
             spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message));
             if (plugin != null) {
                 plugin.logResponse("Message sent to spy players");
             }
+        }
+
+        // Add last message sender to the map
+        if (sender instanceof Player player) {
+            plugin.getMessageManager().getLastMessageSender().put(target.getUniqueId(), player.getUniqueId());
         }
     }
 

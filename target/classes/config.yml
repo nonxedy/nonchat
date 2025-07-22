@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.4.9
+# Version of the plugin: 1.5.0
 #
 # - LuckPerms support.
 # - Vault support.
@@ -59,6 +59,23 @@ update-checker: true # Enable/disable the update checker.
 
 # Default channel that players will use when they join
 default-channel: "local"
+
+# ==================================================
+# MESSAGE DELIVERY NOTIFICATIONS
+# Controls whether players are notified when their messages are not delivered
+# ==================================================
+message-delivery:
+  notify-undelivered: true # Enable/disable notifications when messages are not delivered
+
+# ==================================================
+# INTERACTIVE PLACEHOLDERS CONFIGURATION
+# Interactive placeholders are special placeholders like [item] and [ping]
+# that show interactive content in chat messages
+# ==================================================
+interactive-placeholders:
+  enabled: true # Enable/disable all interactive placeholders ([item], [ping])
+  item-enabled: true # Enable/disable [item] placeholder specifically
+  ping-enabled: true # Enable/disable [ping] placeholder specifically
 
 # The channels configuration.
 channels:
@@ -122,10 +139,11 @@ spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command f
 # ==================================================
 # BROADCAST CONFIGURATION
 # Broadcast messages are messages that are sent to all players on the server.
-# These messages are sent by the server and are not sent by players.
 # ==================================================
 
 broadcast:
+  # Format for broadcast messages.
+  format: "\n§#FFAFFBBroadcast: §f{message}\n" # Use {message} for the message content, use \n for new line
 
   # Enable random auto broadcast messages.
   random: true
@@ -173,6 +191,8 @@ hover-text:
     - "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%" # Playtime in PlaceholderAPI
     - "&#FFAFFB► Location: &#FFFFFF%player_world%" # Location in PlaceholderAPI
     - "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms" # Ping in PlaceholderAPI
+    - " "
+    - "§8Click to send a private message"
 
 # ==================================================
 # BLOCKED WORDS

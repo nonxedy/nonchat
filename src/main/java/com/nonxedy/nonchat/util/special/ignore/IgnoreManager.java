@@ -1,10 +1,11 @@
-package com.nonxedy.nonchat.util;
-
-import com.nonxedy.nonchat.command.impl.IgnoreCommand;
-import org.bukkit.entity.Player;
+package com.nonxedy.nonchat.util.special.ignore;
 
 import java.util.Set;
 import java.util.UUID;
+
+import org.bukkit.entity.Player;
+
+import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 
 /**
  * Manages player ignore lists for chat functionality

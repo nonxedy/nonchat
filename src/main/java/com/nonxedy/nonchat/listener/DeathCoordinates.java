@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.util.ColorUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 /**
  * Handles death location tracking and messaging
@@ -55,11 +55,11 @@ public class DeathCoordinates implements Listener {
      * @return Formatted dimension name
      */
     private String formatDimension(Environment dimension) {
-        switch (dimension) {
-            case NORMAL: return "Overworld";
-            case NETHER: return "Nether";
-            case THE_END: return "The End";
-            default: return dimension.toString();
-        }
+        return switch (dimension) {
+            case NORMAL -> "Overworld";
+            case NETHER -> "Nether";
+            case THE_END -> "The End";
+            default -> dimension.toString();
+        };
     }
 }

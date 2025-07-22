@@ -1,4 +1,4 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.lang;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,9 +6,13 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 // Manages language files and provides methods to load and get translations
 public class LanguageManager {
@@ -63,7 +67,7 @@ public class LanguageManager {
             try (InputStream in = getClass().getResourceAsStream("/langs/" + filename)) {
                 Files.copy(in, langFile.toPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                Bukkit.getLogger().log(Level.WARNING, "Failed to create language file: {0}", e.getMessage());
             }
         }
     }

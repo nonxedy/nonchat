@@ -9,7 +9,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.IConfigurable;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.LanguageManager;
+import com.nonxedy.nonchat.util.lang.LanguageManager;
 
 public class ConfigService implements IConfigurable {
     private final Nonchat plugin;
@@ -121,5 +121,47 @@ public class ConfigService implements IConfigurable {
     @Override
     public Set<String> getKeys(boolean deep) {
         return config.getKeys(deep);
+    }
+
+    /**
+     * Checks if interactive placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isInteractivePlaceholdersEnabled() {
+        return config.isInteractivePlaceholdersEnabled();
+    }
+
+    /**
+     * Checks if item placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isItemPlaceholdersEnabled() {
+        return config.isItemPlaceholdersEnabled();
+    }
+
+    /**
+     * Checks if ping placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isPingPlaceholdersEnabled() {
+        return config.isPingPlaceholdersEnabled();
+    }
+
+    /**
+     * Checks if undelivered message notifications are enabled
+     * @return true if notifications are enabled
+     */
+    @Override
+    public boolean isUndeliveredMessageNotificationEnabled() {
+        return config.isUndeliveredMessageNotificationEnabled();
+    }
+
+    /**
+     * Sets undelivered message notification enabled state
+     * @param enabled New enabled state
+     */
+    @Override
+    public void setUndeliveredMessageNotificationEnabled(boolean enabled) {
+        config.setUndeliveredMessageNotificationEnabled(enabled);
     }
 }

@@ -1,20 +1,24 @@
 package com.nonxedy.nonchat.chat.channel;
 
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
-import com.nonxedy.nonchat.util.ColorUtil;
-import com.nonxedy.nonchat.util.HoverTextUtil;
-import com.nonxedy.nonchat.util.ItemDetector;
-import com.nonxedy.nonchat.util.ItemDisplayUtil;
-import com.nonxedy.nonchat.util.LinkDetector;
-import com.nonxedy.nonchat.util.PingDetector;
+import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
+import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.items.detection.ItemDetector;
+import com.nonxedy.nonchat.util.items.display.ItemDisplayUtil;
+import com.nonxedy.nonchat.util.special.ping.PingDetector;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -39,6 +43,7 @@ public class BaseChannel implements Channel {
     private boolean enabled;
     private static final Pattern mentionPattern = Pattern.compile("@(\\w+)");
     private IgnoreCommand ignoreCommand;
+    private ConfigService configService;
 
     /**
      * Creates a new BaseChannel with all properties.
@@ -162,95 +167,172 @@ public class BaseChannel implements Channel {
     public Component formatMessage(Player player, String message) {
         String baseFormat = getFormat();
         
-        // Split format into parts around {message} BEFORE processing placeholders
+        // Split format into parts around {message}
         String[] formatParts = baseFormat.split("\\{message\\}");
         String beforeMessage = formatParts[0];
         String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
 
-        Component finalMessage;
-        
-        // Check for player name placeholder BEFORE PlaceholderAPI processing
-        if (beforeMessage.contains("%player_name%")) {
-            // Process PlaceholderAPI for everything except player name
-            String tempFormat = beforeMessage.replace("%player_name%", "{PLAYER_NAME_PLACEHOLDER}");
-            
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                try {
-                    tempFormat = PlaceholderAPI.setPlaceholders(player, tempFormat);
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
-                }
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
+                afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error processing format placeholders: {0}", e.getMessage());
             }
-            
-            // Split around our placeholder to create hoverable name
-            String[] nameParts = tempFormat.split("\\{PLAYER_NAME_PLACEHOLDER\\}");
-            String beforeName = nameParts[0];
-            String afterName = nameParts.length > 1 ? nameParts[1] : "";
-            
-            // Build component with hoverable player name
-            finalMessage = ColorUtil.parseComponent(beforeName)
-                .append(hoverTextUtil.createHoverablePlayerName(player, player.getName()));
-            
-            if (!afterName.isEmpty()) {
-                finalMessage = finalMessage.append(ColorUtil.parseComponent(afterName));
-            }
+        }
+
+        Component beforeComponent;
+        if (hoverTextUtil != null && beforeMessage.contains(player.getName())) {
+            beforeComponent = createHoverableFormatPart(beforeMessage, player);
         } else {
-            // Apply PlaceholderAPI normally if no player name placeholder
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                try {
-                    beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("Error processing format placeholders: " + e.getMessage());
-                }
-            }
-            finalMessage = ColorUtil.parseComponent(beforeMessage);
+            beforeComponent = ColorUtil.parseComponent(beforeMessage);
         }
-
-        // Process message content
-        Component messageComponent = processMessageContent(player, message);
-        finalMessage = finalMessage.append(messageComponent);
-
-        // Add after message part
-        if (!afterMessage.isEmpty()) {
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                try {
-                    afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
-                } catch (Exception e) {
-                    Bukkit.getLogger().warning("Error processing after message placeholders: " + e.getMessage());
-                }
-            }
-            finalMessage = finalMessage.append(ColorUtil.parseComponent(afterMessage));
-        }
+        
+        Component afterComponent = ColorUtil.parseComponent(afterMessage);
+        
+        Component finalMessage = beforeComponent
+            .append(processMessageContent(player, message))
+            .append(afterComponent);
 
         return finalMessage;
     }
 
+    private Component createHoverableFormatPart(String formatPart, Player player) {
+        String playerName = player.getName();
+        int nameIndex = formatPart.indexOf(playerName);
+        
+        if (nameIndex == -1) {
+            return ColorUtil.parseComponent(formatPart);
+        }
+        
+        String beforeName = formatPart.substring(0, nameIndex);
+        String afterName = formatPart.substring(nameIndex + playerName.length());
+        
+        Component beforeComp = ColorUtil.parseComponent(beforeName);
+        Component afterComp = ColorUtil.parseComponent(afterName);
+        Component hoverNameComp = hoverTextUtil.createHoverablePlayerName(player, playerName);
+        
+        return beforeComp.append(hoverNameComp).append(afterComp);
+    }
+
     private Component processMessageContent(Player player, String message) {
+        // Check if interactive placeholders are globally disabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        if (plugin instanceof Nonchat nonchatPlugin) {
+            boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
+            
+            if (!globalEnabled) {
+                return processMessageWithColorPermission(player, message);
+            }
+        }
+
         boolean hasItem = message.toLowerCase().contains("[item]");
         boolean hasPing = message.toLowerCase().contains("[ping]");
 
         if (hasItem && hasPing) {
             return processBothPlaceholders(player, message);
         } else if (hasItem) {
-            return ItemDetector.processItemPlaceholders(player, message);
+            return processItemPlaceholderWithColorPermission(player, message);
         } else if (hasPing) {
-            return PingDetector.processPingPlaceholders(player, message);
+            return processPingPlaceholderWithColorPermission(player, message);
         } else {
-            return LinkDetector.makeLinksClickable(message);
+            return processMessageWithColorPermission(player, message);
         }
     }
 
     /**
-     * Processes both item and ping placeholders in a message
+     * Processes message content with color permission check
+     */
+    private Component processMessageWithColorPermission(Player player, String message) {
+        // First make links clickable, then apply color permission
+        Component linkProcessed = LinkDetector.makeLinksClickable(message);
+        
+        // If player doesn't have color permission, strip colors from the message part
+        if (!player.hasPermission("nonchat.color")) {
+            String strippedMessage = ColorUtil.stripAllColors(message);
+            return LinkDetector.makeLinksClickable(strippedMessage);
+        }
+        
+        return linkProcessed;
+    }
+
+    /**
+     * Processes item placeholder with color permission check
+     */
+    private Component processItemPlaceholderWithColorPermission(Player player, String message) {
+        // Check if item placeholders are enabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        boolean itemEnabled = true;
+        
+        if (plugin instanceof Nonchat nonchatPlugin) {
+            itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
+        }
+        
+        if (!itemEnabled) {
+            return processMessageWithColorPermission(player, message);
+        }
+        
+        // Process item placeholder but respect color permissions for the rest of the message
+        if (!player.hasPermission("nonchat.color")) {
+            // Strip colors from message but keep item placeholder functionality
+            String messageWithoutColors = ColorUtil.stripAllColors(message);
+            return ItemDetector.processItemPlaceholders(player, messageWithoutColors);
+        }
+        
+        return ItemDetector.processItemPlaceholders(player, message);
+    }
+
+    /**
+     * Processes ping placeholder with color permission check
+     */
+    private Component processPingPlaceholderWithColorPermission(Player player, String message) {
+        // Check if ping placeholders are enabled
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        boolean pingEnabled = true;
+        
+        if (plugin instanceof Nonchat nonchatPlugin) {
+            pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
+        }
+        
+        if (!pingEnabled) {
+            return processMessageWithColorPermission(player, message);
+        }
+        
+        // Process ping placeholder but respect color permissions for the rest of the message
+        if (!player.hasPermission("nonchat.color")) {
+            // Strip colors from message but keep ping placeholder functionality
+            String messageWithoutColors = ColorUtil.stripAllColors(message);
+            return PingDetector.processPingPlaceholders(player, messageWithoutColors);
+        }
+        
+        return PingDetector.processPingPlaceholders(player, message);
+    }
+
+    /**
+     * Processes both item and ping placeholders with color permission check
      */
     private Component processBothPlaceholders(Player player, String message) {
+        // Check settings
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        boolean itemEnabled = true;
+        boolean pingEnabled = true;
+        
+        if (plugin instanceof Nonchat nonchatPlugin) {
+            itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
+            pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
+        }
+        
+        // Check color permission
+        boolean hasColorPermission = player.hasPermission("nonchat.color");
+        String processedMessage = hasColorPermission ? message : ColorUtil.stripAllColors(message);
+        
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
     
         // Split by [item] and [ping] and process each part
-        String[] parts = message.split("(?i)\\[(item|ping)\\]");
+        String[] parts = processedMessage.split("(?i)\\[(item|ping)\\]");
         Pattern pattern = Pattern.compile("(?i)\\[(item|ping)\\]");
-        Matcher matcher = pattern.matcher(message);
+        Matcher matcher = pattern.matcher(processedMessage);
     
         int partIndex = 0;
     
@@ -262,12 +344,12 @@ public class BaseChannel implements Channel {
             partIndex++;
             
             String placeholder = matcher.group().toLowerCase();
-            if (placeholder.equals("[item]")) {
+            if (placeholder.equals("[item]") && itemEnabled) {
                 // Process item using the new bracketed method with client-side localization
                 ItemStack heldItem = player.getInventory().getItemInMainHand();
                 Component itemComponent = ItemDisplayUtil.createBracketedItemComponent(heldItem);
                 builder.append(itemComponent);
-            } else if (placeholder.equals("[ping]")) {
+            } else if (placeholder.equals("[ping]") && pingEnabled) {
                 // Process ping
                 int ping = player.getPing();
                 NamedTextColor color;
@@ -279,6 +361,9 @@ public class BaseChannel implements Channel {
                     color = NamedTextColor.RED;
                 }
                 builder.append(Component.text(ping + "ms").color(color));
+            } else {
+                // If placeholder is disabled, add it as plain text
+                builder.append(Component.text(matcher.group()));
             }
         }
         
@@ -296,5 +381,13 @@ public class BaseChannel implements Channel {
      */
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
         this.ignoreCommand = ignoreCommand;
+    }
+
+    /**
+     * Sets the config service instance.
+     * @param configService The config service instance
+     */
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
     }
 }

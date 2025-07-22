@@ -13,11 +13,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import com.nonxedy.nonchat.util.BroadcastMessage;
-import com.nonxedy.nonchat.util.CapsFilter;
-import com.nonxedy.nonchat.util.ChatTypeUtil;
-import com.nonxedy.nonchat.util.HoverTextUtil;
-import com.nonxedy.nonchat.util.WordBlocker;
+import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
+import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
+import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
+import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
+import com.nonxedy.nonchat.util.core.broadcast.BroadcastMessage;
 
 /**
  * Central configuration manager for the NonChat plugin
@@ -84,7 +84,7 @@ public class PluginConfig {
         }
     }
 
-    /**
+        /**
      * Sets all default configuration values
      */
     private void setDefaultValues() {
@@ -99,6 +99,14 @@ public class PluginConfig {
         
         // Default channel setting
         config.set("default-channel", "local");
+        
+        // Message delivery notifications
+        config.set("message-delivery.notify-undelivered", true);
+        
+        // Interactive placeholders configuration
+        config.set("interactive-placeholders.enabled", true);
+        config.set("interactive-placeholders.item-enabled", true);
+        config.set("interactive-placeholders.ping-enabled", true);
         
         // Death settings
         config.set("death.enabled", true);
@@ -139,7 +147,9 @@ public class PluginConfig {
             "&#FFAFFB► Level: &#FFFFFF%player_level%",
             "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%",
             "&#FFAFFB► Location: &#FFFFFF%player_world%",
-            "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms"
+            "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms",
+            " ",
+            "§8Click to send a private message"
         );
         config.set("hover-text.format", defaultHoverFormat);
         
@@ -152,6 +162,7 @@ public class PluginConfig {
         config.set("caps-filter.min-length", 4);
         
         // Broadcast settings
+        config.set("broadcast.format", "\n§#FFAFFBBroadcast: §f{message}\n");
         config.set("broadcast.random", true);
         config.set("broadcast.example.enabled", true);
         config.set("broadcast.example.message", "This message will be sent every 60 seconds");
@@ -214,6 +225,75 @@ public class PluginConfig {
     public String getDefaultChannel() {
         return defaultChannel;
     }
+
+    /**
+     * Checks if undelivered message notifications are enabled
+     * @return true if notifications are enabled
+     */
+    public boolean isUndeliveredMessageNotificationEnabled() {
+        return config.getBoolean("message-delivery.notify-undelivered", true);
+    }
+
+    /**
+     * Sets undelivered message notification enabled state
+     * @param enabled New enabled state
+     */
+    public void setUndeliveredMessageNotificationEnabled(boolean enabled) {
+        config.set("message-delivery.notify-undelivered", enabled);
+        saveConfig();
+    }
+
+    /**
+     * Checks if interactive placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isInteractivePlaceholdersEnabled() {
+        return config.getBoolean("interactive-placeholders.enabled", true);
+    }
+
+    /**
+     * Checks if item placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isItemPlaceholdersEnabled() {
+        return config.getBoolean("interactive-placeholders.item-enabled", true);
+    }
+
+    /**
+     * Checks if ping placeholders are enabled
+     * @return true if enabled
+     */
+    public boolean isPingPlaceholdersEnabled() {
+        return config.getBoolean("interactive-placeholders.ping-enabled", true);
+    }
+
+    /**
+     * Sets interactive placeholders enabled state
+     * @param enabled New enabled state
+     */
+    public void setInteractivePlaceholdersEnabled(boolean enabled) {
+        config.set("interactive-placeholders.enabled", enabled);
+        saveConfig();
+    }
+
+    /**
+     * Sets item placeholders enabled state
+     * @param enabled New enabled state
+     */
+    public void setItemPlaceholdersEnabled(boolean enabled) {
+        config.set("interactive-placeholders.item-enabled", enabled);
+        saveConfig();
+    }
+
+    /**
+     * Sets ping placeholders enabled state
+     * @param enabled New enabled state
+     */
+    public void setPingPlaceholdersEnabled(boolean enabled) {
+        config.set("interactive-placeholders.ping-enabled", enabled);
+        saveConfig();
+    }
+
     
     /**
      * Checks if custom death messages are enabled
@@ -298,6 +378,24 @@ public class PluginConfig {
      */
     public boolean isBroadcastEnabled() {
         return config.getBoolean("broadcast.enabled", true);
+    }
+
+    /**
+     * Gets broadcast command format
+     * @return Broadcast command format string
+     */
+    @NotNull
+    public String getBroadcastFormat() {
+        return config.getString("broadcast.format", "\n§#FFAFFBBroadcast: §f{message}\n");
+    }
+
+    /**
+     * Sets broadcast command format
+     * @param format New format string
+     */
+    public void setBroadcastFormat(String format) {
+        config.set("broadcast.format", format);
+        saveConfig();
     }
 
     /**
@@ -548,12 +646,20 @@ public class PluginConfig {
     }
 
     /**
+     * Gets debug log retention days from config
+     * @return Number of days to keep debug logs (default 7)
+     */
+    public int getDebugLogRetentionDays() {
+        return config.getInt("debug-log-retention-days", 7);
+    }
+
+    /**
      * Sets debug mode state
      * @param debug New debug state
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
-        config.set("debug", debug);
+        config.set("debug", debug); 
         saveConfig();
     }
 

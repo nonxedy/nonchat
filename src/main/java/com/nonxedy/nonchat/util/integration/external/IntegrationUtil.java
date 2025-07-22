@@ -1,12 +1,15 @@
-package com.nonxedy.nonchat.util;
+package com.nonxedy.nonchat.util.integration.external;
+
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 // Utility class for managing plugin integrations with LuckPerms, Vault, and PlaceholderAPI
 public class IntegrationUtil {
@@ -95,7 +98,7 @@ public class IntegrationUtil {
             try {
                 return PlaceholderAPI.setPlaceholders(player, text);
             } catch (Exception e) {
-                Bukkit.getLogger().warning("Error processing placeholder: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "Error processing placeholder: {0}", e.getMessage());
                 return text;
             }
         }
