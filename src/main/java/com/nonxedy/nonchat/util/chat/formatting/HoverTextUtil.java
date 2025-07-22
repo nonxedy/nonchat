@@ -53,7 +53,7 @@ public class HoverTextUtil {
         
         return nameComponent
             .hoverEvent(HoverEvent.showText(hoverComponent))
-            .clickEvent(ClickEvent.runCommand("/m " + player.getName()));
+            .clickEvent(ClickEvent.suggestCommand("/m " + player.getName()));
     }
 
     private String processLine(String text, Player player) {

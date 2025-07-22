@@ -191,6 +191,8 @@ hover-text:
     - "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%" # Playtime in PlaceholderAPI
     - "&#FFAFFB► Location: &#FFFFFF%player_world%" # Location in PlaceholderAPI
     - "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms" # Ping in PlaceholderAPI
+    - " "
+    - "§8Click to send a private message"
 
 # ==================================================
 # BLOCKED WORDS
