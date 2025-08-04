@@ -22,9 +22,9 @@ import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
-import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
@@ -49,7 +49,7 @@ public class ChatManager {
         this.messages = messages;
         this.channelManager = new ChannelManager(config);
         this.ignoreCommand = plugin.getIgnoreCommand();
-        this.adDetector = new AdDetector(config.getAntiAdWhitelistedUrls(),
+        this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
         startBubbleUpdater();

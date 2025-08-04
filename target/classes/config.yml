@@ -221,11 +221,6 @@ anti-ad:
   enabled: true # Enable/disable the anti-advertisement filter
   sensitivity: 0.7 # Detection sensitivity (0.0-1.0), higher values may cause false positives
   whitelisted-urls: # URLs that won't be blocked
-    - "minecraft.net"
-    - "youtube.com"
-    - "discord.gg"
-    - "github.com"
-    - "nonxedy.com"
-    - "modrinth.com"
-  staff-notify: true # Notify staff when advertisement is detected
+    - "discord.gg/NAWsxe3J3R"
+  staff-notify: true # Notify staff when advertisement is detected (nonchat.ad.notify must be added to the staff group)
   punish-command: "ban %player_name% advertising" # Command to execute when ad is detected (leave empty for no punishment)

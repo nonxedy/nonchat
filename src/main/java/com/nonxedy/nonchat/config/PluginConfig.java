@@ -172,12 +172,7 @@ public class PluginConfig {
         config.set("anti-ad.enabled", true);
         config.set("anti-ad.sensitivity", 0.7);
         config.set("anti-ad.whitelisted-urls", Arrays.asList(
-            "minecraft.net",
-            "youtube.com",
-            "discord.gg",
-            "github.com",
-            "nonxedy.com",
-            "modrinth.com"
+            "discord.gg/NAWsxe3J3R"
         ));
         config.set("anti-ad.staff-notify", true);
         config.set("anti-ad.punish-command", "ban %player% advertising");
