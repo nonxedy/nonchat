@@ -65,7 +65,7 @@ public class ChatManager {
             }
 
             CapsFilter capsFilter = config.getCapsFilter();
-            if (capsFilter.shouldFilter(messageContent)) {
+            if (!player.hasPermission("nonchat.caps.bypass") && capsFilter.shouldFilter(messageContent)) {
                 player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
                         .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
                 return;
