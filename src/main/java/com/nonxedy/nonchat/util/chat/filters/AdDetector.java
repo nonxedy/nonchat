@@ -1,6 +1,7 @@
 package com.nonxedy.nonchat.util.chat.filters;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,8 +100,8 @@ public class AdDetector implements MessageFilter {
                 Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("nonchat"), () -> {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), resolvedCommand);
                 });
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("§#FFAFFB[nonchat] §cFailed to execute punish command: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cFailed to execute punish command: {0}", e.getMessage());
             }
         }
     }
