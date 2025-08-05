@@ -181,18 +181,12 @@ public class BaseChannel implements Channel {
             }
         }
 
-        Component beforeComponent;
-        if (hoverTextUtil != null && beforeMessage.contains(player.getName())) {
-            beforeComponent = createHoverableFormatPart(beforeMessage, player);
-        } else {
-            beforeComponent = ColorUtil.parseComponent(beforeMessage);
-        }
-        
-        Component afterComponent = ColorUtil.parseComponent(afterMessage);
-        
-        Component finalMessage = beforeComponent
+        Component beforeMessageComponent = ColorUtil.parseComponent(beforeMessage);
+        Component afterMessageComponent = ColorUtil.parseComponent(afterMessage);
+
+        Component finalMessage = beforeMessageComponent
             .append(processMessageContent(player, message))
-            .append(afterComponent);
+            .append(afterMessageComponent);
 
         return finalMessage;
     }
