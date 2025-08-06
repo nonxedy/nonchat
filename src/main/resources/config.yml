@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.0
+# Version of the plugin: 1.5.1
 #
 # - LuckPerms support.
 # - Vault support.
@@ -191,7 +191,7 @@ hover-text:
     - "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%" # Playtime in PlaceholderAPI
     - "&#FFAFFB► Location: &#FFFFFF%player_world%" # Location in PlaceholderAPI
     - "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms" # Ping in PlaceholderAPI
-    - " "
+    - "§7"
     - "§8Click to send a private message"
 
 # ==================================================
@@ -212,3 +212,15 @@ caps-filter:
   enabled: true # Enable/disable the caps filter.
   max-caps-percentage: 70 # Maximum percentage of capital letters allowed in a message.
   min-length: 4 # Minimum message length to check for caps.
+
+# ==================================================
+# ANTI-ADVERTISEMENT SYSTEM  
+# Blocks server advertisements in chat, commands and signs
+# ==================================================
+anti-ad:
+  enabled: true # Enable/disable the anti-advertisement filter
+  sensitivity: 0.7 # Detection sensitivity (0.0-1.0), higher values may cause false positives
+  whitelisted-urls: # URLs that won't be blocked
+    - "discord.gg/NAWsxe3J3R"
+  staff-notify: true # Notify staff when advertisement is detected (nonchat.ad.notify must be added to the staff group)
+  punish-command: "ban %player_name% advertising" # Command to execute when ad is detected (leave empty for no punishment)

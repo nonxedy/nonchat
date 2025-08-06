@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat.util.core.updates;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -11,8 +12,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
@@ -100,7 +103,7 @@ public class UpdateChecker implements Listener {
                 plugin.logResponse("Update available: " + this.updateAvailable);
                 
                 future.complete(this.updateAvailable);
-            } catch (Exception e) {
+            } catch (JsonIOException | JsonSyntaxException | IOException e) {
                 plugin.logError("Failed to check for updates: " + e.getMessage());
                 future.complete(false);
             }

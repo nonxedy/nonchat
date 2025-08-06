@@ -113,8 +113,8 @@ public class Nonchat extends JavaPlugin {
     }
 
     private void registerListeners() {
-        // Create and register chat listener
-        this.chatListener = ChatListenerFactory.createChatListener(this, chatManager, chatService);
+        // Register chat listener via factory
+        ChatListener chatListener = ChatListenerFactory.createChatListener(this, chatManager, chatService);
         getServer().getPluginManager().registerEvents(chatListener, this);
 
         // Register death-related listeners

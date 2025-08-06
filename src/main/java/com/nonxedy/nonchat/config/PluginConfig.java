@@ -148,7 +148,7 @@ public class PluginConfig {
             "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%",
             "&#FFAFFB► Location: &#FFFFFF%player_world%",
             "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms",
-            " ",
+            "§7",
             "§8Click to send a private message"
         );
         config.set("hover-text.format", defaultHoverFormat);
@@ -167,6 +167,15 @@ public class PluginConfig {
         config.set("broadcast.example.enabled", true);
         config.set("broadcast.example.message", "This message will be sent every 60 seconds");
         config.set("broadcast.example.interval", 60);
+        
+        // Anti-advertisement settings
+        config.set("anti-ad.enabled", true);
+        config.set("anti-ad.sensitivity", 0.7);
+        config.set("anti-ad.whitelisted-urls", Arrays.asList(
+            "discord.gg/NAWsxe3J3R"
+        ));
+        config.set("anti-ad.staff-notify", true);
+        config.set("anti-ad.punish-command", "ban %player% advertising");
     }
 
     // Creates default chat channels configuration
@@ -753,6 +762,46 @@ public class PluginConfig {
      */
     public HoverTextUtil getHoverTextUtil() {
         return new HoverTextUtil(getHoverFormat(), isHoverEnabled());
+    }
+
+    /**
+     * Checks if anti-advertisement system is enabled
+     * @return true if enabled
+     */
+    public boolean isAntiAdEnabled() {
+        return config.getBoolean("anti-ad.enabled", true);
+    }
+
+    /**
+     * Gets anti-advertisement sensitivity level
+     * @return Sensitivity between 0.0 and 1.0
+     */
+    public float getAntiAdSensitivity() {
+        return (float) config.getDouble("anti-ad.sensitivity", 0.7);
+    }
+
+    /**
+     * Gets list of whitelisted URLs
+     * @return List of allowed domains/IPs
+     */
+    public List<String> getAntiAdWhitelistedUrls() {
+        return config.getStringList("anti-ad.whitelisted-urls");
+    }
+
+    /**
+     * Checks if staff should be notified about ads
+     * @return true if notifications enabled
+     */
+    public boolean shouldNotifyStaffAboutAds() {
+        return config.getBoolean("anti-ad.staff-notify", true);
+    }
+
+    /**
+     * Gets the punishment command to execute when advertisement is detected
+     * @return Punishment command with %player% placeholder or empty string if no punishment 
+     */
+    public String getAntiAdPunishCommand() {
+        return config.getString("anti-ad.punish-command", "ban %player_name% advertising");
     }
 
     /**

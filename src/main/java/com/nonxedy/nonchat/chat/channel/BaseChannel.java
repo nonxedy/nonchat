@@ -181,38 +181,19 @@ public class BaseChannel implements Channel {
             }
         }
 
-        Component beforeComponent;
-        if (hoverTextUtil != null && beforeMessage.contains(player.getName())) {
-            beforeComponent = createHoverableFormatPart(beforeMessage, player);
-        } else {
-            beforeComponent = ColorUtil.parseComponent(beforeMessage);
-        }
+        // Parse format parts with colors and add hover functionality
+        Component beforeMessageComponent = ColorUtil.parseComponent(beforeMessage);
+        Component afterMessageComponent = ColorUtil.parseComponent(afterMessage);
         
-        Component afterComponent = ColorUtil.parseComponent(afterMessage);
-        
-        Component finalMessage = beforeComponent
+        // Add hover functionality to the format parts
+        beforeMessageComponent = hoverTextUtil.addHoverToComponent(beforeMessageComponent, player);
+        afterMessageComponent = hoverTextUtil.addHoverToComponent(afterMessageComponent, player);
+
+        Component finalMessage = beforeMessageComponent
             .append(processMessageContent(player, message))
-            .append(afterComponent);
+            .append(afterMessageComponent);
 
         return finalMessage;
-    }
-
-    private Component createHoverableFormatPart(String formatPart, Player player) {
-        String playerName = player.getName();
-        int nameIndex = formatPart.indexOf(playerName);
-        
-        if (nameIndex == -1) {
-            return ColorUtil.parseComponent(formatPart);
-        }
-        
-        String beforeName = formatPart.substring(0, nameIndex);
-        String afterName = formatPart.substring(nameIndex + playerName.length());
-        
-        Component beforeComp = ColorUtil.parseComponent(beforeName);
-        Component afterComp = ColorUtil.parseComponent(afterName);
-        Component hoverNameComp = hoverTextUtil.createHoverablePlayerName(player, playerName);
-        
-        return beforeComp.append(hoverNameComp).append(afterComp);
     }
 
     private Component processMessageContent(Player player, String message) {

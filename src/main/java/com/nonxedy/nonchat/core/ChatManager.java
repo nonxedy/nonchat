@@ -22,6 +22,7 @@ import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
@@ -40,6 +41,7 @@ public class ChatManager {
     private final Map<Player, List<ArmorStand>> bubbles = new ConcurrentHashMap<>();
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
+    private final AdDetector adDetector;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
@@ -47,6 +49,9 @@ public class ChatManager {
         this.messages = messages;
         this.channelManager = new ChannelManager(config);
         this.ignoreCommand = plugin.getIgnoreCommand();
+        this.adDetector = new AdDetector(config,
+                                      config.getAntiAdSensitivity(),
+                                      config.getAntiAdPunishCommand());
         startBubbleUpdater();
     }
 
@@ -60,10 +65,18 @@ public class ChatManager {
             }
 
             CapsFilter capsFilter = config.getCapsFilter();
-            if (capsFilter.shouldFilter(messageContent)) {
+            if (!player.hasPermission("nonchat.caps.bypass") && capsFilter.shouldFilter(messageContent)) {
                 player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
                         .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
                 return;
+            }
+
+            // Check for advertisements
+            if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
+                if (adDetector.shouldFilter(player, messageContent)) {
+                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
+                    return;
+                }
             }
 
             // Check if player is trying to use colors without permission
