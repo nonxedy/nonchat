@@ -148,7 +148,7 @@ public class PluginConfig {
             "&#FFAFFB► Playtime: &#FFFFFF%statistic_time_played%",
             "&#FFAFFB► Location: &#FFFFFF%player_world%",
             "&#FFAFFB► Ping: &#FFFFFF%player_ping%ms",
-            " ",
+            "§7",
             "§8Click to send a private message"
         );
         config.set("hover-text.format", defaultHoverFormat);

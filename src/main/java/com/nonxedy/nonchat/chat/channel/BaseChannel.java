@@ -181,32 +181,19 @@ public class BaseChannel implements Channel {
             }
         }
 
+        // Parse format parts with colors and add hover functionality
         Component beforeMessageComponent = ColorUtil.parseComponent(beforeMessage);
         Component afterMessageComponent = ColorUtil.parseComponent(afterMessage);
+        
+        // Add hover functionality to the format parts
+        beforeMessageComponent = hoverTextUtil.addHoverToComponent(beforeMessageComponent, player);
+        afterMessageComponent = hoverTextUtil.addHoverToComponent(afterMessageComponent, player);
 
         Component finalMessage = beforeMessageComponent
             .append(processMessageContent(player, message))
             .append(afterMessageComponent);
 
         return finalMessage;
-    }
-
-    private Component createHoverableFormatPart(String formatPart, Player player) {
-        String playerName = player.getName();
-        int nameIndex = formatPart.indexOf(playerName);
-        
-        if (nameIndex == -1) {
-            return ColorUtil.parseComponent(formatPart);
-        }
-        
-        String beforeName = formatPart.substring(0, nameIndex);
-        String afterName = formatPart.substring(nameIndex + playerName.length());
-        
-        Component beforeComp = ColorUtil.parseComponent(beforeName);
-        Component afterComp = ColorUtil.parseComponent(afterName);
-        Component hoverNameComp = hoverTextUtil.createHoverablePlayerName(player, playerName);
-        
-        return beforeComp.append(hoverNameComp).append(afterComp);
     }
 
     private Component processMessageContent(Player player, String message) {
