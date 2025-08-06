@@ -101,6 +101,11 @@
 			<version>3.0.2</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+  			<groupId>org.apache.commons</groupId>
+  			<artifactId>commons-lang3</artifactId>
+  			<version>3.18.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

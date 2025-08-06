@@ -12,7 +12,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/maven/maven-model-builder/3.9.6/maven-model-builder-3.9.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/maven/maven-artifact/3.9.6/maven-artifact-3.9.6.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/maven/maven-builder-support/3.9.6/maven-builder-support-3.9.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M2/org.eclipse.sisu.inject-0.9.0.M2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/maven/maven-repository-metadata/3.9.6/maven-repository-metadata-3.9.6.jar" enabled="true" runInBatchMode="false"/>
@@ -66,4 +65,5 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/discordsrv/discordsrv/1.28.0/discordsrv-1.28.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/bstats/bstats-bukkit/3.0.2/bstats-bukkit-3.0.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/bstats/bstats-base/3.0.2/bstats-base-3.0.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>
