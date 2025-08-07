@@ -51,6 +51,10 @@
 /run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/core/colors/ColorUtil.java
 /run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/core/debugging/Debugger.java
 /run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/core/updates/UpdateChecker.java
+/run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/folia/BukkitSchedulerImpl.java
+/run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/folia/FoliaDetector.java
+/run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/folia/FoliaScheduler.java
+/run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl.java
 /run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/integration/external/IntegrationUtil.java
 /run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/integration/metrics/Metrics.java
 /run/media/nonxedy/Disk/My files/nonchat/src/main/java/com/nonxedy/nonchat/util/items/detection/ItemDetector.java

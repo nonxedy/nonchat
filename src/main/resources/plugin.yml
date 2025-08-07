@@ -6,6 +6,7 @@ version: 1.5.1
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
+folia-supported: true
 
 depend:
   - LuckPerms

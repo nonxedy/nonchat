@@ -19,6 +19,7 @@ import com.google.gson.JsonSyntaxException;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.folia.FoliaDetector;
 
 import net.kyori.adventure.text.Component;
 
@@ -74,7 +75,7 @@ public class UpdateChecker implements Listener {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         
         // Run the update check asynchronously
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        FoliaDetector.getScheduler(plugin).runTaskAsynchronously(() -> {
             try {
                 // Connect to Modrinth API
                 URL url = new URL(MODRINTH_API);
@@ -118,7 +119,7 @@ public class UpdateChecker implements Listener {
     private void notifyOnlinePlayers() {
         if (!updateAvailable) return;
         
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        FoliaDetector.getScheduler(plugin).runTask(() -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (hasUpdatePermission(player)) {
                     sendUpdateNotification(player);
@@ -163,13 +164,13 @@ public class UpdateChecker implements Listener {
         if (hasUpdatePermission(player)) {
             if (updateAvailable) {
                 // Delay the message slightly to ensure it's seen after join messages
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                FoliaDetector.getScheduler(plugin).runTaskLater(() -> {
                     sendUpdateNotification(player);
                 }, 40L); // 2 second delay for better visibility
             } else if (latestVersion == null) {
                 checkForUpdates().thenAccept(hasUpdate -> {
                     if (hasUpdate) {
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        FoliaDetector.getScheduler(plugin).runTaskLater(() -> {
                             sendUpdateNotification(player);
                         }, 40L);
                     }

@@ -35,6 +35,8 @@ import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
+import com.nonxedy.nonchat.util.folia.FoliaDetector;
+import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 import com.nonxedy.nonchat.util.integration.metrics.Metrics;
 
 import net.kyori.adventure.text.Component;
@@ -56,6 +58,7 @@ public class Nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
+    private FoliaScheduler scheduler;
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
 
     @Override
@@ -64,12 +67,15 @@ public class Nonchat extends JavaPlugin {
         saveResource("langs/messages_en.yml", false);
         saveResource("langs/messages_ru.yml", false);
 
+        // Initialize Folia-compatible scheduler
+        this.scheduler = FoliaDetector.getScheduler(this);
+
         initializeServices();
         registerPlaceholders();
         registerListeners();
         setupIntegrations();
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+        scheduler.runTaskLater(() -> {
             for (World world : Bukkit.getWorlds()) {
                 for (Entity entity : world.getEntities()) {
                     if (entity instanceof ArmorStand) {
@@ -287,5 +293,9 @@ public class Nonchat extends JavaPlugin {
 
     public MessageManager getMessageManager() {
         return messageManager;
+    }
+
+    public FoliaScheduler getScheduler() {
+        return scheduler;
     }
 }

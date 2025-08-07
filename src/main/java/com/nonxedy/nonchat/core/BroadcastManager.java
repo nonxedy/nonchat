@@ -14,6 +14,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.core.broadcast.BroadcastMessage;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 
 import net.kyori.adventure.text.Component;
 
@@ -23,12 +24,14 @@ public class BroadcastManager {
     private final Map<String, BukkitTask> activeTasks;
     private final List<BroadcastMessage> randomMessagePool;
     private BukkitTask randomBroadcastTask;
+    private final FoliaScheduler scheduler;
 
     public BroadcastManager(Nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.activeTasks = new HashMap<>();
         this.randomMessagePool = new ArrayList<>();
+        this.scheduler = plugin.getScheduler();
         start();
     }
 
@@ -65,7 +68,7 @@ public class BroadcastManager {
     }
 
     private void scheduleRegularBroadcast(String key, BroadcastMessage message) {
-        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+        BukkitTask task = scheduler.runTaskTimerAsynchronously(() -> {
             broadcast(Bukkit.getConsoleSender(), message.getMessage());
         }, 0L, message.getInterval() * 20L);
         
@@ -73,7 +76,7 @@ public class BroadcastManager {
     }
 
     private void startRandomBroadcasts() {
-        randomBroadcastTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+        randomBroadcastTask = scheduler.runTaskTimerAsynchronously(() -> {
             if (randomMessagePool.isEmpty()) return;
             
             int randomIndex = new Random().nextInt(randomMessagePool.size());
