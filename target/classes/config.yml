@@ -115,18 +115,6 @@ channels:
     min-length: 0
     max-length: -1
   
-  world:
-    enabled: true
-    display-name: "World"
-    format: "§7(§2W§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}"
-    radius: world
-    character: '@'
-    send-permission: ""
-    receive-permission: ""
-    cooldown: 0
-    min-length: 0
-    max-length: -1
-
 # The death config.
 death:
   enabled: true # Enable/disable custom death messages
