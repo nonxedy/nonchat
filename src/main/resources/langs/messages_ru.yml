@@ -149,3 +149,10 @@ placeholders:
     true: "&#84FFB8Вы игнорируете игроков"
     false: "&#ff0000Вы никого не игнорируете"
 
+# Death coordinates message format
+death-coordinates: "&fВы умерли в &#FFAFFB%s &fпо координатам: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
+
+# World names for death coordinates
+dimension-overworld: "Обычный мир"
+dimension-nether: "Незер"
+dimension-end: "Энд"

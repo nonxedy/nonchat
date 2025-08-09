@@ -125,7 +125,7 @@ public class Nonchat extends JavaPlugin {
 
         // Register death-related listeners
         Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
-        Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig()), this);
+        Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig(), configService.getMessages()), this);
 
         // Register join/quit listener
         Bukkit.getPluginManager().registerEvents(new JoinQuitListener(configService.getConfig()), this);

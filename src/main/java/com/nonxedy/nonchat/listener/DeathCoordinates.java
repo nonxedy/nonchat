@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 /**
@@ -18,9 +19,11 @@ import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 public class DeathCoordinates implements Listener {
     
     private final PluginConfig config;
+    private final PluginMessages messages;
     
-    public DeathCoordinates(PluginConfig config) {
+    public DeathCoordinates(PluginConfig config, PluginMessages messages) {
         this.config = config;
+        this.messages = messages;
     }
     
     /**
@@ -38,7 +41,7 @@ public class DeathCoordinates implements Listener {
         // Only send coordinates if enabled in config
         if (config.isShowDeathCoordinatesEnabled()) {
             String coordsMessage = String.format(
-                "&fYou died in &d%s &fat coordinates: &fx:&d%d &fy:&d%d &fz:&d%d",
+                messages.getString("death-coordinates"),
                 formatDimension(dimension),
                 deathLoc.getBlockX(),
                 deathLoc.getBlockY(),
@@ -50,15 +53,15 @@ public class DeathCoordinates implements Listener {
     }
     
     /**
-     * Converts dimension enum to readable name
+     * Converts dimension enum to readable name using localized messages
      * @param dimension World environment type
-     * @return Formatted dimension name
+     * @return Localized dimension name
      */
     private String formatDimension(Environment dimension) {
         return switch (dimension) {
-            case NORMAL -> "Overworld";
-            case NETHER -> "Nether";
-            case THE_END -> "The End";
+            case NORMAL -> messages.getString("dimension-overworld");
+            case NETHER -> messages.getString("dimension-nether");
+            case THE_END -> messages.getString("dimension-end");
             default -> dimension.toString();
         };
     }

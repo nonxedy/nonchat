@@ -148,3 +148,11 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8You are ignoring players"
     false: "&#ff0000You are not ignoring anyone"
+
+# Death coordinates message format
+death-coordinates: "&fYou died in &#FFAFFB%s &fat coordinates: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
+
+# World names for death coordinates
+dimension-overworld: "Overworld"
+dimension-nether: "Nether"
+dimension-end: "The End"
