@@ -82,6 +82,43 @@ public class LanguageManager {
     }
 
     /**
+     * Reloads all language files from disk
+     * This should be called when the plugin is reloaded to pick up changes to message files
+     */
+    public void reload() {
+        // Clear the loaded languages map
+        loadedLanguages.clear();
+        
+        // Reload all language files from the directory
+        for (File file : langsFolder.listFiles()) {
+            if (file.getName().startsWith("messages_") && file.getName().endsWith(".yml")) {
+                String langCode = file.getName().replace("messages_", "").replace(".yml", "");
+                loadedLanguages.put(langCode, YamlConfiguration.loadConfiguration(file));
+            }
+        }
+        
+        // Restore the current language setting
+        if (currentLang != null) {
+            // Find which language was currently active
+            String currentLangCode = null;
+            for (Map.Entry<String, FileConfiguration> entry : loadedLanguages.entrySet()) {
+                if (entry.getValue() == currentLang) {
+                    currentLangCode = entry.getKey();
+                    break;
+                }
+            }
+            
+            // If we can't determine the current language, try to set it again
+            if (currentLangCode != null) {
+                setLanguage(currentLangCode);
+            } else if (!loadedLanguages.isEmpty()) {
+                // Fallback to the first available language or English
+                setLanguage(loadedLanguages.containsKey("en") ? "en" : loadedLanguages.keySet().iterator().next());
+            }
+        }
+    }
+
+    /**
      * Retrieves a colored message from the current language configuration
      * @param key The message key to retrieve
      * @return The colored message string, or an error message if key not found

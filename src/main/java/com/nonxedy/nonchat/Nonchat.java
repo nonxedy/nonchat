@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -64,8 +65,14 @@ public class Nonchat extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        saveResource("langs/messages_en.yml", false);
-        saveResource("langs/messages_ru.yml", false);
+        
+        // Only save language files if they don't exist (preserve user changes)
+        if (!new File(getDataFolder(), "langs/messages_en.yml").exists()) {
+            saveResource("langs/messages_en.yml", false);
+        }
+        if (!new File(getDataFolder(), "langs/messages_ru.yml").exists()) {
+            saveResource("langs/messages_ru.yml", false);
+        }
 
         // Initialize Folia-compatible scheduler
         this.scheduler = FoliaDetector.getScheduler(this);
