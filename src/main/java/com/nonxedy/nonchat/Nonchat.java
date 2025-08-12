@@ -33,6 +33,7 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
@@ -117,6 +118,9 @@ public class Nonchat extends JavaPlugin {
 
         // Initialize command service last as it depends on all other services
         this.commandService = new CommandService(this, chatService, configService);
+
+        // Initialize LinkDetector with translation support
+        LinkDetector.initialize(configService.getMessages());
 
         // Initialize debug system if enabled
         if (configService.getConfig().isDebug()) {
@@ -237,6 +241,11 @@ public class Nonchat extends JavaPlugin {
 
         if (chatManager != null) {
             chatManager.reloadChannels();
+        }
+
+        // Reinitialize LinkDetector with updated messages
+        if (configService != null) {
+            LinkDetector.initialize(configService.getMessages());
         }
 
         // Reinitialize debugger if needed

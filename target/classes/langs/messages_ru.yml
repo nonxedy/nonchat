@@ -156,3 +156,6 @@ death-coordinates: "&fВы умерли в &#FFAFFB%s &fпо координат�
 dimension-overworld: "Обычный мир"
 dimension-nether: "Незер"
 dimension-end: "Энд"
+
+# Link hover text
+link-hover: "Нажмите, чтобы открыть: {url}"

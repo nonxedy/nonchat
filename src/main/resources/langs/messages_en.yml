@@ -156,3 +156,6 @@ death-coordinates: "&fYou died in &#FFAFFB%s &fat coordinates: &fx:&#FFAFFB%d &f
 dimension-overworld: "Overworld"
 dimension-nether: "Nether"
 dimension-end: "The End"
+
+# Link hover text
+link-hover: "Click to open: {url}"
