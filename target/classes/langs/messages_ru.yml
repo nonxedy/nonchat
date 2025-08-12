@@ -79,6 +79,18 @@ invalid-number: "&#ff0000Пожалуйста, используйте допус
 # General command errors
 command-error: "&#ff0000Произошла ошибка при выполнении команды."
 
+# Death coordinates message format
+death-coordinates: "&fВы умерли в &#FFAFFB%s &fпо координатам: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
+
+# World names for death coordinates
+dimension-overworld: "Обычный мир"
+dimension-nether: "Незер"
+dimension-end: "Энд"
+
+# Link hover text
+link-hover: "Нажмите, чтобы открыть: {url}"
+
+
 # Channel Command
 channel-help-header: "&#FFAFFBКоманды каналов:"
 channel-help-set: "&#FFAFFB/channel set <канал>&#ffffff - выбрать активный канал"
@@ -148,14 +160,3 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8Вы игнорируете игроков"
     false: "&#ff0000Вы никого не игнорируете"
-
-# Death coordinates message format
-death-coordinates: "&fВы умерли в &#FFAFFB%s &fпо координатам: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
-
-# World names for death coordinates
-dimension-overworld: "Обычный мир"
-dimension-nether: "Незер"
-dimension-end: "Энд"
-
-# Link hover text
-link-hover: "Нажмите, чтобы открыть: {url}"

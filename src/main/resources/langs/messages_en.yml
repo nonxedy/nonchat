@@ -79,6 +79,18 @@ invalid-number: "&#ff0000Please enter a valid positive number"
 # General command errors
 command-error: "&#ff0000An error occurred while executing the command."
 
+# Death coordinates message format
+death-coordinates: "&fYou died in &#FFAFFB%s &fat coordinates: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
+
+# World names for death coordinates
+dimension-overworld: "Overworld"
+dimension-nether: "Nether"
+dimension-end: "The End"
+
+# Link hover text
+link-hover: "Click to open: {url}"
+
+
 # Channel Command
 channel-help-header: "&#FFAFFBChannel Commands:"
 channel-help-set: "&#FFAFFB/channel set <channel>&#ffffff - set your active channel"
@@ -148,14 +160,3 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8You are ignoring players"
     false: "&#ff0000You are not ignoring anyone"
-
-# Death coordinates message format
-death-coordinates: "&fYou died in &#FFAFFB%s &fat coordinates: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
-
-# World names for death coordinates
-dimension-overworld: "Overworld"
-dimension-nether: "Nether"
-dimension-end: "The End"
-
-# Link hover text
-link-hover: "Click to open: {url}"
