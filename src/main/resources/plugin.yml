@@ -61,7 +61,7 @@ permissions:
     default: true
   nonchat.clear:
     description: Allows /clear command
-    default: false
+    default: op
   nonchat.ignore:
     description: Allows /ignore command
     default: true
