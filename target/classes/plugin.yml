@@ -71,7 +71,7 @@ permissions:
   nonchat.antiblockedwords:
     description: Allows to sent blocked words
     default: op
-  nonchat.bubblechat:
+  nonchat.chatbubbles:
     description: Allows to use bubble chat
     default: true
   nonchat.me:
