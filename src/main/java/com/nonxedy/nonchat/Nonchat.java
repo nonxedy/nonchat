@@ -41,9 +41,11 @@ import com.nonxedy.nonchat.util.folia.FoliaDetector;
 import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 import com.nonxedy.nonchat.util.integration.metrics.Metrics;
 
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
+@Slf4j
 public class Nonchat extends JavaPlugin {
 
     private ChatService chatService;

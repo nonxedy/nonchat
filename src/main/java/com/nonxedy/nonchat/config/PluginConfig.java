@@ -19,10 +19,13 @@ import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
 import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
 import com.nonxedy.nonchat.util.core.broadcast.BroadcastMessage;
 
+import lombok.Getter;
+
 /**
  * Central configuration manager for the NonChat plugin
  * Handles loading, saving and accessing all plugin settings
  */
+@Getter
 public class PluginConfig {
     // File object representing the config.yml file
     private final File configFile;

@@ -1,9 +1,14 @@
 package com.nonxedy.nonchat.util.chat.formatting;
 
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * Represents a chat type configuration with formatting and behavior settings
  * Handles different chat modes like global and local radius-based chat
  */
+@Data
+@Builder
 public class ChatTypeUtil {
     private final boolean enabled;
     private final String displayName;
@@ -36,26 +41,6 @@ public class ChatTypeUtil {
         this.minLength = minLength;
         this.maxLength = maxLength;
     }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public int getRadius() {
-        return radius;
-    }
-
-    public char getChatChar() {
-        return chatChar;
-    }
     
     /**
      * @deprecated Use getSendPermission() instead
@@ -65,32 +50,12 @@ public class ChatTypeUtil {
         return sendPermission;
     }
     
-    public String getSendPermission() {
-        return sendPermission;
-    }
-    
-    public String getReceivePermission() {
-        return receivePermission;
-    }
-    
-    public int getCooldown() {
-        return cooldown;
-    }
-    
-    public int getMinLength() {
-        return minLength;
-    }
-    
-    public int getMaxLength() {
-        return maxLength;
-    }
-    
     /**
      * @deprecated Use hasSendPermission() instead
      */
     @Deprecated
     public boolean hasPermission() {
-        return sendPermission != null && !sendPermission.isEmpty();
+        return hasSendPermission();
     }
     
     public boolean hasSendPermission() {
