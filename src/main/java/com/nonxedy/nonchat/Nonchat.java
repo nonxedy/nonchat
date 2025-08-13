@@ -1,5 +1,6 @@
 package com.nonxedy.nonchat;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,14 +33,19 @@ import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
+import com.nonxedy.nonchat.util.folia.FoliaDetector;
+import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 import com.nonxedy.nonchat.util.integration.metrics.Metrics;
 
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 
+@Slf4j
 public class Nonchat extends JavaPlugin {
 
     private ChatService chatService;
@@ -56,20 +62,30 @@ public class Nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
+    private FoliaScheduler scheduler;
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        saveResource("langs/messages_en.yml", false);
-        saveResource("langs/messages_ru.yml", false);
+        
+        // Only save language files if they don't exist (preserve user changes)
+        if (!new File(getDataFolder(), "langs/messages_en.yml").exists()) {
+            saveResource("langs/messages_en.yml", false);
+        }
+        if (!new File(getDataFolder(), "langs/messages_ru.yml").exists()) {
+            saveResource("langs/messages_ru.yml", false);
+        }
+
+        // Initialize Folia-compatible scheduler
+        this.scheduler = FoliaDetector.getScheduler(this);
 
         initializeServices();
         registerPlaceholders();
         registerListeners();
         setupIntegrations();
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+        scheduler.runTaskLater(() -> {
             for (World world : Bukkit.getWorlds()) {
                 for (Entity entity : world.getEntities()) {
                     if (entity instanceof ArmorStand) {
@@ -105,6 +121,9 @@ public class Nonchat extends JavaPlugin {
         // Initialize command service last as it depends on all other services
         this.commandService = new CommandService(this, chatService, configService);
 
+        // Initialize LinkDetector with translation support
+        LinkDetector.initialize(configService.getMessages());
+
         // Initialize debug system if enabled
         if (configService.getConfig().isDebug()) {
             this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
@@ -119,10 +138,10 @@ public class Nonchat extends JavaPlugin {
 
         // Register death-related listeners
         Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
-        Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig()), this);
+        Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig(), configService.getMessages()), this);
 
         // Register join/quit listener
-        Bukkit.getPluginManager().registerEvents(new JoinQuitListener(configService.getConfig()), this);
+        Bukkit.getPluginManager().registerEvents(new JoinQuitListener(configService.getConfig(), chatManager.getChannelManager()), this);
 
         // Log successful listener registration
         if (debugger != null) {
@@ -226,6 +245,11 @@ public class Nonchat extends JavaPlugin {
             chatManager.reloadChannels();
         }
 
+        // Reinitialize LinkDetector with updated messages
+        if (configService != null) {
+            LinkDetector.initialize(configService.getMessages());
+        }
+
         // Reinitialize debugger if needed
         if (configService != null && configService.getConfig().isDebug()) {
             if (debugger == null) {
@@ -287,5 +311,9 @@ public class Nonchat extends JavaPlugin {
 
     public MessageManager getMessageManager() {
         return messageManager;
+    }
+
+    public FoliaScheduler getScheduler() {
+        return scheduler;
     }
 }

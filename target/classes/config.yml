@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.1
+# Version of the plugin: 1.5.2
 #
 # - LuckPerms support.
 # - Vault support.
@@ -24,7 +24,7 @@
 #   enabled: true/false         - Whether the channel is enabled
 #   display-name: "Name"        - Display name shown in messages and listings
 #   format: "text {placeholders}" - The message format (must include {message})
-#   radius: number              - Chat radius in blocks, -1 for global
+#   radius: number or world   - Chat radius in blocks, -1 for global, world for world-specific
 #   character: 'X'              - Trigger character (prefix) for this channel
 #   send-permission: "perm"     - Permission needed to send messages
 #   receive-permission: "perm"  - Permission needed to receive messages
@@ -114,7 +114,7 @@ channels:
     cooldown: 0
     min-length: 0
     max-length: -1
-
+  
 # The death config.
 death:
   enabled: true # Enable/disable custom death messages

@@ -1,20 +1,18 @@
 package com.nonxedy.nonchat.util.chat.filters;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 /**
  * Filters excessive capitalization in chat messages
  * Controls and processes uppercase character usage
  */
+@Data
+@AllArgsConstructor
 public class CapsFilter {
     private final boolean enabled;
     private final int maxCapsPercentage;
     private final int minLength;
-
-    // Constructor to initialize filter settings
-    public CapsFilter(boolean enabled, int maxCapsPercentage, int minLength) {
-        this.enabled = enabled;
-        this.maxCapsPercentage = maxCapsPercentage;
-        this.minLength = minLength;
-    }
 
     /**
      * Determines if a message should be filtered for excessive caps

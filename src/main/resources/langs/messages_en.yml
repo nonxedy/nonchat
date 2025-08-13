@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.1
+# Version of the plugin: 1.5.2
 #
 # - LuckPerms support.
 # - Vault support.
@@ -78,6 +78,18 @@ invalid-number: "&#ff0000Please enter a valid positive number"
 
 # General command errors
 command-error: "&#ff0000An error occurred while executing the command."
+
+# Death coordinates message format
+death-coordinates: "&fYou died in &#FFAFFB%s &fat coordinates: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
+
+# World names for death coordinates
+dimension-overworld: "Overworld"
+dimension-nether: "Nether"
+dimension-end: "The End"
+
+# Link hover text
+link-hover: "Click to open: {url}"
+
 
 # Channel Command
 channel-help-header: "&#FFAFFBChannel Commands:"

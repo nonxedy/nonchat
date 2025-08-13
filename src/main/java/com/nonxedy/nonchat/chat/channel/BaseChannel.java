@@ -36,6 +36,7 @@ public class BaseChannel implements Channel {
     private final String sendPermission;
     private final String receivePermission;
     private final int radius;
+    private final String world;
     private final int cooldown;
     private final int minLength;
     private final int maxLength;
@@ -52,6 +53,17 @@ public class BaseChannel implements Channel {
                        String sendPermission, String receivePermission, int radius,
                        boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
                        int minLength, int maxLength) {
+        this(id, displayName, format, character, sendPermission, receivePermission, radius, 
+             "", enabled, hoverTextUtil, cooldown, minLength, maxLength);
+    }
+    
+    /**
+     * Creates a new BaseChannel with all properties including world.
+     */
+    public BaseChannel(String id, String displayName, String format, char character,
+                       String sendPermission, String receivePermission, int radius,
+                       String world, boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
+                       int minLength, int maxLength) {
         this.id = id;
         this.displayName = displayName;
         this.format = format;
@@ -59,6 +71,7 @@ public class BaseChannel implements Channel {
         this.sendPermission = sendPermission;
         this.receivePermission = receivePermission;
         this.radius = radius;
+        this.world = world;
         this.enabled = enabled;
         this.hoverTextUtil = hoverTextUtil;
         this.cooldown = cooldown;
@@ -113,7 +126,17 @@ public class BaseChannel implements Channel {
 
     @Override
     public boolean isGlobal() {
-        return radius == -1;
+        return radius == -1; // Only -1 is global, -2 is world-specific
+    }
+
+    @Override
+    public String getWorld() {
+        return world;
+    }
+
+    @Override
+    public boolean isWorldSpecific() {
+        return !world.isEmpty();
     }
 
     @Override
@@ -154,7 +177,14 @@ public class BaseChannel implements Channel {
             return true;
         }
         
-        // Make sure they're in the same world
+        // Check if this is a world-specific channel
+        if (isWorldSpecific()) {
+            // For world-specific channels, check if both players are in the specified world
+            return sender.getWorld().getName().equals(world) && 
+                   recipient.getWorld().getName().equals(world);
+        }
+        
+        // For numeric radius, make sure they're in the same world
         if (sender.getWorld() != recipient.getWorld()) {
             return false;
         }

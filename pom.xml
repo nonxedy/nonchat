@@ -7,7 +7,7 @@
 
 	<groupId>com.nonxedy.nonchat</groupId>
 	<artifactId>nonchat</artifactId>
-	<version>1.5.1</version>
+	<version>1.5.2</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -49,11 +49,6 @@
 			<artifactId>paper-api</artifactId>
 			<version>1.21.8-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>33.3.0-jre</version>
 		</dependency>
 		<dependency>
 			<groupId>net.luckperms</groupId>
@@ -100,6 +95,11 @@
 			<artifactId>bstats-bukkit</artifactId>
 			<version>3.0.2</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.commons</groupId>
+  			<artifactId>commons-lang3</artifactId>
+  			<version>3.18.0</version>
 		</dependency>
 	</dependencies>
 

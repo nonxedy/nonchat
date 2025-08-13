@@ -64,7 +64,28 @@ public class ChannelManager {
             char character = charStr.isEmpty() ? '\0' : charStr.charAt(0);
             String sendPermission = channelSection.getString("send-permission", "");
             String receivePermission = channelSection.getString("receive-permission", "");
-            int radius = channelSection.getInt("radius", -1);
+            
+            // Handle radius - can be numeric or "world"
+            Object radiusObj = channelSection.get("radius");
+            int radius = -1;
+            String world = "";
+            
+            if (radiusObj instanceof String) {
+                String radiusStr = ((String) radiusObj).toLowerCase().trim();
+                if (radiusStr.equals("world")) {
+                    radius = -2; // Use -2 to indicate world-specific (not global)
+                    world = "world"; // Default world name, can be configured
+                } else {
+                    try {
+                        radius = Integer.parseInt(radiusStr);
+                    } catch (NumberFormatException e) {
+                        radius = -1; // Default to global if invalid
+                    }
+                }
+            } else if (radiusObj instanceof Integer) {
+                radius = (Integer) radiusObj;
+            }
+            
             int cooldown = channelSection.getInt("cooldown", 0);
             int minLength = channelSection.getInt("min-length", 0);
             int maxLength = channelSection.getInt("max-length", 256);
@@ -72,7 +93,7 @@ public class ChannelManager {
             // Create and register channel
             Channel channel = new BaseChannel(
                 channelId, displayName, format, character, sendPermission, receivePermission,
-                radius, enabled, hoverTextUtil, cooldown, minLength, maxLength
+                radius, world, enabled, hoverTextUtil, cooldown, minLength, maxLength
             );
             
             if (config.isDebug()) {
@@ -155,6 +176,7 @@ public class ChannelManager {
             sendPermission,
             receivePermission,
             radius,
+            "", // Default empty world
             true, // Enabled by default
             config.getHoverTextUtil(),
             cooldown,
@@ -208,6 +230,7 @@ public class ChannelManager {
             sendPermission != null ? sendPermission : existingChannel.getSendPermission(),
             receivePermission != null ? receivePermission : existingChannel.getReceivePermission(),
             radius != null ? radius : existingChannel.getRadius(),
+            existingChannel.getWorld(), // Keep existing world
             enabled != null ? enabled : existingChannel.isEnabled(),
             config.getHoverTextUtil(),
             cooldown != null ? cooldown : existingChannel.getCooldown(),
@@ -290,7 +313,14 @@ public class ChannelManager {
         config.set(basePath + "character", channel.hasTriggerCharacter() ? String.valueOf(channel.getCharacter()) : "");
         config.set(basePath + "send-permission", channel.getSendPermission());
         config.set(basePath + "receive-permission", channel.getReceivePermission());
-        config.set(basePath + "radius", channel.getRadius());
+        
+        // Save radius - use "world" string for world-specific channels
+        if (channel.isWorldSpecific()) {
+            config.set(basePath + "radius", "world");
+        } else {
+            config.set(basePath + "radius", channel.getRadius());
+        }
+        
         config.set(basePath + "cooldown", channel.getCooldown());
         config.set(basePath + "min-length", channel.getMinLength());
         config.set(basePath + "max-length", channel.getMaxLength());
@@ -446,10 +476,22 @@ public class ChannelManager {
     }
     
     /**
+     * Cleans up player data when they disconnect.
+     * @param player The player who disconnected
+     */
+    public void cleanupPlayer(Player player) {
+        playerChannels.remove(player);
+        lastMessageTimes.remove(player);
+    }
+    
+    /**
      * Records when a player sends a message for cooldown tracking.
      * @param player The player
      */
     public void recordMessageSent(Player player) {
+        // Clean up old entries to prevent memory leaks
+        lastMessageTimes.entrySet().removeIf(entry -> !entry.getKey().isOnline());
+        
         lastMessageTimes.put(player, System.currentTimeMillis());
     }
     
@@ -498,6 +540,9 @@ public class ChannelManager {
             return 0;
         }
         
-        return (int) ((cooldownMillis - timeSinceLastMessage) / 1000);
+        // Calculate remaining seconds and add 1 to avoid "wait 0 seconds" message
+        // This ensures we show at least 1 second when there's still some cooldown remaining
+        int remainingSeconds = (int) ((cooldownMillis - timeSinceLastMessage) / 1000);
+        return remainingSeconds > 0 ? remainingSeconds : 1;
     }
 }

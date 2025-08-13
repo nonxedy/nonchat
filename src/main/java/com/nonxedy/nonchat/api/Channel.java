@@ -1,6 +1,7 @@
 package com.nonxedy.nonchat.api;
 
 import org.bukkit.entity.Player;
+
 import net.kyori.adventure.text.Component;
 
 /**
@@ -64,10 +65,22 @@ public interface Channel {
     int getRadius();
     
     /**
+     * Gets the world name for world-specific channels. Empty string means not world-specific.
+     * @return World name or empty string.
+     */
+    String getWorld();
+    
+    /**
      * Checks if this is a global channel.
      * @return True if global, false if local.
      */
     boolean isGlobal();
+    
+    /**
+     * Checks if this is a world-specific channel.
+     * @return True if world-specific, false otherwise.
+     */
+    boolean isWorldSpecific();
     
     /**
      * Determines if a player can send messages to this channel.

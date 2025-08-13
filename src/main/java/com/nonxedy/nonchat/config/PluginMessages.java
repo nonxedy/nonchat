@@ -34,6 +34,9 @@ public class PluginMessages {
      * Reloads language configuration from file
      */
     public void reloadConfig() {
+        // Reload the actual language files from disk
+        languageManager.reload();
+        // Reload the current language setting
         loadLanguage();
     }
 

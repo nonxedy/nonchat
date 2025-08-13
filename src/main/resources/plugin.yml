@@ -2,10 +2,11 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.Nonchat
 description: The best chat plugin for 1.16-1.21.8
-version: 1.5.1
+version: 1.5.2
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
+folia-supported: true
 
 depend:
   - LuckPerms
@@ -60,7 +61,7 @@ permissions:
     default: true
   nonchat.clear:
     description: Allows /clear command
-    default: false
+    default: op
   nonchat.ignore:
     description: Allows /ignore command
     default: true
@@ -70,7 +71,7 @@ permissions:
   nonchat.antiblockedwords:
     description: Allows to sent blocked words
     default: op
-  nonchat.bubblechat:
+  nonchat.chatbubbles:
     description: Allows to use bubble chat
     default: true
   nonchat.me:

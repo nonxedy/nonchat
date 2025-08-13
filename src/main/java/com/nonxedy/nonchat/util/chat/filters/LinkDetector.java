@@ -3,6 +3,7 @@ package com.nonxedy.nonchat.util.chat.filters;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
@@ -19,6 +20,17 @@ public class LinkDetector {
     private static final Pattern URL_PATTERN = Pattern.compile(
             "(?i)\\b((?:https?://|www\\.)\\S+\\.[a-z]{2,}\\S*)",
             Pattern.CASE_INSENSITIVE);
+    
+    // Static reference to messages for translation
+    private static PluginMessages messages;
+
+    /**
+     * Initializes the LinkDetector with the messages system
+     * @param messages The PluginMessages instance for translations
+     */
+    public static void initialize(PluginMessages messages) {
+        LinkDetector.messages = messages;
+    }
 
     /**
      * Converts plain text with URLs into a Component with clickable links
@@ -77,9 +89,19 @@ public class LinkDetector {
         if (url.toLowerCase().startsWith("www.")) {
             clickableUrl = "https://" + url;
         }
+        
+        // Use translated message if available, fallback to hardcoded text
+        Component hoverComponent;
+        if (messages != null) {
+            String hoverText = messages.getString("link-hover").replace("{url}", clickableUrl);
+            hoverComponent = ColorUtil.parseComponent(hoverText);
+        } else {
+            hoverComponent = Component.text("Click to open: " + clickableUrl);
+        }
+        
         return Component.text(url)
                 .clickEvent(ClickEvent.openUrl(clickableUrl))
-                .hoverEvent(HoverEvent.showText(Component.text("Click to open: " + clickableUrl)))
+                .hoverEvent(HoverEvent.showText(hoverComponent))
                 .decoration(TextDecoration.UNDERLINED, true);
     }
 }

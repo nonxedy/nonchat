@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
@@ -27,10 +28,12 @@ import me.clip.placeholderapi.PlaceholderAPI;
 public class JoinQuitListener implements Listener {
     
     private final PluginConfig config;
+    private final ChannelManager channelManager;
     private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
     
-    public JoinQuitListener(PluginConfig config) {
+    public JoinQuitListener(PluginConfig config, ChannelManager channelManager) {
         this.config = config;
+        this.channelManager = channelManager;
     }
     
     /**
@@ -64,7 +67,15 @@ public class JoinQuitListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        List<ArmorStand> playerBubbles = bubbles.remove(event.getPlayer());
+        Player player = event.getPlayer();
+        
+        // Clean up player data from ChannelManager to prevent memory leaks
+        if (channelManager != null) {
+            channelManager.cleanupPlayer(player);
+        }
+        
+        // Clean up bubbles
+        List<ArmorStand> playerBubbles = bubbles.remove(player);
         if (playerBubbles != null) {
             BubblePacketUtil.removeBubbles(playerBubbles);
         }
@@ -73,7 +84,6 @@ public class JoinQuitListener implements Listener {
             return;
         }
         
-        Player player = event.getPlayer();
         String quitFormat = config.getQuitFormat();
         
         // Apply PlaceholderAPI if available

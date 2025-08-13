@@ -27,6 +27,7 @@ import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -42,6 +43,7 @@ public class ChatManager {
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
+    private final FoliaScheduler scheduler;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
@@ -52,6 +54,7 @@ public class ChatManager {
         this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
+        this.scheduler = plugin.getScheduler();
         startBubbleUpdater();
     }
 
@@ -144,6 +147,10 @@ public class ChatManager {
                 return;
             }
 
+            // Record message sent immediately after passing cooldown check
+            // This prevents the cooldown from getting stuck when multiple messages are sent rapidly
+            channelManager.recordMessageSent(player);
+
             // The final message content to be used from now on
             final String messageToSend;
 
@@ -168,7 +175,7 @@ public class ChatManager {
                     && isPublicChannel(channel);
 
             if (shouldShowBubble) {
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                scheduler.runTaskForPlayer(player, () -> {
                     removeBubble(player);
                     // For bubbles, use the message without colors if player doesn't have permission
                     String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
@@ -192,9 +199,6 @@ public class ChatManager {
             if (!player.isOnline()) {
                 playerLocks.remove(player);
             }
-
-            // Record message sent for cooldown tracking
-            channelManager.recordMessageSent(player);
         }
     }
 
@@ -225,7 +229,7 @@ public class ChatManager {
     }
 
     private void startBubbleUpdater() {
-        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        scheduler.runTaskTimer(() -> {
             // Use Stream API to handle updating bubbles
             bubbles.entrySet().stream()
                     .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
@@ -256,7 +260,7 @@ public class ChatManager {
         List<ArmorStand> playerBubbles = BubblePacketUtil.spawnMultilineBubble(player, message, loc);
         bubbles.put(player, playerBubbles);
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        scheduler.runTaskLaterForPlayer(player, () -> {
             removeBubble(player);
         }, config.getChatBubblesDuration() * 20L);
     }
