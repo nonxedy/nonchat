@@ -476,10 +476,22 @@ public class ChannelManager {
     }
     
     /**
+     * Cleans up player data when they disconnect.
+     * @param player The player who disconnected
+     */
+    public void cleanupPlayer(Player player) {
+        playerChannels.remove(player);
+        lastMessageTimes.remove(player);
+    }
+    
+    /**
      * Records when a player sends a message for cooldown tracking.
      * @param player The player
      */
     public void recordMessageSent(Player player) {
+        // Clean up old entries to prevent memory leaks
+        lastMessageTimes.entrySet().removeIf(entry -> !entry.getKey().isOnline());
+        
         lastMessageTimes.put(player, System.currentTimeMillis());
     }
     
@@ -528,6 +540,9 @@ public class ChannelManager {
             return 0;
         }
         
-        return (int) ((cooldownMillis - timeSinceLastMessage) / 1000);
+        // Calculate remaining seconds and add 1 to avoid "wait 0 seconds" message
+        // This ensures we show at least 1 second when there's still some cooldown remaining
+        int remainingSeconds = (int) ((cooldownMillis - timeSinceLastMessage) / 1000);
+        return remainingSeconds > 0 ? remainingSeconds : 1;
     }
 }

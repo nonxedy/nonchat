@@ -147,6 +147,10 @@ public class ChatManager {
                 return;
             }
 
+            // Record message sent immediately after passing cooldown check
+            // This prevents the cooldown from getting stuck when multiple messages are sent rapidly
+            channelManager.recordMessageSent(player);
+
             // The final message content to be used from now on
             final String messageToSend;
 
@@ -195,9 +199,6 @@ public class ChatManager {
             if (!player.isOnline()) {
                 playerLocks.remove(player);
             }
-
-            // Record message sent for cooldown tracking
-            channelManager.recordMessageSent(player);
         }
     }
 
