@@ -1,6 +1,6 @@
 package com.nonxedy.nonchat.util.folia;
 
-import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Utility class to detect if the server is running Folia
@@ -30,7 +30,7 @@ public class FoliaDetector {
      * @param plugin The plugin instance
      * @return Scheduler instance
      */
-    public static FoliaScheduler getScheduler(org.bukkit.plugin.Plugin plugin) {
+    public static FoliaScheduler getScheduler(Plugin plugin) {
         if (isFolia()) {
             return new FoliaSchedulerImpl(plugin);
         } else {
