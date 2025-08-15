@@ -211,6 +211,9 @@ public class BaseChannel implements Channel {
             }
         }
 
+        // Extract color from the end of beforeMessage to apply to the message
+        String inheritedColor = extractTrailingColor(beforeMessage);
+
         // Parse format parts with colors and add hover functionality
         Component beforeMessageComponent = ColorUtil.parseComponent(beforeMessage);
         Component afterMessageComponent = ColorUtil.parseComponent(afterMessage);
@@ -220,20 +223,55 @@ public class BaseChannel implements Channel {
         afterMessageComponent = hoverTextUtil.addHoverToComponent(afterMessageComponent, player);
 
         Component finalMessage = beforeMessageComponent
-            .append(processMessageContent(player, message))
+            .append(processMessageContent(player, message, inheritedColor))
             .append(afterMessageComponent);
 
         return finalMessage;
     }
 
-    private Component processMessageContent(Player player, String message) {
+    /**
+     * Extracts the trailing color code from a format string
+     * @param formatPart The format string to extract color from
+     * @return The color code to inherit, or empty string if none found
+     */
+    private String extractTrailingColor(String formatPart) {
+        if (formatPart == null || formatPart.isEmpty()) {
+            return "";
+        }
+        
+        // Look for color codes at the end of the format
+        // Check for hex colors first (§#RRGGBB or &#RRGGBB)
+        Pattern hexPattern = Pattern.compile(".*(§#[A-Fa-f0-9]{6}|&#[A-Fa-f0-9]{6})(?:[^§&]*?)$");
+        Matcher hexMatcher = hexPattern.matcher(formatPart);
+        if (hexMatcher.find()) {
+            return hexMatcher.group(1);
+        }
+        
+        // Check for legacy colors (§[0-9a-fklmnor] or &[0-9a-fklmnor])
+        Pattern legacyPattern = Pattern.compile(".*(§[0-9a-fklmnor]|&[0-9a-fklmnor])(?:[^§&]*?)$");
+        Matcher legacyMatcher = legacyPattern.matcher(formatPart);
+        if (legacyMatcher.find()) {
+            return legacyMatcher.group(1);
+        }
+        
+        // Check for MiniMessage color tags at the end
+        Pattern miniPattern = Pattern.compile(".*(<#[A-Fa-f0-9]{6}>|<(?:black|dark_blue|dark_green|dark_aqua|dark_red|dark_purple|gold|gray|dark_gray|blue|green|aqua|red|light_purple|yellow|white)>)(?:[^<]*?)$");
+        Matcher miniMatcher = miniPattern.matcher(formatPart);
+        if (miniMatcher.find()) {
+            return miniMatcher.group(1);
+        }
+        
+        return "";
+    }
+
+    private Component processMessageContent(Player player, String message, String inheritedColor) {
         // Check if interactive placeholders are globally disabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         if (plugin instanceof Nonchat nonchatPlugin) {
             boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
             
             if (!globalEnabled) {
-                return processMessageWithColorPermission(player, message);
+                return processMessageWithColorPermission(player, message, inheritedColor);
             }
         }
 
@@ -241,22 +279,28 @@ public class BaseChannel implements Channel {
         boolean hasPing = message.toLowerCase().contains("[ping]");
 
         if (hasItem && hasPing) {
-            return processBothPlaceholders(player, message);
+            return processBothPlaceholders(player, message, inheritedColor);
         } else if (hasItem) {
-            return processItemPlaceholderWithColorPermission(player, message);
+            return processItemPlaceholderWithColorPermission(player, message, inheritedColor);
         } else if (hasPing) {
-            return processPingPlaceholderWithColorPermission(player, message);
+            return processPingPlaceholderWithColorPermission(player, message, inheritedColor);
         } else {
-            return processMessageWithColorPermission(player, message);
+            return processMessageWithColorPermission(player, message, inheritedColor);
         }
     }
 
     /**
      * Processes message content with color permission check
      */
-    private Component processMessageWithColorPermission(Player player, String message) {
+    private Component processMessageWithColorPermission(Player player, String message, String inheritedColor) {
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
+        }
+        
         // First make links clickable, then apply color permission
-        Component linkProcessed = LinkDetector.makeLinksClickable(message);
+        Component linkProcessed = LinkDetector.makeLinksClickable(processedMessage);
         
         // If player doesn't have color permission, strip colors from the message part
         if (!player.hasPermission("nonchat.color")) {
@@ -270,7 +314,7 @@ public class BaseChannel implements Channel {
     /**
      * Processes item placeholder with color permission check
      */
-    private Component processItemPlaceholderWithColorPermission(Player player, String message) {
+    private Component processItemPlaceholderWithColorPermission(Player player, String message, String inheritedColor) {
         // Check if item placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
@@ -280,7 +324,13 @@ public class BaseChannel implements Channel {
         }
         
         if (!itemEnabled) {
-            return processMessageWithColorPermission(player, message);
+            return processMessageWithColorPermission(player, message, inheritedColor);
+        }
+        
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
         }
         
         // Process item placeholder but respect color permissions for the rest of the message
@@ -290,13 +340,13 @@ public class BaseChannel implements Channel {
             return ItemDetector.processItemPlaceholders(player, messageWithoutColors);
         }
         
-        return ItemDetector.processItemPlaceholders(player, message);
+        return ItemDetector.processItemPlaceholders(player, processedMessage);
     }
 
     /**
      * Processes ping placeholder with color permission check
      */
-    private Component processPingPlaceholderWithColorPermission(Player player, String message) {
+    private Component processPingPlaceholderWithColorPermission(Player player, String message, String inheritedColor) {
         // Check if ping placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean pingEnabled = true;
@@ -306,7 +356,13 @@ public class BaseChannel implements Channel {
         }
         
         if (!pingEnabled) {
-            return processMessageWithColorPermission(player, message);
+            return processMessageWithColorPermission(player, message, inheritedColor);
+        }
+        
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
         }
         
         // Process ping placeholder but respect color permissions for the rest of the message
@@ -316,13 +372,13 @@ public class BaseChannel implements Channel {
             return PingDetector.processPingPlaceholders(player, messageWithoutColors);
         }
         
-        return PingDetector.processPingPlaceholders(player, message);
+        return PingDetector.processPingPlaceholders(player, processedMessage);
     }
 
     /**
      * Processes both item and ping placeholders with color permission check
      */
-    private Component processBothPlaceholders(Player player, String message) {
+    private Component processBothPlaceholders(Player player, String message, String inheritedColor) {
         // Check settings
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
@@ -333,9 +389,15 @@ public class BaseChannel implements Channel {
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }
         
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
+        }
+        
         // Check color permission
         boolean hasColorPermission = player.hasPermission("nonchat.color");
-        String processedMessage = hasColorPermission ? message : ColorUtil.stripAllColors(message);
+        processedMessage = hasColorPermission ? processedMessage : ColorUtil.stripAllColors(message);
         
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
