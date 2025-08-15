@@ -197,26 +197,32 @@ public class BaseChannel implements Channel {
     public Component formatMessage(Player player, String message) {
         String baseFormat = getFormat();
         
-        // Split format into parts around {message}
-        String[] formatParts = baseFormat.split("\\{message\\}");
-        String beforeMessage = formatParts[0];
-        String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
-
+        // Apply PlaceholderAPI to the entire format first
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
-                beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
-                afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
+                baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
             } catch (Exception e) {
                 Bukkit.getLogger().log(Level.WARNING, "Error processing format placeholders: {0}", e.getMessage());
             }
         }
+        
+        // Check if the format contains MiniMessage gradients that might span across {message}
+        if (containsSpanningGradient(baseFormat)) {
+            return formatMessageWithSpanningGradient(player, message, baseFormat);
+        }
+        
+        // Split format into parts around {message} for traditional processing
+        String[] formatParts = baseFormat.split("\\{message\\}");
+        String beforeMessage = formatParts[0];
+        String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
 
         // Extract color from the end of beforeMessage to apply to the message
         String inheritedColor = extractTrailingColor(beforeMessage);
 
         // Parse format parts with colors and add hover functionality
-        Component beforeMessageComponent = ColorUtil.parseComponent(beforeMessage);
-        Component afterMessageComponent = ColorUtil.parseComponent(afterMessage);
+        // Use parseConfigComponent for better MiniMessage support in config strings
+        Component beforeMessageComponent = ColorUtil.parseConfigComponent(beforeMessage);
+        Component afterMessageComponent = ColorUtil.parseConfigComponent(afterMessage);
         
         // Add hover functionality to the format parts
         beforeMessageComponent = hoverTextUtil.addHoverToComponent(beforeMessageComponent, player);
@@ -227,6 +233,64 @@ public class BaseChannel implements Channel {
             .append(afterMessageComponent);
 
         return finalMessage;
+    }
+
+    /**
+     * Checks if the format contains a MiniMessage gradient that spans across {message}
+     * @param format The format string to check
+     * @return true if contains spanning gradient, false otherwise
+     */
+    private boolean containsSpanningGradient(String format) {
+        if (format == null || format.isEmpty()) {
+            return false;
+        }
+        
+        // Look for gradient tags that might span across {message}
+        Pattern gradientPattern = Pattern.compile("<gradient:[^>]+>");
+        Matcher matcher = gradientPattern.matcher(format);
+        
+        while (matcher.find()) {
+            int gradientStart = matcher.start();
+            int messageIndex = format.indexOf("{message}");
+            
+            if (messageIndex > gradientStart) {
+                // Check if there's a closing gradient tag after {message}
+                String afterMessage = format.substring(messageIndex + 9); // 9 = length of "{message}"
+                if (afterMessage.contains("</gradient>")) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Formats a message when the format contains a spanning gradient
+     * @param player The player sending the message
+     * @param message The message content
+     * @param format The format string with spanning gradient
+     * @return Formatted component
+     */
+    private Component formatMessageWithSpanningGradient(Player player, String message, String format) {
+        // Process the message content first to handle color permissions
+        String processedMessage = message;
+        
+        // Check color permission for the message content
+        if (!player.hasPermission("nonchat.color")) {
+            processedMessage = ColorUtil.stripAllColors(message);
+        }
+        
+        // Replace {message} with the processed message content
+        String fullFormat = format.replace("{message}", processedMessage);
+        
+        // Parse the entire format as MiniMessage to preserve gradients
+        Component fullComponent = ColorUtil.parseConfigComponent(fullFormat);
+        
+        // Add hover functionality - we need to extract the player name part for hover
+        // This is a simplified approach; for more complex hover handling,
+        // we might need to parse the component structure
+        return hoverTextUtil.addHoverToComponent(fullComponent, player);
     }
 
     /**
@@ -259,6 +323,13 @@ public class BaseChannel implements Channel {
         Matcher miniMatcher = miniPattern.matcher(formatPart);
         if (miniMatcher.find()) {
             return miniMatcher.group(1);
+        }
+        
+        // Check for MiniMessage gradient tags that might affect the message
+        Pattern gradientPattern = Pattern.compile(".*(<gradient:[^>]+>)(?:[^<]*?)$");
+        Matcher gradientMatcher = gradientPattern.matcher(formatPart);
+        if (gradientMatcher.find()) {
+            return gradientMatcher.group(1);
         }
         
         return "";

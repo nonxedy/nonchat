@@ -61,6 +61,9 @@ public class ColorUtil {
     // Pattern for detecting MiniMessage tags more accurately
     private static final Pattern MINIMESSAGE_TAG_PATTERN = Pattern.compile("<(?:[/#]?(?:color|c|gradient|rainbow|bold|b|italic|i|underlined|u|strikethrough|st|obfuscated|obf|reset|r|shadow|hover|click|insertion|font|transition|selector|keybind|translatable|score|nbt|newline|br|lang|key|translate|#[0-9a-fA-F]{6}|[a-z_]+)(?::[^>]*)?|/)>");
     
+    // Pattern for detecting gradient tags specifically
+    private static final Pattern GRADIENT_PATTERN = Pattern.compile("<gradient:[^>]+>");
+    
     // MiniMessage instance for parsing MiniMessage format
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
@@ -354,5 +357,42 @@ public class ColorUtil {
             return stripAllColors(message);
         }
         return parseColor(message);
+    }
+    
+    /**
+     * Checks if a string contains MiniMessage gradient tags
+     * @param message The message to check
+     * @return true if contains gradient tags, false otherwise
+     */
+    public static boolean containsGradient(String message) {
+        if (message == null || message.isEmpty()) return false;
+        return GRADIENT_PATTERN.matcher(message).find();
+    }
+    
+    /**
+     * Enhanced component parsing that prioritizes MiniMessage format for config strings
+     * This method is specifically designed for processing config format strings that may contain gradients
+     * @param message The text to convert to Component
+     * @return Adventure Component with processed colors
+     */
+    public static Component parseConfigComponent(String message) {
+        if (message == null || message.isEmpty()) return Component.empty();
+        
+        // For config strings, always try MiniMessage first if it contains any MiniMessage-like tags
+        // This ensures gradients and other MiniMessage features work properly in config
+        if (containsMiniMessageTags(message) || containsGradient(message)) {
+            try {
+                // Try to parse as MiniMessage first
+                return parseMiniMessageComponent(message);
+            } catch (Exception e) {
+                // Fallback to legacy parsing if MiniMessage parsing fails
+                String legacyMessage = parseColor(message);
+                return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
+            }
+        } else {
+            // Use legacy format parsing for traditional color codes
+            String legacyMessage = parseColor(message);
+            return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
+        }
     }
 }
