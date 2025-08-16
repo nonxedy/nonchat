@@ -1,6 +1,8 @@
 package com.nonxedy.nonchat.util.folia;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -42,7 +44,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
             // We'll set it to null and handle it in the entity-specific methods
             this.entityScheduler = null;
             
-        } catch (Exception e) {
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
             throw new RuntimeException("Failed to initialize Folia scheduler", e);
         }
     }
@@ -69,7 +71,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                     try {
                         Object scheduledTask = method.invoke(asyncScheduler, plugin, task);
                         return wrapScheduledTask(scheduledTask);
-                    } catch (Exception ignored) {
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {
                         // Continue to next method
                     }
                 }
@@ -188,7 +190,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                             Object scheduledTask = method.invoke(scheduler, args);
                             return wrapScheduledTask(scheduledTask);
                         }
-                    } catch (Exception ignored) {
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {
                         // Continue to next method
                     }
                 }
@@ -229,10 +231,10 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                 if (args != null) {
                     // Test invoke the method to see if it works
                     Object scheduledTask = method.invoke(scheduler, args);
-                    plugin.getLogger().info("Using fallback method: " + method.getName());
+                    plugin.getLogger().log(Level.INFO, "Using fallback method: {0}", method.getName());
                     return wrapScheduledTask(scheduledTask);
                 }
-            } catch (Exception ignored) {
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
                 // Continue to next method
             }
         }
@@ -272,9 +274,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                         // Handle primitive types specially
                         if (paramTypes[i].isPrimitive()) {
                             if (args[i] instanceof Long && paramTypes[i] == long.class) {
-                                continue;
                             } else if (args[i] instanceof Integer && paramTypes[i] == int.class) {
-                                continue;
                             } else {
                                 typesMatch = false;
                                 break;
@@ -308,7 +308,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                     try {
                         Object scheduledTask = method.invoke(globalRegionScheduler, plugin, task, delay, period);
                         return wrapScheduledTask(scheduledTask);
-                    } catch (Exception ignored) {
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {
                         // Continue to next method
                     }
                 }
@@ -323,7 +323,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                         task.run();
                         try {
                             runDelayed.invoke(globalRegionScheduler, plugin, this, period);
-                        } catch (Exception e) {
+                        } catch (IllegalAccessException | InvocationTargetException e) {
                             // Stop repeating if scheduling fails
                             plugin.getLogger().fine("Timer task stopped due to scheduling failure");
                         }
@@ -331,12 +331,12 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                 };
                 Object scheduledTask = runDelayed.invoke(globalRegionScheduler, plugin, repeatingTask, delay);
                 return wrapScheduledTask(scheduledTask);
-            } catch (Exception e) {
+            } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
                 // If even runDelayed fails, execute once silently
                 task.run();
                 return createImmediateTask();
             }
-        } catch (Exception e) {
+        } catch (SecurityException e) {
             throw new RuntimeException("Failed to run timer task on Folia", e);
         }
     }
@@ -355,7 +355,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                     try {
                         Object scheduledTask = method.invoke(asyncScheduler, plugin, task, delay, period);
                         return wrapScheduledTask(scheduledTask);
-                    } catch (Exception ignored) {
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {
                         // Continue to next method
                     }
                 }
@@ -370,7 +370,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                         task.run();
                         try {
                             runDelayed.invoke(asyncScheduler, plugin, this, period);
-                        } catch (Exception e) {
+                        } catch (IllegalAccessException | InvocationTargetException e) {
                             // Stop repeating if scheduling fails
                             plugin.getLogger().fine("Async timer task stopped due to scheduling failure");
                         }
@@ -378,12 +378,12 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                 };
                 Object scheduledTask = runDelayed.invoke(asyncScheduler, plugin, repeatingTask, delay);
                 return wrapScheduledTask(scheduledTask);
-            } catch (Exception e) {
+            } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
                 // If even runDelayed fails, execute once in a new thread silently
                 new Thread(task).start();
                 return createImmediateTask();
             }
-        } catch (Exception e) {
+        } catch (SecurityException e) {
             throw new RuntimeException("Failed to run async timer task on Folia", e);
         }
     }
@@ -398,7 +398,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
             Method run = entityScheduler.getClass().getMethod("run", Plugin.class, Runnable.class, Object.class, long.class);
             Object scheduledTask = run.invoke(entityScheduler, plugin, task, null, 0L);
             return wrapScheduledTask(scheduledTask);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
             throw new RuntimeException("Failed to run task for entity on Folia", e);
         }
     }
@@ -413,7 +413,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
             Method run = entityScheduler.getClass().getMethod("run", Plugin.class, Runnable.class, Object.class, long.class);
             Object scheduledTask = run.invoke(entityScheduler, plugin, task, null, delay);
             return wrapScheduledTask(scheduledTask);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
             throw new RuntimeException("Failed to run delayed task for entity on Folia", e);
         }
     }
@@ -487,7 +487,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                             Object scheduledTask = method.invoke(scheduler, args);
                             return wrapScheduledTask(scheduledTask);
                         }
-                    } catch (Exception ignored) {
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {
                         // Continue to next method
                     }
                 }
@@ -528,10 +528,10 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                 if (args != null) {
                     // Test invoke the method to see if it works
                     Object scheduledTask = method.invoke(scheduler, args);
-                    plugin.getLogger().info("Using fallback location method: " + method.getName());
+                    plugin.getLogger().log(Level.INFO, "Using fallback location method: {0}", method.getName());
                     return wrapScheduledTask(scheduledTask);
                 }
-            } catch (Exception ignored) {
+            } catch (IllegalAccessException | InvocationTargetException ignored) {
                 // Continue to next method
             }
         }
@@ -565,9 +565,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
                         // Handle primitive types specially
                         if (paramTypes[i].isPrimitive()) {
                             if (args[i] instanceof Long && paramTypes[i] == long.class) {
-                                continue;
                             } else if (args[i] instanceof Integer && paramTypes[i] == int.class) {
-                                continue;
                             } else {
                                 typesMatch = false;
                                 break;
@@ -606,7 +604,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
             public int getTaskId() {
                 try {
                     return (int) scheduledTask.getClass().getMethod("getTaskId").invoke(scheduledTask);
-                } catch (Exception e) {
+                } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
                     return -1;
                 }
             }
@@ -625,7 +623,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
             public boolean isCancelled() {
                 try {
                     return (boolean) scheduledTask.getClass().getMethod("isCancelled").invoke(scheduledTask);
-                } catch (Exception e) {
+                } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
                     return false;
                 }
             }
@@ -634,7 +632,7 @@ public class FoliaSchedulerImpl implements FoliaScheduler {
             public void cancel() {
                 try {
                     scheduledTask.getClass().getMethod("cancel").invoke(scheduledTask);
-                } catch (Exception e) {
+                } catch (IllegalAccessException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
                     // Ignore cancellation errors
                 }
             }

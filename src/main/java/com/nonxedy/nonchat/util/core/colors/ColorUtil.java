@@ -26,6 +26,7 @@ class LRUCache<K,V> {
         this.maxSize = maxSize;
         this.cache = Collections.synchronizedMap(
             new LinkedHashMap<K,V>(maxSize, 0.75f, true) {
+                @Override
                 protected boolean removeEldestEntry(Entry<K,V> eldest) {
                     return cache.size() > maxSize;
                 }

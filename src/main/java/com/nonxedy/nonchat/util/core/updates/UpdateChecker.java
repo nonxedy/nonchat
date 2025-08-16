@@ -45,8 +45,7 @@ public class UpdateChecker implements Listener {
         this.plugin = plugin;
         this.currentVersion = plugin.getDescription().getVersion();
         
-        if (plugin instanceof Nonchat) {
-            Nonchat nonchatPlugin = (Nonchat) plugin;
+        if (plugin instanceof Nonchat nonchatPlugin) {
             if (!nonchatPlugin.getConfigService().getConfig().isUpdateCheckerEnabled()) {
                 plugin.logResponse("Update checker is disabled in config");
                 return;
