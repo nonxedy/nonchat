@@ -39,6 +39,7 @@ import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
 import com.nonxedy.nonchat.util.folia.FoliaDetector;
 import com.nonxedy.nonchat.util.folia.FoliaScheduler;
+import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 import com.nonxedy.nonchat.util.integration.metrics.Metrics;
 
 import lombok.extern.slf4j.Slf4j;
@@ -156,6 +157,9 @@ public class Nonchat extends JavaPlugin {
     }
 
     private void setupIntegrations() {
+        // Initialize external integrations (PlaceholderAPI, LuckPerms, Vault)
+        IntegrationUtil.setupIntegrations();
+
         // Initialize metrics
         this.metrics = new Metrics(this, 25786);
 

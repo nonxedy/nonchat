@@ -124,6 +124,7 @@ public class PluginConfig {
         
         // Private chat settings (оставляем как есть)
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+        config.set("private-chat-target-you", "You");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
         // Chat bubbles configuration
@@ -382,6 +383,15 @@ public class PluginConfig {
     @NotNull
     public String getSpyFormat() {
         return config.getString("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+    }
+
+    /**
+     * Gets private chat target "You" text
+     * @return Text to show for target player in private messages
+     */
+    @NotNull
+    public String getPrivateChatTargetYou() {
+        return config.getString("private-chat-target-you", "You");
     }
 
     /**

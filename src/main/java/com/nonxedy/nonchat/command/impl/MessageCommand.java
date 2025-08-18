@@ -22,6 +22,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -239,10 +240,16 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
             plugin.logResponse("Message sent to " + sender.getName());
         }
 
+        // Get and process the "You" text with PlaceholderAPI
+        String targetYouText = config.getPrivateChatTargetYou();
+        if (target != null) {
+            targetYouText = IntegrationUtil.processPlaceholders(target, targetYouText);
+        }
+        
         // Create and send formatted message to target
         Component targetMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
-                .replace("{target}", "You")
+                .replace("{target}", targetYouText)
                 .replace("{message}", message)
         );
         target.sendMessage(targetMessage);

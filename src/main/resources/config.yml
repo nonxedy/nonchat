@@ -132,6 +132,7 @@ quit-messages:
 
 # The private chat config.
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
+private-chat-target-you: "You" # The text to show for the target player in private messages.
 
 # The spy command config.
 spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command format.

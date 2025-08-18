@@ -13,6 +13,7 @@ import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -67,9 +68,13 @@ public class MessageManager {
                 .replace("{target}", receiver.getName())
                 .replace("{message}", processedMessage);
 
+        // Get and process the "You" text with PlaceholderAPI for the receiver
+        String targetYouText = config.getPrivateChatTargetYou();
+        targetYouText = IntegrationUtil.processPlaceholders(receiver, targetYouText);
+
         String receiverFormat = config.getPrivateChatFormat()
                 .replace("{sender}", sender.getName())
-                .replace("{target}", receiver.getName())
+                .replace("{target}", targetYouText)
                 .replace("{message}", processedMessage);
 
         sender.sendMessage(ColorUtil.parseComponent(senderFormat));
