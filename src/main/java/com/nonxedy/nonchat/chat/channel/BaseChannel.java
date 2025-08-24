@@ -373,9 +373,13 @@ public class BaseChannel implements Channel {
         // First make links clickable, then apply color permission
         Component linkProcessed = LinkDetector.makeLinksClickable(processedMessage);
         
-        // If player doesn't have color permission, strip colors from the message part
+        // If player doesn't have color permission, strip colors from the message part only
         if (!player.hasPermission("nonchat.color")) {
             String strippedMessage = ColorUtil.stripAllColors(message);
+            // Apply inherited color from format even if player doesn't have color permission
+            if (!inheritedColor.isEmpty()) {
+                strippedMessage = inheritedColor + strippedMessage;
+            }
             return LinkDetector.makeLinksClickable(strippedMessage);
         }
         
@@ -408,6 +412,10 @@ public class BaseChannel implements Channel {
         if (!player.hasPermission("nonchat.color")) {
             // Strip colors from message but keep item placeholder functionality
             String messageWithoutColors = ColorUtil.stripAllColors(message);
+            // Apply inherited color from format even if player doesn't have color permission
+            if (!inheritedColor.isEmpty()) {
+                messageWithoutColors = inheritedColor + messageWithoutColors;
+            }
             return ItemDetector.processItemPlaceholders(player, messageWithoutColors);
         }
         
@@ -440,6 +448,10 @@ public class BaseChannel implements Channel {
         if (!player.hasPermission("nonchat.color")) {
             // Strip colors from message but keep ping placeholder functionality
             String messageWithoutColors = ColorUtil.stripAllColors(message);
+            // Apply inherited color from format even if player doesn't have color permission
+            if (!inheritedColor.isEmpty()) {
+                messageWithoutColors = inheritedColor + messageWithoutColors;
+            }
             return PingDetector.processPingPlaceholders(player, messageWithoutColors);
         }
         
@@ -470,6 +482,12 @@ public class BaseChannel implements Channel {
         boolean hasColorPermission = player.hasPermission("nonchat.color");
         processedMessage = hasColorPermission ? processedMessage : ColorUtil.stripAllColors(message);
         
+        // Apply inherited color from format even if player doesn't have color permission
+        if (!hasColorPermission && !inheritedColor.isEmpty()) {
+            // We need to apply inherited color to text parts, but not to placeholders
+            // This is more complex, so we'll handle it in the text processing below
+        }
+        
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
     
@@ -483,7 +501,12 @@ public class BaseChannel implements Channel {
         while (matcher.find()) {
             // Add text before placeholder
             if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
-                builder.append(LinkDetector.makeLinksClickable(parts[partIndex]));
+                String textPart = parts[partIndex];
+                // Apply inherited color if player doesn't have color permission
+                if (!hasColorPermission && !inheritedColor.isEmpty()) {
+                    textPart = inheritedColor + textPart;
+                }
+                builder.append(LinkDetector.makeLinksClickable(textPart));
             }
             partIndex++;
             
@@ -507,13 +530,23 @@ public class BaseChannel implements Channel {
                 builder.append(Component.text(ping + "ms").color(color));
             } else {
                 // If placeholder is disabled, add it as plain text
-                builder.append(Component.text(matcher.group()));
+                String placeholderText = matcher.group();
+                // Apply inherited color if player doesn't have color permission
+                if (!hasColorPermission && !inheritedColor.isEmpty()) {
+                    placeholderText = inheritedColor + placeholderText;
+                }
+                builder.append(Component.text(placeholderText));
             }
         }
         
         // Add remaining text
         if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
-            builder.append(LinkDetector.makeLinksClickable(parts[partIndex]));
+            String textPart = parts[partIndex];
+            // Apply inherited color if player doesn't have color permission
+            if (!hasColorPermission && !inheritedColor.isEmpty()) {
+                textPart = inheritedColor + textPart;
+            }
+            builder.append(LinkDetector.makeLinksClickable(textPart));
         }
         
         return builder.build();
