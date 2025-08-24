@@ -63,6 +63,11 @@ public class ChatManager {
         ReentrantLock lock = playerLocks.computeIfAbsent(player, p -> new ReentrantLock());
         lock.lock();
         try {
+            // Check if the message is empty or contains only whitespace
+            if (messageContent == null || messageContent.trim().isEmpty()) {
+                return; // Silently cancel empty messages
+            }
+            
             if (handleBlockedWords(player, messageContent)) {
                 return;
             }
@@ -86,6 +91,11 @@ public class ChatManager {
             if (!player.hasPermission("nonchat.color") && ColorUtil.hasColorCodes(messageContent)) {
                 // Strip colors but continue processing the message
                 messageContent = ColorUtil.stripAllColors(messageContent);
+                
+                // Check if the message is empty after stripping colors
+                if (messageContent.trim().isEmpty()) {
+                    return; // Silently cancel empty messages
+                }
             }
 
             // Determine which channel to use based on message prefix or player's active channel
@@ -100,6 +110,11 @@ public class ChatManager {
                 // If a channel was found by character, remove the character from the message
                 if (channel != null) {
                     finalMessage = messageContent.substring(1);
+                    
+                    // Check if the message is empty after removing channel character
+                    if (finalMessage.trim().isEmpty()) {
+                        return; // Silently cancel empty messages
+                    }
                 } else {
                     // No character match, use player's active channel or default
                     channel = channelManager.getPlayerChannel(player);
