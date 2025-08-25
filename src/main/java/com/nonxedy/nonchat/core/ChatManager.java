@@ -350,8 +350,20 @@ public class ChatManager {
      * otherwise
      */
     private boolean broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
-        // Always send to console
-        Bukkit.getConsoleSender().sendMessage(message);
+        // For console, create a simple message without our color modifications to avoid &f appearing
+        String consoleFormat = channel.getFormat().replace("{message}", originalMessage);
+        
+        // Apply PlaceholderAPI for console
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                consoleFormat = PlaceholderAPI.setPlaceholders(sender, consoleFormat);
+            } catch (Exception e) {
+                plugin.logError("Error processing format placeholders for console: " + e.getMessage());
+            }
+        }
+        
+        // Send to console with processed format
+        Bukkit.getConsoleSender().sendMessage(ColorUtil.parseComponent(consoleFormat));
 
         // Count how many players received the message
         long recipientCount = Bukkit.getOnlinePlayers().stream()
