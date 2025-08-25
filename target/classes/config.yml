@@ -76,6 +76,7 @@ interactive-placeholders:
   enabled: true # Enable/disable all interactive placeholders ([item], [ping])
   item-enabled: true # Enable/disable [item] placeholder specifically
   ping-enabled: true # Enable/disable [ping] placeholder specifically
+  ping-format: "{ping}ms" # Format for ping display. Use {ping} placeholder for the ping value
 
 # The channels configuration.
 channels:

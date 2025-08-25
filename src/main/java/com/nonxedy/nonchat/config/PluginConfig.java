@@ -110,6 +110,7 @@ public class PluginConfig {
         config.set("interactive-placeholders.enabled", true);
         config.set("interactive-placeholders.item-enabled", true);
         config.set("interactive-placeholders.ping-enabled", true);
+        config.set("interactive-placeholders.ping-format", "{ping}ms");
         
         // Death settings
         config.set("death.enabled", true);
@@ -304,6 +305,24 @@ public class PluginConfig {
      */
     public void setPingPlaceholdersEnabled(boolean enabled) {
         config.set("interactive-placeholders.ping-enabled", enabled);
+        saveConfig();
+    }
+
+    /**
+     * Gets ping format string
+     * @return Ping format string with {ping} placeholder
+     */
+    @NotNull
+    public String getPingFormat() {
+        return config.getString("interactive-placeholders.ping-format", "{ping}ms");
+    }
+
+    /**
+     * Sets ping format string
+     * @param format New format string with {ping} placeholder
+     */
+    public void setPingFormat(String format) {
+        config.set("interactive-placeholders.ping-format", format);
         saveConfig();
     }
 
