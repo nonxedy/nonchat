@@ -85,7 +85,7 @@ public class BubblePacketUtil {
     
     public static void removeBubble(ArmorStand bubble) {
         if (bubble != null && !bubble.isDead()) {
-            bubble.remove(); // Принудительно удаляем из мира
+            bubble.remove();
             armorStandPool.release(bubble);
         }
     }
@@ -93,7 +93,7 @@ public class BubblePacketUtil {
     public static void removeBubbles(List<ArmorStand> bubbles) {
         if (bubbles != null) {
             bubbles.forEach(BubblePacketUtil::removeBubble);
-            bubbles.clear(); // Очищаем список после удаления
+            bubbles.clear();
         }
     }
 
@@ -115,7 +115,6 @@ public class BubblePacketUtil {
      */
     public static void updateBubblesLocation(List<ArmorStand> bubbles, Location baseLocation) {
         if (bubbles != null) {
-            // Удаляем мертвые armor stands из списка
             bubbles.removeIf(bubble -> bubble == null || bubble.isDead());
             
             for (int i = 0; i < bubbles.size(); i++) {
