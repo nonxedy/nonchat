@@ -1,9 +1,13 @@
 package com.nonxedy.nonchat.command.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
@@ -17,7 +21,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
  * Handles chat clearing functionality
  * Provides command to clear chat history
  */
-public class ClearCommand implements CommandExecutor {
+public class ClearCommand implements CommandExecutor, TabCompleter {
     
     // Fields to store plugin messages and main class instance
     private final PluginMessages messages;
@@ -98,5 +102,24 @@ public class ClearCommand implements CommandExecutor {
     private void sendClearNotification() {
         // Send message to all players that chat was cleared
         Bukkit.broadcast(ColorUtil.parseComponentCached(messages.getString("chat-cleared")));
+    }
+
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                        @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.clear")) {
+            return Collections.emptyList();
+        }
+
+        // Clear command doesn't require any arguments, so no suggestions needed
+        return Collections.emptyList();
     }
 }
