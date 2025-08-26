@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
@@ -84,8 +85,10 @@ public class ClearCommand implements CommandExecutor, TabCompleter {
             // Create empty component for clearing
             Component emptyLine = Component.empty();
             // Send empty lines to all players
-            for (int i = 0; i < CLEAR_LINES; i++) {
-                Bukkit.broadcast(emptyLine);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                for (int i = 0; i < CLEAR_LINES; i++) {
+                    player.sendMessage(emptyLine);
+                }
             }
             // Log successful clearing
             plugin.logResponse("Chat cleared successfully");
@@ -93,8 +96,10 @@ public class ClearCommand implements CommandExecutor, TabCompleter {
             // Handle clearing errors
             plugin.logError("Failed to clear chat: " + e.getMessage());
             // Send error message to all players
-            Bukkit.broadcast(Component.text("Failed to clear chat")
-                    .color(NamedTextColor.RED));
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendMessage(Component.text("Failed to clear chat")
+                        .color(NamedTextColor.RED));
+            }
         }
     }
 
