@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -40,60 +42,115 @@ public class BubblePacketUtil {
             Location lineLocation = location.clone().add(0, (lines.size() - 1 - i) * LINE_SPACING, 0);
             
             ArmorStand bubble = armorStandPool.acquire(() -> {
-                ArmorStand as = (ArmorStand) lineLocation.getWorld().spawnEntity(lineLocation, EntityType.ARMOR_STAND);
-                configureArmorStand(as);
-                return as;
+                try {
+                    // Use the player's world to spawn the entity to ensure proper region handling
+                    World world = player.getWorld();
+                    ArmorStand as = (ArmorStand) world.spawnEntity(lineLocation, EntityType.ARMOR_STAND);
+                    configureArmorStand(as);
+                    return as;
+                } catch (Exception e) {
+                    // Log error and return null if entity creation fails
+                    Bukkit.getLogger().warning("[nonchat] Failed to spawn armor stand: " + e.getMessage());
+                    return null;
+                }
             });
             
-            bubble.teleport(lineLocation);
+            // Skip if bubble creation failed
+            if (bubble == null) {
+                continue;
+            }
             
-            Component component = ColorUtil.parseComponent(lines.get(i));
-            bubble.customName(component);
-            
-            bubbleStands.add(bubble);
+            try {
+                bubble.teleport(lineLocation);
+                
+                Component component = ColorUtil.parseComponent(lines.get(i));
+                bubble.customName(component);
+                
+                bubbleStands.add(bubble);
+            } catch (Exception e) {
+                // Remove the bubble if configuration fails
+                if (bubble != null && !bubble.isDead()) {
+                    bubble.remove();
+                }
+                Bukkit.getLogger().warning("[nonchat] Failed to configure armor stand: " + e.getMessage());
+            }
         }
         
         return bubbleStands;
     }
     
     private static void configureArmorStand(ArmorStand as) {
-        as.setCustomNameVisible(true);
-        as.setInvisible(true);
-        as.setGravity(false);
-        as.setMarker(true);
-        as.setSmall(true);
-        // Clear any equipment that might have been set
-        as.getEquipment().clear();
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            as.setDisabledSlots(slot);
+        try {
+            as.setCustomNameVisible(true);
+            as.setInvisible(true);
+            as.setGravity(false);
+            as.setMarker(true);
+            as.setSmall(true);
+            // Clear any equipment that might have been set
+            as.getEquipment().clear();
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                as.setDisabledSlots(slot);
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error configuring armor stand: " + e.getMessage());
         }
     }
     
     public static ArmorStand spawnBubble(Player player, String text, Location location) {
         ArmorStand bubble = armorStandPool.acquire(() -> {
-            ArmorStand as = (ArmorStand) location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND);
-            configureArmorStand(as);
-            return as;
+            try {
+                // Use the player's world to spawn the entity to ensure proper region handling
+                World world = player.getWorld();
+                ArmorStand as = (ArmorStand) world.spawnEntity(location, EntityType.ARMOR_STAND);
+                configureArmorStand(as);
+                return as;
+            } catch (Exception e) {
+                // Log error and return null if entity creation fails
+                Bukkit.getLogger().warning("[nonchat] Failed to spawn armor stand: " + e.getMessage());
+                return null;
+            }
         });
         
-        Component component = ColorUtil.parseComponent(text);
-        bubble.customName(component);
-        bubble.teleport(location);
+        // Return null if bubble creation failed
+        if (bubble == null) {
+            return null;
+        }
+        
+        try {
+            Component component = ColorUtil.parseComponent(text);
+            bubble.customName(component);
+            bubble.teleport(location);
+        } catch (Exception e) {
+            // Remove the bubble if configuration fails
+            if (bubble != null && !bubble.isDead()) {
+                bubble.remove();
+            }
+            Bukkit.getLogger().warning("[nonchat] Failed to configure armor stand: " + e.getMessage());
+            return null;
+        }
         
         return bubble;
     }
     
     public static void removeBubble(ArmorStand bubble) {
-        if (bubble != null && !bubble.isDead()) {
-            bubble.remove();
-            armorStandPool.release(bubble);
+        try {
+            if (bubble != null && !bubble.isDead()) {
+                bubble.remove();
+                armorStandPool.release(bubble);
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error removing bubble: " + e.getMessage());
         }
     }
     
     public static void removeBubbles(List<ArmorStand> bubbles) {
-        if (bubbles != null) {
-            bubbles.forEach(BubblePacketUtil::removeBubble);
-            bubbles.clear();
+        try {
+            if (bubbles != null) {
+                bubbles.forEach(BubblePacketUtil::removeBubble);
+                bubbles.clear();
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error removing bubbles: " + e.getMessage());
         }
     }
 
@@ -103,8 +160,12 @@ public class BubblePacketUtil {
      * @param location New location for the bubble
      */
     public static void updateBubbleLocation(ArmorStand bubble, Location location) {
-        if (bubble != null && !bubble.isDead()) {
-            bubble.teleport(location);
+        try {
+            if (bubble != null && !bubble.isDead()) {
+                bubble.teleport(location);
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error updating bubble location: " + e.getMessage());
         }
     }
     
@@ -114,26 +175,35 @@ public class BubblePacketUtil {
      * @param baseLocation Base location for the bubbles
      */
     public static void updateBubblesLocation(List<ArmorStand> bubbles, Location baseLocation) {
-        if (bubbles != null) {
-            bubbles.removeIf(bubble -> bubble == null || bubble.isDead());
-            
-            for (int i = 0; i < bubbles.size(); i++) {
-                ArmorStand bubble = bubbles.get(i);
-                if (bubble != null && !bubble.isDead()) {
-                    Location lineLocation = baseLocation.clone().add(0, (bubbles.size() - 1 - i) * LINE_SPACING, 0);
-                    bubble.teleport(lineLocation);
+        try {
+            if (bubbles != null) {
+                bubbles.removeIf(bubble -> bubble == null || bubble.isDead());
+                
+                for (int i = 0; i < bubbles.size(); i++) {
+                    try {
+                        ArmorStand bubble = bubbles.get(i);
+                        if (bubble != null && !bubble.isDead()) {
+                            Location lineLocation = baseLocation.clone().add(0, (bubbles.size() - 1 - i) * LINE_SPACING, 0);
+                            bubble.teleport(lineLocation);
+                        }
+                    } catch (Exception e) {
+                        Bukkit.getLogger().fine("[nonchat] Error updating bubble " + i + " location: " + e.getMessage());
+                    }
                 }
             }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error updating bubbles location: " + e.getMessage());
         }
     }
 
     private static List<String> splitTextIntoLines(String text, int maxLength) {
-        List<String> lines = new ArrayList<>();
-        Pattern colorPattern = Pattern.compile("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}");
-        String currentColor = "";
-        String processedText = ColorUtil.parseColor(text);
-        String[] words = processedText.split(" ");
-        StringBuilder currentLine = new StringBuilder();
+        try {
+            List<String> lines = new ArrayList<>();
+            Pattern colorPattern = Pattern.compile("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}");
+            String currentColor = "";
+            String processedText = ColorUtil.parseColor(text);
+            String[] words = processedText.split(" ");
+            StringBuilder currentLine = new StringBuilder();
 
         for (String word : words) {
             String wordWithoutColors = word.replaceAll("§[0-9a-fk-or]|&#[0-9a-fA-F]{6}", "");
@@ -234,6 +304,13 @@ public class BubblePacketUtil {
         }
 
         return lines;
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[nonchat] Error splitting text into lines: " + e.getMessage());
+            // Return a simple fallback
+            List<String> fallback = new ArrayList<>();
+            fallback.add(text);
+            return fallback;
+        }
     }
     
     /**
@@ -248,52 +325,73 @@ public class BubblePacketUtil {
         }
         
         public T acquire(Supplier<T> creator) {
-            synchronized (pool) {
-                if (!pool.isEmpty()) {
-                    T obj = pool.remove(pool.size() - 1);
-                    if (obj instanceof ArmorStand as) {
-                        if (as.isDead()) {
-                            return creator.get();
+            try {
+                synchronized (pool) {
+                    if (!pool.isEmpty()) {
+                        T obj = pool.remove(pool.size() - 1);
+                        if (obj instanceof ArmorStand as) {
+                            if (as.isDead()) {
+                                return creator.get();
+                            }
                         }
+                        return obj;
                     }
-                    return obj;
                 }
+                return creator.get();
+            } catch (Exception e) {
+                Bukkit.getLogger().fine("[nonchat] Error acquiring from pool: " + e.getMessage());
+                return creator.get();
             }
-            return creator.get();
         }
         
         public void release(T obj) {
-            if (obj instanceof ArmorStand as) {
-                if (as.isDead()) {
-                    return;
-                }
-                
-                as.setCustomNameVisible(false);
-                as.customName(null);
-                
-                synchronized (pool) {
-                    if (pool.size() < maxSize) {
-                        pool.add(obj);
-                    } else {
-                        as.remove();
+            try {
+                if (obj instanceof ArmorStand as) {
+                    if (as.isDead()) {
+                        return;
+                    }
+                    
+                    as.setCustomNameVisible(false);
+                    as.customName(null);
+                    
+                    synchronized (pool) {
+                        if (pool.size() < maxSize) {
+                            pool.add(obj);
+                        } else {
+                            as.remove();
+                        }
                     }
                 }
+            } catch (Exception e) {
+                Bukkit.getLogger().fine("[nonchat] Error releasing to pool: " + e.getMessage());
             }
         }
         
         public void clear() {
-            synchronized (pool) {
-                pool.forEach(obj -> {
-                    if (obj instanceof ArmorStand armorStand) {
-                        armorStand.remove();
-                    }
-                });
-                pool.clear();
+            try {
+                synchronized (pool) {
+                    pool.forEach(obj -> {
+                        try {
+                            if (obj instanceof ArmorStand armorStand) {
+                                armorStand.remove();
+                            }
+                        } catch (Exception e) {
+                            Bukkit.getLogger().fine("[nonchat] Error removing armor stand from pool: " + e.getMessage());
+                        }
+                    });
+                    pool.clear();
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().fine("[nonchat] Error clearing pool: " + e.getMessage());
             }
         }
     }
     
     public static void clearPool() {
-        armorStandPool.clear();
+        try {
+            armorStandPool.clear();
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error clearing armor stand pool: " + e.getMessage());
+        }
     }
 }

@@ -57,6 +57,13 @@ public class ChatManager {
         this.scheduler = plugin.getScheduler();
         startBubbleUpdater();
     }
+    
+    /**
+     * Get the plugin logger
+     */
+    private java.util.logging.Logger getLogger() {
+        return plugin.getLogger();
+    }
 
     public void processChat(Player player, String messageContent) {
         // Get or create player-specific lock
@@ -190,12 +197,42 @@ public class ChatManager {
                     && isPublicChannel(channel);
 
             if (shouldShowBubble) {
-                scheduler.runTaskForPlayer(player, () -> {
-                    removeBubble(player);
-                    // For bubbles, use the message without colors if player doesn't have permission
-                    String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
-                    createBubble(player, bubbleMessage);
-                });
+                try {
+                    scheduler.runTaskForPlayer(player, () -> {
+                        try {
+                            removeBubble(player);
+                            // For bubbles, use the message without colors if player doesn't have permission
+                            String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
+                            createBubble(player, bubbleMessage);
+                        } catch (Exception e) {
+                            getLogger().warning("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
+                        }
+                    });
+                } catch (Exception e) {
+                    getLogger().warning("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
+                    // Try to create bubble immediately as fallback
+                    try {
+                        removeBubble(player);
+                        String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
+                        createBubble(player, bubbleMessage);
+                    } catch (Exception fallbackError) {
+                        getLogger().warning("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
+                        // Try to create bubble using global scheduler as last resort
+                        try {
+                            scheduler.runTask(() -> {
+                                try {
+                                    removeBubble(player);
+                                    String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
+                                    createBubble(player, bubbleMessage);
+                                } catch (Exception globalError) {
+                                    getLogger().warning("Global scheduler bubble creation also failed for player " + player.getName() + ": " + globalError.getMessage());
+                                }
+                            });
+                        } catch (Exception globalSchedulerError) {
+                            getLogger().warning("Failed to schedule global bubble creation for player " + player.getName() + ": " + globalSchedulerError.getMessage());
+                        }
+                    }
+                }
             }
 
             handleMentions(player, messageToSend);
@@ -244,25 +281,120 @@ public class ChatManager {
     }
 
     private void startBubbleUpdater() {
-        scheduler.runTaskTimer(() -> {
-            // Use Stream API to handle updating bubbles
-            bubbles.entrySet().stream()
-                    .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
-                    .forEach(entry -> {
-                        Player player = entry.getKey();
-                        Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                        BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
+        try {
+            scheduler.runTaskTimer(() -> {
+                try {
+                    // Use Stream API to handle updating bubbles
+                    bubbles.entrySet().stream()
+                            .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
+                            .forEach(entry -> {
+                                try {
+                                    Player player = entry.getKey();
+                                    Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
+                                    BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
+                                } catch (Exception e) {
+                                    getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
+                                }
+                            });
+                    
+                    // Clean up bubbles for offline players
+                    bubbles.entrySet().removeIf(entry -> {
+                        try {
+                            if (!entry.getKey().isOnline()) {
+                                BubblePacketUtil.removeBubbles(entry.getValue());
+                                return true;
+                            }
+                        } catch (Exception e) {
+                            getLogger().fine("Error cleaning up bubbles for offline player: " + e.getMessage());
+                            return true; // Remove entry on error
+                        }
+                        return false;
                     });
-            
-            // Clean up bubbles for offline players
-            bubbles.entrySet().removeIf(entry -> {
-                if (!entry.getKey().isOnline()) {
-                    BubblePacketUtil.removeBubbles(entry.getValue());
-                    return true;
+                } catch (Exception e) {
+                    getLogger().warning("Error in bubble updater: " + e.getMessage());
                 }
-                return false;
-            });
-        }, 1L, 1L);
+            }, 1L, 1L);
+        } catch (Exception e) {
+            getLogger().severe("Failed to start bubble updater: " + e.getMessage());
+            // Try to start with global scheduler as fallback
+            try {
+                scheduler.runTaskTimer(() -> {
+                    try {
+                        // Use Stream API to handle updating bubbles
+                        bubbles.entrySet().stream()
+                                .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
+                                .forEach(entry -> {
+                                    try {
+                                        Player player = entry.getKey();
+                                        Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
+                                        BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
+                                    } catch (Exception e2) {
+                                        getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
+                                    }
+                                });
+                        
+                        // Clean up bubbles for offline players
+                        bubbles.entrySet().removeIf(entry -> {
+                            try {
+                                if (!entry.getKey().isOnline()) {
+                                    BubblePacketUtil.removeBubbles(entry.getValue());
+                                    return true;
+                                }
+                            } catch (Exception e2) {
+                                getLogger().fine("Error cleaning up bubbles for offline player: " + e2.getMessage());
+                                return true; // Remove entry on error
+                            }
+                            return false;
+                        });
+                    } catch (Exception e2) {
+                        getLogger().warning("Error in fallback bubble updater: " + e2.getMessage());
+                    }
+                }, 1L, 1L);
+                getLogger().info("Bubble updater started with fallback scheduler");
+            } catch (Exception fallbackError) {
+                getLogger().severe("Failed to start bubble updater with fallback scheduler: " + fallbackError.getMessage());
+                // Try to start with immediate execution as last resort
+                try {
+                    getLogger().info("Starting bubble updater with immediate execution as last resort");
+                    // This will run the updater immediately and then stop
+                    scheduler.runTask(() -> {
+                        try {
+                            // Use Stream API to handle updating bubbles
+                            bubbles.entrySet().stream()
+                                    .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
+                                    .forEach(entry -> {
+                                        try {
+                                            Player player = entry.getKey();
+                                            Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
+                                            BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
+                                        } catch (Exception e2) {
+                                            getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
+                                        }
+                                    });
+                            
+                            // Clean up bubbles for offline players
+                            bubbles.entrySet().removeIf(entry -> {
+                                try {
+                                    if (!entry.getKey().isOnline()) {
+                                        BubblePacketUtil.removeBubbles(entry.getValue());
+                                        return true;
+                                    }
+                                } catch (Exception e2) {
+                                    getLogger().fine("Error cleaning up bubbles for offline player: " + e2.getMessage());
+                                    return true; // Remove entry on error
+                                }
+                                return false;
+                            });
+                        } catch (Exception e2) {
+                            getLogger().warning("Error in immediate bubble updater: " + e2.getMessage());
+                        }
+                    });
+                    getLogger().info("Bubble updater started with immediate execution");
+                } catch (Exception immediateError) {
+                    getLogger().severe("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
+                }
+            }
+        }
     }
 
     private void createBubble(Player player, String message) {
@@ -270,20 +402,58 @@ public class ChatManager {
             return; // Don't spawn bubble if player is in spectator mode
         }
 
-        Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
+        try {
+            Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
 
-        List<ArmorStand> playerBubbles = BubblePacketUtil.spawnMultilineBubble(player, message, loc);
-        bubbles.put(player, playerBubbles);
+            List<ArmorStand> playerBubbles = BubblePacketUtil.spawnMultilineBubble(player, message, loc);
+            
+            // Only add bubbles if they were successfully created
+            if (playerBubbles != null && !playerBubbles.isEmpty()) {
+                bubbles.put(player, playerBubbles);
 
-        scheduler.runTaskLaterForPlayer(player, () -> {
-            removeBubble(player);
-        }, config.getChatBubblesDuration() * 20L);
+                try {
+                    scheduler.runTaskLaterForPlayer(player, () -> {
+                        removeBubble(player);
+                    }, config.getChatBubblesDuration() * 20L);
+                } catch (Exception e) {
+                    getLogger().warning("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
+                    // Schedule removal using global scheduler as fallback
+                    try {
+                        scheduler.runTaskLater(() -> {
+                            removeBubble(player);
+                        }, config.getChatBubblesDuration() * 20L);
+                    } catch (Exception fallbackError) {
+                        getLogger().warning("Fallback bubble removal scheduling also failed for player " + player.getName() + ": " + fallbackError.getMessage());
+                        // Try to remove bubble immediately as last resort
+                        try {
+                            removeBubble(player);
+                        } catch (Exception immediateError) {
+                            getLogger().warning("Immediate bubble removal also failed for player " + player.getName() + ": " + immediateError.getMessage());
+                        }
+                    }
+                }
+            } else {
+                getLogger().warning("Failed to create chat bubbles for player: " + player.getName());
+            }
+        } catch (Exception e) {
+            getLogger().warning("Error creating chat bubbles for player " + player.getName() + ": " + e.getMessage());
+        }
     }
 
     private void removeBubble(Player player) {
-        List<ArmorStand> playerBubbles = bubbles.remove(player);
-        if (playerBubbles != null) {
-            BubblePacketUtil.removeBubbles(playerBubbles);
+        try {
+            List<ArmorStand> playerBubbles = bubbles.remove(player);
+            if (playerBubbles != null) {
+                BubblePacketUtil.removeBubbles(playerBubbles);
+            }
+        } catch (Exception e) {
+            getLogger().fine("Error removing bubbles for player " + player.getName() + ": " + e.getMessage());
+            // Try to clean up the map entry even if removal fails
+            try {
+                bubbles.remove(player);
+            } catch (Exception cleanupError) {
+                getLogger().fine("Error cleaning up bubble map for player " + player.getName() + ": " + cleanupError.getMessage());
+            }
         }
     }
 

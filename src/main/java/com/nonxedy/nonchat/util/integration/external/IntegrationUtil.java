@@ -25,7 +25,18 @@ public class IntegrationUtil {
     public static void setupIntegrations() {
         setupLuckPerms();
         setupEconomy();
-        placeholderAPIEnabled = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+        
+        try {
+            placeholderAPIEnabled = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+            if (placeholderAPIEnabled) {
+                Bukkit.getLogger().info("[nonchat] PlaceholderAPI integration enabled");
+            } else {
+                Bukkit.getLogger().info("[nonchat] PlaceholderAPI not available - placeholder features will be disabled");
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[nonchat] Error checking PlaceholderAPI: " + e.getMessage());
+            placeholderAPIEnabled = false;
+        }
     }
 
     /**
@@ -33,9 +44,18 @@ public class IntegrationUtil {
      * Attempts to get the LuckPerms service provider from Bukkit
      */
     private static void setupLuckPerms() {
-        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-        if (provider != null) {
-            luckPerms = provider.getProvider();
+        try {
+            RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+            if (provider != null) {
+                luckPerms = provider.getProvider();
+                Bukkit.getLogger().info("[nonchat] LuckPerms integration enabled");
+            } else {
+                Bukkit.getLogger().info("[nonchat] LuckPerms not available - permission features will be disabled");
+            }
+        } catch (NoClassDefFoundError e) {
+            Bukkit.getLogger().info("[nonchat] LuckPerms not installed - permission features will be disabled");
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[nonchat] Error setting up LuckPerms: " + e.getMessage());
         }
     }
 
@@ -44,9 +64,18 @@ public class IntegrationUtil {
      * Attempts to get the Economy service provider from Bukkit
      */
     private static void setupEconomy() {
-        RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
-        if (provider != null) {
-            economy = provider.getProvider();
+        try {
+            RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
+            if (provider != null) {
+                economy = provider.getProvider();
+                Bukkit.getLogger().info("[nonchat] Vault Economy integration enabled");
+            } else {
+                Bukkit.getLogger().info("[nonchat] Vault Economy not available - economy features will be disabled");
+            }
+        } catch (NoClassDefFoundError e) {
+            Bukkit.getLogger().info("[nonchat] Vault not installed - economy features will be disabled");
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[nonchat] Error setting up Vault Economy: " + e.getMessage());
         }
     }
 
@@ -56,9 +85,13 @@ public class IntegrationUtil {
      * @return The player's prefix or empty string if LuckPerms is not available
      */
     public static String getPlayerPrefix(Player player) {
-        if (luckPerms != null) {
-            User user = luckPerms.getUserManager().getUser(player.getUniqueId());
-            return user != null ? user.getCachedData().getMetaData().getPrefix() : "";
+        try {
+            if (luckPerms != null) {
+                User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+                return user != null ? user.getCachedData().getMetaData().getPrefix() : "";
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error getting player prefix: " + e.getMessage());
         }
         return "";
     }
@@ -69,8 +102,12 @@ public class IntegrationUtil {
      * @return The player's balance formatted to 2 decimal places or "0" if Economy is not available
      */
     public static String getBalance(Player player) {
-        if (economy != null) {
-            return String.format("%.2f", economy.getBalance(player));
+        try {
+            if (economy != null) {
+                return String.format("%.2f", economy.getBalance(player));
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error getting player balance: " + e.getMessage());
         }
         return "0";
     }
@@ -81,8 +118,12 @@ public class IntegrationUtil {
      * @return The player's play time or "0h" if PlaceholderAPI is not available
      */
     public static String getPlayTime(Player player) {
-        if (placeholderAPIEnabled) {
-            return PlaceholderAPI.setPlaceholders(player, "%statistic_time_played%");
+        try {
+            if (placeholderAPIEnabled) {
+                return PlaceholderAPI.setPlaceholders(player, "%statistic_time_played%");
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] Error getting player play time: " + e.getMessage());
         }
         return "0h";
     }
@@ -94,13 +135,17 @@ public class IntegrationUtil {
     * @return Processed text with placeholders replaced or original if PlaceholderAPI not available
     */
     public static String processPlaceholders(Player player, String text) {
-        if (placeholderAPIEnabled && player != null && text != null) {
-            try {
-                return PlaceholderAPI.setPlaceholders(player, text);
-            } catch (Exception e) {
-                Bukkit.getLogger().log(Level.WARNING, "Error processing placeholder: {0}", e.getMessage());
-                return text;
+        try {
+            if (placeholderAPIEnabled && player != null && text != null) {
+                try {
+                    return PlaceholderAPI.setPlaceholders(player, text);
+                } catch (Exception e) {
+                    Bukkit.getLogger().log(Level.WARNING, "[nonchat] Error processing placeholder: {0}", e.getMessage());
+                    return text;
+                }
             }
+        } catch (Exception e) {
+            Bukkit.getLogger().fine("[nonchat] PlaceholderAPI not available for processing placeholders");
         }
         return text;
     }

@@ -8,7 +8,6 @@ com/nonxedy/nonchat/util/core/debugging/Debugger.class
 com/nonxedy/nonchat/util/special/ignore/IgnoreManager.class
 com/nonxedy/nonchat/util/lang/LanguageManager.class
 com/nonxedy/nonchat/util/special/ping/PingDetector.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl$4.class
 com/nonxedy/nonchat/config/PluginMessages.class
 com/nonxedy/nonchat/listener/ChatListenerFactory.class
 com/nonxedy/nonchat/util/folia/FoliaDetector.class
@@ -68,7 +67,6 @@ com/nonxedy/nonchat/util/integration/metrics/Metrics$JsonObjectBuilder$JsonObjec
 com/nonxedy/nonchat/listener/ChatListener.class
 com/nonxedy/nonchat/util/items/display/ItemDisplayUtil.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics$AdvancedBarChart.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl$3.class
 com/nonxedy/nonchat/api/MessageFilter.class
 com/nonxedy/nonchat/util/core/colors/LRUCache$1.class
 com/nonxedy/nonchat/api/INotificationSettings.class
