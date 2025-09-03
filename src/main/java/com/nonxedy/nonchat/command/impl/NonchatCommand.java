@@ -19,7 +19,7 @@ import net.kyori.adventure.text.Component;
 
 /**
  * Main nonchat command handler
- * Provides subcommands for reload and help functionality
+ * Provides subcommands for reload, help, and version functionality
  */
 public class NonchatCommand implements CommandExecutor, TabCompleter {
 
@@ -43,7 +43,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
      * Handles command execution with subcommands
      */
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, 
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                         @NotNull String label, @NotNull String[] args) {
         // Log command execution
         plugin.logCommand(command.getName(), args);
@@ -63,6 +63,9 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             case "help" -> {
                 return handleHelpCommand(sender);
             }
+            case "version" -> {
+                return handleVersionCommand(sender);
+            }
             default -> {
                 sendHelpMessage(sender);
                 return true;
@@ -77,7 +80,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.reload")) {
             sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
-            plugin.logError("Permission denied: nonchat.reload");
+            plugin.logError("No permission for /nonchat reload command: " + sender.getName());
             return true;
         }
 
@@ -89,7 +92,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
 
             // Execute reload operations
             executeReload();
-            
+
             // Send success message
             sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("reloaded")));
             plugin.logResponse("Configuration reload successful");
@@ -108,7 +111,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private void executeReload() {
         configService.reload();
         plugin.reloadConfig();
-        
+
         // These methods need to be added to the nonchat class if not already there
         if (plugin instanceof Nonchat nonchat) {
             nonchat.reloadServices();
@@ -122,12 +125,28 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Check if sender has permission
         if (!sender.hasPermission("nonchat.help")) {
             sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
-            plugin.logError("Permission denied: nonchat.help");
+            plugin.logError("No permission for /nonchat help command: " + sender.getName());
             return true;
         }
 
         // Send the help message
         sendHelpMessage(sender);
+        return true;
+    }
+
+    /**
+     * Handles the version subcommand
+     */
+    private boolean handleVersionCommand(CommandSender sender) {
+        // Check if sender has permission
+        if (!sender.hasPermission("nonchat.version")) {
+            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            plugin.logError("No permission for /nonchat version command: " + sender.getName());
+            return true;
+        }
+
+        // Send the version message
+        sendVersionMessage(sender);
         return true;
     }
 
@@ -150,6 +169,22 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * Sends the version message to the sender
+     */
+    private void sendVersionMessage(CommandSender sender) {
+        try {
+            // Get plugin version from plugin.yml
+            String version = plugin.getDescription().getVersion();
+            // Replace placeholder in version message
+            String versionMessage = messages.getString("version").replace("{version}", version);
+            sender.sendMessage(ColorUtil.parseComponentCached(versionMessage));
+            plugin.logResponse("Version message sent successfully");
+        } catch (Exception e) {
+            plugin.logError("Failed to send version message: " + e.getMessage());
+        }
+    }
+
+    /**
      * Builds list of available commands
      */
     private Component getCommandsList() {
@@ -160,6 +195,9 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             .append(Component.newline())
             // Add help command description
             .append(ColorUtil.parseComponentCached(messages.getString("help-command")))
+            .append(Component.newline())
+            // Add version command description
+            .append(ColorUtil.parseComponentCached(messages.getString("version-command")))
             .append(Component.newline())
             // Add server command description
             .append(ColorUtil.parseComponentCached(messages.getString("server-command")))
@@ -183,10 +221,10 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             .append(ColorUtil.parseComponentCached(messages.getString("roll-command")))
             .append(Component.newline())
             // Add channel command description
-            .append(ColorUtil.parseComponentCached(messages.getString("channel-command"))
+            .append(ColorUtil.parseComponentCached(messages.getString("channel-command")))
             .append(Component.newline())
-            // Add channel command description
-            .append(ColorUtil.parseComponentCached(messages.getString("reply-command"))));
+            // Add reply command description
+            .append(ColorUtil.parseComponentCached(messages.getString("reply-command")));
     }
 
     /**
@@ -197,36 +235,41 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
                                         @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
             List<String> subCommands = new ArrayList<>();
-            
+
             // Add reload subcommand if they have permission
             if (sender.hasPermission("nonchat.reload")) {
                 subCommands.add("reload");
             }
-            
+
             // Add help subcommand if they have permission
             if (sender.hasPermission("nonchat.help")) {
                 subCommands.add("help");
             }
-            
+
+            // Add version subcommand if they have permission
+            if (sender.hasPermission("nonchat.version")) {
+                subCommands.add("version");
+            }
+
             return filterStartingWith(args[0], subCommands);
         }
-        
+
         // No completions for args beyond the first
         return Collections.emptyList();
     }
-    
+
     /**
      * Filters a list of strings to only those starting with a prefix
      */
     private List<String> filterStartingWith(String prefix, List<String> options) {
         List<String> result = new ArrayList<>();
-        
+
         for (String option : options) {
             if (option.toLowerCase().startsWith(prefix.toLowerCase())) {
                 result.add(option);
             }
         }
-        
+
         return result;
     }
 }
