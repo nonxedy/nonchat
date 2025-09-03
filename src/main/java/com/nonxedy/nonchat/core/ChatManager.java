@@ -27,7 +27,6 @@ import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
-import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
@@ -43,7 +42,6 @@ public class ChatManager {
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
-    private final FoliaScheduler scheduler;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
@@ -54,7 +52,6 @@ public class ChatManager {
         this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
-        this.scheduler = plugin.getScheduler();
         startBubbleUpdater();
     }
     
@@ -198,7 +195,7 @@ public class ChatManager {
 
             if (shouldShowBubble) {
                 try {
-                    scheduler.runTaskForPlayer(player, () -> {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
                         try {
                             removeBubble(player);
                             // For bubbles, use the message without colors if player doesn't have permission
@@ -219,7 +216,7 @@ public class ChatManager {
                         getLogger().warning("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
                         // Try to create bubble using global scheduler as last resort
                         try {
-                            scheduler.runTask(() -> {
+                            Bukkit.getScheduler().runTask(plugin, () -> {
                                 try {
                                     removeBubble(player);
                                     String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
@@ -282,7 +279,7 @@ public class ChatManager {
 
     private void startBubbleUpdater() {
         try {
-            scheduler.runTaskTimer(() -> {
+            Bukkit.getScheduler().runTaskTimer(plugin, () -> {
                 try {
                     // Use Stream API to handle updating bubbles
                     bubbles.entrySet().stream()
@@ -296,7 +293,7 @@ public class ChatManager {
                                     getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
                                 }
                             });
-                    
+
                     // Clean up bubbles for offline players
                     bubbles.entrySet().removeIf(entry -> {
                         try {
@@ -318,7 +315,7 @@ public class ChatManager {
             getLogger().severe("Failed to start bubble updater: " + e.getMessage());
             // Try to start with global scheduler as fallback
             try {
-                scheduler.runTaskTimer(() -> {
+                Bukkit.getScheduler().runTaskTimer(plugin, () -> {
                     try {
                         // Use Stream API to handle updating bubbles
                         bubbles.entrySet().stream()
@@ -332,7 +329,7 @@ public class ChatManager {
                                         getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
                                     }
                                 });
-                        
+
                         // Clean up bubbles for offline players
                         bubbles.entrySet().removeIf(entry -> {
                             try {
@@ -357,7 +354,7 @@ public class ChatManager {
                 try {
                     getLogger().info("Starting bubble updater with immediate execution as last resort");
                     // This will run the updater immediately and then stop
-                    scheduler.runTask(() -> {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
                         try {
                             // Use Stream API to handle updating bubbles
                             bubbles.entrySet().stream()
@@ -371,7 +368,7 @@ public class ChatManager {
                                             getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
                                         }
                                     });
-                            
+
                             // Clean up bubbles for offline players
                             bubbles.entrySet().removeIf(entry -> {
                                 try {
@@ -412,14 +409,14 @@ public class ChatManager {
                 bubbles.put(player, playerBubbles);
 
                 try {
-                    scheduler.runTaskLaterForPlayer(player, () -> {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         removeBubble(player);
                     }, config.getChatBubblesDuration() * 20L);
                 } catch (Exception e) {
                     getLogger().warning("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
                     // Schedule removal using global scheduler as fallback
                     try {
-                        scheduler.runTaskLater(() -> {
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             removeBubble(player);
                         }, config.getChatBubblesDuration() * 20L);
                     } catch (Exception fallbackError) {
