@@ -1,0 +1,168 @@
+# ==================================================
+# ARCHIVO DE CONFIGURACIÓN NONCHAT
+# Plugin creado por nonxedy (@nonxedy).
+# Publicado en github https://github.com/nonxedy/nonchat
+# Publicado en modrinth https://modrinth.com/plugin/nonchat
+# Versión del plugin: 1.5.2
+#
+# - Soporte para LuckPerms.
+# - Soporte para Vault.
+# - Soporte para PlaceHolderAPI.
+# - Soporte para DiscordSRV
+#
+# Traducido por: https://github.com/JainaGam3r45
+# ==================================================
+
+# Mensajes del sistema.
+no-permission: "&#ff0000¡No tienes permisos para hacer esto!"
+player-only: "&#ff0000¡Solo los jugadores pueden usar este comando!"
+player-offline: "&#ff0000¡El jugador está desconectado!"
+blocked-words: "&#ff0000¡No puedes usar esa palabra!"
+message-filtered: "&#ff0000Tu mensaje fue filtrado por un filtro de canal."
+mentioned: "&#ffffff¡Fuiste mencionado en el chat por &#84FFB8{player}!"
+player-not-found: "&#ff0000Jugador no encontrado."
+command-disabled: "&#ff0000Este comando está deshabilitado."
+caps-filter: "&#ff0000¡Demasiadas letras mayúsculas! Máximo permitido: {percentage}%"
+message-not-delivered: "&#ff0000Tu mensaje no pudo ser entregado."
+
+# Recargar.
+reloading: "&#FFAFFBRecargando..."
+reloaded: "&#84FFB8¡Plugin recargado exitosamente!"
+reload-failed: "&#ff0000¡Error al recargar el plugin!"
+
+# Versión.
+version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.2\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.2"
+
+# Ayuda.
+help: "&#FFAFFBnonchat | comandos:"
+nreload: "&#FFAFFB/nonchat reload&#ffffff - recarga el plugin"
+help-command: "&#FFAFFB/nonchat help&#ffffff - lista de comandos"
+version-command: "&#FFAFFB/nonchat version&#ffffff - mostrar la versión del plugin"
+server-command: "&#FFAFFB/server&#ffffff - información del servidor"
+message-command: "&#FFAFFB/m <jugador> <mensaje>&#ffffff - envía un mensaje privado a un jugador"
+broadcast-command: "&#FFAFFB/bc <mensaje>&#ffffff - envía un mensaje a todo el servidor"
+ignore-command: "&#FFAFFB/ignore <jugador>&#ffffff - ignora a un jugador"
+spy-command: "&#FFAFFB/spy&#ffffff - activa/desactiva el modo espía"
+me-command: "&#FFAFFB/me <mensaje>&#ffffff - envía un mensaje desde tu personaje"
+roll-command: "&#FFAFFB/roll <número máximo>&#ffffff - lanza un dado"
+channel-command: "&#FFAFFB/channel help&#ffffff - muestra comandos de canales"
+reply-command: "&#FFAFFB/reply <mensaje>&#ffffff - responde al último jugador"
+
+# Limpiar Chat.
+clear-chat: "&#FFAFFBLimpiando el chat..."
+chat-cleared: "&#84FFB8¡Chat limpiado!"
+
+# Anuncio.
+broadcast: "&#FFAFFBAnuncio: &#ffffff{message}"
+
+# Mensaje.
+invalid-usage-message: "&#ffffffUso: &#FFAFFB/m <jugador> <mensaje>"
+
+# Responder.
+no-reply-target: "&#ff0000No tienes a quién responder."
+invalid-usage-reply: "&#ffffffUso: &#FFAFFB/reply <mensaje>"
+
+# Ignorar.
+ignored-player: "&#84FFB8Ahora estás ignorando al jugador {player}."
+unignored-player: "&#ff0000Ya no ignoras al jugador {player}."
+ignored-by-target: "&#FFAFFBEste jugador te está ignorando y no puedes enviarle mensajes."
+invalid-usage-ignore: "&#ffffffUso: &#FFAFFB/ignore <jugador>"
+you-are-ignoring-player: "&#ff0000Estás ignorando a {player}. Primero deja de ignorarlo para enviar mensajes."
+cannot-ignore-self: "&#ff0000No puedes ignorarte a ti mismo."
+
+# Espía.
+spy-mode-enabled: "&#84FFB8Modo espía activado"
+spy-mode-disabled: "&#ff0000Modo espía desactivado"
+invalid-usage-spy: "&#ffffffUso: &#FFAFFB/spy"
+
+# Yo.
+invalid-usage-me: "&#ffffffUso: &#FFAFFB/me <mensaje>"
+
+# Dado.
+invalid-usage-roll: "&#ffffffUso: &#FFAFFB/roll <número máximo>"
+invalid-number: "&#ff0000Por favor ingresa un número positivo válido"
+
+# Errores generales de comandos
+command-error: "&#ff0000Ocurrió un error al ejecutar el comando."
+
+# Formato del mensaje de coordenadas de muerte
+death-coordinates: "&fMoriste en &#FFAFFB%s &fen las coordenadas: &fx:&#FFAFFB%d &fy:&#FFAFFB%d &fz:&#FFAFFB%d"
+
+# Nombres de mundos para coordenadas de muerte
+dimension-overworld: "Mundo Superior"
+dimension-nether: "El Inframundo"
+dimension-end: "El Fin"
+
+# Texto al pasar el cursor sobre enlaces
+link-hover: "Haz clic para abrir: {url}"
+
+
+# Comando de Canal
+channel-help-header: "&#FFAFFBComandos de Canales:"
+channel-help-set: "&#FFAFFB/channel set <canal>&#ffffff - establece tu canal activo"
+channel-help-list: "&#FFAFFB/channel list&#ffffff - lista los canales disponibles"
+channel-help-info: "&#FFAFFB/channel info <canal>&#ffffff - muestra información del canal"
+channel-set-usage: "&#ffffffUso: &#FFAFFB/channel set <canal>"
+channel-info-usage: "&#ffffffUso: &#FFAFFB/channel info <canal>"
+channel-set: "&#84FFB8Canal activo establecido como {channel}"
+channel-set-failed: "&#ff0000Error al establecer el canal activo como {channel}"
+channel-not-found: "&#ff0000Canal {channel} no encontrado"
+channel-disabled: "&#ff0000El canal {channel} está deshabilitado"
+channel-list-header: "&#FFAFFBCanales Disponibles:"
+channel-list-entry: "&#FFAFFB{id}&#ffffff - {display} {current}"
+channel-list-no-permission: "&#ff5555{id} - {display} (Sin Permisos)"
+channel-current: "&#84FFB8(Actual)"
+channel-info-header: "&#FFAFFBCanal: {channel}"
+channel-info-id: "&#FFAFFBIdentificador:&#ffffff {id}"
+channel-info-enabled: "&#FFAFFBHabilitado:&#ffffff {enabled}"
+channel-info-character: "&#FFAFFBCarácter Activador:&#ffffff {character}"
+channel-info-radius: "&#FFAFFBRadio:&#ffffff {radius}"
+channel-info-yes: "&#84FFB8Sí"
+channel-info-no: "&#ff0000No"
+channel-info-global: "&#84FFB8Global"
+channel-info-none: "&#ff5555Ninguno"
+no-channels: "&#ff0000No hay canales disponibles"
+message-too-short: "&#ff0000El mensaje es demasiado corto. Longitud mínima: {min}"
+message-too-long: "&#ff0000El mensaje es demasiado largo. Longitud máxima: {max}"
+channel-cooldown: "&#ff0000Debes esperar {seconds} segundos antes de enviar otro mensaje en {channel}"
+
+# Comandos de gestión de canales
+channel-help-create: "&#FFAFFB/channel create <id> <nombre-mostrar> [opciones]&#ffffff - crea un nuevo canal"
+channel-help-edit: "&#FFAFFB/channel edit <id> [opciones]&#ffffff - edita un canal"
+channel-help-delete: "&#FFAFFB/channel delete <id>&#ffffff - elimina un canal"
+channel-help-default: "&#FFAFFB/channel default <id>&#ffffff - establece el canal predeterminado"
+
+channel-create-usage: "&#ffffffUso: &#FFAFFB/channel create <id> <nombre-mostrar> [opciones]"
+channel-edit-usage: "&#ffffffUso: &#FFAFFB/channel edit <id> [opciones]"
+channel-delete-usage: "&#ffffffUso: &#FFAFFB/channel delete <id>"
+channel-default-usage: "&#ffffffUso: &#FFAFFB/channel default <id>"
+
+channel-invalid-id: "&#ff0000El ID del canal solo puede contener letras minúsculas, números y guiones"
+channel-already-exists: "&#ff0000El canal {channel} ya existe"
+channel-create-failed: "&#ff0000Error al crear el canal {channel}"
+channel-created: "&#84FFB8Canal {channel} creado"
+channel-updated: "&#84FFB8Canal {channel} actualizado"
+channel-update-failed: "&#ff0000Error al actualizar el canal {channel}"
+channel-deleted: "&#84FFB8Canal {channel} eliminado"
+channel-delete-failed: "&#ff0000Error al eliminar el canal {channel}. El canal puede ser el canal predeterminado."
+channel-default-set: "&#84FFB8Canal predeterminado establecido como {channel}"
+channel-default-failed: "&#ff0000Error al establecer el canal predeterminado como {channel}"
+
+# Variables de reemplazo.
+placeholders:
+  # Variables del comando espía.
+  spy: # %nonchat_spy_enabled%
+    enabled: "&#ffffffModo Espía: &#84FFB8Activado"
+    disabled: "&#ffffffModo Espía: &#ff0000Desactivado"
+  # Variables de burbujas de chat.
+  bubble: # %nonchat_bubble_enabled%
+    enabled: "&#ffffffBurbujas de Chat: &#84FFB8Activadas"
+    disabled: "&#ffffffBurbujas de Chat: &#ff0000Desactivadas"
+  # Variables del filtro de mayúsculas.
+  caps-filter: # %nonchat_caps_filter_enabled%
+    enabled: "&#ffffffFiltro de Mayúsculas: &#84FFB8Activado"
+    disabled: "&#ffffffFiltro de Mayúsculas: &#ff0000Desactivado"
+  # Variables del comando ignorar.
+  ignored: # %nonchat_ignored%
+    true: "&#84FFB8Estás ignorando jugadores"
+    false: "&#ff0000No estás ignorando a nadie"

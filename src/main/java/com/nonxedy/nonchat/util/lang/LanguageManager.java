@@ -46,6 +46,7 @@ public class LanguageManager {
         // Create default language files if they don't exist
         createLanguageFile("messages_en.yml");
         createLanguageFile("messages_ru.yml");
+        createLanguageFile("messages_es.yml");
         
         // Load all language files from the directory
         for (File file : langsFolder.listFiles()) {
