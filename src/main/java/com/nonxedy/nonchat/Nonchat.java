@@ -75,6 +75,9 @@ public class Nonchat extends JavaPlugin {
             if (!new File(getDataFolder(), "langs/messages_ru.yml").exists()) {
                 saveResource("langs/messages_ru.yml", false);
             }
+            if (!new File(getDataFolder(), "langs/messages_es.yml").exists()) {
+                saveResource("langs/messages_es.yml", false);
+            }
 
             initializeServices();
             registerPlaceholders();
