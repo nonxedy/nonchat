@@ -14,6 +14,7 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.core.broadcast.BroadcastMessage;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 
 import net.kyori.adventure.text.Component;
 
@@ -55,6 +56,7 @@ public class BroadcastManager {
         try {
             // Try to use Adventure API first
             Component formatted = ColorUtil.parseComponent(message);
+            formatted = LinkDetector.makeLinksClickable(formatted);
             Bukkit.broadcast(formatted);
         } catch (NoSuchMethodError e) {
             // Fall back to traditional Bukkit broadcast if Adventure API is not available
