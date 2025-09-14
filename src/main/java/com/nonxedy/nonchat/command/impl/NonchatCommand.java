@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
@@ -177,7 +178,9 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             String version = plugin.getDescription().getVersion();
             // Replace placeholder in version message
             String versionMessage = messages.getString("version").replace("{version}", version);
-            sender.sendMessage(ColorUtil.parseComponentCached(versionMessage));
+            // Make links clickable in the version message
+            Component versionComponent = LinkDetector.makeLinksClickable(versionMessage);
+            sender.sendMessage(versionComponent);
             plugin.logResponse("Version message sent successfully");
         } catch (Exception e) {
             plugin.logError("Failed to send version message: " + e.getMessage());
