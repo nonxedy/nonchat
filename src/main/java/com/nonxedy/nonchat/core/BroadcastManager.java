@@ -12,9 +12,9 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.broadcast.BroadcastMessage;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
-import com.nonxedy.nonchat.util.folia.FoliaScheduler;
 
 import net.kyori.adventure.text.Component;
 
@@ -24,14 +24,12 @@ public class BroadcastManager {
     private final Map<String, BukkitTask> activeTasks;
     private final List<BroadcastMessage> randomMessagePool;
     private BukkitTask randomBroadcastTask;
-    private final FoliaScheduler scheduler;
 
     public BroadcastManager(Nonchat plugin, PluginConfig config) {
         this.plugin = plugin;
         this.config = config;
         this.activeTasks = new HashMap<>();
         this.randomMessagePool = new ArrayList<>();
-        this.scheduler = plugin.getScheduler();
         start();
     }
 
@@ -57,7 +55,7 @@ public class BroadcastManager {
     public void broadcast(CommandSender sender, String message) {
         try {
             // Try to use Adventure API first
-            Component formatted = ColorUtil.parseComponent(message);
+            Component formatted = LinkDetector.makeLinksClickable(message);
             Bukkit.broadcast(formatted);
         } catch (NoSuchMethodError e) {
             // Fall back to traditional Bukkit broadcast if Adventure API is not available
@@ -68,17 +66,17 @@ public class BroadcastManager {
     }
 
     private void scheduleRegularBroadcast(String key, BroadcastMessage message) {
-        BukkitTask task = scheduler.runTaskTimerAsynchronously(() -> {
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             broadcast(Bukkit.getConsoleSender(), message.getMessage());
         }, 0L, message.getInterval() * 20L);
-        
+
         activeTasks.put(key, task);
     }
 
     private void startRandomBroadcasts() {
-        randomBroadcastTask = scheduler.runTaskTimerAsynchronously(() -> {
+        randomBroadcastTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             if (randomMessagePool.isEmpty()) return;
-            
+
             int randomIndex = new Random().nextInt(randomMessagePool.size());
             BroadcastMessage message = randomMessagePool.get(randomIndex);
             broadcast(Bukkit.getConsoleSender(), message.getMessage());

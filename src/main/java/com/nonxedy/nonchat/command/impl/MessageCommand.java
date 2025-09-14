@@ -22,6 +22,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -223,6 +224,15 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
      * @param message Message content
      */
     private void sendPrivateMessage(CommandSender sender, Player target, String message) {
+        // Check if sender has color permission and process message accordingly
+        String processedMessage;
+        if (sender instanceof Player player && !player.hasPermission("nonchat.color")) {
+            // Strip all color codes if player doesn't have permission
+            processedMessage = ColorUtil.stripAllColors(message);
+        } else {
+            processedMessage = message;
+        }
+        
         // Get the message format from config
         String format = config.getPrivateChatFormat();
         // Handle console messages by using "Console" as sender name
@@ -232,18 +242,24 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         Component senderMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
                 .replace("{target}", target.getName())
-                .replace("{message}", message)
+                .replace("{message}", processedMessage)
         );
         sender.sendMessage(senderMessage);
         if (plugin != null) {
             plugin.logResponse("Message sent to " + sender.getName());
         }
 
+        // Get and process the "You" text with PlaceholderAPI
+        String targetYouText = config.getPrivateChatTargetYou();
+        if (target != null) {
+            targetYouText = IntegrationUtil.processPlaceholders(target, targetYouText);
+        }
+        
         // Create and send formatted message to target
         Component targetMessage = ColorUtil.parseComponent(
             format.replace("{sender}", senderName)
-                .replace("{target}", "You")
-                .replace("{message}", message)
+                .replace("{target}", targetYouText)
+                .replace("{message}", processedMessage)
         );
         target.sendMessage(targetMessage);
         if (plugin != null) {
@@ -252,7 +268,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
 
         // Notify spy players if spy system is enabled and sender is a player
         if (spyCommand != null && sender instanceof Player) {
-            spyCommand.onPrivateMessage((Player) sender, target, ColorUtil.parseComponent(message));
+            spyCommand.onPrivateMessage((Player) sender, target, Component.text(processedMessage));
             if (plugin != null) {
                 plugin.logResponse("Message sent to spy players");
             }

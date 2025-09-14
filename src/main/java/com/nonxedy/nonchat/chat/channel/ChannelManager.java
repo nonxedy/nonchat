@@ -70,8 +70,8 @@ public class ChannelManager {
             int radius = -1;
             String world = "";
             
-            if (radiusObj instanceof String) {
-                String radiusStr = ((String) radiusObj).toLowerCase().trim();
+            if (radiusObj instanceof String string) {
+                String radiusStr = string.toLowerCase().trim();
                 if (radiusStr.equals("world")) {
                     radius = -2; // Use -2 to indicate world-specific (not global)
                     world = "world"; // Default world name, can be configured
@@ -82,8 +82,8 @@ public class ChannelManager {
                         radius = -1; // Default to global if invalid
                     }
                 }
-            } else if (radiusObj instanceof Integer) {
-                radius = (Integer) radiusObj;
+            } else if (radiusObj instanceof Integer integer) {
+                radius = integer;
             }
             
             int cooldown = channelSection.getInt("cooldown", 0);

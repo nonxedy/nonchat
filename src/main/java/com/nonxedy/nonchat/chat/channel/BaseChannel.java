@@ -197,43 +197,152 @@ public class BaseChannel implements Channel {
     public Component formatMessage(Player player, String message) {
         String baseFormat = getFormat();
         
-        // Split format into parts around {message}
-        String[] formatParts = baseFormat.split("\\{message\\}");
-        String beforeMessage = formatParts[0];
-        String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
-
+        // Apply PlaceholderAPI to the entire format first
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
-                beforeMessage = PlaceholderAPI.setPlaceholders(player, beforeMessage);
-                afterMessage = PlaceholderAPI.setPlaceholders(player, afterMessage);
+                baseFormat = PlaceholderAPI.setPlaceholders(player, baseFormat);
             } catch (Exception e) {
                 Bukkit.getLogger().log(Level.WARNING, "Error processing format placeholders: {0}", e.getMessage());
             }
         }
+        
+        // Check if the format contains MiniMessage gradients that might span across {message}
+        if (containsSpanningGradient(baseFormat)) {
+            return formatMessageWithSpanningGradient(player, message, baseFormat);
+        }
+        
+        // Split format into parts around {message} for traditional processing
+        String[] formatParts = baseFormat.split("\\{message\\}");
+        String beforeMessage = formatParts[0];
+        String afterMessage = formatParts.length > 1 ? formatParts[1] : "";
+
+        // Extract color from the end of beforeMessage to apply to the message
+        String inheritedColor = extractTrailingColor(beforeMessage);
 
         // Parse format parts with colors and add hover functionality
-        Component beforeMessageComponent = ColorUtil.parseComponent(beforeMessage);
-        Component afterMessageComponent = ColorUtil.parseComponent(afterMessage);
+        // Use parseConfigComponent for better MiniMessage support in config strings
+        Component beforeMessageComponent = ColorUtil.parseConfigComponent(beforeMessage);
+        Component afterMessageComponent = ColorUtil.parseConfigComponent(afterMessage);
         
         // Add hover functionality to the format parts
         beforeMessageComponent = hoverTextUtil.addHoverToComponent(beforeMessageComponent, player);
         afterMessageComponent = hoverTextUtil.addHoverToComponent(afterMessageComponent, player);
 
         Component finalMessage = beforeMessageComponent
-            .append(processMessageContent(player, message))
+            .append(processMessageContent(player, message, inheritedColor))
             .append(afterMessageComponent);
 
         return finalMessage;
     }
 
-    private Component processMessageContent(Player player, String message) {
+    /**
+     * Checks if the format contains a MiniMessage gradient that spans across {message}
+     * @param format The format string to check
+     * @return true if contains spanning gradient, false otherwise
+     */
+    private boolean containsSpanningGradient(String format) {
+        if (format == null || format.isEmpty()) {
+            return false;
+        }
+        
+        // Look for gradient tags that might span across {message}
+        Pattern gradientPattern = Pattern.compile("<gradient:[^>]+>");
+        Matcher matcher = gradientPattern.matcher(format);
+        
+        while (matcher.find()) {
+            int gradientStart = matcher.start();
+            int messageIndex = format.indexOf("{message}");
+            
+            if (messageIndex > gradientStart) {
+                // Check if there's a closing gradient tag after {message}
+                String afterMessage = format.substring(messageIndex + 9); // 9 = length of "{message}"
+                if (afterMessage.contains("</gradient>")) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Formats a message when the format contains a spanning gradient
+     * @param player The player sending the message
+     * @param message The message content
+     * @param format The format string with spanning gradient
+     * @return Formatted component
+     */
+    private Component formatMessageWithSpanningGradient(Player player, String message, String format) {
+        // Process the message content first to handle color permissions
+        String processedMessage = message;
+        
+        // Check color permission for the message content
+        if (!player.hasPermission("nonchat.color")) {
+            processedMessage = ColorUtil.stripAllColors(message);
+        }
+        
+        // Replace {message} with the processed message content
+        String fullFormat = format.replace("{message}", processedMessage);
+        
+        // Parse the entire format as MiniMessage to preserve gradients
+        Component fullComponent = ColorUtil.parseConfigComponent(fullFormat);
+        
+        // Add hover functionality - we need to extract the player name part for hover
+        // This is a simplified approach; for more complex hover handling,
+        // we might need to parse the component structure
+        return hoverTextUtil.addHoverToComponent(fullComponent, player);
+    }
+
+    /**
+     * Extracts the trailing color code from a format string
+     * @param formatPart The format string to extract color from
+     * @return The color code to inherit, or empty string if none found
+     */
+    private String extractTrailingColor(String formatPart) {
+        if (formatPart == null || formatPart.isEmpty()) {
+            return "";
+        }
+        
+        // Look for color codes at the end of the format
+        // Check for hex colors first (§#RRGGBB or &#RRGGBB)
+        Pattern hexPattern = Pattern.compile(".*(§#[A-Fa-f0-9]{6}|&#[A-Fa-f0-9]{6})(?:[^§&]*?)$");
+        Matcher hexMatcher = hexPattern.matcher(formatPart);
+        if (hexMatcher.find()) {
+            return hexMatcher.group(1);
+        }
+        
+        // Check for legacy colors (§[0-9a-fklmnor] or &[0-9a-fklmnor])
+        Pattern legacyPattern = Pattern.compile(".*(§[0-9a-fklmnor]|&[0-9a-fklmnor])(?:[^§&]*?)$");
+        Matcher legacyMatcher = legacyPattern.matcher(formatPart);
+        if (legacyMatcher.find()) {
+            return legacyMatcher.group(1);
+        }
+        
+        // Check for MiniMessage color tags at the end
+        Pattern miniPattern = Pattern.compile(".*(<#[A-Fa-f0-9]{6}>|<(?:black|dark_blue|dark_green|dark_aqua|dark_red|dark_purple|gold|gray|dark_gray|blue|green|aqua|red|light_purple|yellow|white)>)(?:[^<]*?)$");
+        Matcher miniMatcher = miniPattern.matcher(formatPart);
+        if (miniMatcher.find()) {
+            return miniMatcher.group(1);
+        }
+        
+        // Check for MiniMessage gradient tags that might affect the message
+        Pattern gradientPattern = Pattern.compile(".*(<gradient:[^>]+>)(?:[^<]*?)$");
+        Matcher gradientMatcher = gradientPattern.matcher(formatPart);
+        if (gradientMatcher.find()) {
+            return gradientMatcher.group(1);
+        }
+        
+        return "";
+    }
+
+    private Component processMessageContent(Player player, String message, String inheritedColor) {
         // Check if interactive placeholders are globally disabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         if (plugin instanceof Nonchat nonchatPlugin) {
             boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
             
             if (!globalEnabled) {
-                return processMessageWithColorPermission(player, message);
+                return processMessageWithColorPermission(player, message, inheritedColor);
             }
         }
 
@@ -241,26 +350,36 @@ public class BaseChannel implements Channel {
         boolean hasPing = message.toLowerCase().contains("[ping]");
 
         if (hasItem && hasPing) {
-            return processBothPlaceholders(player, message);
+            return processBothPlaceholders(player, message, inheritedColor);
         } else if (hasItem) {
-            return processItemPlaceholderWithColorPermission(player, message);
+            return processItemPlaceholderWithColorPermission(player, message, inheritedColor);
         } else if (hasPing) {
-            return processPingPlaceholderWithColorPermission(player, message);
+            return processPingPlaceholderWithColorPermission(player, message, inheritedColor);
         } else {
-            return processMessageWithColorPermission(player, message);
+            return processMessageWithColorPermission(player, message, inheritedColor);
         }
     }
 
     /**
      * Processes message content with color permission check
      */
-    private Component processMessageWithColorPermission(Player player, String message) {
-        // First make links clickable, then apply color permission
-        Component linkProcessed = LinkDetector.makeLinksClickable(message);
+    private Component processMessageWithColorPermission(Player player, String message, String inheritedColor) {
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
+        }
         
-        // If player doesn't have color permission, strip colors from the message part
+        // First make links clickable, then apply color permission
+        Component linkProcessed = LinkDetector.makeLinksClickable(processedMessage);
+        
+        // If player doesn't have color permission, strip colors from the message part only
         if (!player.hasPermission("nonchat.color")) {
             String strippedMessage = ColorUtil.stripAllColors(message);
+            // Apply inherited color from format even if player doesn't have color permission
+            if (!inheritedColor.isEmpty()) {
+                strippedMessage = inheritedColor + strippedMessage;
+            }
             return LinkDetector.makeLinksClickable(strippedMessage);
         }
         
@@ -270,7 +389,7 @@ public class BaseChannel implements Channel {
     /**
      * Processes item placeholder with color permission check
      */
-    private Component processItemPlaceholderWithColorPermission(Player player, String message) {
+    private Component processItemPlaceholderWithColorPermission(Player player, String message, String inheritedColor) {
         // Check if item placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
@@ -280,23 +399,33 @@ public class BaseChannel implements Channel {
         }
         
         if (!itemEnabled) {
-            return processMessageWithColorPermission(player, message);
+            return processMessageWithColorPermission(player, message, inheritedColor);
+        }
+        
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
         }
         
         // Process item placeholder but respect color permissions for the rest of the message
         if (!player.hasPermission("nonchat.color")) {
             // Strip colors from message but keep item placeholder functionality
             String messageWithoutColors = ColorUtil.stripAllColors(message);
+            // Apply inherited color from format even if player doesn't have color permission
+            if (!inheritedColor.isEmpty()) {
+                messageWithoutColors = inheritedColor + messageWithoutColors;
+            }
             return ItemDetector.processItemPlaceholders(player, messageWithoutColors);
         }
         
-        return ItemDetector.processItemPlaceholders(player, message);
+        return ItemDetector.processItemPlaceholders(player, processedMessage);
     }
 
     /**
      * Processes ping placeholder with color permission check
      */
-    private Component processPingPlaceholderWithColorPermission(Player player, String message) {
+    private Component processPingPlaceholderWithColorPermission(Player player, String message, String inheritedColor) {
         // Check if ping placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean pingEnabled = true;
@@ -306,23 +435,33 @@ public class BaseChannel implements Channel {
         }
         
         if (!pingEnabled) {
-            return processMessageWithColorPermission(player, message);
+            return processMessageWithColorPermission(player, message, inheritedColor);
+        }
+        
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
         }
         
         // Process ping placeholder but respect color permissions for the rest of the message
         if (!player.hasPermission("nonchat.color")) {
             // Strip colors from message but keep ping placeholder functionality
             String messageWithoutColors = ColorUtil.stripAllColors(message);
+            // Apply inherited color from format even if player doesn't have color permission
+            if (!inheritedColor.isEmpty()) {
+                messageWithoutColors = inheritedColor + messageWithoutColors;
+            }
             return PingDetector.processPingPlaceholders(player, messageWithoutColors);
         }
         
-        return PingDetector.processPingPlaceholders(player, message);
+        return PingDetector.processPingPlaceholders(player, processedMessage);
     }
 
     /**
      * Processes both item and ping placeholders with color permission check
      */
-    private Component processBothPlaceholders(Player player, String message) {
+    private Component processBothPlaceholders(Player player, String message, String inheritedColor) {
         // Check settings
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
@@ -333,9 +472,21 @@ public class BaseChannel implements Channel {
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }
         
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
+        }
+        
         // Check color permission
         boolean hasColorPermission = player.hasPermission("nonchat.color");
-        String processedMessage = hasColorPermission ? message : ColorUtil.stripAllColors(message);
+        processedMessage = hasColorPermission ? processedMessage : ColorUtil.stripAllColors(message);
+        
+        // Apply inherited color from format even if player doesn't have color permission
+        if (!hasColorPermission && !inheritedColor.isEmpty()) {
+            // We need to apply inherited color to text parts, but not to placeholders
+            // This is more complex, so we'll handle it in the text processing below
+        }
         
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
@@ -350,7 +501,12 @@ public class BaseChannel implements Channel {
         while (matcher.find()) {
             // Add text before placeholder
             if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
-                builder.append(LinkDetector.makeLinksClickable(parts[partIndex]));
+                String textPart = parts[partIndex];
+                // Apply inherited color if player doesn't have color permission
+                if (!hasColorPermission && !inheritedColor.isEmpty()) {
+                    textPart = inheritedColor + textPart;
+                }
+                builder.append(LinkDetector.makeLinksClickable(textPart));
             }
             partIndex++;
             
@@ -374,13 +530,23 @@ public class BaseChannel implements Channel {
                 builder.append(Component.text(ping + "ms").color(color));
             } else {
                 // If placeholder is disabled, add it as plain text
-                builder.append(Component.text(matcher.group()));
+                String placeholderText = matcher.group();
+                // Apply inherited color if player doesn't have color permission
+                if (!hasColorPermission && !inheritedColor.isEmpty()) {
+                    placeholderText = inheritedColor + placeholderText;
+                }
+                builder.append(Component.text(placeholderText));
             }
         }
         
         // Add remaining text
         if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
-            builder.append(LinkDetector.makeLinksClickable(parts[partIndex]));
+            String textPart = parts[partIndex];
+            // Apply inherited color if player doesn't have color permission
+            if (!hasColorPermission && !inheritedColor.isEmpty()) {
+                textPart = inheritedColor + textPart;
+            }
+            builder.append(LinkDetector.makeLinksClickable(textPart));
         }
         
         return builder.build();

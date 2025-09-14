@@ -1,11 +1,14 @@
 package com.nonxedy.nonchat.command.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +24,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
  * Manages private message spying functionality
  * Allows staff to monitor private communications
  */
-public class SpyCommand implements CommandExecutor {
+public class SpyCommand implements CommandExecutor, TabCompleter {
 
     // Plugin instance reference
     private final Nonchat plugin;
@@ -136,5 +139,24 @@ public class SpyCommand implements CommandExecutor {
      */
     public Set<Player> getSpyPlayers() {
         return new HashSet<>(spyPlayers);
+    }
+
+    /**
+     * Provides tab completion suggestions
+     * @param sender Command sender
+     * @param command Command being completed
+     * @param label Command label used
+     * @param args Current arguments
+     * @return List of suggestions
+     */
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                        @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("nonchat.spy")) {
+            return Collections.emptyList();
+        }
+
+        // Spy command doesn't require any arguments, so no suggestions needed
+        return Collections.emptyList();
     }
 }

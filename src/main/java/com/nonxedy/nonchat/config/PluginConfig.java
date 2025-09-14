@@ -110,6 +110,7 @@ public class PluginConfig {
         config.set("interactive-placeholders.enabled", true);
         config.set("interactive-placeholders.item-enabled", true);
         config.set("interactive-placeholders.ping-enabled", true);
+        config.set("interactive-placeholders.ping-format", "{ping}ms");
         
         // Death settings
         config.set("death.enabled", true);
@@ -124,6 +125,7 @@ public class PluginConfig {
         
         // Private chat settings (оставляем как есть)
         config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+        config.set("private-chat-target-you", "You");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
         // Chat bubbles configuration
@@ -306,6 +308,24 @@ public class PluginConfig {
         saveConfig();
     }
 
+    /**
+     * Gets ping format string
+     * @return Ping format string with {ping} placeholder
+     */
+    @NotNull
+    public String getPingFormat() {
+        return config.getString("interactive-placeholders.ping-format", "{ping}ms");
+    }
+
+    /**
+     * Sets ping format string
+     * @param format New format string with {ping} placeholder
+     */
+    public void setPingFormat(String format) {
+        config.set("interactive-placeholders.ping-format", format);
+        saveConfig();
+    }
+
     
     /**
      * Checks if custom death messages are enabled
@@ -382,6 +402,15 @@ public class PluginConfig {
     @NotNull
     public String getSpyFormat() {
         return config.getString("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+    }
+
+    /**
+     * Gets private chat target "You" text
+     * @return Text to show for target player in private messages
+     */
+    @NotNull
+    public String getPrivateChatTargetYou() {
+        return config.getString("private-chat-target-you", "You");
     }
 
     /**

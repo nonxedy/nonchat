@@ -36,13 +36,15 @@ public class PingDetector {
         
         // Check if interactive placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
-        if (plugin instanceof Nonchat nonchatPlugin) {
-            boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
-            boolean pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
-            
-            if (!globalEnabled || !pingEnabled) {
-                return Component.text(text);
-            }
+        if (!(plugin instanceof Nonchat nonchatPlugin)) {
+            return Component.text(text);
+        }
+        
+        boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
+        boolean pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
+        
+        if (!globalEnabled || !pingEnabled) {
+            return Component.text(text);
         }
         
         TextComponent.Builder builder = Component.text().content("");
@@ -70,8 +72,14 @@ public class PingDetector {
                 color = NamedTextColor.RED; // Bad
             }
             
+            // Get ping format from config
+            String pingFormat = nonchatPlugin.getConfig().getString("interactive-placeholders.ping-format", "{ping}ms");
+            
+            // Replace {ping} placeholder with actual ping value
+            String formattedPing = pingFormat.replace("{ping}", String.valueOf(ping));
+            
             // Create ping component with appropriate color
-            Component pingComponent = Component.text(ping + "ms").color(color);
+            Component pingComponent = Component.text(formattedPing).color(color);
             builder.append(pingComponent);
             
             lastEnd = matcher.end();

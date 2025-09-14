@@ -8,16 +8,13 @@ com/nonxedy/nonchat/util/core/debugging/Debugger.class
 com/nonxedy/nonchat/util/special/ignore/IgnoreManager.class
 com/nonxedy/nonchat/util/lang/LanguageManager.class
 com/nonxedy/nonchat/util/special/ping/PingDetector.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl$4.class
 com/nonxedy/nonchat/config/PluginMessages.class
 com/nonxedy/nonchat/listener/ChatListenerFactory.class
-com/nonxedy/nonchat/util/folia/FoliaDetector.class
 com/nonxedy/nonchat/command/impl/ChannelCommand.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics$MetricsBase.class
 com/nonxedy/nonchat/service/ChatService.class
 com/nonxedy/nonchat/util/chat/formatting/HoverTextUtil.class
 com/nonxedy/nonchat/util/chat/filters/WordBlocker.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl$1.class
 com/nonxedy/nonchat/command/impl/ClearCommand.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics$SingleLineChart.class
 com/nonxedy/nonchat/api/IConfigurable.class
@@ -43,10 +40,8 @@ com/nonxedy/nonchat/command/impl/NonchatCommand.class
 com/nonxedy/nonchat/util/core/broadcast/BroadcastMessage.class
 com/nonxedy/nonchat/util/lang/TranslationUtil.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl$2.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics$SimplePie.class
 com/nonxedy/nonchat/listener/DeathListener.class
-com/nonxedy/nonchat/util/folia/BukkitSchedulerImpl.class
 com/nonxedy/nonchat/util/chat/formatting/ChatTypeUtil.class
 com/nonxedy/nonchat/util/core/colors/ColorUtil.class
 com/nonxedy/nonchat/listener/DiscordSRVListener.class
@@ -54,7 +49,6 @@ com/nonxedy/nonchat/command/impl/RollCommand.class
 com/nonxedy/nonchat/listener/JoinQuitListener.class
 com/nonxedy/nonchat/util/core/broadcast/AutoBroadcastSender.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics$AdvancedPie.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl.class
 com/nonxedy/nonchat/command/impl/SpyCommand.class
 com/nonxedy/nonchat/command/impl/IgnoreCommand.class
 com/nonxedy/nonchat/util/chat/formatting/ChatTypeUtil$ChatTypeUtilBuilder.class
@@ -68,7 +62,6 @@ com/nonxedy/nonchat/util/integration/metrics/Metrics$JsonObjectBuilder$JsonObjec
 com/nonxedy/nonchat/listener/ChatListener.class
 com/nonxedy/nonchat/util/items/display/ItemDisplayUtil.class
 com/nonxedy/nonchat/util/integration/metrics/Metrics$AdvancedBarChart.class
-com/nonxedy/nonchat/util/folia/FoliaSchedulerImpl$3.class
 com/nonxedy/nonchat/api/MessageFilter.class
 com/nonxedy/nonchat/util/core/colors/LRUCache$1.class
 com/nonxedy/nonchat/api/INotificationSettings.class
@@ -78,7 +71,6 @@ com/nonxedy/nonchat/Nonchat.class
 com/nonxedy/nonchat/api/IMessageHandler.class
 com/nonxedy/nonchat/hook/DiscordSRVHook.class
 com/nonxedy/nonchat/command/impl/ReplyCommand.class
-com/nonxedy/nonchat/util/folia/FoliaScheduler.class
 com/nonxedy/nonchat/core/ChatManager.class
 com/nonxedy/nonchat/core/BroadcastManager.class
 com/nonxedy/nonchat/command/impl/BroadcastCommand.class

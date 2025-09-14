@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.2
+# Version of the plugin: 1.5.3
 #
 # - LuckPerms support.
 # - Vault support.
@@ -51,7 +51,7 @@
 # !!! DONT DELETE {message} IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE !!!
 # ==================================================
 
-language: en # Supported: en, ru
+language: en # Supported: en, ru, es
 
 debug: false # Enable/disable debug mode
 
@@ -76,6 +76,7 @@ interactive-placeholders:
   enabled: true # Enable/disable all interactive placeholders ([item], [ping])
   item-enabled: true # Enable/disable [item] placeholder specifically
   ping-enabled: true # Enable/disable [ping] placeholder specifically
+  ping-format: "{ping}ms" # Format for ping display. Use {ping} placeholder for the ping value
 
 # The channels configuration.
 channels:
@@ -132,6 +133,7 @@ quit-messages:
 
 # The private chat config.
 private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
+private-chat-target-you: "You" # The text to show for the target player in private messages.
 
 # The spy command config.
 spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command format.

@@ -18,7 +18,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 public class LinkDetector {
     // Pattern to match URLs in text
     private static final Pattern URL_PATTERN = Pattern.compile(
-            "(?i)\\b((?:https?://|www\\.)\\S+\\.[a-z]{2,}\\S*)",
+            "(?i)\\b((?:https?://|www\\.)?\\S+\\.[a-z]{2,}\\S*)",
             Pattern.CASE_INSENSITIVE);
     
     // Static reference to messages for translation
@@ -88,8 +88,10 @@ public class LinkDetector {
         String clickableUrl = url;
         if (url.toLowerCase().startsWith("www.")) {
             clickableUrl = "https://" + url;
+        } else if (!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
+            clickableUrl = "https://" + url;
         }
-        
+
         // Use translated message if available, fallback to hardcoded text
         Component hoverComponent;
         if (messages != null) {
@@ -98,7 +100,7 @@ public class LinkDetector {
         } else {
             hoverComponent = Component.text("Click to open: " + clickableUrl);
         }
-        
+
         return Component.text(url)
                 .clickEvent(ClickEvent.openUrl(clickableUrl))
                 .hoverEvent(HoverEvent.showText(hoverComponent))
