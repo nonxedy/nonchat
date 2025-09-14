@@ -51,7 +51,7 @@
 # !!! DONT DELETE {message} IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE !!!
 # ==================================================
 
-language: en # Supported: en, ru
+language: en # Supported: en, ru, es
 
 debug: false # Enable/disable debug mode
 
