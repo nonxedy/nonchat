@@ -124,14 +124,14 @@ public class Nonchat extends JavaPlugin {
             this.chatManager.setIgnoreCommand(ignoreCommand);
             this.messageManager.setIgnoreCommand(ignoreCommand);
 
+            // Initialize LinkDetector with translation support before creating commands
+            LinkDetector.initialize(configService.getMessages());
+
             // Initialize service layer that depends on managers
             this.chatService = new ChatService(chatManager, messageManager, broadcastManager, configService.getConfig());
 
             // Initialize command service last as it depends on all other services
             this.commandService = new CommandService(this, chatService, configService);
-
-            // Initialize LinkDetector with translation support
-            LinkDetector.initialize(configService.getMessages());
 
             // Initialize debug system if enabled
             if (configService.getConfig().isDebug()) {
@@ -279,10 +279,15 @@ public class Nonchat extends JavaPlugin {
                 broadcastManager.reload();
             }
 
+            // Reinitialize LinkDetector with updated messages before reloading commands
+            if (configService != null) {
+                LinkDetector.initialize(configService.getMessages());
+            }
+
             if (commandService != null) {
                 commandService.reloadCommands();
             }
-            
+
             getLogger().info("Configuration reloaded successfully");
         } catch (Exception e) {
             getLogger().severe("Failed to reload configuration: " + e.getMessage());
@@ -307,18 +312,18 @@ public class Nonchat extends JavaPlugin {
                 broadcastManager.reload();
             }
 
-            // Reload commands and channels
+            // Reinitialize LinkDetector with updated messages before reloading commands
+            if (configService != null) {
+                LinkDetector.initialize(configService.getMessages());
+            }
+
+            // Reload commands and channels after LinkDetector is reinitialized
             if (commandService != null) {
                 commandService.reloadCommands();
             }
 
             if (chatManager != null) {
                 chatManager.reloadChannels();
-            }
-
-            // Reinitialize LinkDetector with updated messages
-            if (configService != null) {
-                LinkDetector.initialize(configService.getMessages());
             }
 
             // Reinitialize debugger if needed

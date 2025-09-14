@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import net.kyori.adventure.text.Component;
@@ -93,12 +94,26 @@ public class BroadcastCommand implements CommandExecutor, TabCompleter {
      */
     private void broadcastMessage(String message) {
         try {
-            // Get the broadcast format from config and replace {message} placeholder
+            // Process links in the message first (before applying format)
+            Component messageWithLinks = LinkDetector.makeLinksClickable(message);
+
+            // Get the broadcast format from config
             String broadcastFormat = config.getBroadcastFormat();
-            String formattedMessage = broadcastFormat.replace("{message}", message);
-            
-            // Create formatted message component
-            Component broadcastComponent = ColorUtil.parseComponent(formattedMessage);
+
+            // Build the final broadcast component
+            final Component broadcastComponent;
+            if (broadcastFormat.contains("{message}")) {
+                String[] parts = broadcastFormat.split("\\{message\\}", 2);
+                Component prefixComponent = parts.length > 0 && !parts[0].isEmpty() ?
+                    ColorUtil.parseConfigComponent(parts[0]) : Component.empty();
+                Component suffixComponent = parts.length > 1 && !parts[1].isEmpty() ?
+                    ColorUtil.parseConfigComponent(parts[1]) : Component.empty();
+
+                broadcastComponent = prefixComponent.append(messageWithLinks).append(suffixComponent);
+            } else {
+                // Fallback: if no {message} placeholder, just use the message with links
+                broadcastComponent = messageWithLinks;
+            }
 
             // Send to all online players with spacing
             plugin.getServer().getOnlinePlayers().forEach(player -> {
