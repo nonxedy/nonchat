@@ -240,7 +240,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         
         sender.sendMessage(senderMessage);
         if (plugin != null) {
-            plugin.logResponse("Enhanced message sent to " + sender.getName());
+            plugin.logResponse("Message sent to " + sender.getName());
         }
 
         // Create and send formatted message to target using new utility
@@ -249,7 +249,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         
         target.sendMessage(targetMessage);
         if (plugin != null) {
-            plugin.logResponse("Enhanced message sent to " + target.getName());
+            plugin.logResponse("Message sent to " + target.getName());
         }
 
         // Notify spy players if spy system is enabled and sender is a player
