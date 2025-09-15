@@ -132,8 +132,31 @@ quit-messages:
   format: "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%" # Quit message format
 
 # The private chat config.
-private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
-private-chat-target-you: "You" # The text to show for the target player in private messages.
+private-chat:
+  # Message formatting
+  sender:
+    # What the sender sees when they send a message
+    format: "§8[§6You §8-> §6{receiver}§8] §f{message}"
+    # Hover text for sender messages
+    hover:
+      enabled: true # Enable/disable hover text for sender messages
+      text:
+        - "§7Sent to §f{receiver}"
+        - "§8Click to reply"
+  receiver:
+    # What the receiver sees when they receive a message
+    format: "§8[§6{sender} §8-> §6You§8] §f{message}"
+    # Hover text for receiver messages  
+    hover:
+      enabled: true # Enable/disable hover text for receiver messages
+      text:
+        - "§7From §f{sender}"
+        - "§8Click to reply"
+  
+  # Interactive features
+  click-actions:
+    enabled: true # Enable/disable all click actions
+    reply-command: "/msg {sender} " # Default reply command
 
 # The spy command config.
 spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command format.

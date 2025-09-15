@@ -29,7 +29,6 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = (Player) sender;
         plugin.logCommand(command.getName(), args);
 
         if (!(sender instanceof Player)) {
@@ -37,10 +36,12 @@ public class ReplyCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        Player player = (Player) sender;
+
         if (!sender.hasPermission("nonchat.reply")) {
             sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
             if (plugin != null) {
-                plugin.logError("Player " + sender.getName() + " tried to use the message command without permission.");
+                plugin.logError("Player " + sender.getName() + " tried to use the reply command without permission.");
             }
             return true;
         }

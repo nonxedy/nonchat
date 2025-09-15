@@ -124,7 +124,20 @@ public class PluginConfig {
         config.set("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
         
         // Private chat settings (оставляем как есть)
-        config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+        // Private chat configuration
+        config.set("private-chat.sender-format", "§7[§aTo §f{target}§7] §7{message}");
+        config.set("private-chat.receiver-format", "§7[§cFrom §f{sender}§7] §7{message}");
+        config.set("private-chat.hover.enabled", true);
+        config.set("private-chat.hover.sender-hover", Arrays.asList(
+            "§7Sent to: §f{target}",
+            "§7Time: §f{time}",
+            "§7Click to send another message"
+        ));
+        config.set("private-chat.hover.receiver-hover", Arrays.asList(
+            "§7From: §f{sender}",
+            "§7Time: §f{time}",
+            "§7Click to reply"
+        ));
         config.set("private-chat-target-you", "You");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
@@ -387,12 +400,72 @@ public class PluginConfig {
     }
 
     /**
-     * Gets private chat message format
-     * @return Private chat format string
+     * Gets private chat sender message format
+     * @return Private chat sender format string
      */
     @NotNull
-    public String getPrivateChatFormat() {
-        return config.getString("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+    public String getPrivateChatSenderFormat() {
+        return config.getString("private-chat.sender.format", "§8[§6You §8-> §6{receiver}§8] §f{message}");
+    }
+
+    /**
+     * Gets private chat receiver message format
+     * @return Private chat receiver format string
+     */
+    @NotNull
+    public String getPrivateChatReceiverFormat() {
+        return config.getString("private-chat.receiver.format", "§8[§6{sender} §8-> §6You§8] §f{message}");
+    }
+
+    /**
+     * Checks if private chat sender hover text is enabled
+     * @return true if sender hover text is enabled
+     */
+    public boolean isPrivateChatSenderHoverEnabled() {
+        return config.getBoolean("private-chat.sender.hover.enabled", true);
+    }
+
+    /**
+     * Checks if private chat receiver hover text is enabled
+     * @return true if receiver hover text is enabled
+     */
+    public boolean isPrivateChatReceiverHoverEnabled() {
+        return config.getBoolean("private-chat.receiver.hover.enabled", true);
+    }
+
+    /**
+     * Gets private chat sender hover text list
+     * @return List of hover text lines for sender
+     */
+    @NotNull
+    public List<String> getPrivateChatSenderHover() {
+        return config.getStringList("private-chat.sender.hover.text");
+    }
+
+    /**
+     * Gets private chat receiver hover text list
+     * @return List of hover text lines for receiver
+     */
+    @NotNull
+    public List<String> getPrivateChatReceiverHover() {
+        return config.getStringList("private-chat.receiver.hover.text");
+    }
+
+    /**
+     * Checks if private chat click actions are enabled globally
+     * @return true if click actions are enabled
+     */
+    public boolean isPrivateChatClickActionsEnabled() {
+        return config.getBoolean("private-chat.click-actions.enabled", true);
+    }
+
+    /**
+     * Gets private chat default reply command
+     * @return Reply command template
+     */
+    @NotNull
+    public String getPrivateChatReplyCommand() {
+        return config.getString("private-chat.click-actions.reply-command", "/msg {sender} ");
     }
 
     /**
@@ -402,15 +475,6 @@ public class PluginConfig {
     @NotNull
     public String getSpyFormat() {
         return config.getString("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-    }
-
-    /**
-     * Gets private chat target "You" text
-     * @return Text to show for target player in private messages
-     */
-    @NotNull
-    public String getPrivateChatTargetYou() {
-        return config.getString("private-chat-target-you", "You");
     }
 
     /**
