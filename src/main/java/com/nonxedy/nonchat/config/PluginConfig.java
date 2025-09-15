@@ -138,7 +138,6 @@ public class PluginConfig {
             "§7Time: §f{time}",
             "§7Click to reply"
         ));
-        config.set("private-chat-target-you", "You");
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
         // Chat bubbles configuration
