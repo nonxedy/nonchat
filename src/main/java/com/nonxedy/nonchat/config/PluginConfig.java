@@ -1,16 +1,30 @@
 package com.nonxedy.nonchat.config;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
@@ -27,6 +41,10 @@ import lombok.Getter;
  */
 @Getter
 public class PluginConfig {
+    // Plugin instance for resource access
+    private final JavaPlugin plugin;
+    // Logger for migration messages
+    private final Logger logger;
     // File object representing the config.yml file
     private final File configFile;
     // Configuration object to store and manage plugin settings
@@ -39,7 +57,9 @@ public class PluginConfig {
     private String defaultChannel;
 
     // Constructor initializes config file path and loads configuration
-    public PluginConfig() {
+    public PluginConfig(JavaPlugin plugin) {
+        this.plugin = plugin;
+        this.logger = plugin.getLogger();
         // Sets config file path to plugins/nonchat/config.yml
         this.configFile = new File("plugins/nonchat", "config.yml");
         loadConfig();
@@ -53,6 +73,9 @@ public class PluginConfig {
         if (!configFile.exists()) {
             // Create default configuration if file doesn't exist
             createDefaultConfig();
+        } else {
+            // Check if configuration needs to be updated (using BankPlus approach)
+            updateConfigIfNeeded();
         }
         // Load configuration from file
         this.config = YamlConfiguration.loadConfiguration(configFile);
@@ -958,5 +981,341 @@ public class PluginConfig {
 
     public Set<String> getKeys(boolean deep) {
         return config.getKeys(deep);
+    }
+
+    /**
+     * Checks if the plugin was updated and updates configuration accordingly
+     */
+    private void updateConfigIfNeeded() {
+        File savesFile = new File(plugin.getDataFolder(), "saves.yml");
+        FileConfiguration savesConfig;
+        
+        if (!savesFile.exists()) {
+            try {
+                savesFile.getParentFile().mkdirs();
+                savesFile.createNewFile();
+                savesConfig = new YamlConfiguration();
+            } catch (IOException e) {
+                logger.warning("Failed to create saves.yml: " + e.getMessage());
+                return;
+            }
+        } else {
+            savesConfig = YamlConfiguration.loadConfiguration(savesFile);
+        }
+
+        String currentVersion = savesConfig.getString("version");
+        String pluginVersion = plugin.getDescription().getVersion();
+        boolean isUpdated = pluginVersion.equals(currentVersion);
+
+        savesConfig.set("version", pluginVersion);
+        try {
+            savesConfig.save(savesFile);
+        } catch (IOException e) {
+            logger.warning("Could not save saves.yml: " + e.getMessage());
+        }
+
+        if (!isUpdated) {
+            logger.info("Plugin version changed from " + (currentVersion != null ? currentVersion : "unknown") + " to " + pluginVersion);
+            logger.info("Checking for configuration updates...");
+            setupConfigFile(true);
+        } else {
+            setupConfigFile(false);
+        }
+    }
+
+    /**
+     * Updates the config file with missing paths from the default configuration
+     * Preserves user values and comments, adds only missing keys
+     */
+    private void setupConfigFile(boolean backup) {
+        try {
+            if (backup) {
+                createBackup();
+            }
+
+            HashMap<Integer, FileLine> fileLines = new HashMap<>();
+            List<String> fileAsList = new ArrayList<>();
+            int positions = 1;
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    fileAsList.add(line);
+                }
+            }
+
+            for (int i = 0; i < fileAsList.size(); i++) {
+                String line = fileAsList.get(i);
+                if (isListContent(line)) continue;
+
+                if (!line.isEmpty() && !isComment(line) && line.contains(":")) {
+                    String[] split = line.split(":");
+                    boolean isValue = split.length > 1 && !isComment(split[1]);
+                    boolean isHeader = split.length == 1 || isComment(split[1]);
+                    boolean isList = isHeader && i + 1 < fileAsList.size() && isListContent(fileAsList.get(i + 1));
+                    
+                    fileLines.put(positions, new FileLine(line, isValue, isHeader, isList));
+                    positions++;
+                    continue;
+                }
+                fileLines.put(positions, new FileLine(line, false, false, false));
+                positions++;
+            }
+
+            FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
+            
+            InputStream resourceStream = plugin.getResource("config.yml");
+            if (resourceStream == null) {
+                logger.warning("Could not load default config.yml from plugin resources!");
+                return;
+            }
+            
+            FileConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
+                new InputStreamReader(resourceStream, StandardCharsets.UTF_8)
+            );
+
+            boolean hasChanges = false;
+            for (String key : defaultConfig.getKeys(true)) {
+                if (currentConfig.contains(key)) continue;
+                if (defaultConfig.isConfigurationSection(key)) continue;
+
+                if (shouldAddMissingKey(key, currentConfig)) {
+                    currentConfig.set(key, defaultConfig.get(key));
+                    hasChanges = true;
+                    logger.info("Added missing configuration key: " + key);
+                }
+            }
+
+            if (hasChanges) {
+                HashMap<Integer, FileLine> templateLines = new HashMap<>();
+                List<String> templateAsList = new ArrayList<>();
+                int templatePositions = 1;
+
+                try (InputStream resource = plugin.getResource("config.yml");
+                     BufferedReader templateReader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
+                    String templateLine;
+                    while ((templateLine = templateReader.readLine()) != null) {
+                        templateAsList.add(templateLine);
+                    }
+                }
+
+                for (int i = 0; i < templateAsList.size(); i++) {
+                    String templateLine = templateAsList.get(i);
+                    if (isListContent(templateLine)) continue;
+
+                    if (!templateLine.isEmpty() && !isComment(templateLine) && templateLine.contains(":")) {
+                        String[] split = templateLine.split(":");
+                        boolean isValue = split.length > 1 && !isComment(split[1]);
+                        boolean isHeader = split.length == 1 || isComment(split[1]);
+                        boolean isList = isHeader && i + 1 < templateAsList.size() && isListContent(templateAsList.get(i + 1));
+                        
+                        templateLines.put(templatePositions, new FileLine(templateLine, isValue, isHeader, isList));
+                        templatePositions++;
+                        continue;
+                    }
+                    templateLines.put(templatePositions, new FileLine(templateLine, false, false, false));
+                    templatePositions++;
+                }
+
+                StringBuilder builder = new StringBuilder();
+                HashMap<Integer, String> headers = new HashMap<>();
+
+                for (int pos = 1; pos < templatePositions; pos++) {
+                    FileLine fileLine = templateLines.get(pos);
+                    if (fileLine == null) continue;
+
+                    String line = fileLine.getLine();
+                    if (!fileLine.isValue() && !fileLine.isHeader() && !fileLine.isList()) {
+                        builder.append(line).append("\n");
+                        continue;
+                    }
+
+                    int spaces = 0;
+                    for (char c : line.toCharArray()) {
+                        if (c == ' ') spaces++;
+                        else break;
+                    }
+
+                    int point = spaces / 2;
+                    String identifier = line.substring(spaces).split(":")[0];
+                    if (fileLine.isHeader()) headers.put(point, identifier);
+
+                    if (fileLine.isValue()) {
+                        StringBuilder path = new StringBuilder();
+                        for (int i = 0; i <= point - 1; i++) {
+                            String header = headers.get(i);
+                            if (header != null) path.append(header).append(".");
+                        }
+                        path.append(identifier);
+
+                        for (int i = 0; i < spaces; i++) builder.append(" ");
+                        builder.append(identifier).append(": ");
+
+                        Object value = currentConfig.get(path.toString());
+                        if (value instanceof String) {
+                            String stringValue = ((String) value).replace("\n", "\\n");
+                            builder.append("\"").append(stringValue).append("\"\n");
+                        } else {
+                            builder.append(value).append("\n");
+                        }
+                        continue;
+                    }
+
+                    if (fileLine.isList()) {
+                        StringBuilder path = new StringBuilder();
+                        for (int i = 0; i <= point - 1; i++) {
+                            String header = headers.get(i);
+                            if (header != null) path.append(header).append(".");
+                        }
+                        path.append(identifier);
+
+                        for (int i = 0; i < spaces; i++) builder.append(" ");
+                        builder.append(identifier).append(":");
+
+                        List<String> value = currentConfig.getStringList(path.toString());
+                        if (value.isEmpty()) builder.append(" []\n");
+                        else {
+                            builder.append("\n");
+                            for (String listLine : value) {
+                                for (int i = 0; i < spaces + 2; i++) builder.append(" ");
+                                String escapedListLine = listLine.replace("\n", "\\n");
+                                builder.append("- \"").append(escapedListLine).append("\"\n");
+                            }
+                        }
+                        continue;
+                    }
+
+                    builder.append(line).append("\n");
+                }
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+                    writer.write(builder.toString());
+                    writer.flush();
+                }
+                
+                logger.info("Configuration updated successfully with new options");
+                if (backup) {
+                    logger.info("A backup of your previous configuration was created in the 'backups' folder.");
+                }
+            }
+
+        } catch (Exception e) {
+            logger.severe("Failed to update configuration: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Creates a backup of the current configuration file
+     */
+    private void createBackup() {
+        try {
+            File backupDir = new File(plugin.getDataFolder(), "backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            String timestamp = dateFormat.format(new Date());
+            File backupFile = new File(backupDir, "config_" + timestamp + ".yml.backup");
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(configFile));
+                 BufferedWriter writer = new BufferedWriter(new FileWriter(backupFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line);
+                    writer.newLine();
+                }
+            }
+            
+            logger.info("Created configuration backup: " + backupFile.getName());
+
+        } catch (IOException e) {
+            logger.warning("Failed to create configuration backup: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Determines if a missing key should be added based on intelligent section detection
+     */
+    private boolean shouldAddMissingKey(String key, FileConfiguration currentConfig) {
+        if (!key.contains(".")) {
+            return true;
+        }
+
+        String[] parts = key.split("\\.");
+        String topLevelSection = parts[0];
+        
+        // For all other sections, add missing keys if it's a new feature section
+        if (!hasAnyKeysInSection(currentConfig, topLevelSection)) {
+            return true;
+        }
+        
+        // If user has some keys in this section, add missing keys to complete it
+        return true;
+    }
+
+    /**
+     * Checks if the user has ANY configuration keys under a given section
+     * This is more robust than maintaining a manual list
+     */
+    private boolean hasAnyKeysInSection(FileConfiguration config, String sectionName) {
+        if (!config.contains(sectionName)) {
+            return false;
+        }
+        
+        Set<String> allKeys = config.getKeys(true);
+        for (String existingKey : allKeys) {
+            if (existingKey.startsWith(sectionName + ".") || existingKey.equals(sectionName)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Checks if a line is a comment (starts with #)
+     */
+    private boolean isComment(String s) {
+        return s.replace(" ", "").startsWith("#");
+    }
+
+    /**
+     * Checks if a line is list content (starts with -)
+     */
+    private boolean isListContent(String s) {
+        return s.replace(" ", "").startsWith("-");
+    }
+
+    /**
+     * Inner class to represent a line in the configuration file
+     */
+    private static class FileLine {
+        private final String line;
+        private final boolean isValue, isHeader, isList;
+
+        public FileLine(String line, boolean isValue, boolean isHeader, boolean isList) {
+            this.line = line;
+            this.isValue = isValue;
+            this.isHeader = isHeader;
+            this.isList = isList;
+        }
+
+        public String getLine() {
+            return line;
+        }
+
+        public boolean isValue() {
+            return isValue;
+        }
+
+        public boolean isHeader() {
+            return isHeader;
+        }
+
+        public boolean isList() {
+            return isList;
+        }
     }
 }
