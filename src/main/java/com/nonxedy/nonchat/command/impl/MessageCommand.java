@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
@@ -218,7 +219,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Sends private message to sender and recipient
+     * Sends private message to sender and recipient with enhanced formatting and hover effects
      * @param sender Message sender
      * @param target Message recipient
      * @param message Message content
@@ -233,34 +234,19 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
             processedMessage = message;
         }
         
-        // Get the message format from config
-        String format = config.getPrivateChatFormat();
-        // Handle console messages by using "Console" as sender name
-        String senderName = sender instanceof Player ? sender.getName() : "Console";
-
-        // Create and send formatted message to sender
-        Component senderMessage = ColorUtil.parseComponent(
-            format.replace("{sender}", senderName)
-                .replace("{target}", target.getName())
-                .replace("{message}", processedMessage)
-        );
+        // Create and send formatted message to sender using new utility
+        Component senderMessage = PrivateMessageUtil.createSenderMessage(config, 
+            sender instanceof Player player ? player : null, target, processedMessage);
+        
         sender.sendMessage(senderMessage);
         if (plugin != null) {
             plugin.logResponse("Message sent to " + sender.getName());
         }
 
-        // Get and process the "You" text with PlaceholderAPI
-        String targetYouText = config.getPrivateChatTargetYou();
-        if (target != null) {
-            targetYouText = IntegrationUtil.processPlaceholders(target, targetYouText);
-        }
+        // Create and send formatted message to target using new utility
+        Component targetMessage = PrivateMessageUtil.createReceiverMessage(config, 
+            sender instanceof Player player ? player : null, target, processedMessage);
         
-        // Create and send formatted message to target
-        Component targetMessage = ColorUtil.parseComponent(
-            format.replace("{sender}", senderName)
-                .replace("{target}", targetYouText)
-                .replace("{message}", processedMessage)
-        );
         target.sendMessage(targetMessage);
         if (plugin != null) {
             plugin.logResponse("Message sent to " + target.getName());

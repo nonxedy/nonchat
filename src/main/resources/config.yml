@@ -10,87 +10,87 @@
 # - PlaceHolderAPI support.
 # - DiscordSRV support.
 # ==================================================
-# CUSTOM CHANNELS
-# You can create your own custom channels in several ways:
-#
-# 1. Adding them to this config file:
-#    Copy and modify one of the existing channel blocks under the "channels:" section.
-#    Make sure to use a unique ID and set all the parameters you need.
-#
-# 2. Using the in-game command (requires nonchat.admin.channel.create permission):
-#    /channel create <id> <display-name> [options]
-#    
-# Available options for channels:
-#   enabled: true/false         - Whether the channel is enabled
-#   display-name: "Name"        - Display name shown in messages and listings
-#   format: "text {placeholders}" - The message format (must include {message})
-#   radius: number or world   - Chat radius in blocks, -1 for global, world for world-specific
-#   character: 'X'              - Trigger character (prefix) for this channel
-#   send-permission: "perm"     - Permission needed to send messages
-#   receive-permission: "perm"  - Permission needed to receive messages
-#   cooldown: number            - Seconds between messages (0 for no cooldown)
-#   min-length: number          - Minimum message length (0 for no minimum)
-#   max-length: number          - Maximum message length (-1 for unlimited)
-#
-# Command options format:
-#   format:text %luckperms_prefix% %player_name% {message}
-#   char:X                      - Trigger character
-#   send:permission.node        - Permission to send
-#   receive:permission.node     - Permission to receive
-#   radius:100                  - Radius in blocks (-1 for global)
-#   enabled:true                - Enable/disable
-#   cooldown:5                  - Cooldown in seconds
-#   min:1                       - Min message length
-#   max:100                     - Max message length
+
 # ==================================================
-# CHAT FORMATTING:
-#
-# {message} - The message (required)
-# PlaceholderAPI placeholders
-#
-# !!! DONT DELETE {message} IF YOU DELETE IT, YOUR SENT MESSAGES WILL BE INVISIBLE !!!
+# GENERAL PLUGIN SETTINGS
 # ==================================================
 
-language: en # Supported: en, ru, es
+# Supported languages: en, ru, es
+language: en
 
-debug: false # Enable/disable debug mode
+# Enable/disable debug mode for detailed console logs.
+debug: false
 
-update-checker: true # Enable/disable the update checker.
+# Enable/disable the automatic update checker.
+update-checker: true
 
-# Default channel that players will use when they join
+# Default channel that players will join upon entering the server.
 default-channel: "local"
 
 # ==================================================
 # MESSAGE DELIVERY NOTIFICATIONS
-# Controls whether players are notified when their messages are not delivered
+# Controls whether players are notified when their messages are not delivered.
 # ==================================================
 message-delivery:
-  notify-undelivered: true # Enable/disable notifications when messages are not delivered
+  # If true, players will be notified when their message doesn't reach anyone.
+  notify-undelivered: true
 
 # ==================================================
-# INTERACTIVE PLACEHOLDERS CONFIGURATION
-# Interactive placeholders are special placeholders like [item] and [ping]
-# that show interactive content in chat messages
+# INTERACTIVE PLACEHOLDERS
+# Configure special placeholders like [item] and [ping].
 # ==================================================
 interactive-placeholders:
-  enabled: true # Enable/disable all interactive placeholders ([item], [ping])
-  item-enabled: true # Enable/disable [item] placeholder specifically
-  ping-enabled: true # Enable/disable [ping] placeholder specifically
-  ping-format: "{ping}ms" # Format for ping display. Use {ping} placeholder for the ping value
+  # Enable/disable all interactive placeholders.
+  enabled: true
+  # Enable/disable the [item] placeholder specifically.
+  item-enabled: true
+  # Enable/disable the [ping] placeholder specifically.
+  ping-enabled: true
+  # Format for the ping display. Use {ping} for the numerical value.
+  ping-format: "{ping}ms"
 
-# The channels configuration.
+# ==================================================
+# CUSTOM CHANNELS
+# Define chat channels with unique settings.
+#
+# You can create new channels by copying an existing block or using the command:
+# /channel create <id> <display-name> [options]
+#
+# Channel Options:
+#   enabled: (true/false) - Enable or disable the channel.
+#   display-name: ("Name") - Name shown in messages.
+#   format: ("text {placeholders}") - Message format (must include {message}).
+#   radius: (number or 'world') - Chat radius in blocks. -1 for global, 'world' for world-only.
+#   character: ('X') - Prefix character to talk in this channel.
+#   send-permission: ("permission.node") - Permission required to send messages.
+#   receive-permission: ("permission.node") - Permission required to receive messages.
+#   cooldown: (number) - Seconds between messages. 0 for no cooldown.
+#   min-length: (number) - Minimum message length. 0 for no minimum.
+#   max-length: (number) - Maximum message length. -1 for unlimited.
+# ==================================================
 channels:
-  global: # The ID of the channel
-    enabled: true # Enable/disable the channel
-    display-name: "Global" # Display name for the channel
-    format: "§7(§6G§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}" # The chat format
-    radius: -1 # The radius of chat (in blocks). -1 = global
-    character: '!' # The character that triggers this channel
-    send-permission: "" # Permission to send messages in this channel (empty = everyone)
-    receive-permission: "" # Permission to receive messages from this channel (empty = everyone)
-    cooldown: 0 # Cooldown between messages in seconds (0 = no cooldown)
-    min-length: 0 # Minimum message length (0 = no minimum)
-    max-length: -1 # Maximum message length (-1 to disable limit)
+  # The ID of the channel.
+  global:
+    # Enable/disable the channel.
+    enabled: true
+    # Display name for the channel.
+    display-name: "Global"
+    # The chat format. Use {message} for the message content.
+    format: "§7(§6G§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}"
+    # The radius of chat in blocks. -1 for global.
+    radius: -1
+    # The character that triggers this channel.
+    character: '!'
+    # Permission to send messages in this channel (empty for everyone).
+    send-permission: ""
+    # Permission to receive messages from this channel (empty for everyone).
+    receive-permission: ""
+    # Cooldown between messages in seconds (0 for no cooldown).
+    cooldown: 0
+    # Minimum message length (0 for no minimum).
+    min-length: 0
+    # Maximum message length (-1 to disable limit).
+    max-length: -1
   
   local:
     enabled: true
@@ -116,75 +116,124 @@ channels:
     min-length: 0
     max-length: -1
   
-# The death config.
+# ==================================================
+# CUSTOM DEATH MESSAGES
+# ==================================================
 death:
-  enabled: true # Enable/disable custom death messages
-  format: "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died" # The death format.
-  show-coordinates: true # Show death coordinates to the player
+  # Enable/disable custom death messages.
+  enabled: true
+  # The death message format.
+  format: "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died"
+  # Show death coordinates to the player who died.
+  show-coordinates: true
 
-# The join/quit message config.
+# ==================================================
+# JOIN & QUIT MESSAGES
+# ==================================================
 join-messages:
-  enabled: true # Enable/disable join messages
-  format: "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%" # Join message format
+  # Enable/disable custom join messages.
+  enabled: true
+  # The format for the join message.
+  format: "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%"
 
 quit-messages:
-  enabled: true # Enable/disable quit messages
-  format: "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%" # Quit message format
+  # Enable/disable custom quit messages.
+  enabled: true
+  # The format for the quit message.
+  format: "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%"
 
-# The private chat config.
-private-chat-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The private chat format.
-private-chat-target-you: "You" # The text to show for the target player in private messages.
+# ==================================================
+# PRIVATE CHAT (MESSAGES)
+# ==================================================
+private-chat:
+  sender:
+    # Format for the message seen by the sender.
+    format: "§8[§6You §8-> §6{receiver}§8] §f{message}"
+    hover:
+      # Enable/disable hover text on the sender's message.
+      enabled: true
+      # Text to display on hover.
+      text:
+        - "§7Sent to §f{receiver}"
+        - "§8Click to reply"
+  receiver:
+    # Format for the message seen by the receiver.
+    format: "§8[§6{sender} §8-> §6You§8] §f{message}"
+    hover:
+      # Enable/disable hover text on the receiver's message.
+      enabled: true
+      # Text to display on hover.
+      text:
+        - "§7From §f{sender}"
+        - "§8Click to reply"
+  
+  click-actions:
+    # Enable/disable click-to-reply functionality on private messages.
+    enabled: true
+    # Command executed when clicking to reply. Use {sender} as a placeholder.
+    reply-command: "/msg {sender} "
 
-# The spy command config.
-spy-format: "§f{sender} §7-> §f{target}§7: §7{message}" # The spy command format.
+# ==================================================
+# SPY COMMAND
+# ==================================================
+# Format for messages seen by players using spy mode.
+spy-format: "§f{sender} §7-> §f{target}§7: §7{message}"
 
 # ==================================================
 # BROADCAST CONFIGURATION
-# Broadcast messages are messages that are sent to all players on the server.
 # ==================================================
-
 broadcast:
-  # Format for broadcast messages.
-  format: "\n§#FFAFFBBroadcast: §f{message}\n" # Use {message} for the message content, use \n for new line
-
-  # Enable random auto broadcast messages.
+  # Format for broadcast messages. Use {message} for content and \n for new lines.
+  format: "\n§#FFAFFBBroadcast: §f{message}\n"
+  # Enable/disable random auto-broadcast messages from the list below.
   random: true
 
-  # Example auto broadcast message.
+  # Example auto-broadcast message. You can add more by copying this section.
   example:
-    enabled: true # Will message shown?
-    message: "This message will be sent every 60 seconds" # Message
-    interval: 60 # Interval in seconds! Message will sent after X seconds.
+    # Enable/disable this specific broadcast.
+    enabled: true
+    # The message to be broadcasted.
+    message: "This message will be sent every 60 seconds"
+    # Interval in seconds for this message to be sent.
+    interval: 60
 
 # ==================================================
 # CHAT BUBBLE CONFIGURATION
-# Chat bubbles are small messages that appear above the player's head when they speak.
+# Messages that appear above a player's head.
 # ==================================================
-
 chat-bubbles:
-  enabled: true # Enable chat bubbles
-  duration: 5 # Duration of the bubble in seconds.
-  height: 2.5 # Height of the bubble in blocks.
+  # Enable/disable chat bubbles.
+  enabled: true
+  # Duration of the bubble in seconds.
+  duration: 5
+  # Height of the bubble above the player's head in blocks.
+  height: 2.5
 
 # ==================================================
 # ROLEPLAY COMMANDS
-# Roleplay commands are commands that are used to simulate roleplay in the game.
 # ==================================================
-
-roleplay-commands: # List of roleplay commands.
-  me: # /me command.
-    enabled: true # Enable/disable the command.
-    format: "&7*%player_name%: {message}" # The format of the command.
-  roll:
+roleplay-commands:
+  # Configuration for the /me command.
+  me:
+    # Enable/disable the /me command.
     enabled: true
+    # The format of the /me message.
+    format: "&7*%player_name%: {message}"
+  # Configuration for the /roll command.
+  roll:
+    # Enable/disable the /roll command.
+    enabled: true
+    # The format of the /roll message.
     format: "&7*%player_name% rolled a {number}"
 
 # ==================================================
 # HOVER TEXT
-# Hover text are texts that are performed when a player hovers over a player's name in chat.
+# Text that appears when hovering over a player's name in chat.
 # ==================================================
 hover-text:
-  enabled: true # Enable/disable the hover text.
+  # Enable/disable the hover text feature.
+  enabled: true
+  # The lines of text to display on hover. Supports PlaceholderAPI placeholders.
   format:
     - "&#FFAFFB⭐ %player_name%" # Player name
     - "&#FFAFFB► Rank: &#FFFFFF%luckperms_prefix%" # Prefix in luckperms
@@ -197,10 +246,11 @@ hover-text:
     - "§8Click to send a private message"
 
 # ==================================================
-# BLOCKED WORDS
-# That is the list of banned words. Player will not be able to send messages with banned words.
+# BLOCKED WORDS FILTER
+# Blocks messages containing specific words.
 # ==================================================
-banned-words: # List of banned words.
+# List of banned words.
+banned-words:
   - "spam"
   - "badword"
   - "anotherbadword"
@@ -208,21 +258,29 @@ banned-words: # List of banned words.
 
 # ==================================================
 # CAPS FILTER
-# Caps filter is a feature that checks if the message contains too many capital letters.
+# Limits the use of excessive capital letters in messages.
 # ==================================================
 caps-filter:
-  enabled: true # Enable/disable the caps filter.
-  max-caps-percentage: 70 # Maximum percentage of capital letters allowed in a message.
-  min-length: 4 # Minimum message length to check for caps.
+  # Enable/disable the caps filter.
+  enabled: true
+  # Maximum percentage of capital letters allowed in a message.
+  max-caps-percentage: 70
+  # Minimum message length to check for caps.
+  min-length: 4
 
 # ==================================================
 # ANTI-ADVERTISEMENT SYSTEM  
-# Blocks server advertisements in chat, commands and signs
+# Blocks server advertisements in chat, commands, and signs.
 # ==================================================
 anti-ad:
-  enabled: true # Enable/disable the anti-advertisement filter
-  sensitivity: 0.7 # Detection sensitivity (0.0-1.0), higher values may cause false positives
-  whitelisted-urls: # URLs that won't be blocked
+  # Enable/disable the anti-advertisement filter.
+  enabled: true
+  # Detection sensitivity (0.0-1.0). Higher values may cause false positives.
+  sensitivity: 0.7
+  # URLs that will not be blocked.
+  whitelisted-urls:
     - "discord.gg/NAWsxe3J3R"
-  staff-notify: true # Notify staff when advertisement is detected (nonchat.ad.notify must be added to the staff group)
-  punish-command: "ban %player_name% advertising" # Command to execute when ad is detected (leave empty for no punishment)
+  # Notify staff when an advertisement is detected (requires 'nonchat.ad.notify' permission).
+  staff-notify: true
+  # Command to execute when an advertisement is detected. Leave empty for no punishment.
+  punish-command: "ban %player_name% advertising"

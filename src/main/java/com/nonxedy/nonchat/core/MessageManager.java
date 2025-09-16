@@ -12,6 +12,7 @@ import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
@@ -60,25 +61,15 @@ public class MessageManager {
 
         lastMessageSender.put(receiver.getUniqueId(), sender.getUniqueId());
 
-        // Process message with color permission for both sender and receiver
+        // Process message with color permission for sender
         String processedMessage = sender.hasPermission("nonchat.color") ? message : ColorUtil.stripAllColors(message);
 
-        String senderFormat = config.getPrivateChatFormat()
-                .replace("{sender}", sender.getName())
-                .replace("{target}", receiver.getName())
-                .replace("{message}", processedMessage);
+        // Create and send enhanced formatted messages using new utility
+        Component senderMessage = PrivateMessageUtil.createSenderMessage(config, sender, receiver, processedMessage);
+        Component receiverMessage = PrivateMessageUtil.createReceiverMessage(config, sender, receiver, processedMessage);
 
-        // Get and process the "You" text with PlaceholderAPI for the receiver
-        String targetYouText = config.getPrivateChatTargetYou();
-        targetYouText = IntegrationUtil.processPlaceholders(receiver, targetYouText);
-
-        String receiverFormat = config.getPrivateChatFormat()
-                .replace("{sender}", sender.getName())
-                .replace("{target}", targetYouText)
-                .replace("{message}", processedMessage);
-
-        sender.sendMessage(ColorUtil.parseComponent(senderFormat));
-        receiver.sendMessage(ColorUtil.parseComponent(receiverFormat));
+        sender.sendMessage(senderMessage);
+        receiver.sendMessage(receiverMessage);
 
         spyCommand.onPrivateMessage(sender, receiver, Component.text(processedMessage));
     }
