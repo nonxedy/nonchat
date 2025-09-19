@@ -17,7 +17,7 @@ public class BukkitChatListener extends ChatListener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
         // Cancel the default event handling
         event.setCancelled(true);
