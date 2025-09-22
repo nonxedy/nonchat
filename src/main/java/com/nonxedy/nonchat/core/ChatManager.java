@@ -54,13 +54,6 @@ public class ChatManager {
                                       config.getAntiAdPunishCommand());
         startBubbleUpdater();
     }
-    
-    /**
-     * Get the plugin logger
-     */
-    private java.util.logging.Logger getLogger() {
-        return plugin.getLogger();
-    }
 
     public void processChat(Player player, String messageContent) {
         // Get or create player-specific lock
@@ -202,18 +195,18 @@ public class ChatManager {
                             String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
                             createBubble(player, bubbleMessage);
                         } catch (Exception e) {
-                            getLogger().warning("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
+                            plugin.logError("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
                         }
                     });
                 } catch (Exception e) {
-                    getLogger().warning("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
+                    plugin.logError("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
                     // Try to create bubble immediately as fallback
                     try {
                         removeBubble(player);
                         String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
                         createBubble(player, bubbleMessage);
                     } catch (Exception fallbackError) {
-                        getLogger().warning("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
+                        plugin.logError("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
                         // Try to create bubble using global scheduler as last resort
                         try {
                             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -222,11 +215,11 @@ public class ChatManager {
                                     String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
                                     createBubble(player, bubbleMessage);
                                 } catch (Exception globalError) {
-                                    getLogger().warning("Global scheduler bubble creation also failed for player " + player.getName() + ": " + globalError.getMessage());
+                                    plugin.logError("Global scheduler bubble creation also failed for player " + player.getName() + ": " + globalError.getMessage());
                                 }
                             });
                         } catch (Exception globalSchedulerError) {
-                            getLogger().warning("Failed to schedule global bubble creation for player " + player.getName() + ": " + globalSchedulerError.getMessage());
+                            plugin.logError("Failed to schedule global bubble creation for player " + player.getName() + ": " + globalSchedulerError.getMessage());
                         }
                     }
                 }
@@ -290,7 +283,7 @@ public class ChatManager {
                                     Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
                                     BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
                                 } catch (Exception e) {
-                                    getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
+                                    plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
                                 }
                             });
 
@@ -302,17 +295,17 @@ public class ChatManager {
                                 return true;
                             }
                         } catch (Exception e) {
-                            getLogger().fine("Error cleaning up bubbles for offline player: " + e.getMessage());
+                            plugin.logError("Error cleaning up bubbles for offline player: " + e.getMessage());
                             return true; // Remove entry on error
                         }
                         return false;
                     });
                 } catch (Exception e) {
-                    getLogger().warning("Error in bubble updater: " + e.getMessage());
+                    plugin.logError("Error in bubble updater: " + e.getMessage());
                 }
             }, 1L, 1L);
         } catch (Exception e) {
-            getLogger().severe("Failed to start bubble updater: " + e.getMessage());
+            plugin.logError("Failed to start bubble updater: " + e.getMessage());
             // Try to start with global scheduler as fallback
             try {
                 Bukkit.getScheduler().runTaskTimer(plugin, () -> {
@@ -326,7 +319,7 @@ public class ChatManager {
                                         Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
                                         BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
                                     } catch (Exception e2) {
-                                        getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
+                                        plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
                                     }
                                 });
 
@@ -338,21 +331,21 @@ public class ChatManager {
                                     return true;
                                 }
                             } catch (Exception e2) {
-                                getLogger().fine("Error cleaning up bubbles for offline player: " + e2.getMessage());
+                                plugin.logError("Error cleaning up bubbles for offline player: " + e2.getMessage());
                                 return true; // Remove entry on error
                             }
                             return false;
                         });
                     } catch (Exception e2) {
-                        getLogger().warning("Error in fallback bubble updater: " + e2.getMessage());
+                        plugin.logError("Error in fallback bubble updater: " + e2.getMessage());
                     }
                 }, 1L, 1L);
-                getLogger().info("Bubble updater started with fallback scheduler");
+                plugin.logResponse("Bubble updater started with fallback scheduler");
             } catch (Exception fallbackError) {
-                getLogger().severe("Failed to start bubble updater with fallback scheduler: " + fallbackError.getMessage());
+                plugin.logError("Failed to start bubble updater with fallback scheduler: " + fallbackError.getMessage());
                 // Try to start with immediate execution as last resort
                 try {
-                    getLogger().info("Starting bubble updater with immediate execution as last resort");
+                    plugin.logResponse("Starting bubble updater with immediate execution as last resort");
                     // This will run the updater immediately and then stop
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         try {
@@ -365,7 +358,7 @@ public class ChatManager {
                                             Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
                                             BubblePacketUtil.updateBubblesLocation(entry.getValue(), newLoc);
                                         } catch (Exception e2) {
-                                            getLogger().fine("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
+                                            plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
                                         }
                                     });
 
@@ -377,18 +370,18 @@ public class ChatManager {
                                         return true;
                                     }
                                 } catch (Exception e2) {
-                                    getLogger().fine("Error cleaning up bubbles for offline player: " + e2.getMessage());
+                                    plugin.logError("Error cleaning up bubbles for offline player: " + e2.getMessage());
                                     return true; // Remove entry on error
                                 }
                                 return false;
                             });
                         } catch (Exception e2) {
-                            getLogger().warning("Error in immediate bubble updater: " + e2.getMessage());
+                            plugin.logError("Error in immediate bubble updater: " + e2.getMessage());
                         }
                     });
-                    getLogger().info("Bubble updater started with immediate execution");
+                    plugin.logResponse("Bubble updater started with immediate execution");
                 } catch (Exception immediateError) {
-                    getLogger().severe("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
+                    plugin.logError("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
                 }
             }
         }
@@ -413,27 +406,27 @@ public class ChatManager {
                         removeBubble(player);
                     }, config.getChatBubblesDuration() * 20L);
                 } catch (Exception e) {
-                    getLogger().warning("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
+                    plugin.logError("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
                     // Schedule removal using global scheduler as fallback
                     try {
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             removeBubble(player);
                         }, config.getChatBubblesDuration() * 20L);
                     } catch (Exception fallbackError) {
-                        getLogger().warning("Fallback bubble removal scheduling also failed for player " + player.getName() + ": " + fallbackError.getMessage());
+                        plugin.logError("Fallback bubble removal scheduling also failed for player " + player.getName() + ": " + fallbackError.getMessage());
                         // Try to remove bubble immediately as last resort
                         try {
                             removeBubble(player);
                         } catch (Exception immediateError) {
-                            getLogger().warning("Immediate bubble removal also failed for player " + player.getName() + ": " + immediateError.getMessage());
+                            plugin.logError("Immediate bubble removal also failed for player " + player.getName() + ": " + immediateError.getMessage());
                         }
                     }
                 }
             } else {
-                getLogger().warning("Failed to create chat bubbles for player: " + player.getName());
+                plugin.logError("Failed to create chat bubbles for player: " + player.getName());
             }
         } catch (Exception e) {
-            getLogger().warning("Error creating chat bubbles for player " + player.getName() + ": " + e.getMessage());
+            plugin.logError("Error creating chat bubbles for player " + player.getName() + ": " + e.getMessage());
         }
     }
 
@@ -444,12 +437,12 @@ public class ChatManager {
                 BubblePacketUtil.removeBubbles(playerBubbles);
             }
         } catch (Exception e) {
-            getLogger().fine("Error removing bubbles for player " + player.getName() + ": " + e.getMessage());
+            plugin.logError("Error removing bubbles for player " + player.getName() + ": " + e.getMessage());
             // Try to clean up the map entry even if removal fails
             try {
                 bubbles.remove(player);
             } catch (Exception cleanupError) {
-                getLogger().fine("Error cleaning up bubble map for player " + player.getName() + ": " + cleanupError.getMessage());
+                plugin.logError("Error cleaning up bubble map for player " + player.getName() + ": " + cleanupError.getMessage());
             }
         }
     }
