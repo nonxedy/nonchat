@@ -19,8 +19,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -984,6 +986,70 @@ public class PluginConfig {
     }
 
     /**
+     * Reads a file into a list of strings
+     * @param file File to read
+     * @return List of file lines
+     * @throws IOException if file cannot be read
+     */
+    private List<String> readFileToList(File file) throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    /**
+     * Reads a resource into a list of strings
+     * @param resourcePath Resource path to read
+     * @return List of resource lines
+     * @throws IOException if resource cannot be read
+     */
+    private List<String> readResourceToList(String resourcePath) throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (InputStream resource = plugin.getResource(resourcePath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    /**
+     * Processes file lines into FileLine objects
+     * @param fileLines List of file lines
+     * @return Map of position to FileLine
+     */
+    private HashMap<Integer, FileLine> processFileLines(List<String> fileLines) {
+        HashMap<Integer, FileLine> processedLines = new HashMap<>();
+        int positions = 1;
+
+        for (int i = 0; i < fileLines.size(); i++) {
+            String line = fileLines.get(i);
+            if (isListContent(line)) continue;
+
+            if (!line.isEmpty() && !isComment(line) && line.contains(":")) {
+                String[] split = line.split(":");
+                boolean isValue = split.length > 1 && !isComment(split[1]);
+                boolean isHeader = split.length == 1 || isComment(split[1]);
+                boolean isList = isHeader && i + 1 < fileLines.size() && isListContent(fileLines.get(i + 1));
+                
+                processedLines.put(positions, new FileLine(line, isValue, isHeader, isList));
+                positions++;
+                continue;
+            }
+            processedLines.put(positions, new FileLine(line, false, false, false));
+            positions++;
+        }
+        return processedLines;
+    }
+
+    /**
      * Checks if the plugin was updated and updates configuration accordingly
      */
     private void updateConfigIfNeeded() {
@@ -996,7 +1062,7 @@ public class PluginConfig {
                 savesFile.createNewFile();
                 savesConfig = new YamlConfiguration();
             } catch (IOException e) {
-                logger.warning("Failed to create saves.yml: " + e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cFailed to create saves.yml: {0}", e.getMessage());
                 return;
             }
         } else {
@@ -1007,16 +1073,20 @@ public class PluginConfig {
         String pluginVersion = plugin.getDescription().getVersion();
         boolean isUpdated = pluginVersion.equals(currentVersion);
 
-        savesConfig.set("version", pluginVersion);
-        try {
-            savesConfig.save(savesFile);
-        } catch (IOException e) {
-            logger.warning("Could not save saves.yml: " + e.getMessage());
+        // Only save if version changed
+        if (currentVersion == null || !currentVersion.equals(pluginVersion)) {
+            savesConfig.set("version", pluginVersion);
+            try {
+                savesConfig.save(savesFile);
+            } catch (IOException e) {
+                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cCould not save saves.yml: {0}", e.getMessage());
+            }
         }
 
         if (!isUpdated) {
-            logger.info("Plugin version changed from " + (currentVersion != null ? currentVersion : "unknown") + " to " + pluginVersion);
-            logger.info("Checking for configuration updates...");
+            Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aPlugin version changed from {0} to {1}", 
+                new Object[]{(currentVersion != null ? currentVersion : "unknown"), pluginVersion});
+            Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aChecking for configuration updates...");
             setupConfigFile(true);
         } else {
             setupConfigFile(false);
@@ -1033,46 +1103,22 @@ public class PluginConfig {
                 createBackup();
             }
 
-            HashMap<Integer, FileLine> fileLines = new HashMap<>();
-            List<String> fileAsList = new ArrayList<>();
-            int positions = 1;
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    fileAsList.add(line);
-                }
-            }
-
-            for (int i = 0; i < fileAsList.size(); i++) {
-                String line = fileAsList.get(i);
-                if (isListContent(line)) continue;
-
-                if (!line.isEmpty() && !isComment(line) && line.contains(":")) {
-                    String[] split = line.split(":");
-                    boolean isValue = split.length > 1 && !isComment(split[1]);
-                    boolean isHeader = split.length == 1 || isComment(split[1]);
-                    boolean isList = isHeader && i + 1 < fileAsList.size() && isListContent(fileAsList.get(i + 1));
-                    
-                    fileLines.put(positions, new FileLine(line, isValue, isHeader, isList));
-                    positions++;
-                    continue;
-                }
-                fileLines.put(positions, new FileLine(line, false, false, false));
-                positions++;
-            }
+            List<String> fileAsList = readFileToList(configFile);
+            HashMap<Integer, FileLine> fileLines = processFileLines(fileAsList);
 
             FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
             
-            InputStream resourceStream = plugin.getResource("config.yml");
-            if (resourceStream == null) {
-                logger.warning("Could not load default config.yml from plugin resources!");
-                return;
+            FileConfiguration defaultConfig;
+            try (InputStream resourceStream = plugin.getResource("config.yml")) {
+                if (resourceStream == null) {
+                    Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cCould not load default config.yml from plugin resources!");
+                    return;
+                }
+                
+                defaultConfig = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(resourceStream, StandardCharsets.UTF_8)
+                );
             }
-            
-            FileConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
-                new InputStreamReader(resourceStream, StandardCharsets.UTF_8)
-            );
 
             boolean hasChanges = false;
             for (String key : defaultConfig.getKeys(true)) {
@@ -1082,44 +1128,18 @@ public class PluginConfig {
                 if (shouldAddMissingKey(key, currentConfig)) {
                     currentConfig.set(key, defaultConfig.get(key));
                     hasChanges = true;
-                    logger.info("Added missing configuration key: " + key);
+                    Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aAdded missing configuration key: {0}", key);
                 }
             }
 
             if (hasChanges) {
-                HashMap<Integer, FileLine> templateLines = new HashMap<>();
-                List<String> templateAsList = new ArrayList<>();
-                int templatePositions = 1;
-
-                try (InputStream resource = plugin.getResource("config.yml");
-                     BufferedReader templateReader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
-                    String templateLine;
-                    while ((templateLine = templateReader.readLine()) != null) {
-                        templateAsList.add(templateLine);
-                    }
-                }
-
-                for (int i = 0; i < templateAsList.size(); i++) {
-                    String templateLine = templateAsList.get(i);
-                    if (isListContent(templateLine)) continue;
-
-                    if (!templateLine.isEmpty() && !isComment(templateLine) && templateLine.contains(":")) {
-                        String[] split = templateLine.split(":");
-                        boolean isValue = split.length > 1 && !isComment(split[1]);
-                        boolean isHeader = split.length == 1 || isComment(split[1]);
-                        boolean isList = isHeader && i + 1 < templateAsList.size() && isListContent(templateAsList.get(i + 1));
-                        
-                        templateLines.put(templatePositions, new FileLine(templateLine, isValue, isHeader, isList));
-                        templatePositions++;
-                        continue;
-                    }
-                    templateLines.put(templatePositions, new FileLine(templateLine, false, false, false));
-                    templatePositions++;
-                }
+                List<String> templateAsList = readResourceToList("config.yml");
+                HashMap<Integer, FileLine> templateLines = processFileLines(templateAsList);
 
                 StringBuilder builder = new StringBuilder();
                 HashMap<Integer, String> headers = new HashMap<>();
 
+                int templatePositions = templateLines.size() + 1;
                 for (int pos = 1; pos < templatePositions; pos++) {
                     FileLine fileLine = templateLines.get(pos);
                     if (fileLine == null) continue;
