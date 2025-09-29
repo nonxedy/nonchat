@@ -50,6 +50,20 @@ interactive-placeholders:
   ping-format: "{ping}ms"
 
 # ==================================================
+# MENTION SOUNDS
+# Configure sound settings when players are mentioned in chat.
+# ==================================================
+mention-sounds:
+  # Enable/disable sound when player is mentioned.
+  enabled: true
+  # Sound to play when player is mentioned (Minecraft sound names).
+  sound: "entity.experience_orb.pickup"
+  # Volume of the mention sound (0.0 to 1.0).
+  volume: 1.0
+  # Pitch of the mention sound (0.5 to 2.0).
+  pitch: 1.0
+
+# ==================================================
 # CUSTOM CHANNELS
 # Define chat channels with unique settings.
 #
@@ -135,12 +149,28 @@ join-messages:
   enabled: true
   # The format for the join message.
   format: "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%"
+  # Enable/disable sound when player joins.
+  sound-enabled: true
+  # Sound to play when player joins (Minecraft sound names).
+  sound: "entity.experience_orb.pickup"
+  # Volume of the join sound (0.0 to 1.0).
+  sound-volume: 1.0
+  # Pitch of the join sound (0.5 to 2.0).
+  sound-pitch: 1.0
 
 quit-messages:
   # Enable/disable custom quit messages.
   enabled: true
   # The format for the quit message.
   format: "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%"
+  # Enable/disable sound when player quits.
+  sound-enabled: true
+  # Sound to play when player quits (Minecraft sound names).
+  sound: "entity.villager.no"
+  # Volume of the quit sound (0.0 to 1.0).
+  sound-volume: 1.0
+  # Pitch of the quit sound (0.5 to 2.0).
+  sound-pitch: 1.0
 
 # ==================================================
 # PRIVATE CHAT (MESSAGES)

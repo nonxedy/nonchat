@@ -35,6 +35,25 @@ public class JoinQuitListener implements Listener {
         this.config = config;
         this.channelManager = channelManager;
     }
+
+    /**
+     * Cleans up sound names by converting to proper Minecraft resource location format
+     * @param soundName The original sound name
+     * @return The cleaned sound name in proper format (lowercase with dots)
+     */
+    private String cleanSoundName(String soundName) {
+        if (soundName == null) {
+            return "entity.experience_orb.pickup"; // fallback sound
+        }
+        
+        // Remove "minecraft:" prefix if present
+        String cleaned = soundName.replace("minecraft:", "");
+        
+        // Convert from old format (ENTITY_EXPERIENCE_ORB_PICKUP) to new format (entity.experience_orb.pickup)
+        cleaned = cleaned.toLowerCase().replace('_', '.');
+        
+        return cleaned;
+    }
     
     /**
      * Handles player join events
@@ -59,6 +78,20 @@ public class JoinQuitListener implements Listener {
         }
         
         event.joinMessage(ColorUtil.parseComponent(joinFormat));
+        
+        // Play join sound if enabled for join events
+        if (config.isJoinSoundEnabled()) {
+            try {
+                String soundName = cleanSoundName(config.getJoinSound());
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    onlinePlayer.playSound(onlinePlayer.getLocation(), 
+                        soundName, 
+                        config.getJoinSoundVolume(), config.getJoinSoundPitch());
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error playing join sound: {0}", e.getMessage());
+            }
+        }
     }
     
     /**
@@ -96,5 +129,19 @@ public class JoinQuitListener implements Listener {
         }
         
         event.quitMessage(ColorUtil.parseComponent(quitFormat));
+        
+        // Play quit sound if enabled for quit events
+        if (config.isQuitSoundEnabled()) {
+            try {
+                String soundName = cleanSoundName(config.getQuitSound());
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    onlinePlayer.playSound(onlinePlayer.getLocation(), 
+                        soundName, 
+                        config.getQuitSoundVolume(), config.getQuitSoundPitch());
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error playing quit sound: {0}", e.getMessage());
+            }
+        }
     }
 }

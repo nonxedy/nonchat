@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -218,6 +216,7 @@ public class PluginConfig {
         ));
         config.set("anti-ad.staff-notify", true);
         config.set("anti-ad.punish-command", "ban %player% advertising");
+        
     }
 
     // Creates default chat channels configuration
@@ -421,6 +420,105 @@ public class PluginConfig {
     @NotNull
     public String getQuitFormat() {
         return config.getString("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
+    }
+
+    /**
+     * Checks if join sound is enabled
+     * @return true if join sound is enabled
+     */
+    public boolean isJoinSoundEnabled() {
+        return config.getBoolean("join-messages.sound-enabled", true);
+    }
+
+    /**
+     * Gets join sound name
+     * @return Join sound name
+     */
+    @NotNull
+    public String getJoinSound() {
+        return config.getString("join-messages.sound", "entity.experience_orb.pickup");
+    }
+
+    /**
+     * Gets join sound volume
+     * @return Join sound volume (0.0 to 1.0)
+     */
+    public float getJoinSoundVolume() {
+        return (float) config.getDouble("join-messages.sound-volume", 1.0);
+    }
+
+    /**
+     * Gets join sound pitch
+     * @return Join sound pitch (0.5 to 2.0)
+     */
+    public float getJoinSoundPitch() {
+        return (float) config.getDouble("join-messages.sound-pitch", 1.0);
+    }
+
+    /**
+     * Checks if quit sound is enabled
+     * @return true if quit sound is enabled
+     */
+    public boolean isQuitSoundEnabled() {
+        return config.getBoolean("quit-messages.sound-enabled", true);
+    }
+
+    /**
+     * Gets quit sound name
+     * @return Quit sound name
+     */
+    @NotNull
+    public String getQuitSound() {
+        return config.getString("quit-messages.sound", "entity.villager.no");
+    }
+
+    /**
+     * Gets quit sound volume
+     * @return Quit sound volume (0.0 to 1.0)
+     */
+    public float getQuitSoundVolume() {
+        return (float) config.getDouble("quit-messages.sound-volume", 1.0);
+    }
+
+    /**
+     * Gets quit sound pitch
+     * @return Quit sound pitch (0.5 to 2.0)
+     */
+    public float getQuitSoundPitch() {
+        return (float) config.getDouble("quit-messages.sound-pitch", 1.0);
+    }
+
+    /**
+     * Checks if mention sounds are enabled
+     * @return true if mention sounds are enabled
+     */
+    public boolean isMentionSoundEnabled() {
+        return config.getBoolean("mention-sounds.enabled", true);
+    }
+
+    /**
+     * Gets mention sound name
+     * @return Mention sound name
+     */
+    @NotNull
+    public String getMentionSound() {
+        return config.getString("mention-sounds.sound", "entity.experience_orb.pickup");
+    }
+
+    /**
+     * Gets mention sound volume
+     * @return Mention sound volume (0.0 to 1.0)
+     */
+    public float getMentionSoundVolume() {
+        return (float) config.getDouble("mention-sounds.volume", 1.0);
+    }
+
+    /**
+     * Gets mention sound pitch
+     * @return Mention sound pitch (0.5 to 2.0)
+     */
+    public float getMentionSoundPitch() {
+        return (float) config.getDouble("mention-sounds.pitch", 1.0);
     }
 
     /**

@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
@@ -495,7 +494,17 @@ public class ChatManager {
         mentionMessage = mentionMessage.replace("{player}", sender.getName());
 
         mentioned.sendMessage(ColorUtil.parseComponent(mentionMessage));
-        mentioned.playSound(mentioned.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+        
+        // Play mention sound if enabled for mention events
+        if (config.isMentionSoundEnabled()) {
+            try {
+                mentioned.playSound(mentioned.getLocation(), 
+                    config.getMentionSound(), 
+                    config.getMentionSoundVolume(), config.getMentionSoundPitch());
+            } catch (Exception e) {
+                plugin.logError("Error playing mention sound: " + e.getMessage());
+            }
+        }
     }
 
     /**
