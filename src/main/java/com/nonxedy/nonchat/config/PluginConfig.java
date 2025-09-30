@@ -18,15 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
@@ -42,9 +41,7 @@ import lombok.Getter;
 @Getter
 public class PluginConfig {
     // Plugin instance for resource access
-    private final JavaPlugin plugin;
-    // Logger for migration messages
-    private final Logger logger;
+    private final Nonchat plugin;
     // File object representing the config.yml file
     private final File configFile;
     // Configuration object to store and manage plugin settings
@@ -57,9 +54,8 @@ public class PluginConfig {
     private String defaultChannel;
 
     // Constructor initializes config file path and loads configuration
-    public PluginConfig(JavaPlugin plugin) {
+    public PluginConfig(Nonchat plugin) {
         this.plugin = plugin;
-        this.logger = plugin.getLogger();
         // Sets config file path to plugins/nonchat/config.yml
         this.configFile = new File("plugins/nonchat", "config.yml");
         loadConfig();
@@ -1296,8 +1292,8 @@ public class PluginConfig {
                         builder.append(identifier).append(": ");
 
                         Object value = currentConfig.get(path.toString());
-                        if (value instanceof String) {
-                            String stringValue = ((String) value).replace("\n", "\\n");
+                        if (value instanceof String string) {
+                            String stringValue = string.replace("\n", "\\n");
                             builder.append("\"").append(stringValue).append("\"\n");
                         } else {
                             builder.append(value).append("\n");
@@ -1337,15 +1333,14 @@ public class PluginConfig {
                     writer.flush();
                 }
                 
-                logger.info("Configuration updated successfully with new options");
+                plugin.logResponse("Configuration updated successfully with new options");
                 if (backup) {
-                    logger.info("A backup of your previous configuration was created in the 'backups' folder.");
+                    plugin.logResponse("A backup of your previous configuration was created in the 'backups' folder.");
                 }
             }
 
-        } catch (Exception e) {
-            logger.severe("Failed to update configuration: " + e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            plugin.logError("Failed to update configuration: " + e.getMessage());
         }
     }
 
@@ -1372,10 +1367,10 @@ public class PluginConfig {
                 }
             }
             
-            logger.info("Created configuration backup: " + backupFile.getName());
+            plugin.logResponse("Created configuration backup: " + backupFile.getName());
 
         } catch (IOException e) {
-            logger.warning("Failed to create configuration backup: " + e.getMessage());
+            plugin.logError("Failed to create configuration backup: " + e.getMessage());
         }
     }
 

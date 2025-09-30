@@ -14,7 +14,6 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.chat.formatting.PrivateMessageUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
-import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
 
 import net.kyori.adventure.text.Component;
 
