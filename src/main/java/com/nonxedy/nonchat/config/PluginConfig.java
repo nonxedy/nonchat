@@ -167,7 +167,10 @@ public class PluginConfig {
         config.set("chat-bubbles.enabled", true);
         config.set("chat-bubbles.duration", 5);
         config.set("chat-bubbles.height", 2.5);
-        config.set("chat-bubbles.show-in-private-channels", false);
+        config.set("chat-bubbles.scale", 1.0);
+        config.set("chat-bubbles.scale-x", 1.0);
+        config.set("chat-bubbles.scale-y", 1.0);
+        config.set("chat-bubbles.scale-z", 1.0);
         
         // Create default channel configurations
         createDefaultChannels();
@@ -701,13 +704,36 @@ public class PluginConfig {
     }
 
     /**
-     * Checks if chat bubbles should be shown in private channels
-     * @return true if bubbles should show in private channels
+     * Gets chat bubble scale
+     * @return Scale multiplier (1.0 = normal size)
      */
-    public boolean shouldShowBubblesInPrivateChannels() {
-        return config.getBoolean("chat-bubbles.show-in-private-channels", false);
+    public double getChatBubblesScale() {
+        return config.getDouble("chat-bubbles.scale", 1.0);
     }
 
+    /**
+     * Gets chat bubble scale X axis
+     * @return Scale X multiplier (1.0 = normal size)
+     */
+    public double getChatBubblesScaleX() {
+        return config.getDouble("chat-bubbles.scale-x", 1.0);
+    }
+
+    /**
+     * Gets chat bubble scale Y axis
+     * @return Scale Y multiplier (1.0 = normal size)
+     */
+    public double getChatBubblesScaleY() {
+        return config.getDouble("chat-bubbles.scale-y", 1.0);
+    }
+
+    /**
+     * Gets chat bubble scale Z axis
+     * @return Scale Z multiplier (1.0 = normal size)
+     */
+    public double getChatBubblesScaleZ() {
+        return config.getDouble("chat-bubbles.scale-z", 1.0);
+    }
 
     /**
      * Gets list of banned words

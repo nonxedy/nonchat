@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,7 +32,7 @@ import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
-import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
@@ -61,7 +59,7 @@ public class Nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
-    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+    private final Map<Player, List<TextDisplay>> bubbles = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -83,20 +81,6 @@ public class Nonchat extends JavaPlugin {
             registerPlaceholders();
             registerListeners();
             setupIntegrations();
-
-            Bukkit.getScheduler().runTaskLater(this, () -> {
-                try {
-                    for (World world : Bukkit.getWorlds()) {
-                        for (Entity entity : world.getEntities()) {
-                            if (entity instanceof ArmorStand) {
-                                entity.remove();
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    getLogger().warning("Failed to clean up armor stands: " + e.getMessage());
-                }
-            }, 20);
 
             Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
         } catch (Exception e) {
@@ -242,6 +226,14 @@ public class Nonchat extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
+            // Clean up all chat bubbles and display entities
+            if (chatManager != null) {
+                chatManager.cleanup();
+            }
+            
+            // Clear display entity pool
+            DisplayEntityUtil.clearPool();
+            
             if (broadcastManager != null) {
                 broadcastManager.stop();
             }
@@ -345,9 +337,9 @@ public class Nonchat extends JavaPlugin {
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         try {
-            List<ArmorStand> playerBubbles = bubbles.remove(event.getPlayer());
+            List<TextDisplay> playerBubbles = bubbles.remove(event.getPlayer());
             if (playerBubbles != null) {
-                BubblePacketUtil.removeBubbles(playerBubbles);
+                DisplayEntityUtil.removeBubbles(playerBubbles);
             }
         } catch (Exception e) {
             getLogger().fine("Error handling player teleport: " + e.getMessage());

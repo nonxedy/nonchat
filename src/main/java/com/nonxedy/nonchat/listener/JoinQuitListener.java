@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,7 +16,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -29,7 +29,7 @@ public class JoinQuitListener implements Listener {
     
     private final PluginConfig config;
     private final ChannelManager channelManager;
-    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+    private final Map<Player, List<TextDisplay>> bubbles = new HashMap<>();
     
     public JoinQuitListener(PluginConfig config, ChannelManager channelManager) {
         this.config = config;
@@ -108,9 +108,9 @@ public class JoinQuitListener implements Listener {
         }
         
         // Clean up bubbles
-        List<ArmorStand> playerBubbles = bubbles.remove(player);
+        List<TextDisplay> playerBubbles = bubbles.remove(player);
         if (playerBubbles != null) {
-            BubblePacketUtil.removeBubbles(playerBubbles);
+            DisplayEntityUtil.removeBubbles(playerBubbles);
         }
 
         if (!config.isQuitMessageEnabled()) {

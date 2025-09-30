@@ -238,6 +238,12 @@ chat-bubbles:
   duration: 5
   # Height of the bubble above the player's head in blocks.
   height: 2.5
+  # Overall scale of the chat bubble (1.0 = normal size).
+  scale: 1.0
+  # Individual axis scale multipliers (1.0 = normal size).
+  scale-x: 1.0
+  scale-y: 1.0
+  scale-z: 1.0
 
 # ==================================================
 # ROLEPLAY COMMANDS
