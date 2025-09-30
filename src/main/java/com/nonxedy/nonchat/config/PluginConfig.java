@@ -530,7 +530,7 @@ public class PluginConfig {
      */
     @NotNull
     public String getPrivateChatSenderFormat() {
-        return config.getString("private-chat.sender.format", "§8[§6You §8-> §6{receiver}§8] §f{message}");
+        return config.getString("private-chat.sender.format", "§8[§fYou §8-> §f{receiver}§8] §f{message}");
     }
 
     /**
@@ -539,7 +539,7 @@ public class PluginConfig {
      */
     @NotNull
     public String getPrivateChatReceiverFormat() {
-        return config.getString("private-chat.receiver.format", "§8[§6{sender} §8-> §6You§8] §f{message}");
+        return config.getString("private-chat.receiver.format", "§8[§f{sender} §8-> §fYou§8] §f{message}");
     }
 
     /**

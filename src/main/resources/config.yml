@@ -178,7 +178,7 @@ quit-messages:
 private-chat:
   sender:
     # Format for the message seen by the sender.
-    format: "§8[§6You §8-> §6{receiver}§8] §f{message}"
+    format: "§8[§fYou §8-> §f{receiver}§8] §f{message}"
     hover:
       # Enable/disable hover text on the sender's message.
       enabled: true
@@ -188,7 +188,7 @@ private-chat:
         - "§8Click to reply"
   receiver:
     # Format for the message seen by the receiver.
-    format: "§8[§6{sender} §8-> §6You§8] §f{message}"
+    format: "§8[§f{sender} §f-> §6You§8] §f{message}"
     hover:
       # Enable/disable hover text on the receiver's message.
       enabled: true
