@@ -161,9 +161,16 @@ public class ColorUtil {
         try {
             // Check if message contains legacy codes that need conversion
             if (containsLegacyCodes(message)) {
-                // Convert legacy codes to MiniMessage format
-                String preparedMessage = prepareMixedFormatMessage(message);
-                return MINI_MESSAGE.deserialize(preparedMessage);
+                // Use a smarter approach for mixed formats
+                // First, try to parse as MiniMessage directly to see if it works
+                try {
+                    return MINI_MESSAGE.deserialize(message);
+                } catch (Exception miniMessageException) {
+                    // If MiniMessage parsing fails, it means we have legacy codes that need conversion
+                    // Convert legacy codes to MiniMessage format
+                    String preparedMessage = prepareMixedFormatMessage(message);
+                    return MINI_MESSAGE.deserialize(preparedMessage);
+                }
             } else {
                 // Parse directly with MiniMessage
                 return MINI_MESSAGE.deserialize(message);
@@ -200,9 +207,12 @@ public class ColorUtil {
         
         String result = message;
         
-        // Only convert legacy codes if they don't conflict with existing MiniMessage tags
-        // First convert hex format from &#RRGGBB to <#RRGGBB> only if not already in MiniMessage format
-        if (!result.contains("<#")) {
+        // Check if the message already has valid MiniMessage hex colors
+        boolean hasMiniMessageHex = result.matches(".*<#[0-9a-fA-F]{6}>.*");
+        
+        // Only convert legacy hex codes if there are no MiniMessage hex colors present
+        // This prevents conflicts between &#RRGGBB and <#RRGGBB> formats
+        if (!hasMiniMessageHex) {
             Matcher matcher = HEX_PATTERN.matcher(result);
             StringBuffer buffer = new StringBuffer(result.length() + 4 * 8);
             
@@ -215,76 +225,102 @@ public class ColorUtil {
             result = buffer.toString();
         }
         
-        // Convert legacy color codes to MiniMessage format only if they're not part of existing tags
-        // Use more careful replacement to avoid conflicts
-        result = replaceLegacyCode(result, "&0", "<black>");
-        result = replaceLegacyCode(result, "&1", "<dark_blue>");
-        result = replaceLegacyCode(result, "&2", "<dark_green>");
-        result = replaceLegacyCode(result, "&3", "<dark_aqua>");
-        result = replaceLegacyCode(result, "&4", "<dark_red>");
-        result = replaceLegacyCode(result, "&5", "<dark_purple>");
-        result = replaceLegacyCode(result, "&6", "<gold>");
-        result = replaceLegacyCode(result, "&7", "<gray>");
-        result = replaceLegacyCode(result, "&8", "<dark_gray>");
-        result = replaceLegacyCode(result, "&9", "<blue>");
-        result = replaceLegacyCode(result, "&a", "<green>");
-        result = replaceLegacyCode(result, "&b", "<aqua>");
-        result = replaceLegacyCode(result, "&c", "<red>");
-        result = replaceLegacyCode(result, "&d", "<light_purple>");
-        result = replaceLegacyCode(result, "&e", "<yellow>");
-        result = replaceLegacyCode(result, "&f", "<white>");
-        
-        // Convert § codes (section symbol)
-        result = replaceLegacyCode(result, "§0", "<black>");
-        result = replaceLegacyCode(result, "§1", "<dark_blue>");
-        result = replaceLegacyCode(result, "§2", "<dark_green>");
-        result = replaceLegacyCode(result, "§3", "<dark_aqua>");
-        result = replaceLegacyCode(result, "§4", "<dark_red>");
-        result = replaceLegacyCode(result, "§5", "<dark_purple>");
-        result = replaceLegacyCode(result, "§6", "<gold>");
-        result = replaceLegacyCode(result, "§7", "<gray>");
-        result = replaceLegacyCode(result, "§8", "<dark_gray>");
-        result = replaceLegacyCode(result, "§9", "<blue>");
-        result = replaceLegacyCode(result, "§a", "<green>");
-        result = replaceLegacyCode(result, "§b", "<aqua>");
-        result = replaceLegacyCode(result, "§c", "<red>");
-        result = replaceLegacyCode(result, "§d", "<light_purple>");
-        result = replaceLegacyCode(result, "§e", "<yellow>");
-        result = replaceLegacyCode(result, "§f", "<white>");
-        
-        // Format codes with & prefix
-        result = replaceLegacyCode(result, "&l", "<bold>");
-        result = replaceLegacyCode(result, "&m", "<strikethrough>");
-        result = replaceLegacyCode(result, "&n", "<underlined>");
-        result = replaceLegacyCode(result, "&o", "<italic>");
-        result = replaceLegacyCode(result, "&k", "<obfuscated>");
-        result = replaceLegacyCode(result, "&r", "<reset>");
-        
-        // Format codes with § prefix
-        result = replaceLegacyCode(result, "§l", "<bold>");
-        result = replaceLegacyCode(result, "§m", "<strikethrough>");
-        result = replaceLegacyCode(result, "§n", "<underlined>");
-        result = replaceLegacyCode(result, "§o", "<italic>");
-        result = replaceLegacyCode(result, "§k", "<obfuscated>");
-        result = replaceLegacyCode(result, "§r", "<reset>");
+        // For legacy color codes, only convert them if they're not part of existing MiniMessage tags
+        // We need to be more careful to avoid conflicts
+        result = safelyConvertLegacyColors(result);
         
         return result;
     }
     
     /**
-     * Safely replaces legacy codes without interfering with existing MiniMessage tags
-     * @param text The text to process
-     * @param legacyCode The legacy code to replace
-     * @param miniMessageTag The MiniMessage tag to replace with
-     * @return Processed text
+     * Safely converts legacy color codes to MiniMessage format, avoiding conflicts
+     * @param message The message to process
+     * @return Message with legacy colors converted to MiniMessage format
      */
-    private static String replaceLegacyCode(String text, String legacyCode, String miniMessageTag) {
-        if (!text.contains(legacyCode)) return text;
+    private static String safelyConvertLegacyColors(String message) {
+        if (message == null || message.isEmpty()) return message;
         
-        // Simple replacement - in a more sophisticated implementation,
-        // we could check if the legacy code is inside existing MiniMessage tags
-        return text.replace(legacyCode, miniMessageTag);
+        // Split the message by MiniMessage tags to process text between tags
+        String[] parts = message.split("(?=<)|(?<=>)");
+        StringBuilder result = new StringBuilder();
+        
+        for (String part : parts) {
+            if (part.startsWith("<") && part.endsWith(">")) {
+                // This is a MiniMessage tag, keep it as is
+                result.append(part);
+            } else {
+                // This is text between tags, convert legacy codes
+                String converted = convertLegacyCodesInText(part);
+                result.append(converted);
+            }
+        }
+        
+        return result.toString();
     }
+    
+    /**
+     * Converts legacy color codes in plain text (not inside MiniMessage tags)
+     * @param text The text to convert
+     * @return Text with legacy codes converted to MiniMessage format
+     */
+    private static String convertLegacyCodesInText(String text) {
+        String result = text;
+        
+        // Convert legacy color codes to MiniMessage format
+        result = result.replace("&0", "<black>");
+        result = result.replace("&1", "<dark_blue>");
+        result = result.replace("&2", "<dark_green>");
+        result = result.replace("&3", "<dark_aqua>");
+        result = result.replace("&4", "<dark_red>");
+        result = result.replace("&5", "<dark_purple>");
+        result = result.replace("&6", "<gold>");
+        result = result.replace("&7", "<gray>");
+        result = result.replace("&8", "<dark_gray>");
+        result = result.replace("&9", "<blue>");
+        result = result.replace("&a", "<green>");
+        result = result.replace("&b", "<aqua>");
+        result = result.replace("&c", "<red>");
+        result = result.replace("&d", "<light_purple>");
+        result = result.replace("&e", "<yellow>");
+        result = result.replace("&f", "<white>");
+        
+        // Convert § codes (section symbol)
+        result = result.replace("§0", "<black>");
+        result = result.replace("§1", "<dark_blue>");
+        result = result.replace("§2", "<dark_green>");
+        result = result.replace("§3", "<dark_aqua>");
+        result = result.replace("§4", "<dark_red>");
+        result = result.replace("§5", "<dark_purple>");
+        result = result.replace("§6", "<gold>");
+        result = result.replace("§7", "<gray>");
+        result = result.replace("§8", "<dark_gray>");
+        result = result.replace("§9", "<blue>");
+        result = result.replace("§a", "<green>");
+        result = result.replace("§b", "<aqua>");
+        result = result.replace("§c", "<red>");
+        result = result.replace("§d", "<light_purple>");
+        result = result.replace("§e", "<yellow>");
+        result = result.replace("§f", "<white>");
+        
+        // Format codes with & prefix
+        result = result.replace("&l", "<bold>");
+        result = result.replace("&m", "<strikethrough>");
+        result = result.replace("&n", "<underlined>");
+        result = result.replace("&o", "<italic>");
+        result = result.replace("&k", "<obfuscated>");
+        result = result.replace("&r", "<reset>");
+        
+        // Format codes with § prefix
+        result = result.replace("§l", "<bold>");
+        result = result.replace("§m", "<strikethrough>");
+        result = result.replace("§n", "<underlined>");
+        result = result.replace("§o", "<italic>");
+        result = result.replace("§k", "<obfuscated>");
+        result = result.replace("§r", "<reset>");
+        
+        return result;
+    }
+    
     
     /**
      * Checks if a message contains MiniMessage tags using pattern matching

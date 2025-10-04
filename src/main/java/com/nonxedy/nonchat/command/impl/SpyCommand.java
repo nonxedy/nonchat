@@ -57,13 +57,14 @@ public class SpyCommand implements CommandExecutor, TabCompleter {
         // Log the command execution
         plugin.logCommand(command.getName(), args);
 
-        // Cast sender to Player
-        Player player = (Player) sender;
         // Check if sender is a player
         if (!(sender instanceof Player)) {
             sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("player-only")));
             return true;
         }
+
+        // Cast sender to Player
+        Player player = (Player) sender;
 
         // Check if player has permission to use spy command
         if (!player.hasPermission("nonchat.spy")) {

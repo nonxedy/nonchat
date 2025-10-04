@@ -34,7 +34,7 @@ public class IntegrationUtil {
                 Bukkit.getLogger().info("[nonchat] PlaceholderAPI not available - placeholder features will be disabled");
             }
         } catch (Exception e) {
-            Bukkit.getLogger().warning("[nonchat] Error checking PlaceholderAPI: " + e.getMessage());
+            Bukkit.getLogger().log(Level.WARNING, "[nonchat] Error checking PlaceholderAPI: {0}", e.getMessage());
             placeholderAPIEnabled = false;
         }
     }
@@ -55,7 +55,7 @@ public class IntegrationUtil {
         } catch (NoClassDefFoundError e) {
             Bukkit.getLogger().info("[nonchat] LuckPerms not installed - permission features will be disabled");
         } catch (Exception e) {
-            Bukkit.getLogger().warning("[nonchat] Error setting up LuckPerms: " + e.getMessage());
+            Bukkit.getLogger().log(Level.WARNING, "[nonchat] Error setting up LuckPerms: {0}", e.getMessage());
         }
     }
 
@@ -75,7 +75,7 @@ public class IntegrationUtil {
         } catch (NoClassDefFoundError e) {
             Bukkit.getLogger().info("[nonchat] Vault not installed - economy features will be disabled");
         } catch (Exception e) {
-            Bukkit.getLogger().warning("[nonchat] Error setting up Vault Economy: " + e.getMessage());
+            Bukkit.getLogger().log(Level.WARNING, "[nonchat] Error setting up Vault Economy: {0}", e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class IntegrationUtil {
                 return user != null ? user.getCachedData().getMetaData().getPrefix() : "";
             }
         } catch (Exception e) {
-            Bukkit.getLogger().fine("[nonchat] Error getting player prefix: " + e.getMessage());
+            Bukkit.getLogger().log(Level.FINE, "[nonchat] Error getting player prefix: {0}", e.getMessage());
         }
         return "";
     }
@@ -107,7 +107,7 @@ public class IntegrationUtil {
                 return String.format("%.2f", economy.getBalance(player));
             }
         } catch (Exception e) {
-            Bukkit.getLogger().fine("[nonchat] Error getting player balance: " + e.getMessage());
+            Bukkit.getLogger().log(Level.FINE, "[nonchat] Error getting player balance: {0}", e.getMessage());
         }
         return "0";
     }
@@ -123,7 +123,7 @@ public class IntegrationUtil {
                 return PlaceholderAPI.setPlaceholders(player, "%statistic_time_played%");
             }
         } catch (Exception e) {
-            Bukkit.getLogger().fine("[nonchat] Error getting player play time: " + e.getMessage());
+            Bukkit.getLogger().log(Level.FINE, "[nonchat] Error getting player play time: {0}", e.getMessage());
         }
         return "0h";
     }

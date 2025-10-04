@@ -1,18 +1,31 @@
 package com.nonxedy.nonchat.config;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.formatting.ChatTypeUtil;
@@ -27,6 +40,8 @@ import lombok.Getter;
  */
 @Getter
 public class PluginConfig {
+    // Plugin instance for resource access
+    private final Nonchat plugin;
     // File object representing the config.yml file
     private final File configFile;
     // Configuration object to store and manage plugin settings
@@ -39,7 +54,8 @@ public class PluginConfig {
     private String defaultChannel;
 
     // Constructor initializes config file path and loads configuration
-    public PluginConfig() {
+    public PluginConfig(Nonchat plugin) {
+        this.plugin = plugin;
         // Sets config file path to plugins/nonchat/config.yml
         this.configFile = new File("plugins/nonchat", "config.yml");
         loadConfig();
@@ -53,6 +69,9 @@ public class PluginConfig {
         if (!configFile.exists()) {
             // Create default configuration if file doesn't exist
             createDefaultConfig();
+        } else {
+            // Check if configuration needs to be updated (using BankPlus approach)
+            updateConfigIfNeeded();
         }
         // Load configuration from file
         this.config = YamlConfiguration.loadConfiguration(configFile);
@@ -124,15 +143,30 @@ public class PluginConfig {
         config.set("quit-messages.format", "§8(§c-§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
         
         // Private chat settings (оставляем как есть)
-        config.set("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-        config.set("private-chat-target-you", "You");
+        // Private chat configuration
+        config.set("private-chat.sender-format", "§7[§aTo §f{target}§7] §7{message}");
+        config.set("private-chat.receiver-format", "§7[§cFrom §f{sender}§7] §7{message}");
+        config.set("private-chat.hover.enabled", true);
+        config.set("private-chat.hover.sender-hover", Arrays.asList(
+            "§7Sent to: §f{target}",
+            "§7Time: §f{time}",
+            "§7Click to send another message"
+        ));
+        config.set("private-chat.hover.receiver-hover", Arrays.asList(
+            "§7From: §f{sender}",
+            "§7Time: §f{time}",
+            "§7Click to reply"
+        ));
         config.set("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
         
         // Chat bubbles configuration
         config.set("chat-bubbles.enabled", true);
         config.set("chat-bubbles.duration", 5);
         config.set("chat-bubbles.height", 2.5);
-        config.set("chat-bubbles.show-in-private-channels", false);
+        config.set("chat-bubbles.scale", 1.0);
+        config.set("chat-bubbles.scale-x", 1.0);
+        config.set("chat-bubbles.scale-y", 1.0);
+        config.set("chat-bubbles.scale-z", 1.0);
         
         // Create default channel configurations
         createDefaultChannels();
@@ -160,6 +194,9 @@ public class PluginConfig {
         
         // Banned words
         config.set("banned-words", Arrays.asList("spam", "badword", "anotherbadword", "плохой"));
+
+        // Banned patterns (regex)
+        config.set("banned-patterns", Arrays.asList(".*\\btest\\b.*", ".*\\d{4,}.*"));
         
         // Caps filter
         config.set("caps-filter.enabled", true);
@@ -181,6 +218,7 @@ public class PluginConfig {
         ));
         config.set("anti-ad.staff-notify", true);
         config.set("anti-ad.punish-command", "ban %player% advertising");
+        
     }
 
     // Creates default chat channels configuration
@@ -387,12 +425,171 @@ public class PluginConfig {
     }
 
     /**
-     * Gets private chat message format
-     * @return Private chat format string
+     * Checks if join sound is enabled
+     * @return true if join sound is enabled
+     */
+    public boolean isJoinSoundEnabled() {
+        return config.getBoolean("join-messages.sound-enabled", true);
+    }
+
+    /**
+     * Gets join sound name
+     * @return Join sound name
      */
     @NotNull
-    public String getPrivateChatFormat() {
-        return config.getString("private-chat-format", "§f{sender} §7-> §f{target}§7: §7{message}");
+    public String getJoinSound() {
+        return config.getString("join-messages.sound", "entity.experience_orb.pickup");
+    }
+
+    /**
+     * Gets join sound volume
+     * @return Join sound volume (0.0 to 1.0)
+     */
+    public float getJoinSoundVolume() {
+        return (float) config.getDouble("join-messages.sound-volume", 1.0);
+    }
+
+    /**
+     * Gets join sound pitch
+     * @return Join sound pitch (0.5 to 2.0)
+     */
+    public float getJoinSoundPitch() {
+        return (float) config.getDouble("join-messages.sound-pitch", 1.0);
+    }
+
+    /**
+     * Checks if quit sound is enabled
+     * @return true if quit sound is enabled
+     */
+    public boolean isQuitSoundEnabled() {
+        return config.getBoolean("quit-messages.sound-enabled", true);
+    }
+
+    /**
+     * Gets quit sound name
+     * @return Quit sound name
+     */
+    @NotNull
+    public String getQuitSound() {
+        return config.getString("quit-messages.sound", "entity.villager.no");
+    }
+
+    /**
+     * Gets quit sound volume
+     * @return Quit sound volume (0.0 to 1.0)
+     */
+    public float getQuitSoundVolume() {
+        return (float) config.getDouble("quit-messages.sound-volume", 1.0);
+    }
+
+    /**
+     * Gets quit sound pitch
+     * @return Quit sound pitch (0.5 to 2.0)
+     */
+    public float getQuitSoundPitch() {
+        return (float) config.getDouble("quit-messages.sound-pitch", 1.0);
+    }
+
+    /**
+     * Checks if mention sounds are enabled
+     * @return true if mention sounds are enabled
+     */
+    public boolean isMentionSoundEnabled() {
+        return config.getBoolean("mention-sounds.enabled", true);
+    }
+
+    /**
+     * Gets mention sound name
+     * @return Mention sound name
+     */
+    @NotNull
+    public String getMentionSound() {
+        return config.getString("mention-sounds.sound", "entity.experience_orb.pickup");
+    }
+
+    /**
+     * Gets mention sound volume
+     * @return Mention sound volume (0.0 to 1.0)
+     */
+    public float getMentionSoundVolume() {
+        return (float) config.getDouble("mention-sounds.volume", 1.0);
+    }
+
+    /**
+     * Gets mention sound pitch
+     * @return Mention sound pitch (0.5 to 2.0)
+     */
+    public float getMentionSoundPitch() {
+        return (float) config.getDouble("mention-sounds.pitch", 1.0);
+    }
+
+    /**
+     * Gets private chat sender message format
+     * @return Private chat sender format string
+     */
+    @NotNull
+    public String getPrivateChatSenderFormat() {
+        return config.getString("private-chat.sender.format", "§8[§fYou §8-> §f{receiver}§8] §f{message}");
+    }
+
+    /**
+     * Gets private chat receiver message format
+     * @return Private chat receiver format string
+     */
+    @NotNull
+    public String getPrivateChatReceiverFormat() {
+        return config.getString("private-chat.receiver.format", "§8[§f{sender} §8-> §fYou§8] §f{message}");
+    }
+
+    /**
+     * Checks if private chat sender hover text is enabled
+     * @return true if sender hover text is enabled
+     */
+    public boolean isPrivateChatSenderHoverEnabled() {
+        return config.getBoolean("private-chat.sender.hover.enabled", true);
+    }
+
+    /**
+     * Checks if private chat receiver hover text is enabled
+     * @return true if receiver hover text is enabled
+     */
+    public boolean isPrivateChatReceiverHoverEnabled() {
+        return config.getBoolean("private-chat.receiver.hover.enabled", true);
+    }
+
+    /**
+     * Gets private chat sender hover text list
+     * @return List of hover text lines for sender
+     */
+    @NotNull
+    public List<String> getPrivateChatSenderHover() {
+        return config.getStringList("private-chat.sender.hover.text");
+    }
+
+    /**
+     * Gets private chat receiver hover text list
+     * @return List of hover text lines for receiver
+     */
+    @NotNull
+    public List<String> getPrivateChatReceiverHover() {
+        return config.getStringList("private-chat.receiver.hover.text");
+    }
+
+    /**
+     * Checks if private chat click actions are enabled globally
+     * @return true if click actions are enabled
+     */
+    public boolean isPrivateChatClickActionsEnabled() {
+        return config.getBoolean("private-chat.click-actions.enabled", true);
+    }
+
+    /**
+     * Gets private chat default reply command
+     * @return Reply command template
+     */
+    @NotNull
+    public String getPrivateChatReplyCommand() {
+        return config.getString("private-chat.click-actions.reply-command", "/msg {sender} ");
     }
 
     /**
@@ -402,15 +599,6 @@ public class PluginConfig {
     @NotNull
     public String getSpyFormat() {
         return config.getString("spy-format", "§f{sender} §7-> §f{target}§7: §7{message}");
-    }
-
-    /**
-     * Gets private chat target "You" text
-     * @return Text to show for target player in private messages
-     */
-    @NotNull
-    public String getPrivateChatTargetYou() {
-        return config.getString("private-chat-target-you", "You");
     }
 
     /**
@@ -515,13 +703,36 @@ public class PluginConfig {
     }
 
     /**
-     * Checks if chat bubbles should be shown in private channels
-     * @return true if bubbles should show in private channels
+     * Gets chat bubble scale
+     * @return Scale multiplier (1.0 = normal size)
      */
-    public boolean shouldShowBubblesInPrivateChannels() {
-        return config.getBoolean("chat-bubbles.show-in-private-channels", false);
+    public double getChatBubblesScale() {
+        return config.getDouble("chat-bubbles.scale", 1.0);
     }
 
+    /**
+     * Gets chat bubble scale X axis
+     * @return Scale X multiplier (1.0 = normal size)
+     */
+    public double getChatBubblesScaleX() {
+        return config.getDouble("chat-bubbles.scale-x", 1.0);
+    }
+
+    /**
+     * Gets chat bubble scale Y axis
+     * @return Scale Y multiplier (1.0 = normal size)
+     */
+    public double getChatBubblesScaleY() {
+        return config.getDouble("chat-bubbles.scale-y", 1.0);
+    }
+
+    /**
+     * Gets chat bubble scale Z axis
+     * @return Scale Z multiplier (1.0 = normal size)
+     */
+    public double getChatBubblesScaleZ() {
+        return config.getDouble("chat-bubbles.scale-z", 1.0);
+    }
 
     /**
      * Gets list of banned words
@@ -533,12 +744,21 @@ public class PluginConfig {
     }
 
     /**
+     * Gets list of banned regex patterns
+     * @return List of blocked patterns
+     */
+    @NotNull
+    public List<String> getBannedPatterns() {
+        return config.getStringList("banned-patterns");
+    }
+
+    /**
      * Gets word blocker instance
      * @return Configured WordBlocker
      */
     @NotNull
     public WordBlocker getWordBlocker() {
-        return new WordBlocker(getBannedWords());
+        return new WordBlocker(getBannedWords(), getBannedPatterns());
     }
 
     /**
@@ -895,5 +1115,358 @@ public class PluginConfig {
 
     public Set<String> getKeys(boolean deep) {
         return config.getKeys(deep);
+    }
+
+    /**
+     * Reads a file into a list of strings
+     * @param file File to read
+     * @return List of file lines
+     * @throws IOException if file cannot be read
+     */
+    private List<String> readFileToList(File file) throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    /**
+     * Reads a resource into a list of strings
+     * @param resourcePath Resource path to read
+     * @return List of resource lines
+     * @throws IOException if resource cannot be read
+     */
+    private List<String> readResourceToList(String resourcePath) throws IOException {
+        List<String> lines = new ArrayList<>();
+        try (InputStream resource = plugin.getResource(resourcePath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+        return lines;
+    }
+
+    /**
+     * Processes file lines into FileLine objects
+     * @param fileLines List of file lines
+     * @return Map of position to FileLine
+     */
+    private HashMap<Integer, FileLine> processFileLines(List<String> fileLines) {
+        HashMap<Integer, FileLine> processedLines = new HashMap<>();
+        int positions = 1;
+
+        for (int i = 0; i < fileLines.size(); i++) {
+            String line = fileLines.get(i);
+            if (isListContent(line)) continue;
+
+            if (!line.isEmpty() && !isComment(line) && line.contains(":")) {
+                String[] split = line.split(":");
+                boolean isValue = split.length > 1 && !isComment(split[1]);
+                boolean isHeader = split.length == 1 || isComment(split[1]);
+                boolean isList = isHeader && i + 1 < fileLines.size() && isListContent(fileLines.get(i + 1));
+                
+                processedLines.put(positions, new FileLine(line, isValue, isHeader, isList));
+                positions++;
+                continue;
+            }
+            processedLines.put(positions, new FileLine(line, false, false, false));
+            positions++;
+        }
+        return processedLines;
+    }
+
+    /**
+     * Checks if the plugin was updated and updates configuration accordingly
+     */
+    private void updateConfigIfNeeded() {
+        File savesFile = new File(plugin.getDataFolder(), "saves.yml");
+        FileConfiguration savesConfig;
+        
+        if (!savesFile.exists()) {
+            try {
+                savesFile.getParentFile().mkdirs();
+                savesFile.createNewFile();
+                savesConfig = new YamlConfiguration();
+            } catch (IOException e) {
+                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cFailed to create saves.yml: {0}", e.getMessage());
+                return;
+            }
+        } else {
+            savesConfig = YamlConfiguration.loadConfiguration(savesFile);
+        }
+
+        String currentVersion = savesConfig.getString("version");
+        String pluginVersion = plugin.getDescription().getVersion();
+        boolean isUpdated = pluginVersion.equals(currentVersion);
+
+        // Only save if version changed
+        if (currentVersion == null || !currentVersion.equals(pluginVersion)) {
+            savesConfig.set("version", pluginVersion);
+            try {
+                savesConfig.save(savesFile);
+            } catch (IOException e) {
+                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cCould not save saves.yml: {0}", e.getMessage());
+            }
+        }
+
+        if (!isUpdated) {
+            Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aPlugin version changed from {0} to {1}", 
+                new Object[]{(currentVersion != null ? currentVersion : "unknown"), pluginVersion});
+            Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aChecking for configuration updates...");
+            setupConfigFile(true);
+        } else {
+            setupConfigFile(false);
+        }
+    }
+
+    /**
+     * Updates the config file with missing paths from the default configuration
+     * Preserves user values and comments, adds only missing keys
+     */
+    private void setupConfigFile(boolean backup) {
+        try {
+            if (backup) {
+                createBackup();
+            }
+
+            List<String> fileAsList = readFileToList(configFile);
+            HashMap<Integer, FileLine> fileLines = processFileLines(fileAsList);
+
+            FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
+            
+            FileConfiguration defaultConfig;
+            try (InputStream resourceStream = plugin.getResource("config.yml")) {
+                if (resourceStream == null) {
+                    Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cCould not load default config.yml from plugin resources!");
+                    return;
+                }
+                
+                defaultConfig = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(resourceStream, StandardCharsets.UTF_8)
+                );
+            }
+
+            boolean hasChanges = false;
+            for (String key : defaultConfig.getKeys(true)) {
+                if (currentConfig.contains(key)) continue;
+                if (defaultConfig.isConfigurationSection(key)) continue;
+
+                if (shouldAddMissingKey(key, currentConfig)) {
+                    currentConfig.set(key, defaultConfig.get(key));
+                    hasChanges = true;
+                    Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aAdded missing configuration key: {0}", key);
+                }
+            }
+
+            if (hasChanges) {
+                List<String> templateAsList = readResourceToList("config.yml");
+                HashMap<Integer, FileLine> templateLines = processFileLines(templateAsList);
+
+                StringBuilder builder = new StringBuilder();
+                HashMap<Integer, String> headers = new HashMap<>();
+
+                int templatePositions = templateLines.size() + 1;
+                for (int pos = 1; pos < templatePositions; pos++) {
+                    FileLine fileLine = templateLines.get(pos);
+                    if (fileLine == null) continue;
+
+                    String line = fileLine.getLine();
+                    if (!fileLine.isValue() && !fileLine.isHeader() && !fileLine.isList()) {
+                        builder.append(line).append("\n");
+                        continue;
+                    }
+
+                    int spaces = 0;
+                    for (char c : line.toCharArray()) {
+                        if (c == ' ') spaces++;
+                        else break;
+                    }
+
+                    int point = spaces / 2;
+                    String identifier = line.substring(spaces).split(":")[0];
+                    if (fileLine.isHeader()) headers.put(point, identifier);
+
+                    if (fileLine.isValue()) {
+                        StringBuilder path = new StringBuilder();
+                        for (int i = 0; i <= point - 1; i++) {
+                            String header = headers.get(i);
+                            if (header != null) path.append(header).append(".");
+                        }
+                        path.append(identifier);
+
+                        for (int i = 0; i < spaces; i++) builder.append(" ");
+                        builder.append(identifier).append(": ");
+
+                        Object value = currentConfig.get(path.toString());
+                        if (value instanceof String string) {
+                            String stringValue = string.replace("\n", "\\n");
+                            builder.append("\"").append(stringValue).append("\"\n");
+                        } else {
+                            builder.append(value).append("\n");
+                        }
+                        continue;
+                    }
+
+                    if (fileLine.isList()) {
+                        StringBuilder path = new StringBuilder();
+                        for (int i = 0; i <= point - 1; i++) {
+                            String header = headers.get(i);
+                            if (header != null) path.append(header).append(".");
+                        }
+                        path.append(identifier);
+
+                        for (int i = 0; i < spaces; i++) builder.append(" ");
+                        builder.append(identifier).append(":");
+
+                        List<String> value = currentConfig.getStringList(path.toString());
+                        if (value.isEmpty()) builder.append(" []\n");
+                        else {
+                            builder.append("\n");
+                            for (String listLine : value) {
+                                for (int i = 0; i < spaces + 2; i++) builder.append(" ");
+                                String escapedListLine = listLine.replace("\n", "\\n");
+                                builder.append("- \"").append(escapedListLine).append("\"\n");
+                            }
+                        }
+                        continue;
+                    }
+
+                    builder.append(line).append("\n");
+                }
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+                    writer.write(builder.toString());
+                    writer.flush();
+                }
+                
+                plugin.logResponse("Configuration updated successfully with new options");
+                if (backup) {
+                    plugin.logResponse("A backup of your previous configuration was created in the 'backups' folder.");
+                }
+            }
+
+        } catch (IOException e) {
+            plugin.logError("Failed to update configuration: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Creates a backup of the current configuration file
+     */
+    private void createBackup() {
+        try {
+            File backupDir = new File(plugin.getDataFolder(), "backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            String timestamp = dateFormat.format(new Date());
+            File backupFile = new File(backupDir, "config_" + timestamp + ".yml.backup");
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(configFile));
+                 BufferedWriter writer = new BufferedWriter(new FileWriter(backupFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line);
+                    writer.newLine();
+                }
+            }
+            
+            plugin.logResponse("Created configuration backup: " + backupFile.getName());
+
+        } catch (IOException e) {
+            plugin.logError("Failed to create configuration backup: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Determines if a missing key should be added based on intelligent section detection
+     */
+    private boolean shouldAddMissingKey(String key, FileConfiguration currentConfig) {
+        if (!key.contains(".")) {
+            return true;
+        }
+
+        String[] parts = key.split("\\.");
+        String topLevelSection = parts[0];
+        
+        // For all other sections, add missing keys if it's a new feature section
+        if (!hasAnyKeysInSection(currentConfig, topLevelSection)) {
+            return true;
+        }
+        
+        // If user has some keys in this section, add missing keys to complete it
+        return true;
+    }
+
+    /**
+     * Checks if the user has ANY configuration keys under a given section
+     * This is more robust than maintaining a manual list
+     */
+    private boolean hasAnyKeysInSection(FileConfiguration config, String sectionName) {
+        if (!config.contains(sectionName)) {
+            return false;
+        }
+        
+        Set<String> allKeys = config.getKeys(true);
+        for (String existingKey : allKeys) {
+            if (existingKey.startsWith(sectionName + ".") || existingKey.equals(sectionName)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Checks if a line is a comment (starts with #)
+     */
+    private boolean isComment(String s) {
+        return s.replace(" ", "").startsWith("#");
+    }
+
+    /**
+     * Checks if a line is list content (starts with -)
+     */
+    private boolean isListContent(String s) {
+        return s.replace(" ", "").startsWith("-");
+    }
+
+    /**
+     * Inner class to represent a line in the configuration file
+     */
+    private static class FileLine {
+        private final String line;
+        private final boolean isValue, isHeader, isList;
+
+        public FileLine(String line, boolean isValue, boolean isHeader, boolean isList) {
+            this.line = line;
+            this.isValue = isValue;
+            this.isHeader = isHeader;
+            this.isList = isList;
+        }
+
+        public String getLine() {
+            return line;
+        }
+
+        public boolean isValue() {
+            return isValue;
+        }
+
+        public boolean isHeader() {
+            return isHeader;
+        }
+
+        public boolean isList() {
+            return isList;
+        }
     }
 }

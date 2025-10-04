@@ -19,7 +19,7 @@ public class ConfigService implements IConfigurable {
 
     public ConfigService(Nonchat plugin) {
         this.plugin = plugin;
-        this.config = new PluginConfig();
+        this.config = new PluginConfig(plugin);
         this.languageManager = new LanguageManager(plugin.getDataFolder());
         this.messages = new PluginMessages(plugin);
         load();

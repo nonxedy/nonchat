@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,7 +16,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.config.PluginConfig;
-import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -29,11 +29,30 @@ public class JoinQuitListener implements Listener {
     
     private final PluginConfig config;
     private final ChannelManager channelManager;
-    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+    private final Map<Player, List<TextDisplay>> bubbles = new HashMap<>();
     
     public JoinQuitListener(PluginConfig config, ChannelManager channelManager) {
         this.config = config;
         this.channelManager = channelManager;
+    }
+
+    /**
+     * Cleans up sound names by converting to proper Minecraft resource location format
+     * @param soundName The original sound name
+     * @return The cleaned sound name in proper format (lowercase with dots)
+     */
+    private String cleanSoundName(String soundName) {
+        if (soundName == null) {
+            return "entity.experience_orb.pickup"; // fallback sound
+        }
+        
+        // Remove "minecraft:" prefix if present
+        String cleaned = soundName.replace("minecraft:", "");
+        
+        // Convert from old format (ENTITY_EXPERIENCE_ORB_PICKUP) to new format (entity.experience_orb.pickup)
+        cleaned = cleaned.toLowerCase().replace('_', '.');
+        
+        return cleaned;
     }
     
     /**
@@ -59,6 +78,20 @@ public class JoinQuitListener implements Listener {
         }
         
         event.joinMessage(ColorUtil.parseComponent(joinFormat));
+        
+        // Play join sound if enabled for join events
+        if (config.isJoinSoundEnabled()) {
+            try {
+                String soundName = cleanSoundName(config.getJoinSound());
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    onlinePlayer.playSound(onlinePlayer.getLocation(), 
+                        soundName, 
+                        config.getJoinSoundVolume(), config.getJoinSoundPitch());
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error playing join sound: {0}", e.getMessage());
+            }
+        }
     }
     
     /**
@@ -75,9 +108,9 @@ public class JoinQuitListener implements Listener {
         }
         
         // Clean up bubbles
-        List<ArmorStand> playerBubbles = bubbles.remove(player);
+        List<TextDisplay> playerBubbles = bubbles.remove(player);
         if (playerBubbles != null) {
-            BubblePacketUtil.removeBubbles(playerBubbles);
+            DisplayEntityUtil.removeBubbles(playerBubbles);
         }
 
         if (!config.isQuitMessageEnabled()) {
@@ -96,5 +129,19 @@ public class JoinQuitListener implements Listener {
         }
         
         event.quitMessage(ColorUtil.parseComponent(quitFormat));
+        
+        // Play quit sound if enabled for quit events
+        if (config.isQuitSoundEnabled()) {
+            try {
+                String soundName = cleanSoundName(config.getQuitSound());
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    onlinePlayer.playSound(onlinePlayer.getLocation(), 
+                        soundName, 
+                        config.getQuitSoundVolume(), config.getQuitSoundPitch());
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().log(Level.WARNING, "Error playing quit sound: {0}", e.getMessage());
+            }
+        }
     }
 }

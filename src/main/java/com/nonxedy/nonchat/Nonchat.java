@@ -5,12 +5,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,7 +33,7 @@ import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
-import com.nonxedy.nonchat.util.chat.packets.BubblePacketUtil;
+import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.core.updates.UpdateChecker;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
@@ -61,7 +60,7 @@ public class Nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
-    private final Map<Player, List<ArmorStand>> bubbles = new HashMap<>();
+    private final Map<Player, List<TextDisplay>> bubbles = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -84,25 +83,10 @@ public class Nonchat extends JavaPlugin {
             registerListeners();
             setupIntegrations();
 
-            Bukkit.getScheduler().runTaskLater(this, () -> {
-                try {
-                    for (World world : Bukkit.getWorlds()) {
-                        for (Entity entity : world.getEntities()) {
-                            if (entity instanceof ArmorStand) {
-                                entity.remove();
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    getLogger().warning("Failed to clean up armor stands: " + e.getMessage());
-                }
-            }, 20);
-
             Bukkit.getConsoleSender().sendMessage("§d[nonchat] §aplugin enabled");
         } catch (Exception e) {
-            getLogger().severe("Failed to enable plugin: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to enable plugin", e);
+            getLogger().log(Level.SEVERE, "Failed to enable plugin: {0}", e.getMessage());
+             throw new RuntimeException("Failed to enable plugin", e);
         }
     }
 
@@ -141,7 +125,7 @@ public class Nonchat extends JavaPlugin {
             
             getLogger().info("Core services initialized successfully");
         } catch (Exception e) {
-            getLogger().severe("Failed to initialize core services: " + e.getMessage());
+            getLogger().log(Level.SEVERE, "Failed to initialize core services: {0}", e.getMessage());
             throw new RuntimeException("Failed to initialize core services", e);
         }
     }
@@ -165,7 +149,7 @@ public class Nonchat extends JavaPlugin {
             }
             getLogger().info("Event listeners registered successfully");
         } catch (Exception e) {
-            getLogger().severe("Failed to register event listeners: " + e.getMessage());
+            getLogger().log(Level.SEVERE, "Failed to register event listeners: {0}", e.getMessage());
             throw new RuntimeException("Failed to register event listeners", e);
         }
     }
@@ -181,7 +165,7 @@ public class Nonchat extends JavaPlugin {
         } catch (NoClassDefFoundError e) {
             getLogger().info("PlaceholderAPI not installed - placeholders will be disabled");
         } catch (Exception e) {
-            getLogger().warning("Failed to register PlaceholderAPI expansion: " + e.getMessage());
+            getLogger().log(Level.WARNING, "Failed to register PlaceholderAPI expansion: {0}", e.getMessage());
         }
     }
 
@@ -192,7 +176,7 @@ public class Nonchat extends JavaPlugin {
         } catch (NoClassDefFoundError e) {
             getLogger().info("Some external integrations not available - features will be disabled");
         } catch (Exception e) {
-            getLogger().warning("Failed to setup external integrations: " + e.getMessage());
+            getLogger().log(Level.WARNING, "Failed to setup external integrations: {0}", e.getMessage());
         }
 
         try {
@@ -202,7 +186,7 @@ public class Nonchat extends JavaPlugin {
         } catch (NoClassDefFoundError e) {
             getLogger().info("Metrics not available - metrics will be disabled");
         } catch (Exception e) {
-            getLogger().warning("Failed to initialize metrics: " + e.getMessage());
+            getLogger().log(Level.WARNING, "Failed to initialize metrics: {0}", e.getMessage());
         }
 
         try {
@@ -221,7 +205,7 @@ public class Nonchat extends JavaPlugin {
         } catch (NoClassDefFoundError e) {
             getLogger().info("DiscordSRV not installed - Discord integration will be disabled");
         } catch (Exception e) {
-            getLogger().warning("Failed to setup DiscordSRV integration: " + e.getMessage());
+            getLogger().log(Level.WARNING, "Failed to setup DiscordSRV integration: {0}", e.getMessage());
         }
 
         try {
@@ -235,13 +219,21 @@ public class Nonchat extends JavaPlugin {
                 getLogger().info("Update checker initialized successfully");
             }
         } catch (Exception e) {
-            getLogger().warning("Failed to initialize update checker: " + e.getMessage());
+            getLogger().log(Level.WARNING, "Failed to initialize update checker: {0}", e.getMessage());
         }
     }
 
     @Override
     public void onDisable() {
         try {
+            // Clean up all chat bubbles and display entities
+            if (chatManager != null) {
+                chatManager.cleanup();
+            }
+            
+            // Clear display entity pool
+            DisplayEntityUtil.clearPool();
+            
             if (broadcastManager != null) {
                 broadcastManager.stop();
             }
@@ -262,7 +254,7 @@ public class Nonchat extends JavaPlugin {
                     .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
                     .append(Component.text("plugin disabled", TextColor.fromHexString("#FF5252"))));
         } catch (Exception e) {
-            getLogger().warning("Error during plugin shutdown: " + e.getMessage());
+            getLogger().log(Level.WARNING, "Error during plugin shutdown: {0}", e.getMessage());
         }
     }
 
@@ -290,7 +282,7 @@ public class Nonchat extends JavaPlugin {
 
             getLogger().info("Configuration reloaded successfully");
         } catch (Exception e) {
-            getLogger().severe("Failed to reload configuration: " + e.getMessage());
+            getLogger().log(Level.SEVERE, "Failed to reload configuration: {0}", e.getMessage());
             throw new RuntimeException("Failed to reload configuration", e);
         }
     }
@@ -337,7 +329,7 @@ public class Nonchat extends JavaPlugin {
             
             getLogger().info("Services reloaded successfully");
         } catch (Exception e) {
-            getLogger().severe("Failed to reload services: " + e.getMessage());
+            getLogger().log(Level.SEVERE, "Failed to reload services: {0}", e.getMessage());
             throw new RuntimeException("Failed to reload services", e);
         }
     }
@@ -345,13 +337,62 @@ public class Nonchat extends JavaPlugin {
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         try {
-            List<ArmorStand> playerBubbles = bubbles.remove(event.getPlayer());
+            List<TextDisplay> playerBubbles = bubbles.remove(event.getPlayer());
             if (playerBubbles != null) {
-                BubblePacketUtil.removeBubbles(playerBubbles);
+                DisplayEntityUtil.removeBubbles(playerBubbles);
             }
         } catch (Exception e) {
-            getLogger().fine("Error handling player teleport: " + e.getMessage());
+            getLogger().log(Level.FINE, "Error handling player teleport: {0}", e.getMessage());
         }
+    }
+
+    public void logCommand(String command, String[] args) {
+        try {
+            if (debugger != null) {
+                debugger.debug("Commands", command + " Args: " + Arrays.toString(args));
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.FINE, "Failed to log command: {0}", e.getMessage());
+        }
+    }
+
+    public void logResponse(String response) {
+        try {
+            if (debugger != null) {
+                debugger.debug("API", "Response: " + response);
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.FINE, "Failed to log response: {0}", e.getMessage());
+        }
+    }
+
+    public void logError(String error) {
+        try {
+            if (debugger != null) {
+                debugger.error("System", "Error occurred", new Exception(error));
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.FINE, "Failed to log error: {0}", e.getMessage());
+        }
+    }
+
+    public void logPlaceholder(String placeholder, String result) {
+        try {
+            if (debugger != null) {
+                debugger.debug("Placeholders", placeholder + " -> " + result);
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.FINE, "Failed to log placeholder: {0}", e.getMessage());
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------
+    public ChatManager getChatManager() {
+        return chatManager;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 
     public SpyCommand getSpyCommand() {
@@ -364,54 +405,5 @@ public class Nonchat extends JavaPlugin {
 
     public ConfigService getConfigService() {
         return configService;
-    }
-
-    public void logCommand(String command, String[] args) {
-        try {
-            if (debugger != null) {
-                debugger.debug("Commands", command + " Args: " + Arrays.toString(args));
-            }
-        } catch (Exception e) {
-            getLogger().fine("Failed to log command: " + e.getMessage());
-        }
-    }
-
-    public void logResponse(String response) {
-        try {
-            if (debugger != null) {
-                debugger.debug("API", "Response: " + response);
-            }
-        } catch (Exception e) {
-            getLogger().fine("Failed to log response: " + e.getMessage());
-        }
-    }
-
-    public void logError(String error) {
-        try {
-            if (debugger != null) {
-                debugger.error("System", "Error occurred", new Exception(error));
-            }
-        } catch (Exception e) {
-            getLogger().fine("Failed to log error: " + e.getMessage());
-        }
-    }
-
-    public void logPlaceholder(String placeholder, String result) {
-        try {
-            if (debugger != null) {
-                debugger.debug("Placeholders", placeholder + " -> " + result);
-            }
-        } catch (Exception e) {
-            getLogger().fine("Failed to log placeholder: " + e.getMessage());
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------
-    public ChatManager getChatManager() {
-        return chatManager;
-    }
-
-    public MessageManager getMessageManager() {
-        return messageManager;
     }
 }

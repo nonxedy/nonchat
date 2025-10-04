@@ -22,7 +22,7 @@ public class PaperChatListener extends ChatListener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onAsyncChat(AsyncChatEvent event) {
         event.setCancelled(true);
 

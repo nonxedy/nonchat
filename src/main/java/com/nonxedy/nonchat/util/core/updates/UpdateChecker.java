@@ -26,7 +26,7 @@ import net.kyori.adventure.text.Component;
  * Handles version checking and update notifications for the plugin
  * Connects to Modrinth API to check for new versions
  */
-public class UpdateChecker implements Listener {
+public final class UpdateChecker implements Listener {
 
     // Initialize class variables
     private final Nonchat plugin;
