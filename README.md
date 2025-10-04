@@ -18,7 +18,6 @@
 - 🔔 **Player Pings** - Mention players in chat with customizable sounds and highlights
 - 💭 **Chat Bubbles** - Display messages above players' heads
 - 📢 **Auto Broadcasting** - Schedule automatic server announcements
-- 🛡️ **Word Filter** - Protect your chat from inappropriate content
 - ⚰️ **Custom Death Messages** - Stylish death announcements
 - 🎭 **Roleplay Commands** - Enhanced RP experience with /me and /roll commands
 - 🔒 **Staff Chat** - Private communication for staff members
@@ -27,6 +26,10 @@
 - 📱 **Interactive Chat Placeholders** - Dynamic placeholders for enhanced chat experience:
   - `[ping]` - Display your current ping with color-coded status
   - `[item]` - Show your held item with detailed hover information
+- 🛡️ **Advanced Chat Filters** - Comprehensive protection systems:
+  - **Anti-Advertisement** - Blocks server advertisements with customizable sensitivity
+  - **Caps Filter** - Prevents excessive use of capital letters
+  - **Word Filter** - Blocks inappropriate content and regex patterns
 
 ## 🎮 Commands
 
@@ -43,6 +46,7 @@
 | `/channel` | Channel management commands |
 | `/nonchat help` | View plugin help |
 | `/nonchat reload` | Reload plugin configuration |
+| `/nonchat version` | Show plugin version |
 
 ## 🔧 Interactive Chat Placeholders
 
@@ -90,12 +94,8 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 
 | Status | Task |
 |:------:|------|
-| 🔜 | Add support for ProtocolLib in chat bubbles |
-| 🔜 | Add more interactive placeholders (ex. [coords], [health], [time]) |
-| ✅ | Update plugin architecture |
-| ✅ | Add interactive placeholders ([ping], [item]) |
-| ✅ | Update plugin API |
-| ✅ | Add metrics to plugin |
+| ⏳ | Make channel names clickable to switch to them |
+| 🔜 | Add more placeholders (placeholder that returns your current channel) |
 
 </div>
 
