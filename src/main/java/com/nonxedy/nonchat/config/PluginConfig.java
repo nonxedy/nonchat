@@ -194,6 +194,9 @@ public class PluginConfig {
         
         // Banned words
         config.set("banned-words", Arrays.asList("spam", "badword", "anotherbadword", "плохой"));
+
+        // Banned patterns (regex)
+        config.set("banned-patterns", Arrays.asList(".*\\btest\\b.*", ".*\\d{4,}.*"));
         
         // Caps filter
         config.set("caps-filter.enabled", true);
@@ -741,12 +744,21 @@ public class PluginConfig {
     }
 
     /**
+     * Gets list of banned regex patterns
+     * @return List of blocked patterns
+     */
+    @NotNull
+    public List<String> getBannedPatterns() {
+        return config.getStringList("banned-patterns");
+    }
+
+    /**
      * Gets word blocker instance
      * @return Configured WordBlocker
      */
     @NotNull
     public WordBlocker getWordBlocker() {
-        return new WordBlocker(getBannedWords());
+        return new WordBlocker(getBannedWords(), getBannedPatterns());
     }
 
     /**

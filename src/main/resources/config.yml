@@ -283,14 +283,24 @@ hover-text:
 
 # ==================================================
 # BLOCKED WORDS FILTER
-# Blocks messages containing specific words.
+# Blocks messages containing specific words and regex patterns.
 # ==================================================
-# List of banned words.
+# List of banned words (simple text matching, case-insensitive).
 banned-words:
   - "spam"
   - "badword"
   - "anotherbadword"
   - "плохой"
+
+# List of regex patterns for advanced filtering (case-insensitive).
+# Examples:
+#   - ".*\\btest\\b.*" - matches any message containing the word "test"
+#   - ".*\\d{4,}.*" - matches any message containing 4 or more consecutive digits
+#   - ".*http[s]?://.*" - matches URLs starting with http:// or https://
+#   - ".*\\b(word1|word2|word3)\\b.*" - matches any of the specified words
+banned-patterns:
+  - ".*\\btest\\b.*"
+  - ".*\\d{4,}.*"
 
 # ==================================================
 # CAPS FILTER
