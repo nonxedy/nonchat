@@ -299,8 +299,8 @@ banned-words:
 #   - ".*http[s]?://.*" - matches URLs starting with http:// or https://
 #   - ".*\\b(word1|word2|word3)\\b.*" - matches any of the specified words
 banned-patterns:
-  - ".*\\btest\\b.*"
-  - ".*\\d{4,}.*"
+  - '.*\\btest\\b.*'
+  - '.*\\d{4,}.*'
 
 # ==================================================
 # CAPS FILTER
