@@ -164,3 +164,7 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8You are ignoring players"
     false: "&#ff0000You are not ignoring anyone"
+  # Current channel placeholders.
+  current-channel: # %nonchat_current_channel%
+    format: "&#ffffffCurrent Channel: &#84FFB8{channel} (&#FFAFFB{id}&#84FFB8)"
+    none: "&#ff0000No active channel"
