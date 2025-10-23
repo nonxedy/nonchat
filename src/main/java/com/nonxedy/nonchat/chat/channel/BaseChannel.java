@@ -219,13 +219,11 @@ public class BaseChannel implements Channel {
         // Extract color from the end of beforeMessage to apply to the message
         String inheritedColor = extractTrailingColor(beforeMessage);
 
-        // Parse format parts with colors and add hover functionality
-        // Use parseConfigComponent for better MiniMessage support in config strings
-        Component beforeMessageComponent = ColorUtil.parseConfigComponent(beforeMessage);
+        // Parse format parts with colors and add hover functionality only to the player name
+        Component beforeMessageComponent = parseBeforeMessageWithHover(beforeMessage, player);
         Component afterMessageComponent = ColorUtil.parseConfigComponent(afterMessage);
         
-        // Add hover functionality to the format parts
-        beforeMessageComponent = hoverTextUtil.addHoverToComponent(beforeMessageComponent, player);
+        // Add hover functionality to the format parts (only to player name in beforeMessage)
         afterMessageComponent = hoverTextUtil.addHoverToComponent(afterMessageComponent, player);
 
         Component finalMessage = beforeMessageComponent
@@ -275,22 +273,17 @@ public class BaseChannel implements Channel {
     private Component formatMessageWithSpanningGradient(Player player, String message, String format) {
         // Process the message content first to handle color permissions
         String processedMessage = message;
-        
+
         // Check color permission for the message content
         if (!player.hasPermission("nonchat.color")) {
             processedMessage = ColorUtil.stripAllColors(message);
         }
-        
+
         // Replace {message} with the processed message content
         String fullFormat = format.replace("{message}", processedMessage);
-        
-        // Parse the entire format as MiniMessage to preserve gradients
-        Component fullComponent = ColorUtil.parseConfigComponent(fullFormat);
-        
-        // Add hover functionality - we need to extract the player name part for hover
-        // This is a simplified approach; for more complex hover handling,
-        // we might need to parse the component structure
-        return hoverTextUtil.addHoverToComponent(fullComponent, player);
+
+        // Parse the full format with hover only on player name
+        return parseFullFormatWithHover(fullFormat, player);
     }
 
     /**
@@ -566,5 +559,55 @@ public class BaseChannel implements Channel {
      */
     public void setConfigService(ConfigService configService) {
         this.configService = configService;
+    }
+
+    /**
+     * Parses the beforeMessage part and adds hover only to the player name
+     * @param beforeMessage The part of the format before {message}
+     * @param player The player to get hover information for
+     * @return Component with hover only on the player name
+     */
+    private Component parseBeforeMessageWithHover(String beforeMessage, Player player) {
+        String playerName = player.getName();
+        int nameIndex = beforeMessage.indexOf(playerName);
+
+        if (nameIndex == -1) {
+            // If player name not found, add hover to the entire beforeMessage
+            return hoverTextUtil.addHoverToComponent(ColorUtil.parseConfigComponent(beforeMessage), player);
+        }
+
+        String beforeName = beforeMessage.substring(0, nameIndex);
+        String afterName = beforeMessage.substring(nameIndex + playerName.length());
+
+        Component beforeComponent = ColorUtil.parseConfigComponent(beforeName);
+        Component nameComponent = hoverTextUtil.createHoverableText(playerName, player);
+        Component afterComponent = ColorUtil.parseConfigComponent(afterName);
+
+        return beforeComponent.append(nameComponent).append(afterComponent);
+    }
+
+    /**
+     * Parses the full format and adds hover only to the player name
+     * @param fullFormat The full format string
+     * @param player The player to get hover information for
+     * @return Component with hover only on the player name
+     */
+    private Component parseFullFormatWithHover(String fullFormat, Player player) {
+        String playerName = player.getName();
+        int nameIndex = fullFormat.indexOf(playerName);
+
+        if (nameIndex == -1) {
+            // If player name not found, add hover to the entire format
+            return hoverTextUtil.addHoverToComponent(ColorUtil.parseConfigComponent(fullFormat), player);
+        }
+
+        String beforeName = fullFormat.substring(0, nameIndex);
+        String afterName = fullFormat.substring(nameIndex + playerName.length());
+
+        Component beforeComponent = ColorUtil.parseConfigComponent(beforeName);
+        Component nameComponent = hoverTextUtil.createHoverableText(playerName, player);
+        Component afterComponent = ColorUtil.parseConfigComponent(afterName);
+
+        return beforeComponent.append(nameComponent).append(afterComponent);
     }
 }
