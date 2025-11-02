@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.AsyncFilterService;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
@@ -41,16 +42,18 @@ public class ChatManager {
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
+    private final AsyncFilterService asyncFilterService;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
-        this.channelManager = new ChannelManager(config);
-        this.ignoreCommand = plugin.getIgnoreCommand();
         this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
+        this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
+        this.channelManager = new ChannelManager(plugin, config);
+        this.ignoreCommand = plugin.getIgnoreCommand();
         startBubbleUpdater();
     }
 

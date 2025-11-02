@@ -667,7 +667,7 @@ public class PluginConfig {
                 
                 ConfigurationSection messageSection = section.getConfigurationSection(key);
                 if (messageSection != null) {
-                    messages.put(key, new BroadcastMessage(
+                    messages.put(key, createBroadcastMessage(
                         messageSection.getBoolean("enabled", true),
                         messageSection.getString("message", "Default message"),
                         messageSection.getInt("interval", 60)
@@ -759,6 +759,17 @@ public class PluginConfig {
     @NotNull
     public WordBlocker getWordBlocker() {
         return new WordBlocker(getBannedWords(), getBannedPatterns());
+    }
+
+    /**
+     * Creates a new BroadcastMessage instance
+     * @param enabled Whether the message is enabled
+     * @param message The message content
+     * @param interval The broadcast interval
+     * @return New BroadcastMessage instance
+     */
+    public BroadcastMessage createBroadcastMessage(boolean enabled, String message, int interval) {
+        return new BroadcastMessage(enabled, message, interval);
     }
 
     /**
@@ -857,11 +868,11 @@ public class PluginConfig {
                     int maxLength = channelSection.getInt("max-length", -1);
                     
                     channels.put(key, new ChatTypeUtil(
-                        enabled, 
+                        enabled,
                         displayName,
-                        format, 
-                        radius, 
-                        chatChar, 
+                        format,
+                        radius,
+                        chatChar,
                         sendPermission,
                         receivePermission,
                         cooldown,
