@@ -1342,7 +1342,9 @@ public class PluginConfig {
                             for (String listLine : value) {
                                 for (int i = 0; i < spaces + 2; i++) builder.append(" ");
                                 String escapedListLine = listLine.replace("\n", "\\n");
-                                builder.append("- \"").append(escapedListLine).append("\"\n");
+                                boolean useSingleQuotes = escapedListLine.contains("\\");
+                                String quote = useSingleQuotes ? "'" : "\"";
+                                builder.append("- ").append(quote).append(escapedListLine).append(quote).append("\n");
                             }
                         }
                         continue;

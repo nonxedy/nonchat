@@ -294,13 +294,13 @@ banned-words:
 
 # List of regex patterns for advanced filtering (case-insensitive).
 # Examples:
-#   - ".*\\btest\\b.*" - matches any message containing the word "test"
-#   - ".*\\d{4,}.*" - matches any message containing 4 or more consecutive digits
-#   - ".*http[s]?://.*" - matches URLs starting with http:// or https://
-#   - ".*\\b(word1|word2|word3)\\b.*" - matches any of the specified words
+#   - '.*\btest\b.*' - matches any message containing the word "test"
+#   - '.*\d{4,}.*' - matches any message containing 4 or more consecutive digits
+#   - '.*http[s]?://.*' - matches URLs starting with http:// or https://
+#   - '.*\b(word1|word2|word3)\b.*' - matches any of the specified words
 banned-patterns:
-  - '.*\\btest\\b.*'
-  - '.*\\d{4,}.*'
+  - '.*\btest\b.*'
+  - '.*\d{4,}.*'
 
 # ==================================================
 # CAPS FILTER
