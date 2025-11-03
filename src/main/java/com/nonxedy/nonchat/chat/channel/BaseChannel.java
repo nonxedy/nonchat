@@ -196,7 +196,7 @@ public class BaseChannel implements Channel {
     @Override
     public Component formatMessage(Player player, String message) {
         String baseFormat = getFormat();
-        
+
         // Apply PlaceholderAPI to the entire format first
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
@@ -205,12 +205,12 @@ public class BaseChannel implements Channel {
                 Bukkit.getLogger().log(Level.WARNING, "Error processing format placeholders: {0}", e.getMessage());
             }
         }
-        
+
         // Check if the format contains MiniMessage gradients that might span across {message}
         if (containsSpanningGradient(baseFormat)) {
             return formatMessageWithSpanningGradient(player, message, baseFormat);
         }
-        
+
         // Split format into parts around {message} for traditional processing
         String[] formatParts = baseFormat.split("\\{message\\}");
         String beforeMessage = formatParts[0];
@@ -222,7 +222,7 @@ public class BaseChannel implements Channel {
         // Parse format parts with colors and add hover functionality only to the player name
         Component beforeMessageComponent = parseBeforeMessageWithHover(beforeMessage, player);
         Component afterMessageComponent = ColorUtil.parseConfigComponent(afterMessage);
-        
+
         // Add hover functionality to the format parts (only to player name in beforeMessage)
         afterMessageComponent = hoverTextUtil.addHoverToComponent(afterMessageComponent, player);
 
@@ -333,12 +333,43 @@ public class BaseChannel implements Channel {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         if (plugin instanceof Nonchat nonchatPlugin) {
             boolean globalEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.enabled", true);
-            
+
             if (!globalEnabled) {
                 return processMessageWithColorPermission(player, message, inheritedColor);
             }
+
+            // Use the new InteractivePlaceholderManager
+            if (nonchatPlugin.getPlaceholderManager() != null) {
+                // Apply inherited color if message doesn't have its own colors and player has permission
+                String processedMessage = message;
+                if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+                    processedMessage = inheritedColor + message;
+                }
+
+                // Process interactive placeholders
+                Component placeholderProcessed = nonchatPlugin.getPlaceholderManager().processMessage(player, processedMessage);
+
+                // Handle color permissions for non-placeholder text
+                if (!player.hasPermission("nonchat.color")) {
+                    // We need to strip colors from text parts while preserving placeholder components
+                    // This is complex, so for now we'll fall back to the old method if placeholders are present
+                    if (processedMessage.contains("[") && processedMessage.contains("]")) {
+                        return processLegacyPlaceholdersWithColorPermission(player, processedMessage, inheritedColor);
+                    }
+                }
+
+                return placeholderProcessed;
+            }
         }
 
+        // Fallback to legacy processing
+        return processLegacyMessageContent(player, message, inheritedColor);
+    }
+
+    /**
+     * Legacy method for processing messages with old placeholder system
+     */
+    private Component processLegacyMessageContent(Player player, String message, String inheritedColor) {
         boolean hasItem = message.toLowerCase().contains("[item]");
         boolean hasPing = message.toLowerCase().contains("[ping]");
 
@@ -351,6 +382,35 @@ public class BaseChannel implements Channel {
         } else {
             return processMessageWithColorPermission(player, message, inheritedColor);
         }
+    }
+
+    /**
+     * Processes legacy placeholders with color permission handling
+     */
+    private Component processLegacyPlaceholdersWithColorPermission(Player player, String message, String inheritedColor) {
+        // Apply inherited color if message doesn't have its own colors and player has permission
+        String processedMessage = message;
+        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+            processedMessage = inheritedColor + message;
+        }
+
+        // Strip colors from text parts while keeping placeholders
+        if (!player.hasPermission("nonchat.color")) {
+            // Simple approach: strip colors but keep placeholder brackets
+            processedMessage = ColorUtil.stripAllColors(processedMessage);
+            if (!inheritedColor.isEmpty()) {
+                processedMessage = inheritedColor + processedMessage;
+            }
+        }
+
+        // Process with the new manager
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
+        if (plugin instanceof Nonchat nonchatPlugin && nonchatPlugin.getPlaceholderManager() != null) {
+            return nonchatPlugin.getPlaceholderManager().processMessage(player, processedMessage);
+        }
+
+        // Fallback
+        return LinkDetector.makeLinksClickable(processedMessage);
     }
 
     /**
