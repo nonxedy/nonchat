@@ -201,7 +201,7 @@ public class ChatManager {
                             plugin.logError("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
                         }
                     });
-                } catch (Exception e) {
+                } catch (IllegalArgumentException e) {
                     plugin.logError("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
                     // Try to create bubble immediately as fallback
                     try {
@@ -221,7 +221,7 @@ public class ChatManager {
                                     plugin.logError("Global scheduler bubble creation also failed for player " + player.getName() + ": " + globalError.getMessage());
                                 }
                             });
-                        } catch (Exception globalSchedulerError) {
+                        } catch (IllegalArgumentException globalSchedulerError) {
                             plugin.logError("Failed to schedule global bubble creation for player " + player.getName() + ": " + globalSchedulerError.getMessage());
                         }
                     }
@@ -302,7 +302,7 @@ public class ChatManager {
                     plugin.logError("Error in bubble updater: " + e.getMessage());
                 }
             }, 1L, 1L);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             plugin.logError("Failed to start bubble updater: " + e.getMessage());
             // Try to start with global scheduler as fallback
             try {
@@ -339,7 +339,7 @@ public class ChatManager {
                     }
                 }, 1L, 1L);
                 plugin.logResponse("Bubble updater started with fallback scheduler");
-            } catch (Exception fallbackError) {
+            } catch (IllegalArgumentException fallbackError) {
                 plugin.logError("Failed to start bubble updater with fallback scheduler: " + fallbackError.getMessage());
                 // Try to start with immediate execution as last resort
                 try {
@@ -378,7 +378,7 @@ public class ChatManager {
                         }
                     });
                     plugin.logResponse("Bubble updater started with immediate execution");
-                } catch (Exception immediateError) {
+                } catch (IllegalArgumentException immediateError) {
                     plugin.logError("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
                 }
             }
@@ -404,14 +404,14 @@ public class ChatManager {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         removeBubble(player);
                     }, config.getChatBubblesDuration() * 20L);
-                } catch (Exception e) {
+                } catch (IllegalArgumentException e) {
                     plugin.logError("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
                     // Schedule removal using global scheduler as fallback
                     try {
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             removeBubble(player);
                         }, config.getChatBubblesDuration() * 20L);
-                    } catch (Exception fallbackError) {
+                    } catch (IllegalArgumentException fallbackError) {
                         plugin.logError("Fallback bubble removal scheduling also failed for player " + player.getName() + ": " + fallbackError.getMessage());
                         // Try to remove bubble immediately as last resort
                         try {
