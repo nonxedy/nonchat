@@ -3,7 +3,7 @@
   
   # nonchat
   
-  [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.16--1.21.8-brightgreen)](https://www.minecraft.net/)
+  [![Minecraft Version](https://img.shields.io/badge/Minecraft-1.16--1.21.10-brightgreen)](https://www.minecraft.net/)
   [![Discord](https://img.shields.io/discord/YOUR_DISCORD_ID?color=7289DA&label=Discord&logo=discord)](https://discord.gg/NAWsxe3J3R)
   [![Modrinth](https://img.shields.io/modrinth/dt/nonchat?logo=modrinth)](https://modrinth.com/plugin/nonchat)
   [![Boosty](https://img.shields.io/badge/Support%20on-Boosty-orange)](https://boosty.to/nonxedy)
