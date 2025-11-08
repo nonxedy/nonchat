@@ -308,7 +308,7 @@ spy-format: "§f{sender} §7-> §f{target}§7: §7{message}"
 broadcast:
   # Format for broadcast messages. Use {message} for content and \n for new lines.
   format: "\n§#FFAFFBBroadcast: §f{message}\n"
-  # Enable/disable random auto-broadcast messages from the list below.
+  # Enable/disable randomization of auto-broadcast messages.
   random: true
 
   # Example auto-broadcast message. You can add more by copying this section.
