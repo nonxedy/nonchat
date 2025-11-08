@@ -523,8 +523,8 @@ public class ChatManager {
         while (mentionMatcher.find()) {
             // Add text before the mention
             coloredMessage.append(message.substring(lastEnd, mentionMatcher.start()));
-            // Add the colored mention
-            coloredMessage.append(mentionColor).append(mentionMatcher.group(0));
+            // Add the colored mention with reset after it
+            coloredMessage.append(mentionColor).append(mentionMatcher.group(0)).append("&r");
             lastEnd = mentionMatcher.end();
         }
 
