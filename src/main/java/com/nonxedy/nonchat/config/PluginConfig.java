@@ -125,12 +125,6 @@ public class PluginConfig {
         // Message delivery notifications
         config.set("message-delivery.notify-undelivered", true);
         
-        // Interactive placeholders configuration
-        config.set("interactive-placeholders.enabled", true);
-        config.set("interactive-placeholders.item-enabled", true);
-        config.set("interactive-placeholders.ping-enabled", true);
-        config.set("interactive-placeholders.ping-format", "{ping}ms");
-        
         // Death settings
         config.set("death.enabled", true);
         config.set("death.format", "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died");
@@ -296,7 +290,7 @@ public class PluginConfig {
     }
 
     /**
-     * Checks if interactive placeholders are enabled
+     * Checks if interactive placeholders are globally enabled
      * @return true if enabled
      */
     public boolean isInteractivePlaceholdersEnabled() {
@@ -304,23 +298,7 @@ public class PluginConfig {
     }
 
     /**
-     * Checks if item placeholders are enabled
-     * @return true if enabled
-     */
-    public boolean isItemPlaceholdersEnabled() {
-        return config.getBoolean("interactive-placeholders.item-enabled", true);
-    }
-
-    /**
-     * Checks if ping placeholders are enabled
-     * @return true if enabled
-     */
-    public boolean isPingPlaceholdersEnabled() {
-        return config.getBoolean("interactive-placeholders.ping-enabled", true);
-    }
-
-    /**
-     * Sets interactive placeholders enabled state
+     * Sets interactive placeholders global enabled state
      * @param enabled New enabled state
      */
     public void setInteractivePlaceholdersEnabled(boolean enabled) {
@@ -329,40 +307,117 @@ public class PluginConfig {
     }
 
     /**
-     * Sets item placeholders enabled state
-     * @param enabled New enabled state
-     */
-    public void setItemPlaceholdersEnabled(boolean enabled) {
-        config.set("interactive-placeholders.item-enabled", enabled);
-        saveConfig();
-    }
-
-    /**
-     * Sets ping placeholders enabled state
-     * @param enabled New enabled state
-     */
-    public void setPingPlaceholdersEnabled(boolean enabled) {
-        config.set("interactive-placeholders.ping-enabled", enabled);
-        saveConfig();
-    }
-
-    /**
-     * Gets ping format string
-     * @return Ping format string with {ping} placeholder
+     * Gets all configured custom placeholders from config
+     * @return Map of placeholder keys to their configurations
      */
     @NotNull
-    public String getPingFormat() {
-        return config.getString("interactive-placeholders.ping-format", "{ping}ms");
+    public Map<String, ConfigurationSection> getCustomPlaceholders() {
+        Map<String, ConfigurationSection> placeholders = new HashMap<>();
+        ConfigurationSection customPlaceholdersSection =
+            config.getConfigurationSection("interactive-placeholders.custom-placeholders");
+
+        if (customPlaceholdersSection != null) {
+            for (String key : customPlaceholdersSection.getKeys(false)) {
+                ConfigurationSection placeholderConfig = customPlaceholdersSection.getConfigurationSection(key);
+                if (placeholderConfig != null) {
+                    placeholders.put(key, placeholderConfig);
+                }
+            }
+        }
+
+        return placeholders;
     }
 
     /**
-     * Sets ping format string
-     * @param format New format string with {ping} placeholder
+     * Checks if a specific custom placeholder is enabled
+     * @param placeholderKey The placeholder key
+     * @return true if enabled
      */
-    public void setPingFormat(String format) {
-        config.set("interactive-placeholders.ping-format", format);
-        saveConfig();
+    public boolean isCustomPlaceholderEnabled(String placeholderKey) {
+        return config.getBoolean("interactive-placeholders.custom-placeholders." + placeholderKey + ".enabled", false);
     }
+
+    /**
+     * Gets the activation name for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return The activation name (e.g., "loc" for [loc])
+     */
+    @NotNull
+    public String getCustomPlaceholderActivation(String placeholderKey) {
+        return config.getString("interactive-placeholders.custom-placeholders." + placeholderKey + ".placeholder", placeholderKey);
+    }
+
+    /**
+     * Gets the display name for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return The display name
+     */
+    @NotNull
+    public String getCustomPlaceholderDisplayName(String placeholderKey) {
+        return config.getString("interactive-placeholders.custom-placeholders." + placeholderKey + ".display-name", placeholderKey);
+    }
+
+    /**
+     * Gets the format string for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return The format string
+     */
+    @NotNull
+    public String getCustomPlaceholderFormat(String placeholderKey) {
+        return config.getString("interactive-placeholders.custom-placeholders." + placeholderKey + ".format", "[" + placeholderKey + "]");
+    }
+
+    /**
+     * Gets the permission required for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return The permission string (empty if none required)
+     */
+    @NotNull
+    public String getCustomPlaceholderPermission(String placeholderKey) {
+        return config.getString("interactive-placeholders.custom-placeholders." + placeholderKey + ".permission", "");
+    }
+
+    /**
+     * Gets the hover text for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return List of hover text lines
+     */
+    @NotNull
+    public List<String> getCustomPlaceholderHoverText(String placeholderKey) {
+        return config.getStringList("interactive-placeholders.custom-placeholders." + placeholderKey + ".hover-text");
+    }
+
+    /**
+     * Gets the click action type for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return The click action type
+     */
+    @NotNull
+    public String getCustomPlaceholderClickActionType(String placeholderKey) {
+        ConfigurationSection clickActionSection =
+            config.getConfigurationSection("interactive-placeholders.custom-placeholders." + placeholderKey + ".click-action");
+        if (clickActionSection != null) {
+            return clickActionSection.getString("type", "none");
+        }
+        return "none";
+    }
+
+    /**
+     * Gets the click action value for a custom placeholder
+     * @param placeholderKey The placeholder key
+     * @return The click action value
+     */
+    @NotNull
+    public String getCustomPlaceholderClickActionValue(String placeholderKey) {
+        ConfigurationSection clickActionSection =
+            config.getConfigurationSection("interactive-placeholders.custom-placeholders." + placeholderKey + ".click-action");
+        if (clickActionSection != null) {
+            return clickActionSection.getString("value", "");
+        }
+        return "";
+    }
+
+
 
     
     /**
@@ -524,6 +579,23 @@ public class PluginConfig {
     }
 
     /**
+     * Checks if mention coloring is enabled
+     * @return true if mention coloring is enabled
+     */
+    public boolean isMentionColoringEnabled() {
+        return config.getBoolean("mention-colors.enabled", true);
+    }
+
+    /**
+     * Gets mention color
+     * @return Mention color code
+     */
+    @NotNull
+    public String getMentionColor() {
+        return config.getString("mention-colors.color", "&#FFAFFB");
+    }
+
+    /**
      * Gets private chat sender message format
      * @return Private chat sender format string
      */
@@ -667,7 +739,7 @@ public class PluginConfig {
                 
                 ConfigurationSection messageSection = section.getConfigurationSection(key);
                 if (messageSection != null) {
-                    messages.put(key, new BroadcastMessage(
+                    messages.put(key, createBroadcastMessage(
                         messageSection.getBoolean("enabled", true),
                         messageSection.getString("message", "Default message"),
                         messageSection.getInt("interval", 60)
@@ -759,6 +831,17 @@ public class PluginConfig {
     @NotNull
     public WordBlocker getWordBlocker() {
         return new WordBlocker(getBannedWords(), getBannedPatterns());
+    }
+
+    /**
+     * Creates a new BroadcastMessage instance
+     * @param enabled Whether the message is enabled
+     * @param message The message content
+     * @param interval The broadcast interval
+     * @return New BroadcastMessage instance
+     */
+    public BroadcastMessage createBroadcastMessage(boolean enabled, String message, int interval) {
+        return new BroadcastMessage(enabled, message, interval);
     }
 
     /**
@@ -857,11 +940,11 @@ public class PluginConfig {
                     int maxLength = channelSection.getInt("max-length", -1);
                     
                     channels.put(key, new ChatTypeUtil(
-                        enabled, 
+                        enabled,
                         displayName,
-                        format, 
-                        radius, 
-                        chatChar, 
+                        format,
+                        radius,
+                        chatChar,
                         sendPermission,
                         receivePermission,
                         cooldown,
@@ -1331,7 +1414,9 @@ public class PluginConfig {
                             for (String listLine : value) {
                                 for (int i = 0; i < spaces + 2; i++) builder.append(" ");
                                 String escapedListLine = listLine.replace("\n", "\\n");
-                                builder.append("- \"").append(escapedListLine).append("\"\n");
+                                boolean useSingleQuotes = escapedListLine.contains("\\");
+                                String quote = useSingleQuotes ? "'" : "\"";
+                                builder.append("- ").append(quote).append(escapedListLine).append(quote).append("\n");
                             }
                         }
                         continue;

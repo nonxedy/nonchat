@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,6 +17,8 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+
+import me.clip.placeholderapi.PlaceholderAPI;
 
 /**
  * Handles roleplay action command functionality
@@ -102,6 +105,15 @@ public class MeCommand implements CommandExecutor, TabCompleter {
         String message = String.join(" ", args);
         String formattedMessage = config.getMeFormat()
             .replace("{message}", message);
+
+        // Process PlaceholderAPI placeholders if available
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            try {
+                formattedMessage = PlaceholderAPI.setPlaceholders((Player) sender, formattedMessage);
+            } catch (Exception e) {
+                plugin.logError("Failed to process PlaceholderAPI placeholders for me command: " + e.getMessage());
+            }
+        }
 
         plugin.getServer().broadcast(ColorUtil.parseComponent(formattedMessage));
         plugin.logResponse("Me command executed: " + sender.getName() + " - " + message);

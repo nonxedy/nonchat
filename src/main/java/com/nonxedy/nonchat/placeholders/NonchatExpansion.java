@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
+import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -70,6 +71,16 @@ public class NonchatExpansion extends PlaceholderExpansion {
             case "caps_filter_enabled" -> plugin.getConfigService().getConfig().isCapsFilterEnabled() ?
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.caps-filter.enabled")) :
                 ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.caps-filter.disabled"));
+            case "current_channel" -> {
+                Channel currentChannel = plugin.getChatManager().getPlayerChannel(player);
+                if (currentChannel != null) {
+                    yield ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.current-channel.format")
+                        .replace("{channel}", currentChannel.getDisplayName())
+                        .replace("{id}", currentChannel.getId()));
+                } else {
+                    yield ColorUtil.parseColor(plugin.getConfigService().getMessages().getString("placeholders.current-channel.none"));
+                }
+            }
             default -> null;
         };
     }

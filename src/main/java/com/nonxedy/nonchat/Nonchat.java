@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
@@ -29,9 +30,11 @@ import com.nonxedy.nonchat.listener.DeathListener;
 import com.nonxedy.nonchat.listener.DiscordSRVListener;
 import com.nonxedy.nonchat.listener.JoinQuitListener;
 import com.nonxedy.nonchat.placeholders.NonchatExpansion;
+import com.nonxedy.nonchat.placeholders.impl.ConfigurablePlaceholder;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.debugging.Debugger;
@@ -60,6 +63,7 @@ public class Nonchat extends JavaPlugin {
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
+    private InteractivePlaceholderManager placeholderManager;
     private final Map<Player, List<TextDisplay>> bubbles = new HashMap<>();
 
     @Override
@@ -117,16 +121,114 @@ public class Nonchat extends JavaPlugin {
             // Initialize command service last as it depends on all other services
             this.commandService = new CommandService(this, chatService, configService);
 
+            // Initialize interactive placeholder manager
+            initializeInteractivePlaceholders();
+
             // Initialize debug system if enabled
             if (configService.getConfig().isDebug()) {
                 this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
                 debugger.info("Core", "Services initialized successfully");
             }
-            
+
             getLogger().info("Core services initialized successfully");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to initialize core services: {0}", e.getMessage());
             throw new RuntimeException("Failed to initialize core services", e);
+        }
+    }
+
+    private void initializeInteractivePlaceholders() {
+        try {
+            this.placeholderManager = new InteractivePlaceholderManager();
+
+            // Register built-in placeholders
+            registerBuiltInPlaceholders();
+
+            // Load custom placeholders from config
+            loadCustomPlaceholdersFromConfig();
+
+            getLogger().info("Interactive placeholders initialized successfully");
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "Failed to initialize interactive placeholders: {0}", e.getMessage());
+            throw new RuntimeException("Failed to initialize interactive placeholders", e);
+        }
+    }
+
+    private void registerBuiltInPlaceholders() {
+        // Built-in placeholders are now loaded from config in loadCustomPlaceholdersFromConfig()
+        getLogger().info("Built-in interactive placeholders will be loaded from config");
+    }
+
+    private void loadCustomPlaceholdersFromConfig() {
+        try {
+            // Load custom placeholders from config
+            ConfigurationSection customPlaceholdersSection =
+                getConfig().getConfigurationSection("interactive-placeholders.custom-placeholders");
+
+            if (customPlaceholdersSection != null) {
+                int loadedCount = 0;
+                for (String placeholderKey : customPlaceholdersSection.getKeys(false)) {
+                    ConfigurationSection placeholderConfig =
+                        customPlaceholdersSection.getConfigurationSection(placeholderKey);
+
+                    if (placeholderConfig != null && placeholderConfig.getBoolean("enabled", false)) {
+                        String displayName = placeholderConfig.getString("display-name", placeholderKey);
+                        String description = placeholderConfig.getString("description", "");
+                        String permission = placeholderConfig.getString("permission", "");
+                        String activationKey = placeholderConfig.getString("placeholder", placeholderKey);
+                        String format = placeholderConfig.getString("format", "[" + activationKey + "]");
+                        List<String> hoverText = placeholderConfig.getStringList("hover-text");
+
+                        // Click action
+                        String clickActionType = "none";
+                        String clickActionValue = "";
+                        ConfigurationSection clickActionSection =
+                            placeholderConfig.getConfigurationSection("click-action");
+                        if (clickActionSection != null) {
+                            clickActionType = clickActionSection.getString("type", "none");
+                            clickActionValue = clickActionSection.getString("value", "");
+                        }
+
+                        // Create and register the placeholder
+                        ConfigurablePlaceholder placeholder = new ConfigurablePlaceholder(
+                            placeholderKey,
+                            activationKey,
+                            displayName,
+                            description,
+                            true, // Already checked enabled above
+                            permission,
+                            format,
+                            hoverText,
+                            clickActionType,
+                            clickActionValue
+                        );
+
+                        placeholderManager.registerPlaceholder(placeholder);
+                        loadedCount++;
+                    }
+                }
+                getLogger().info("Loaded " + loadedCount + " custom interactive placeholders from config");
+            } else {
+                getLogger().info("No custom placeholders section found in config");
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Failed to load custom placeholders from config: {0}", e.getMessage());
+        }
+    }
+
+    private void reloadInteractivePlaceholders() {
+        try {
+            if (placeholderManager != null) {
+                // Clear existing placeholders
+                placeholderManager.clearPlaceholders();
+
+                // Reload from config
+                loadCustomPlaceholdersFromConfig();
+
+                getLogger().info("Interactive placeholders reloaded successfully");
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Failed to reload interactive placeholders: {0}", e.getMessage());
         }
     }
 
@@ -280,6 +382,9 @@ public class Nonchat extends JavaPlugin {
                 commandService.reloadCommands();
             }
 
+            // Reload interactive placeholders
+            reloadInteractivePlaceholders();
+
             getLogger().info("Configuration reloaded successfully");
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to reload configuration: {0}", e.getMessage());
@@ -317,6 +422,9 @@ public class Nonchat extends JavaPlugin {
             if (chatManager != null) {
                 chatManager.reloadChannels();
             }
+
+            // Reload interactive placeholders
+            reloadInteractivePlaceholders();
 
             // Reinitialize debugger if needed
             if (configService != null && configService.getConfig().isDebug()) {
@@ -405,5 +513,9 @@ public class Nonchat extends JavaPlugin {
 
     public ConfigService getConfigService() {
         return configService;
+    }
+
+    public InteractivePlaceholderManager getPlaceholderManager() {
+        return placeholderManager;
     }
 }

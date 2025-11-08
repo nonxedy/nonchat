@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,6 +18,8 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+
+import me.clip.placeholderapi.PlaceholderAPI;
 
 /**
  * Handles dice rolling command functionality
@@ -87,6 +90,15 @@ public class RollCommand implements CommandExecutor, TabCompleter {
             int rolledNumber = random.nextInt(maxNumber) + 1;
             String format = config.getRollFormat()
                 .replace("{number}", String.valueOf(rolledNumber));
+
+            // Process PlaceholderAPI placeholders if available
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                try {
+                    format = PlaceholderAPI.setPlaceholders((Player) sender, format);
+                } catch (Exception e) {
+                    plugin.logError("Failed to process PlaceholderAPI placeholders for roll command: " + e.getMessage());
+                }
+            }
 
             sender.getServer().broadcast(ColorUtil.parseComponent(format));
             plugin.logResponse("Player " + sender.getName() + " used roll command");

@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.util.AsyncFilterService;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
@@ -41,16 +42,18 @@ public class ChatManager {
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
+    private final AsyncFilterService asyncFilterService;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
-        this.channelManager = new ChannelManager(config);
-        this.ignoreCommand = plugin.getIgnoreCommand();
         this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
+        this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
+        this.channelManager = new ChannelManager(plugin, config);
+        this.ignoreCommand = plugin.getIgnoreCommand();
         startBubbleUpdater();
     }
 
@@ -162,9 +165,6 @@ public class ChatManager {
             // This prevents the cooldown from getting stuck when multiple messages are sent rapidly
             channelManager.recordMessageSent(player);
 
-            // The final message content to be used from now on
-            final String messageToSend;
-
             // Check if message should be filtered by registered filters
             if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
                 player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-filtered")));
@@ -177,7 +177,11 @@ public class ChatManager {
                 // Message was cancelled by a processor
                 return;
             }
-            messageToSend = processedMessage; // Use a new variable for the processed message
+
+            // Apply mention coloring for all recipients if enabled
+            final String messageToSend = config.isMentionColoringEnabled()
+                ? processMentionColoring(processedMessage)
+                : processedMessage;
 
             // Only show chat bubbles for public channels (channels without receive permission requirements)
             // or if the channel doesn't have restricted access
@@ -197,7 +201,7 @@ public class ChatManager {
                             plugin.logError("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
                         }
                     });
-                } catch (Exception e) {
+                } catch (IllegalArgumentException e) {
                     plugin.logError("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
                     // Try to create bubble immediately as fallback
                     try {
@@ -217,16 +221,16 @@ public class ChatManager {
                                     plugin.logError("Global scheduler bubble creation also failed for player " + player.getName() + ": " + globalError.getMessage());
                                 }
                             });
-                        } catch (Exception globalSchedulerError) {
+                        } catch (IllegalArgumentException globalSchedulerError) {
                             plugin.logError("Failed to schedule global bubble creation for player " + player.getName() + ": " + globalSchedulerError.getMessage());
                         }
                     }
                 }
             }
 
-            handleMentions(player, messageToSend);
+            handleMentions(player, processedMessage); // Use original message for mention detection
             Component formattedMessage = channel.formatMessage(player, messageToSend);
-            boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, messageToSend);
+            boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, processedMessage); // Use original message for console
 
             // Check if undelivered message notifications are enabled and notify if message wasn't delivered
             if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
@@ -298,7 +302,7 @@ public class ChatManager {
                     plugin.logError("Error in bubble updater: " + e.getMessage());
                 }
             }, 1L, 1L);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             plugin.logError("Failed to start bubble updater: " + e.getMessage());
             // Try to start with global scheduler as fallback
             try {
@@ -335,7 +339,7 @@ public class ChatManager {
                     }
                 }, 1L, 1L);
                 plugin.logResponse("Bubble updater started with fallback scheduler");
-            } catch (Exception fallbackError) {
+            } catch (IllegalArgumentException fallbackError) {
                 plugin.logError("Failed to start bubble updater with fallback scheduler: " + fallbackError.getMessage());
                 // Try to start with immediate execution as last resort
                 try {
@@ -374,7 +378,7 @@ public class ChatManager {
                         }
                     });
                     plugin.logResponse("Bubble updater started with immediate execution");
-                } catch (Exception immediateError) {
+                } catch (IllegalArgumentException immediateError) {
                     plugin.logError("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
                 }
             }
@@ -400,14 +404,14 @@ public class ChatManager {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         removeBubble(player);
                     }, config.getChatBubblesDuration() * 20L);
-                } catch (Exception e) {
+                } catch (IllegalArgumentException e) {
                     plugin.logError("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
                     // Schedule removal using global scheduler as fallback
                     try {
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             removeBubble(player);
                         }, config.getChatBubblesDuration() * 20L);
-                    } catch (Exception fallbackError) {
+                    } catch (IllegalArgumentException fallbackError) {
                         plugin.logError("Fallback bubble removal scheduling also failed for player " + player.getName() + ": " + fallbackError.getMessage());
                         // Try to remove bubble immediately as last resort
                         try {
@@ -490,17 +494,44 @@ public class ChatManager {
         mentionMessage = mentionMessage.replace("{player}", sender.getName());
 
         mentioned.sendMessage(ColorUtil.parseComponent(mentionMessage));
-        
+
         // Play mention sound if enabled for mention events
         if (config.isMentionSoundEnabled()) {
             try {
-                mentioned.playSound(mentioned.getLocation(), 
-                    config.getMentionSound(), 
+                mentioned.playSound(mentioned.getLocation(),
+                    config.getMentionSound(),
                     config.getMentionSoundVolume(), config.getMentionSoundPitch());
             } catch (Exception e) {
                 plugin.logError("Error playing mention sound: " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Processes mention coloring in a message for the sender's view
+     * @param message The message to process
+     * @return The message with colored mentions
+     */
+    private String processMentionColoring(String message) {
+        String mentionColor = config.getMentionColor();
+        Matcher mentionMatcher = mentionPattern.matcher(message);
+
+        // Use StringBuilder for efficient string manipulation
+        StringBuilder coloredMessage = new StringBuilder();
+        int lastEnd = 0;
+
+        while (mentionMatcher.find()) {
+            // Add text before the mention
+            coloredMessage.append(message.substring(lastEnd, mentionMatcher.start()));
+            // Add the colored mention
+            coloredMessage.append(mentionColor).append(mentionMatcher.group(0));
+            lastEnd = mentionMatcher.end();
+        }
+
+        // Add remaining text after the last mention
+        coloredMessage.append(message.substring(lastEnd));
+
+        return coloredMessage.toString();
     }
 
     /**

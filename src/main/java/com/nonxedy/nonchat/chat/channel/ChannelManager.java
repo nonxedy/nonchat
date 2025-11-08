@@ -13,8 +13,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
 import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.util.AsyncConfigSaver;
 import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
 
 /**
@@ -26,9 +28,11 @@ public class ChannelManager {
     private final Map<Player, Long> lastMessageTimes = new ConcurrentHashMap<>();
     private String defaultChannelId;
     private final PluginConfig config;
+    private final AsyncConfigSaver asyncConfigSaver;
 
-    public ChannelManager(PluginConfig config) {
+    public ChannelManager(Nonchat plugin, PluginConfig config) {
         this.config = config;
+        this.asyncConfigSaver = new AsyncConfigSaver(plugin, config);
         loadChannels();
     }
 
@@ -135,11 +139,10 @@ public class ChannelManager {
         // Set default channel
         this.defaultChannelId = "local";
         
-        // Save default channels to config
+        // Save default channels to config asynchronously
         saveChannelToConfig("global", globalChannel);
         saveChannelToConfig("local", localChannel);
-        config.set("default-channel", defaultChannelId);
-        config.saveConfig();
+        asyncConfigSaver.saveAsync("default-channel", defaultChannelId);
     }
     
     /**
@@ -190,9 +193,9 @@ public class ChannelManager {
         // Add to channels map
         channels.put(channelId, channel);
         
-        // Save to config
+        // Save to config asynchronously
         saveChannelToConfig(channelId, channel);
-        config.saveConfig();
+        asyncConfigSaver.saveNow();
         
         return channel;
     }
@@ -244,9 +247,9 @@ public class ChannelManager {
         // Replace in channels map
         channels.put(channelId, updatedChannel);
         
-        // Save to config
+        // Save to config asynchronously
         saveChannelToConfig(channelId, updatedChannel);
-        config.saveConfig();
+        asyncConfigSaver.saveNow();
         
         return true;
     }
@@ -270,9 +273,9 @@ public class ChannelManager {
         // Remove from channels map
         channels.remove(channelId);
         
-        // Remove from config
+        // Remove from config asynchronously
         config.set("channels." + channelId, null);
-        config.saveConfig();
+        asyncConfigSaver.saveNow();
         
         // Switch any players using this channel to the default
         Channel defaultChannel = getDefaultChannel();
@@ -298,7 +301,7 @@ public class ChannelManager {
         
         this.defaultChannelId = channelId;
         config.set("default-channel", channelId);
-        config.saveConfig();
+        asyncConfigSaver.saveNow();
         
         return true;
     }

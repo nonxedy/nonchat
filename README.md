@@ -95,7 +95,7 @@ Visit our [Wiki](https://github.com/nonxedy/nonchat/wiki) for detailed setup ins
 | Status | Task |
 |:------:|------|
 | ⏳ | Make channel names clickable to switch to them |
-| 🔜 | Add more placeholders (placeholder that returns your current channel) |
+| ✅ | Add more placeholders (placeholder that returns your current channel) |
 
 </div>
 

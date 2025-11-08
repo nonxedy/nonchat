@@ -3,7 +3,7 @@
 # Plugin creado por nonxedy (@nonxedy).
 # Publicado en github https://github.com/nonxedy/nonchat
 # Publicado en modrinth https://modrinth.com/plugin/nonchat
-# Versión del plugin: 1.5.4
+# Versión del plugin: 1.5.5
 #
 # - Soporte para LuckPerms.
 # - Soporte para Vault.
@@ -166,3 +166,7 @@ placeholders:
   ignored: # %nonchat_ignored%
     true: "&#84FFB8Estás ignorando jugadores"
     false: "&#ff0000No estás ignorando a nadie"
+  # Variables del canal actual.
+  current-channel: # %nonchat_current_channel%
+    format: "&#ffffffCanal actual: &#84FFB8{channel} (&#FFAFFB{id}&#84FFB8)"
+    none: "&#ff0000No hay ningún canal activo"

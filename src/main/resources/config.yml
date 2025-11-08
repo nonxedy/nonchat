@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.4
+# Version of the plugin: 1.5.5
 #
 # - LuckPerms support.
 # - Vault support.
@@ -37,17 +37,100 @@ message-delivery:
 
 # ==================================================
 # INTERACTIVE PLACEHOLDERS
-# Configure special placeholders like [item] and [ping].
+# Configure interactive placeholders that enhance chat with dynamic content.
 # ==================================================
 interactive-placeholders:
   # Enable/disable all interactive placeholders.
   enabled: true
-  # Enable/disable the [item] placeholder specifically.
-  item-enabled: true
-  # Enable/disable the [ping] placeholder specifically.
-  ping-enabled: true
-  # Format for the ping display. Use {ping} for the numerical value.
-  ping-format: "{ping}ms"
+
+  # ==================================================
+  # CUSTOM INTERACTIVE PLACEHOLDERS
+  # Define your own interactive placeholders here.
+  # Each placeholder can have custom activation name, format, hover text, click actions, and permissions.
+  #
+  # Activation: Use [placeholder] in chat to activate (e.g., [loc] activates location placeholder)
+  # Available Variables in format and hover-text:
+  #   Basic: {player}, {world}, {x}, {y}, {z}, {server_name}, {online_players}, {max_players}
+  #   Item (for item placeholder): {item_name}, {item_amount}, {item_lore}, {item_enchantments}, {item_durability}
+  #   Ping (for ping placeholder): {ping}, {ping_quality}
+  # Click Action Types: command, suggest_command, open_url, none
+  # ==================================================
+  custom-placeholders:
+    # Built-in item placeholder - shows held item with customizable format and hover info
+    item:
+      enabled: true
+      placeholder: "item"  # Activated by [item] in chat
+      display-name: "Held Item"
+      description: "Shows the item currently held in main hand with customizable format and hover information"
+      permission: ""
+      format: "&f[{item_name}]"
+      hover-text:
+        - "&#FFAFFBItem: &f{item_name}"
+        - "&#FFAFFBAmount: &f{item_amount}"
+        - "&#FFAFFBLore: &f{item_lore}"
+        - "&#FFAFFBEnchantments: &f{item_enchantments}"
+        - "&#FFAFFBDurability: &f{item_durability}"
+      click-action:
+        type: "none"
+
+    # Built-in ping placeholder - shows connection latency with color coding
+    ping:
+      enabled: true
+      placeholder: "ping"  # Activated by [ping] in chat
+      display-name: "Player Ping"
+      description: "Shows current ping in milliseconds with color-coded status"
+      permission: ""
+      format: "{ping}ms"
+      hover-text:
+        - "Current ping: {ping}ms"
+        - "Connection quality: {ping_quality}"
+      click-action:
+        type: "none"
+
+    # Example: Location placeholder with teleport functionality
+    location:
+      enabled: false  # Set to true to enable
+      placeholder: "loc"  # Activated by [loc] in chat
+      display-name: "Player Location"
+      description: "Shows the player's current location"
+      permission: ""
+      format: "&#FFAFFB[📍]"
+      hover-text:
+        - "Current location: {world}, {x}, {y}, {z}"
+        - "Click to teleport!"
+      click-action:
+        type: "command"
+        value: "/tp {player} {x} {y} {z}"
+
+    # Example: Inventory inspection placeholder
+    inventory:
+      enabled: false  # Set to true to enable
+      placeholder: "inv"  # Activated by [inv] in chat
+      display-name: "Player Inventory"
+      description: "Click to view player's inventory"
+      permission: "nonchat.placeholders.inventory"
+      format: "&#FFAFFB[📦]"
+      hover-text:
+        - "Click to view inventory"
+        - "Player: {player}"
+      click-action:
+        type: "command"
+        value: "/invsee {player}"
+
+    # Example: Server information placeholder
+    server:
+      enabled: false  # Set to true to enable
+      placeholder: "server"  # Activated by [server] in chat
+      display-name: "Server Info"
+      description: "Shows server information"
+      permission: ""
+      format: "&#FFAFFB[🏠]"
+      hover-text:
+        - "Server: {server_name}"
+        - "Online: {online_players}/{max_players}"
+        - "Version: {server_version}"
+      click-action:
+        type: "none"
 
 # ==================================================
 # MENTION SOUNDS
@@ -62,6 +145,16 @@ mention-sounds:
   volume: 1.0
   # Pitch of the mention sound (0.5 to 2.0).
   pitch: 1.0
+
+# ==================================================
+# MENTION COLORS
+# Configure colors for mentions in chat messages.
+# ==================================================
+mention-colors:
+  # Enable/disable mention coloring for the sender.
+  enabled: true
+  # Color to apply to @mentions in the sender's message.
+  color: "&#FFAFFB"
 
 # ==================================================
 # CUSTOM CHANNELS
@@ -294,13 +387,13 @@ banned-words:
 
 # List of regex patterns for advanced filtering (case-insensitive).
 # Examples:
-#   - ".*\\btest\\b.*" - matches any message containing the word "test"
-#   - ".*\\d{4,}.*" - matches any message containing 4 or more consecutive digits
-#   - ".*http[s]?://.*" - matches URLs starting with http:// or https://
-#   - ".*\\b(word1|word2|word3)\\b.*" - matches any of the specified words
+#   - '.*\btest\b.*' - matches any message containing the word "test"
+#   - '.*\d{4,}.*' - matches any message containing 4 or more consecutive digits
+#   - '.*http[s]?://.*' - matches URLs starting with http:// or https://
+#   - '.*\b(word1|word2|word3)\b.*' - matches any of the specified words
 banned-patterns:
-  - ".*\\btest\\b.*"
-  - ".*\\d{4,}.*"
+  - '.*\btest\b.*'
+  - '.*\d{4,}.*'
 
 # ==================================================
 # CAPS FILTER
