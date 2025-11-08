@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.Nonchat
 description: The best chat plugin for 1.16-1.21.10
-version: 1.5.4
+version: 1.5.5
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
