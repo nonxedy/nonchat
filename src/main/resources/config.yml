@@ -281,7 +281,7 @@ private-chat:
         - "§8Click to reply"
   receiver:
     # Format for the message seen by the receiver.
-    format: "§8[§f{sender} §f-> §6You§8] §f{message}"
+    format: "§8[§f{sender} §f-> §fYou§8] §f{message}"
     hover:
       # Enable/disable hover text on the receiver's message.
       enabled: true
