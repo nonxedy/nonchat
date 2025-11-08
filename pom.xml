@@ -117,6 +117,43 @@
 					<release>21</release>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.6.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<relocations>
+								<relocation>
+									<pattern>com.github.benmanes.caffeine</pattern>
+									<shadedPattern>com.nonxedy.nonchat.libs.caffeine</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.yaml.snakeyaml</pattern>
+									<shadedPattern>com.nonxedy.nonchat.libs.snakeyaml</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>net.kyori.adventure</pattern>
+									<shadedPattern>com.nonxedy.nonchat.libs.adventure</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.commons.lang3</pattern>
+									<shadedPattern>com.nonxedy.nonchat.libs.commonslang3</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.bstats</pattern>
+									<shadedPattern>com.nonxedy.nonchat.libs.bstats</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
