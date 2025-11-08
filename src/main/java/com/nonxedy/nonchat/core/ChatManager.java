@@ -165,9 +165,6 @@ public class ChatManager {
             // This prevents the cooldown from getting stuck when multiple messages are sent rapidly
             channelManager.recordMessageSent(player);
 
-            // The final message content to be used from now on
-            final String messageToSend;
-
             // Check if message should be filtered by registered filters
             if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
                 player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-filtered")));
@@ -180,7 +177,11 @@ public class ChatManager {
                 // Message was cancelled by a processor
                 return;
             }
-            messageToSend = processedMessage; // Use a new variable for the processed message
+
+            // Apply mention coloring for all recipients if enabled
+            final String messageToSend = config.isMentionColoringEnabled()
+                ? processMentionColoring(processedMessage)
+                : processedMessage;
 
             // Only show chat bubbles for public channels (channels without receive permission requirements)
             // or if the channel doesn't have restricted access
@@ -227,9 +228,9 @@ public class ChatManager {
                 }
             }
 
-            handleMentions(player, messageToSend);
+            handleMentions(player, processedMessage); // Use original message for mention detection
             Component formattedMessage = channel.formatMessage(player, messageToSend);
-            boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, messageToSend);
+            boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, processedMessage); // Use original message for console
 
             // Check if undelivered message notifications are enabled and notify if message wasn't delivered
             if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
@@ -493,17 +494,44 @@ public class ChatManager {
         mentionMessage = mentionMessage.replace("{player}", sender.getName());
 
         mentioned.sendMessage(ColorUtil.parseComponent(mentionMessage));
-        
+
         // Play mention sound if enabled for mention events
         if (config.isMentionSoundEnabled()) {
             try {
-                mentioned.playSound(mentioned.getLocation(), 
-                    config.getMentionSound(), 
+                mentioned.playSound(mentioned.getLocation(),
+                    config.getMentionSound(),
                     config.getMentionSoundVolume(), config.getMentionSoundPitch());
             } catch (Exception e) {
                 plugin.logError("Error playing mention sound: " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Processes mention coloring in a message for the sender's view
+     * @param message The message to process
+     * @return The message with colored mentions
+     */
+    private String processMentionColoring(String message) {
+        String mentionColor = config.getMentionColor();
+        Matcher mentionMatcher = mentionPattern.matcher(message);
+
+        // Use StringBuilder for efficient string manipulation
+        StringBuilder coloredMessage = new StringBuilder();
+        int lastEnd = 0;
+
+        while (mentionMatcher.find()) {
+            // Add text before the mention
+            coloredMessage.append(message.substring(lastEnd, mentionMatcher.start()));
+            // Add the colored mention
+            coloredMessage.append(mentionColor).append(mentionMatcher.group(0));
+            lastEnd = mentionMatcher.end();
+        }
+
+        // Add remaining text after the last mention
+        coloredMessage.append(message.substring(lastEnd));
+
+        return coloredMessage.toString();
     }
 
     /**

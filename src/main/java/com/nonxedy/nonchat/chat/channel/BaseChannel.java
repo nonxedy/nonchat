@@ -329,6 +329,11 @@ public class BaseChannel implements Channel {
     }
 
     private Component processMessageContent(Player player, String message, String inheritedColor) {
+        // If message has color codes (like mention colors), use legacy processing to preserve colors
+        if (ColorUtil.hasColorCodes(message)) {
+            return processLegacyMessageContent(player, message, inheritedColor);
+        }
+
         // Check if interactive placeholders are globally disabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         if (plugin instanceof Nonchat nonchatPlugin) {

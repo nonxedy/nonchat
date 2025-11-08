@@ -147,6 +147,16 @@ mention-sounds:
   pitch: 1.0
 
 # ==================================================
+# MENTION COLORS
+# Configure colors for mentions in chat messages.
+# ==================================================
+mention-colors:
+  # Enable/disable mention coloring for the sender.
+  enabled: true
+  # Color to apply to @mentions in the sender's message (Minecraft color codes).
+  color: "&#FFAFFB"
+
+# ==================================================
 # CUSTOM CHANNELS
 # Define chat channels with unique settings.
 #

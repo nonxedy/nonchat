@@ -579,6 +579,23 @@ public class PluginConfig {
     }
 
     /**
+     * Checks if mention coloring is enabled
+     * @return true if mention coloring is enabled
+     */
+    public boolean isMentionColoringEnabled() {
+        return config.getBoolean("mention-colors.enabled", true);
+    }
+
+    /**
+     * Gets mention color
+     * @return Mention color code
+     */
+    @NotNull
+    public String getMentionColor() {
+        return config.getString("mention-colors.color", "&#FFAFFB");
+    }
+
+    /**
      * Gets private chat sender message format
      * @return Private chat sender format string
      */
