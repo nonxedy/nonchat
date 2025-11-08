@@ -29,7 +29,7 @@ reloaded: "&#84FFB8Плагин перезагружен!"
 reload-failed: "&#ff0000Не удалось перезагрузить плагин!"
 
 # Version.
-version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.4\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.4"
+version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.5\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.5"
 
 
 # Help.
