@@ -1,10 +1,13 @@
 package com.nonxedy.nonchat.listener;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.core.ChatManager;
@@ -16,10 +19,43 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 public class PaperChatListener extends ChatListener {
 
     private final Nonchat plugin;
+    private final Map<String, String> playerMessages = new ConcurrentHashMap<>();
+    private final Map<String, Character> modifiedPrefixes = new ConcurrentHashMap<>();
 
     public PaperChatListener(Nonchat plugin, ChatManager chatManager, ChatService chatService) {
         super(chatManager, chatService);
         this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onAsyncPlayerChatLowest(AsyncPlayerChatEvent event) {
+        // Check if message starts with a channel character and temporarily remove it for ChatColor2
+        String message = event.getMessage();
+        if (message.length() > 0) {
+            char firstChar = message.charAt(0);
+            // Check if this character matches any channel
+            if (chatManager != null && chatManager.getChannelManager().findChannelByCharacter(firstChar).isPresent()) {
+                // Temporarily remove the prefix so ChatColor2 can color the message
+                event.setMessage(message.substring(1));
+                modifiedPrefixes.put(event.getPlayer().getUniqueId().toString(), firstChar);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        String playerId = player.getUniqueId().toString();
+        String message = event.getMessage();
+
+        // If we modified this message earlier, restore the prefix
+        Character prefix = modifiedPrefixes.remove(playerId);
+        if (prefix != null) {
+            message = prefix + message;
+        }
+
+        // Store the final message (potentially colored by ChatColor2)
+        playerMessages.put(playerId, message);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -27,14 +63,18 @@ public class PaperChatListener extends ChatListener {
         event.setCancelled(true);
 
         Player player = event.getPlayer();
-        String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+        String playerId = player.getUniqueId().toString();
+
+        // Use the colored message from AsyncPlayerChatEvent if available, otherwise fall back to plain text
+        final String message = playerMessages.remove(playerId); // Remove to prevent memory leaks
+        final String finalMessage = message != null ? message : PlainTextComponentSerializer.plainText().serialize(event.message());
 
         CompletableFuture.runAsync(() -> {
             try {
                 if (chatService != null) {
-                    chatService.handleChat(player, message);
+                    chatService.handleChat(player, finalMessage);
                 } else if (chatManager != null) {
-                    chatManager.processChat(player, message);
+                    chatManager.processChat(player, finalMessage);
                 }
             } catch (Exception e) {
                 plugin.logError("Async chat processing failed: " + e.getMessage());
