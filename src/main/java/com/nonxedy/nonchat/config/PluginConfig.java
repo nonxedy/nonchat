@@ -37,6 +37,8 @@ import lombok.Getter;
 /**
  * Central configuration manager for the NonChat plugin
  * Handles loading, saving and accessing all plugin settings
+ * 
+ * TODO: Remove color codes from Bukkit.getLogger().log() messages - logger doesn't support color formatting.
  */
 @Getter
 public class PluginConfig {
