@@ -213,6 +213,30 @@ public class PluginConfig {
         config.set("anti-ad.staff-notify", true);
         config.set("anti-ad.punish-command", "ban %player% advertising");
         
+        // Anti-spam settings
+        config.set("anti-spam.enabled", true);
+        
+        // Repetitive message detection
+        config.set("anti-spam.repetitive.enabled", true);
+        config.set("anti-spam.repetitive.threshold", 3);
+        config.set("anti-spam.repetitive.time-window", 10);
+        config.set("anti-spam.repetitive.message", "&cPlease do not send the same message repeatedly!");
+        config.set("anti-spam.repetitive.actions", Arrays.asList("block", "notify-staff"));
+        
+        // Similar message detection
+        config.set("anti-spam.similar.enabled", true);
+        config.set("anti-spam.similar.threshold", 0.85);
+        config.set("anti-spam.similar.time-window", 30);
+        config.set("anti-spam.similar.message", "&cPlease do not send similar messages repeatedly!");
+        config.set("anti-spam.similar.actions", Arrays.asList("block", "notify-staff"));
+        
+        // Flood detection
+        config.set("anti-spam.flood.enabled", true);
+        config.set("anti-spam.flood.max-messages", 5);
+        config.set("anti-spam.flood.time-window", 5);
+        config.set("anti-spam.flood.message", "&cYou are sending messages too quickly! Please slow down.");
+        config.set("anti-spam.flood.actions", Arrays.asList("block", "notify-staff"));
+        
     }
 
     // Creates default chat channels configuration
@@ -1137,6 +1161,140 @@ public class PluginConfig {
      */
     public String getAntiAdPunishCommand() {
         return config.getString("anti-ad.punish-command", "ban %player_name% advertising");
+    }
+
+    /**
+     * Checks if anti-spam system is enabled
+     * @return true if enabled
+     */
+    public boolean isAntiSpamEnabled() {
+        return config.getBoolean("anti-spam.enabled", true);
+    }
+
+    /**
+     * Checks if repetitive message detection is enabled
+     * @return true if enabled
+     */
+    public boolean isAntiSpamRepetitiveEnabled() {
+        return config.getBoolean("anti-spam.repetitive.enabled", true);
+    }
+
+    /**
+     * Gets repetitive message detection threshold
+     * @return Maximum number of identical messages allowed
+     */
+    public int getAntiSpamRepetitiveThreshold() {
+        return config.getInt("anti-spam.repetitive.threshold", 3);
+    }
+
+    /**
+     * Gets repetitive message detection time window
+     * @return Time window in seconds
+     */
+    public int getAntiSpamRepetitiveTimeWindow() {
+        return config.getInt("anti-spam.repetitive.time-window", 10);
+    }
+
+    /**
+     * Gets repetitive spam warning message
+     * @return Warning message template
+     */
+    @NotNull
+    public String getAntiSpamRepetitiveMessage() {
+        return config.getString("anti-spam.repetitive.message", "&cPlease do not send the same message repeatedly!");
+    }
+
+    /**
+     * Gets actions to execute when repetitive spam is detected
+     * @return List of actions/commands
+     */
+    @NotNull
+    public List<String> getAntiSpamRepetitiveActions() {
+        return config.getStringList("anti-spam.repetitive.actions");
+    }
+
+    /**
+     * Checks if similar message detection is enabled
+     * @return true if enabled
+     */
+    public boolean isAntiSpamSimilarEnabled() {
+        return config.getBoolean("anti-spam.similar.enabled", true);
+    }
+
+    /**
+     * Gets similar message detection threshold
+     * @return Similarity threshold (0.0-1.0)
+     */
+    public double getAntiSpamSimilarThreshold() {
+        return config.getDouble("anti-spam.similar.threshold", 0.85);
+    }
+
+    /**
+     * Gets similar message detection time window
+     * @return Time window in seconds
+     */
+    public int getAntiSpamSimilarTimeWindow() {
+        return config.getInt("anti-spam.similar.time-window", 30);
+    }
+
+    /**
+     * Gets similar spam warning message
+     * @return Warning message template
+     */
+    @NotNull
+    public String getAntiSpamSimilarMessage() {
+        return config.getString("anti-spam.similar.message", "&cPlease do not send similar messages repeatedly!");
+    }
+
+    /**
+     * Gets actions to execute when similar spam is detected
+     * @return List of actions/commands
+     */
+    @NotNull
+    public List<String> getAntiSpamSimilarActions() {
+        return config.getStringList("anti-spam.similar.actions");
+    }
+
+    /**
+     * Checks if flood detection is enabled
+     * @return true if enabled
+     */
+    public boolean isAntiSpamFloodEnabled() {
+        return config.getBoolean("anti-spam.flood.enabled", true);
+    }
+
+    /**
+     * Gets flood detection maximum messages
+     * @return Maximum messages allowed in time window
+     */
+    public int getAntiSpamFloodMaxMessages() {
+        return config.getInt("anti-spam.flood.max-messages", 5);
+    }
+
+    /**
+     * Gets flood detection time window
+     * @return Time window in seconds
+     */
+    public int getAntiSpamFloodTimeWindow() {
+        return config.getInt("anti-spam.flood.time-window", 5);
+    }
+
+    /**
+     * Gets flood spam warning message
+     * @return Warning message template
+     */
+    @NotNull
+    public String getAntiSpamFloodMessage() {
+        return config.getString("anti-spam.flood.message", "&cYou are sending messages too quickly! Please slow down.");
+    }
+
+    /**
+     * Gets actions to execute when flood spam is detected
+     * @return List of actions/commands
+     */
+    @NotNull
+    public List<String> getAntiSpamFloodActions() {
+        return config.getStringList("anti-spam.flood.actions");
     }
 
     /**
