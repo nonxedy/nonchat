@@ -125,6 +125,11 @@ message-too-short: "&#ff0000Сообщение слишком короткое. 
 message-too-long: "&#ff0000Сообщение слишком длинное. Максимальная длина: {max}"
 channel-cooldown: "&#ff0000Вы должны подождать {seconds} секунд перед отправкой следующего сообщения в {channel}"
 
+# Spam detection notifications
+spam-detected-repetitive: "§#FFAFFB[nonchat] §f{player} detected repetitive spam: §#ff0000{message}"
+spam-detected-similar: "§#FFAFFB[nonchat] §f{player} detected similar spam: §#ff0000{message}"
+spam-detected-flood: "§#FFAFFB[nonchat] §f{player} detected flood spam: §#ff0000{message}"
+
 # Channel management commands
 channel-help-create: "&#FFAFFB/channel create <id> <отображаемое-имя> [опции]&#ffffff - создать новый канал"
 channel-help-edit: "&#FFAFFB/channel edit <id> [опции]&#ffffff - редактировать канал"

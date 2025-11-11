@@ -124,6 +124,11 @@ message-too-short: "&#ff0000Message is too short. Minimum length: {min}"
 message-too-long: "&#ff0000Message is too long. Maximum length: {max}"
 channel-cooldown: "&#ff0000You must wait {seconds} seconds before sending another message in {channel}"
 
+# Spam detection notifications
+spam-detected-repetitive: "§#FFAFFB[nonchat] §f{player} detected repetitive spam: §#ff0000{message}"
+spam-detected-similar: "§#FFAFFB[nonchat] §f{player} detected similar spam: §#ff0000{message}"
+spam-detected-flood: "§#FFAFFB[nonchat] §f{player} detected flood spam: §#ff0000{message}"
+
 # Channel management commands
 channel-help-create: "&#FFAFFB/channel create <id> <display-name> [options]&#ffffff - create a new channel"
 channel-help-edit: "&#FFAFFB/channel edit <id> [options]&#ffffff - edit a channel"
