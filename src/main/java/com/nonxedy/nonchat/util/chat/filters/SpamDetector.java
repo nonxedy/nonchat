@@ -116,6 +116,10 @@ public class SpamDetector implements MessageFilter {
      * @return true if repetitive spam detected
      */
     private boolean detectRepetitiveSpam(MessageHistory history, String message) {
+        if (message == null) {
+            return false;
+        }
+        
         int threshold = config.getAntiSpamRepetitiveThreshold();
         int timeWindow = config.getAntiSpamRepetitiveTimeWindow();
         
@@ -125,7 +129,7 @@ public class SpamDetector implements MessageFilter {
         // If count >= threshold, the current message would exceed the limit
         int count = 0;
         for (MessageEntry entry : recentMessages) {
-            if (entry.getMessage().equals(message)) {
+            if (entry != null && entry.getMessage() != null && entry.getMessage().equals(message)) {
                 count++;
             }
         }
@@ -141,6 +145,10 @@ public class SpamDetector implements MessageFilter {
      * @return true if similar spam detected
      */
     private boolean detectSimilarSpam(MessageHistory history, String message) {
+        if (message == null) {
+            return false;
+        }
+        
         double threshold = config.getAntiSpamSimilarThreshold();
         int timeWindow = config.getAntiSpamSimilarTimeWindow();
         
@@ -148,6 +156,10 @@ public class SpamDetector implements MessageFilter {
         
         // Check similarity with recent messages
         for (MessageEntry entry : recentMessages) {
+            if (entry == null || entry.getMessage() == null) {
+                continue;
+            }
+            
             // Don't compare with itself
             if (entry.getMessage().equals(message)) {
                 continue;
@@ -297,17 +309,16 @@ public class SpamDetector implements MessageFilter {
      * @return Text with placeholders resolved
      */
     private String resolvePlaceholders(Player player, String text) {
-        if (player == null) return text;
+        if (player == null || text == null) return text;
         
-        // Try PlaceholderAPI first if available
-        try {
-            Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+        // Check if PlaceholderAPI is loaded
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             return PlaceholderAPI.setPlaceholders(player, text);
-        } catch (ClassNotFoundException e) {
-            // Fall back to standard placeholders if PAPI not available
-            return text.replace("%player_name%", player.getName())
-                      .replace("%player_uuid%", player.getUniqueId().toString());
         }
+        
+        // Fall back to standard placeholders if PAPI not available
+        return text.replace("%player_name%", player.getName())
+                  .replace("%player_uuid%", player.getUniqueId().toString());
     }
 
     /**
