@@ -24,6 +24,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.AsyncFilterService;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
+import com.nonxedy.nonchat.util.chat.filters.SpamDetector;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
@@ -42,6 +43,7 @@ public class ChatManager {
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
+    private final SpamDetector spamDetector;
     private final AsyncFilterService asyncFilterService;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
@@ -51,6 +53,7 @@ public class ChatManager {
         this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
+        this.spamDetector = new SpamDetector(config, messages);
         this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
         this.channelManager = new ChannelManager(plugin, config);
         this.ignoreCommand = plugin.getIgnoreCommand();
@@ -76,6 +79,14 @@ public class ChatManager {
                 player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
                         .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
                 return;
+            }
+
+            // Check for spam
+            if (config.isAntiSpamEnabled() && !player.hasPermission("nonchat.spam.bypass")) {
+                if (spamDetector.shouldFilter(player, messageContent)) {
+                    // Warning message is already sent by SpamDetector
+                    return;
+                }
             }
 
             // Check for advertisements
