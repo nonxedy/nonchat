@@ -423,3 +423,83 @@ anti-ad:
   staff-notify: true
   # Command to execute when an advertisement is detected. Leave empty for no punishment.
   punish-command: "ban %player_name% advertising"
+
+# ==================================================
+# ANTI-SPAM SYSTEM
+# Intelligent spam detection with contextual analysis.
+# Detects repetitive messages, similar messages, and message flooding.
+# ==================================================
+anti-spam:
+  # Enable/disable the anti-spam filter.
+  enabled: true
+  
+  # ==================================================
+  # REPETITIVE MESSAGE DETECTION
+  # Detects when a player sends the exact same message multiple times.
+  # ==================================================
+  repetitive:
+    # Enable/disable repetitive message detection.
+    enabled: true
+    # Maximum number of identical messages allowed within the time window.
+    threshold: 3
+    # Time window in seconds to check for repetitive messages.
+    time-window: 10
+    # Warning message sent to the player when repetitive spam is detected.
+    # Supports color codes and PlaceholderAPI placeholders.
+    # Use %player_name% as placeholder for the player's name.
+    message: "&cPlease do not send the same message repeatedly!"
+    # Actions to execute when repetitive spam is detected.
+    # Special actions: 'block' (blocks the message), 'notify-staff' (notifies staff)
+    # Regular commands: Any command that will be executed (use %player_name% placeholder)
+    # Example: ["block", "tell %player_name% Stop spamming!", "notify-staff"]
+    actions:
+      - block
+      - notify-staff
+  
+  # ==================================================
+  # SIMILAR MESSAGE DETECTION
+  # Detects when a player sends similar messages (variations of the same content).
+  # Uses text similarity algorithms to catch spam attempts with slight modifications.
+  # ==================================================
+  similar:
+    # Enable/disable similar message detection.
+    enabled: true
+    # Similarity threshold (0.0-1.0). Higher values (closer to 1.0) require more similarity.
+    # Recommended: 0.80-0.90 for strict detection, 0.70-0.80 for moderate detection.
+    threshold: 0.85
+    # Time window in seconds to check for similar messages.
+    time-window: 30
+    # Warning message sent to the player when similar spam is detected.
+    # Supports color codes and PlaceholderAPI placeholders.
+    # Use %player_name% as placeholder for the player's name.
+    message: "&cPlease do not send similar messages repeatedly!"
+    # Actions to execute when similar spam is detected.
+    # Special actions: 'block' (blocks the message), 'notify-staff' (notifies staff)
+    # Regular commands: Any command that will be executed (use %player_name% placeholder)
+    # Example: ["block", "tell %player_name% Stop spamming!", "mute %player_name% 60"]
+    actions:
+      - block
+      - notify-staff
+  
+  # ==================================================
+  # FLOOD DETECTION
+  # Detects when a player sends too many messages in a short time period.
+  # ==================================================
+  flood:
+    # Enable/disable flood detection.
+    enabled: true
+    # Maximum number of messages allowed within the time window.
+    max-messages: 5
+    # Time window in seconds to check for message flooding.
+    time-window: 5
+    # Warning message sent to the player when flood spam is detected.
+    # Supports color codes and PlaceholderAPI placeholders.
+    # Use %player_name% as placeholder for the player's name.
+    message: "&cYou are sending messages too quickly! Please slow down."
+    # Actions to execute when flood spam is detected.
+    # Special actions: 'block' (blocks the message), 'notify-staff' (notifies staff)
+    # Regular commands: Any command that will be executed (use %player_name% placeholder)
+    # Example: ["block", "tell %player_name% Slow down!", "mute %player_name% 30", "notify-staff"]
+    actions:
+      - block
+      - notify-staff
