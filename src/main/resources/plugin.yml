@@ -110,6 +110,12 @@ permissions:
   nonchat.ad.notify:
     description: Notify players about advertisements
     default: op
+  nonchat.spam.bypass:
+    description: Bypass anti-spam detection
+    default: op
+  nonchat.spam.notify:
+    description: Notify players about spam detection
+    default: op
 
 commands:
   message:

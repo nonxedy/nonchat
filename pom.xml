@@ -13,6 +13,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>21</maven.compiler.release>
+		<!-- Suffix for development builds (set via -Ddev.build=true) -->
+		<dev.build.suffix></dev.build.suffix>
 	</properties>
 
 	<repositories>
@@ -115,6 +117,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>nonchat-${project.version}${dev.build.suffix}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -187,4 +190,13 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<dev.build.suffix>-dev</dev.build.suffix>
+			</properties>
+		</profile>
+	</profiles>
 </project>
