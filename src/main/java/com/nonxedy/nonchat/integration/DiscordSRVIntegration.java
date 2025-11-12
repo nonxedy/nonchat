@@ -31,16 +31,16 @@ public class DiscordSRVIntegration {
         // Get the player's current channel
         Channel playerChannel = ChannelAPI.getPlayerChannel(player);
         
-        // Check if the message starts with a channel character
+        // Check if the message starts with a channel prefix
         for (Channel channel : ChannelAPI.getAllChannels()) {
-            if (channel.hasTriggerCharacter() && message.startsWith(String.valueOf(channel.getCharacter()))) {
+            if (channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
                 // Message is for a specific channel
                 if (!channel.getId().equals(event.getChannel())) {
                     // Cancel if the message is for a different channel than what DiscordSRV is trying to process
                     event.setCancelled(true);
                 } else {
-                    // Remove the trigger character from the message before sending to Discord
-                    String cleanMessage = message.substring(1); // Remove the first character (trigger)
+                    // Remove the trigger prefix from the message before sending to Discord
+                    String cleanMessage = message.substring(channel.getPrefix().length());
                     event.setMessage(cleanMessage);
                 }
                 return;

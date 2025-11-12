@@ -54,21 +54,14 @@ public class DiscordSRVListener implements Listener {
         }
 
         // Determine which channel handles this message
-        Channel channel = null;
-    
-        // First check if message starts with a channel character
-        if (message.length() > 0) {
-            char firstChar = message.charAt(0);
-            for (Channel ch : chatManager.getAllChannels()) {
-                if (ch.isEnabled() && ch.hasTriggerCharacter() && ch.getCharacter() == firstChar) {
-                    channel = ch;
-                    message = message.substring(1); // Remove the channel character
-                    break;
-                }
-            }
+        Channel channel = chatManager.getChannelManager().getChannelForMessage(message);
+        
+        // If the channel has a prefix and the message starts with it, remove the prefix
+        if (channel != null && channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
+            message = message.substring(channel.getPrefix().length());
         }
-    
-        // If no channel was found by character, use the player's active channel
+        
+        // If no channel was found by prefix, use the player's active channel
         if (channel == null) {
             channel = chatManager.getPlayerChannel(player);
         }
