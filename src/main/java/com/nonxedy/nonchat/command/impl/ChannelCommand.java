@@ -179,8 +179,8 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                         messages.getString("channel-info-no"))));
         
         player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-info-character")
-                .replace("{character}", channel.hasTriggerCharacter() ? 
-                        String.valueOf(channel.getCharacter()) : messages.getString("channel-info-none"))));
+                .replace("{character}", channel.hasPrefix() ? 
+                        channel.getPrefix() : messages.getString("channel-info-none"))));
         
         player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-info-radius")
                 .replace("{radius}", channel.isGlobal() ? 
@@ -222,7 +222,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         String format = "§7({display})§r {prefix} §f{sender}§r {suffix}§7: §f{message}";
         format = format.replace("{display}", displayName);
         
-        Character character = null;
+        String prefix = "";
         String sendPermission = "";
         String receivePermission = "";
         int radius = -1; // Global by default
@@ -235,8 +235,11 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
             String arg = args[i];
             if (arg.startsWith("format:")) {
                 format = arg.substring(7);
-            } else if (arg.startsWith("char:") && arg.length() > 5) {
-                character = arg.charAt(5);
+            } else if (arg.startsWith("prefix:")) {
+                prefix = arg.substring(7);
+            } else if (arg.startsWith("char:")) {
+                // Support legacy char: parameter for backward compatibility
+                prefix = arg.substring(5);
             } else if (arg.startsWith("send:")) {
                 sendPermission = arg.substring(5);
             } else if (arg.startsWith("receive:")) {
@@ -272,10 +275,30 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
             }
         }
         
-        // Create the channel
-        // First create without discord channel ID
-        Channel channel = chatManager.createChannel(
-            channelId, displayName, format, character, 
+        // Validate prefix
+        if (prefix != null && !prefix.isEmpty()) {
+            // Check for whitespace
+            if (prefix.contains(" ")) {
+                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot contain spaces"));
+                return true;
+            }
+            
+            // Check length
+            if (prefix.length() > 10) {
+                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot be longer than 10 characters"));
+                return true;
+            }
+            
+            // Check uniqueness
+            if (!chatManager.getChannelManager().isPrefixUnique(prefix, null)) {
+                player.sendMessage(ColorUtil.parseComponent("§cError: A channel with prefix '" + prefix + "' already exists"));
+                return true;
+            }
+        }
+        
+        // Create the channel using ChannelManager directly to support multi-character prefixes
+        Channel channel = chatManager.getChannelManager().createChannel(
+            channelId, displayName, format, prefix, 
             sendPermission, receivePermission, radius,
             cooldown, minLength, maxLength
         );
@@ -316,7 +339,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         // Process parameters to edit
         String displayName = null;
         String format = null;
-        Character character = null;
+        String prefix = null;
         String sendPermission = null;
         String receivePermission = null;
         Integer radius = null;
@@ -331,12 +354,11 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
                 displayName = arg.substring(8);
             } else if (arg.startsWith("format:")) {
                 format = arg.substring(7);
+            } else if (arg.startsWith("prefix:")) {
+                prefix = arg.substring(7);
             } else if (arg.startsWith("char:")) {
-                if (arg.length() > 5) {
-                    character = arg.charAt(5);
-                } else {
-                    character = '\0'; // No character
-                }
+                // Support legacy char: parameter for backward compatibility
+                prefix = arg.substring(5);
             } else if (arg.startsWith("send:")) {
                 sendPermission = arg.substring(5);
             } else if (arg.startsWith("receive:")) {
@@ -374,9 +396,30 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
             }
         }
         
-        // Update the channel
-        boolean success = chatManager.updateChannel(
-            channelId, displayName, format, character,
+        // Validate prefix if it's being updated
+        if (prefix != null && !prefix.isEmpty()) {
+            // Check for whitespace
+            if (prefix.contains(" ")) {
+                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot contain spaces"));
+                return true;
+            }
+            
+            // Check length
+            if (prefix.length() > 10) {
+                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot be longer than 10 characters"));
+                return true;
+            }
+            
+            // Check uniqueness (excluding current channel)
+            if (!chatManager.getChannelManager().isPrefixUnique(prefix, channelId)) {
+                player.sendMessage(ColorUtil.parseComponent("§cError: A channel with prefix '" + prefix + "' already exists"));
+                return true;
+            }
+        }
+        
+        // Update the channel using ChannelManager directly to support multi-character prefixes
+        boolean success = chatManager.getChannelManager().updateChannel(
+            channelId, displayName, format, prefix,
             sendPermission, receivePermission, radius, enabled,
             cooldown, minLength, maxLength
         );
