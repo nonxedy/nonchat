@@ -433,6 +433,11 @@ anti-spam:
   # Enable/disable the anti-spam filter.
   enabled: true
   
+  # Enable/disable console notifications when spam is detected.
+  # If true, spam notifications will be logged to the console.
+  # If false, only staff members with 'nonchat.spam.notify' permission will see notifications.
+  console-notify: true
+  
   # ==================================================
   # REPETITIVE MESSAGE DETECTION
   # Detects when a player sends the exact same message multiple times.

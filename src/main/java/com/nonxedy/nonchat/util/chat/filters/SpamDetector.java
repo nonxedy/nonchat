@@ -261,14 +261,23 @@ public class SpamDetector implements MessageFilter {
      * @param spamType Type of spam detected (repetitive, similar, flood)
      */
     private void notifyStaff(Player player, String message, String spamType) {
+        // Validate parameters
+        if (player == null || spamType == null) {
+            return;
+        }
+        
         // Get the appropriate translation key based on spam type
         String translationKey = "spam-detected-" + spamType;
         String notificationTemplate = messages.getString(translationKey);
         
-        // Replace placeholders
+        if (notificationTemplate == null || notificationTemplate.isEmpty()) {
+            return;
+        }
+        
+        // Replace placeholders (handle null message)
         String notification = notificationTemplate
             .replace("{player}", player.getName())
-            .replace("{message}", message);
+            .replace("{message}", message != null ? message : "[empty]");
         
         // Parse color codes and send to staff
         Component notificationComponent = ColorUtil.parseComponentCached(notification);
@@ -277,8 +286,10 @@ public class SpamDetector implements MessageFilter {
             .filter(p -> p.hasPermission("nonchat.spam.notify") || p.isOp())
             .forEach(p -> p.sendMessage(notificationComponent));
             
-        // Log to console
-        Bukkit.getConsoleSender().sendMessage(notificationComponent);
+        // Log to console if enabled
+        if (config.isAntiSpamConsoleNotifyEnabled()) {
+            Bukkit.getConsoleSender().sendMessage(notificationComponent);
+        }
     }
 
     /**

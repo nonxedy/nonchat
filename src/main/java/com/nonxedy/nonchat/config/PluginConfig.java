@@ -217,6 +217,7 @@ public class PluginConfig {
         
         // Anti-spam settings
         config.set("anti-spam.enabled", true);
+        config.set("anti-spam.console-notify", true);
         
         // Repetitive message detection
         config.set("anti-spam.repetitive.enabled", true);
@@ -1297,6 +1298,14 @@ public class PluginConfig {
     @NotNull
     public List<String> getAntiSpamFloodActions() {
         return config.getStringList("anti-spam.flood.actions");
+    }
+
+    /**
+     * Checks if console notifications for spam detection are enabled
+     * @return true if console notifications are enabled
+     */
+    public boolean isAntiSpamConsoleNotifyEnabled() {
+        return config.getBoolean("anti-spam.console-notify", true);
     }
 
     /**
