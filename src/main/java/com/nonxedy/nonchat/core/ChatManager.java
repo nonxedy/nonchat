@@ -109,31 +109,25 @@ public class ChatManager {
             }
 
             // Determine which channel to use based on message prefix or player's active channel
-            Channel channel;
+            Channel channel = channelManager.getChannelForMessage(messageContent);
             String finalMessage;
 
-            // First check if message starts with a channel character
-            if (messageContent.length() > 0) {
-                char firstChar = messageContent.charAt(0);
-                channel = findChannelByChar(firstChar);
-
-                // If a channel was found by character, remove the character from the message
-                if (channel != null) {
-                    finalMessage = messageContent.substring(1);
-                    
-                    // Check if the message is empty after removing channel character
-                    if (finalMessage.trim().isEmpty()) {
-                        return; // Silently cancel empty messages
-                    }
-                } else {
-                    // No character match, use player's active channel or default
-                    channel = channelManager.getPlayerChannel(player);
-                    finalMessage = messageContent;
+            // If a channel was found by prefix, remove the prefix from the message
+            if (channel != null && channel.hasPrefix() && messageContent.startsWith(channel.getPrefix())) {
+                finalMessage = messageContent.substring(channel.getPrefix().length());
+                
+                // Check if the message is empty after removing channel prefix
+                if (finalMessage.trim().isEmpty()) {
+                    return; // Silently cancel empty messages
                 }
             } else {
-                // Empty message, use player's active channel
-                channel = channelManager.getPlayerChannel(player);
+                // No prefix match, use the message as-is
                 finalMessage = messageContent;
+            }
+
+            // Ensure we have a valid channel (should not be null from getChannelForMessage)
+            if (channel == null) {
+                return; // Silently cancel if no channel available
             }
 
             // Check if channel is enabled
@@ -596,7 +590,7 @@ public class ChatManager {
      * @return The channel, or null if not found
      */
     private Channel findChannelByChar(char c) {
-        return channelManager.findChannelByCharacter(c).orElse(null);
+        return channelManager.findChannelByPrefix(String.valueOf(c)).orElse(null);
     }
 
     /**
@@ -675,7 +669,8 @@ public class ChatManager {
     public Channel createChannel(String channelId, String displayName, String format,
             Character character, String sendPermission, String receivePermission,
             int radius, int cooldown, int minLength, int maxLength) {
-        return channelManager.createChannel(channelId, displayName, format, character,
+        String prefix = character != null ? String.valueOf(character) : "";
+        return channelManager.createChannel(channelId, displayName, format, prefix,
                 sendPermission, receivePermission, radius,
                 cooldown, minLength, maxLength);
     }
@@ -707,7 +702,8 @@ public class ChatManager {
             Character character, String sendPermission, String receivePermission,
             Integer radius, Boolean enabled, Integer cooldown,
             Integer minLength, Integer maxLength) {
-        return channelManager.updateChannel(channelId, displayName, format, character,
+        String prefix = character != null ? String.valueOf(character) : null;
+        return channelManager.updateChannel(channelId, displayName, format, prefix,
                 sendPermission, receivePermission, radius, enabled,
                 cooldown, minLength, maxLength);
     }

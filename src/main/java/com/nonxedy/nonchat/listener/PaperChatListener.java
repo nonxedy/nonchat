@@ -20,7 +20,7 @@ public class PaperChatListener extends ChatListener {
 
     private final Nonchat plugin;
     private final Map<String, String> playerMessages = new ConcurrentHashMap<>();
-    private final Map<String, Character> modifiedPrefixes = new ConcurrentHashMap<>();
+    private final Map<String, String> modifiedPrefixes = new ConcurrentHashMap<>();
 
     public PaperChatListener(Nonchat plugin, ChatManager chatManager, ChatService chatService) {
         super(chatManager, chatService);
@@ -29,15 +29,15 @@ public class PaperChatListener extends ChatListener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onAsyncPlayerChatLowest(AsyncPlayerChatEvent event) {
-        // Check if message starts with a channel character and temporarily remove it for ChatColor2
+        // Check if message starts with a channel prefix and temporarily remove it for ChatColor2
         String message = event.getMessage();
-        if (message.length() > 0) {
-            char firstChar = message.charAt(0);
-            // Check if this character matches any channel
-            if (chatManager != null && chatManager.getChannelManager().findChannelByCharacter(firstChar).isPresent()) {
+        if (message.length() > 0 && chatManager != null) {
+            // Find channel that matches the message prefix
+            var channel = chatManager.getChannelManager().getChannelForMessage(message);
+            if (channel != null && channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
                 // Temporarily remove the prefix so ChatColor2 can color the message
-                event.setMessage(message.substring(1));
-                modifiedPrefixes.put(event.getPlayer().getUniqueId().toString(), firstChar);
+                event.setMessage(message.substring(channel.getPrefix().length()));
+                modifiedPrefixes.put(event.getPlayer().getUniqueId().toString(), channel.getPrefix());
             }
         }
     }
@@ -49,7 +49,7 @@ public class PaperChatListener extends ChatListener {
         String message = event.getMessage();
 
         // If we modified this message earlier, restore the prefix
-        Character prefix = modifiedPrefixes.remove(playerId);
+        String prefix = modifiedPrefixes.remove(playerId);
         if (prefix != null) {
             message = prefix + message;
         }
