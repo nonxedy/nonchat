@@ -508,3 +508,4 @@ anti-spam:
     actions:
       - block
       - notify-staff
+      - "tell %player_name% Slow down!" # Custom commands
