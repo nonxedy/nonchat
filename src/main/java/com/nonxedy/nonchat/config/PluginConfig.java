@@ -450,7 +450,9 @@ public class PluginConfig {
     /**
      * Checks if custom death messages are enabled
      * @return true if enabled
+     * @deprecated Use deaths.yml configuration instead. This legacy config.yml system will be removed in a future version.
      */
+    @Deprecated
     public boolean isDeathMessagesEnabled() {
         return config.getBoolean("death.enabled", true);
     }
@@ -458,7 +460,9 @@ public class PluginConfig {
     /**
      * Checks if showing death coordinates is enabled
      * @return true if enabled
+     * @deprecated Use deaths.yml configuration instead. This legacy config.yml system will be removed in a future version.
      */
+    @Deprecated
     public boolean isShowDeathCoordinatesEnabled() {
         return config.getBoolean("death.show-coordinates", true);
     }
@@ -466,7 +470,9 @@ public class PluginConfig {
     /**
      * Gets death message format
      * @return Formatted death message string
+     * @deprecated Use deaths.yml configuration instead. This legacy config.yml system will be removed in a future version.
      */
+    @Deprecated
     @NotNull
     public String getDeathFormat() {
         return config.getString("death.format", "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died");

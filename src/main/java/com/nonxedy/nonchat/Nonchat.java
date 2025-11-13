@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
+import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
@@ -34,6 +35,7 @@ import com.nonxedy.nonchat.placeholders.impl.ConfigurablePlaceholder;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.service.DeathMessageService;
 import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
@@ -52,6 +54,8 @@ public class Nonchat extends JavaPlugin {
     private ChatService chatService;
     private CommandService commandService;
     private ConfigService configService;
+    private DeathConfig deathConfig;
+    private DeathMessageService deathMessageService;
     private ChatManager chatManager;
     private MessageManager messageManager;
     private BroadcastManager broadcastManager;
@@ -123,6 +127,20 @@ public class Nonchat extends JavaPlugin {
 
             // Initialize interactive placeholder manager
             initializeInteractivePlaceholders();
+            
+            // Initialize death message service with independent configuration
+            // DeathConfig.load() will create deaths.yml if needed and auto-update with missing keys
+            try {
+                this.deathConfig = new DeathConfig(getDataFolder(), getLogger(), this);
+                this.deathConfig.load(); // This calls saveDefaultConfig() and setupConfigFile() before loading
+                this.deathMessageService = new DeathMessageService(this, deathConfig, configService.getMessages());
+                getLogger().info("Death message service initialized successfully");
+            } catch (Exception e) {
+                getLogger().log(Level.WARNING, "Failed to initialize death message service: {0}", e.getMessage());
+                getLogger().log(Level.WARNING, "Death messages will be disabled. Error: " + e.getMessage(), e);
+                this.deathConfig = null;
+                this.deathMessageService = null;
+            }
 
             // Initialize debug system if enabled
             if (configService.getConfig().isDebug()) {
@@ -239,8 +257,12 @@ public class Nonchat extends JavaPlugin {
             getServer().getPluginManager().registerEvents(chatListener, this);
 
             // Register death-related listeners
-            Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
-            Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig(), configService.getMessages()), this);
+            if (deathMessageService != null && deathConfig != null) {
+                Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig(), deathMessageService), this);
+                Bukkit.getPluginManager().registerEvents(new DeathCoordinates(deathConfig, configService.getMessages()), this);
+            } else {
+                Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
+            }
 
             // Register join/quit listener
             Bukkit.getPluginManager().registerEvents(new JoinQuitListener(configService.getConfig(), chatManager.getChannelManager()), this);
@@ -517,5 +539,22 @@ public class Nonchat extends JavaPlugin {
 
     public InteractivePlaceholderManager getPlaceholderManager() {
         return placeholderManager;
+    }
+    
+    public DeathMessageService getDeathMessageService() {
+        return deathMessageService;
+    }
+    
+    /**
+     * Reloads death message configuration
+     * @throws RuntimeException if reload fails
+     */
+    public void reloadDeathMessages() {
+        if (deathMessageService != null) {
+            deathMessageService.reload();
+        } else {
+            getLogger().warning("Death message service is not initialized");
+            throw new RuntimeException("Death message service is not initialized");
+        }
     }
 }
