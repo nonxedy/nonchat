@@ -96,6 +96,13 @@ dimension-end: "El Fin"
 # Texto al pasar el cursor sobre enlaces
 link-hover: "Haz clic para abrir: {url}"
 
+# Sistema de mensajes de muerte
+death-messages-reloading: "&#FFAFFBRecargando mensajes de muerte..."
+death-messages-reloaded: "&#84FFB8¡Mensajes de muerte recargados! Se cargaron {count} variantes de mensajes en {causes} causas de muerte."
+death-messages-reloaded-simple: "&#84FFB8¡Mensajes de muerte recargados exitosamente!"
+death-messages-reload-failed: "&#ff0000¡Error al recargar los mensajes de muerte!"
+death-messages-load-error: "&#ff0000Error al cargar mensajes de muerte: {error}"
+death-messages-validation-warning: "&#FFAFFBAdvertencia: {warning}"
 
 # Comando de Canal
 channel-help-header: "&#FFAFFBComandos de Canales:"

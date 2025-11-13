@@ -95,6 +95,13 @@ dimension-end: "Энд"
 # Link hover text
 link-hover: "Нажмите, чтобы открыть: {url}"
 
+# Death messages system
+death-messages-reloading: "&#FFAFFBReloading death messages..."
+death-messages-reloaded: "&#84FFB8Death messages reloaded! Loaded {count} message variants across {causes} death causes."
+death-messages-reloaded-simple: "&#84FFB8Death messages reloaded successfully!"
+death-messages-reload-failed: "&#ff0000Failed to reload death messages!"
+death-messages-load-error: "&#ff0000Error loading death messages: {error}"
+death-messages-validation-warning: "&#FFAFFBWarning: {warning}"
 
 # Channel Command
 channel-help-header: "&#FFAFFBКоманды каналов:"
