@@ -1,0 +1,308 @@
+#========================================
+# nonchat - Custom Death Messages
+#========================================
+#
+# This file allows you to customize death messages based on the cause of death.
+# Each death cause can have multiple message variants that are randomly selected.
+#
+# Available Placeholders:
+#   PlaceholderAPI placeholders:
+#     %player_name% - The player's name
+#     %luckperms_prefix% - Player's LuckPerms prefix
+#     - Player's LuckPerms suffix
+#     (Any other PlaceholderAPI placeholder)
+#
+#   Death-specific placeholders:
+#     {death_cause} - The cause of death (e.g., FALL, FIRE)
+#     {killer_name} - Name of the killer (if applicable)
+#     {killer_type} - Type of killer (PLAYER, ZOMBIE, etc.)
+#     {world} - World where death occurred
+#     {x}, {y}, {z} - Death coordinates
+#
+# Color Codes:
+#   Legacy: Use § followed by color code (e.g., §c for red)
+#   Hex: Use &#RRGGBB format (e.g., &#FF5252 for red)
+#
+#========================================
+
+# Global settings for the death message system
+settings:
+  # Enable or disable custom death messages
+  enabled: false
+  
+  # Use fallback message if no custom message is found for a cause
+  use-fallback: true
+  
+  # Show death coordinates in chat when a player dies
+  show-coordinates: false
+  
+  # Enable debug logging for the death message system
+  debug: false
+
+# Configurable placeholder values
+# These values are used when information is not available
+placeholders:
+  # Text to show when a value is unknown
+  unknown: 'Unknown'
+  
+  # Text to show when there is no value (e.g., no killer)
+  none: 'None'
+  
+  # Text to show for unknown entities
+  unknown-entity: 'Something'
+  
+  # Text to show for unknown players
+  unknown-player: 'Someone'
+
+# Death messages organized by cause
+# Each cause can have multiple variants that are randomly selected
+# For all available death causes, see: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/entity/EntityDamageEvent.DamageCause.html
+messages:
+
+  # Fall damage deaths
+  FALL:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7fell from a high place"
+      - "§c☠ §f%player_name% §7hit the ground too hard"
+      - "§c☠ §f%player_name% §7learned that gravity exists"
+
+  # Fire damage deaths
+  FIRE:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7went up in flames"
+      - "§c🔥 §f%player_name% §7burned to death"
+      - "§c🔥 §f%player_name% §7became a human torch"
+
+  # Fire tick (burning) deaths
+  FIRE_TICK:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7burned to death"
+      - "§c🔥 §f%player_name% §7couldn't stop the burning"
+      - "§c🔥 §f%player_name% §7was consumed by flames"
+
+  # Lava deaths
+  LAVA:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7tried to swim in lava"
+      - "§c🌋 §f%player_name% §7discovered that lava is hot"
+      - "§c🌋 §f%player_name% §7became one with the lava"
+
+  # Drowning deaths
+  DROWNING:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7drowned"
+      - "§9💧 §f%player_name% §7forgot to breathe"
+      - "§9💧 §f%player_name% §7ran out of air"
+
+  # Block explosion deaths
+  BLOCK_EXPLOSION:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7blew up"
+      - "§c💥 §f%player_name% §7went out with a bang"
+      - "§c💥 §f%player_name% §7was blown to bits"
+
+  # Entity explosion deaths
+  ENTITY_EXPLOSION:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was blown up by {killer_name}"
+      - "§c💥 §f%player_name% §7exploded thanks to {killer_name}"
+      - "§c💥 §f%player_name% §7went boom because of {killer_name}"
+
+  # Entity attack deaths
+  ENTITY_ATTACK:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was slain by {killer_name}"
+      - "§c⚔ §f%player_name% §7was killed by {killer_name}"
+      - "§c⚔ §f%player_name% §7lost a fight with {killer_name}"
+
+  # Entity sweep attack deaths
+  ENTITY_SWEEP_ATTACK:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was swept away by {killer_name}"
+      - "§c⚔ §f%player_name% §7couldn't dodge {killer_name}'s sweep attack"
+      - "§c⚔ §f%player_name% §7was caught in {killer_name}'s sweep"
+
+  # Projectile deaths
+  PROJECTILE:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was shot by {killer_name}"
+      - "§c🏹 §f%player_name% §7was turned into a pincushion by {killer_name}"
+      - "§c🏹 §f%player_name% §7took an arrow from {killer_name}"
+
+  # Void deaths
+  VOID:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7fell into the void"
+      - "§5🌌 §f%player_name% §7fell out of the world"
+      - "§5🌌 §f%player_name% §7discovered the void"
+
+  # Suffocation deaths
+  SUFFOCATION:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7suffocated in a wall"
+      - "§7⬛ §f%player_name% §7became one with the wall"
+      - "§7⬛ §f%player_name% §7couldn't breathe in the wall"
+
+  # Starvation deaths
+  STARVATION:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7starved to death"
+      - "§e🍖 §f%player_name% §7forgot to eat"
+      - "§e🍖 §f%player_name% §7died of hunger"
+
+  # Poison deaths
+  POISON:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was poisoned"
+      - "§2☠ §f%player_name% §7succumbed to poison"
+      - "§2☠ §f%player_name% §7died from poison"
+
+  # Magic deaths
+  MAGIC:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was killed by magic"
+      - "§d✨ §f%player_name% §7died from magic"
+      - "§d✨ §f%player_name% §7was magically eliminated"
+
+  # Wither deaths
+  WITHER:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7withered away"
+      - "§8💀 §f%player_name% §7was withered"
+      - "§8💀 §f%player_name% §7succumbed to wither"
+
+  # Lightning deaths
+  LIGHTNING:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was struck by lightning"
+      - "§e⚡ §f%player_name% §7was electrocuted"
+      - "§e⚡ §f%player_name% §7became a lightning rod"
+
+  # Falling block deaths
+  FALLING_BLOCK:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was squashed by a falling block"
+      - "§7⬇ §f%player_name% §7was crushed"
+      - "§7⬇ §f%player_name% §7didn't look up"
+
+  # Contact deaths (cactus, berry bush, etc.)
+  CONTACT:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was pricked to death"
+      - "§a🌵 §f%player_name% §7discovered cacti are sharp"
+      - "§a🌵 §f%player_name% §7hugged a cactus"
+
+  # Fly into wall deaths (elytra)
+  FLY_INTO_WALL:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7experienced kinetic energy"
+      - "§7💨 §f%player_name% §7flew into a wall"
+      - "§7💨 §f%player_name% §7needs flying lessons"
+
+  # Hot floor deaths (magma blocks)
+  HOT_FLOOR:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7discovered the floor was lava"
+      - "§c🔥 §f%player_name% §7walked on hot floor"
+      - "§c🔥 §f%player_name% §7forgot to wear shoes"
+
+  # Cramming deaths
+  CRAMMING:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was squished"
+      - "§7⬛ §f%player_name% §7was crammed to death"
+      - "§7⬛ §f%player_name% §7had no personal space"
+
+  # Dryout deaths (fish out of water)
+  DRYOUT:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7dried out"
+      - "§e☀ §f%player_name% §7needed water"
+      - "§e☀ §f%player_name% §7forgot they were a fish"
+
+  # Freeze deaths (powder snow)
+  FREEZE:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7froze to death"
+      - "§b❄ §f%player_name% §7became an ice sculpture"
+      - "§b❄ §f%player_name% §7turned into a popsicle"
+
+  # Sonic boom deaths (warden)
+  SONIC_BOOM:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was obliterated by a sonic boom"
+      - "§5💥 §f%player_name% §7was sonic boomed"
+      - "§5💥 §f%player_name% §7angered the Warden"
+
+  # Thorns deaths
+  THORNS:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was killed trying to hurt {killer_name}"
+      - "§a🌹 §f%player_name% §7was pricked by {killer_name}'s thorns"
+      - "§a🌹 §f%player_name% §7learned about thorns enchantment"
+
+  # Dragon breath deaths
+  DRAGON_BREATH:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7was roasted by dragon breath"
+      - "§5🐉 §f%player_name% §7couldn't handle the dragon's breath"
+      - "§5🐉 §f%player_name% §7got too close to the dragon"
+
+  # Melting deaths (snowman in hot biome)
+  MELTING:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7melted"
+      - "§e☀ §f%player_name% §7couldn't handle the heat"
+      - "§e☀ §f%player_name% §7became a puddle"
+
+  # Suicide deaths (/kill command)
+  SUICIDE:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7decided to end it all"
+      - "§c☠ §f%player_name% §7used /kill"
+      - "§c☠ §f%player_name% §7gave up on life"
+
+  # World border deaths
+  WORLD_BORDER:
+    enabled: true
+    variants:
+      - "%luckperms_prefix% §f%player_name%§r §7went too far"
+      - "§c🚫 §f%player_name% §7crossed the world border"
+      - "§c🚫 §f%player_name% §7ignored the boundaries"
+
+#  # Custom deaths (from plugins/commands)
+#  CUSTOM:
+#    enabled: true
+#    variants:
+#      - "%luckperms_prefix% §f%player_name%§r §7died"
+#      - "§c☠ §f%player_name% §7died mysteriously"
+#      - "§c☠ §f%player_name% §7met an unfortunate end"
