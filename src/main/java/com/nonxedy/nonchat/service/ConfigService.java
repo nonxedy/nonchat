@@ -3,6 +3,7 @@ package com.nonxedy.nonchat.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -10,6 +11,8 @@ import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.IConfigurable;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
+import com.nonxedy.nonchat.placeholders.impl.ConfigurablePlaceholder;
+import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
 import com.nonxedy.nonchat.util.lang.LanguageManager;
 
 public class ConfigService implements IConfigurable {
@@ -236,5 +239,66 @@ public class ConfigService implements IConfigurable {
      */
     public String getCustomPlaceholderClickActionValue(String placeholderKey) {
         return config.getCustomPlaceholderClickActionValue(placeholderKey);
+    }
+
+    /**
+     * Loads custom placeholders from config and registers them with the interactive placeholder manager
+     * @param placeholderManager The manager to register placeholders with
+     */
+    public void loadCustomPlaceholdersFromConfig(InteractivePlaceholderManager placeholderManager) {
+        try {
+            // Load custom placeholders from config
+            ConfigurationSection customPlaceholdersSection =
+                plugin.getConfig().getConfigurationSection("interactive-placeholders.custom-placeholders");
+
+            if (customPlaceholdersSection != null) {
+                int loadedCount = 0;
+                for (String placeholderKey : customPlaceholdersSection.getKeys(false)) {
+                    ConfigurationSection placeholderConfig =
+                        customPlaceholdersSection.getConfigurationSection(placeholderKey);
+
+                    if (placeholderConfig != null && placeholderConfig.getBoolean("enabled", false)) {
+                        String displayName = placeholderConfig.getString("display-name", placeholderKey);
+                        String description = placeholderConfig.getString("description", "");
+                        String permission = placeholderConfig.getString("permission", "");
+                        String activationKey = placeholderConfig.getString("placeholder", placeholderKey);
+                        String format = placeholderConfig.getString("format", "[" + activationKey + "]");
+                        List<String> hoverText = placeholderConfig.getStringList("hover-text");
+
+                        // Click action
+                        String clickActionType = "none";
+                        String clickActionValue = "";
+                        ConfigurationSection clickActionSection =
+                            placeholderConfig.getConfigurationSection("click-action");
+                        if (clickActionSection != null) {
+                            clickActionType = clickActionSection.getString("type", "none");
+                            clickActionValue = clickActionSection.getString("value", "");
+                        }
+
+                        // Create and register the placeholder
+                        ConfigurablePlaceholder placeholder = new ConfigurablePlaceholder(
+                            placeholderKey,
+                            activationKey,
+                            displayName,
+                            description,
+                            true, // Already checked enabled above
+                            permission,
+                            format,
+                            hoverText,
+                            clickActionType,
+                            clickActionValue
+                        );
+
+                        placeholderManager.registerPlaceholder(placeholder);
+                        loadedCount++;
+                    }
+                }
+                plugin.getLogger().log(Level.INFO, "Loaded {0} custom interactive placeholders from config", loadedCount);
+            } else {
+                plugin.getLogger().info("No custom placeholders section found in config");
+            }
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to load custom placeholders from config: {0}", e.getMessage());
+        }
     }
 }
