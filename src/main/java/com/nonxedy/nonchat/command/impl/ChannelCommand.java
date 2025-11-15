@@ -279,19 +279,20 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         if (prefix != null && !prefix.isEmpty()) {
             // Check for whitespace
             if (prefix.contains(" ")) {
-                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot contain spaces"));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-prefix-no-spaces")));
                 return true;
             }
             
             // Check length
             if (prefix.length() > 10) {
-                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot be longer than 10 characters"));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-prefix-too-long")));
                 return true;
             }
             
             // Check uniqueness
             if (!chatManager.getChannelManager().isPrefixUnique(prefix, null)) {
-                player.sendMessage(ColorUtil.parseComponent("§cError: A channel with prefix '" + prefix + "' already exists"));
+                player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-prefix-exists")
+                        .replace("{prefix}", prefix)));
                 return true;
             }
         }
@@ -400,19 +401,20 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
         if (prefix != null && !prefix.isEmpty()) {
             // Check for whitespace
             if (prefix.contains(" ")) {
-                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot contain spaces"));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-prefix-no-spaces")));
                 return true;
             }
             
             // Check length
             if (prefix.length() > 10) {
-                player.sendMessage(ColorUtil.parseComponent("§cError: Channel prefix cannot be longer than 10 characters"));
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("channel-prefix-too-long")));
                 return true;
             }
             
             // Check uniqueness (excluding current channel)
             if (!chatManager.getChannelManager().isPrefixUnique(prefix, channelId)) {
-                player.sendMessage(ColorUtil.parseComponent("§cError: A channel with prefix '" + prefix + "' already exists"));
+                player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-prefix-exists")
+                        .replace("{prefix}", prefix)));
                 return true;
             }
         }
