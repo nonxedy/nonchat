@@ -76,8 +76,8 @@ public class ChannelAPI {
     public static boolean isMessageForChannel(String message, String channelId) {
         return getChannelOptional(channelId)
             .filter(Channel::isEnabled)
-            .filter(Channel::hasTriggerCharacter)
-            .map(channel -> message.startsWith(String.valueOf(channel.getCharacter())))
+            .filter(Channel::hasPrefix)
+            .map(channel -> message.startsWith(channel.getPrefix()))
             .orElse(false);
     }
 

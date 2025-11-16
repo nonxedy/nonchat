@@ -150,6 +150,9 @@ channel-deleted: "&#84FFB8Channel {channel} deleted"
 channel-delete-failed: "&#ff0000Failed to delete channel {channel}. Channel may be the default channel."
 channel-default-set: "&#84FFB8Default channel set to {channel}"
 channel-default-failed: "&#ff0000Failed to set default channel to {channel}"
+channel-prefix-no-spaces: "&#ff0000Error: Channel prefix cannot contain spaces"
+channel-prefix-too-long: "&#ff0000Error: Channel prefix cannot be longer than 10 characters"
+channel-prefix-exists: "&#ff0000Error: A channel with prefix '{prefix}' already exists"
 
 # Placeholders.
 placeholders:

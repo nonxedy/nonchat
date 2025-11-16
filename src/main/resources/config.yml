@@ -216,7 +216,7 @@ channels:
     display-name: "Staff"
     format: "§7(§bSC§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}"
     radius: -1
-    character: '*'
+    character: '!staff' # Supports any string without spaces (up to 10 characters)
     send-permission: "nonchat.chat.staff"
     receive-permission: "nonchat.chat.staff"
     cooldown: 0

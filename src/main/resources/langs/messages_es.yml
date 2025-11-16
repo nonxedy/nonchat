@@ -152,6 +152,9 @@ channel-deleted: "&#84FFB8Canal {channel} eliminado"
 channel-delete-failed: "&#ff0000Error al eliminar el canal {channel}. El canal puede ser el canal predeterminado."
 channel-default-set: "&#84FFB8Canal predeterminado establecido como {channel}"
 channel-default-failed: "&#ff0000Error al establecer el canal predeterminado como {channel}"
+channel-prefix-no-spaces: "&#ff0000Error: El prefijo del canal no puede contener espacios"
+channel-prefix-too-long: "&#ff0000Error: El prefijo del canal no puede tener más de 10 caracteres"
+channel-prefix-exists: "&#ff0000Error: Ya existe un canal con el prefijo '{prefix}'"
 
 # Variables de reemplazo.
 placeholders:

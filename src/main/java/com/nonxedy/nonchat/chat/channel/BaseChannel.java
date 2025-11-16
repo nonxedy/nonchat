@@ -32,7 +32,7 @@ public class BaseChannel implements Channel {
     private final String id;
     private final String displayName;
     private final String format;
-    private final char character;
+    private final String prefix;
     private final String sendPermission;
     private final String receivePermission;
     private final int radius;
@@ -49,25 +49,41 @@ public class BaseChannel implements Channel {
     /**
      * Creates a new BaseChannel with all properties.
      */
-    public BaseChannel(String id, String displayName, String format, char character,
+    public BaseChannel(String id, String displayName, String format, String prefix,
                        String sendPermission, String receivePermission, int radius,
                        boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
                        int minLength, int maxLength) {
-        this(id, displayName, format, character, sendPermission, receivePermission, radius, 
+        this(id, displayName, format, prefix, sendPermission, receivePermission, radius, 
              "", enabled, hoverTextUtil, cooldown, minLength, maxLength);
     }
     
     /**
      * Creates a new BaseChannel with all properties including world.
      */
-    public BaseChannel(String id, String displayName, String format, char character,
+    public BaseChannel(String id, String displayName, String format, String prefix,
                        String sendPermission, String receivePermission, int radius,
                        String world, boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
                        int minLength, int maxLength) {
         this.id = id;
         this.displayName = displayName;
         this.format = format;
-        this.character = character;
+        
+        // Initialize prefix with empty string if null
+        String validatedPrefix = prefix != null ? prefix : "";
+        
+        // Validate prefix: no whitespace
+        if (validatedPrefix.contains(" ")) {
+            Bukkit.getLogger().warning("Channel '" + id + "' has invalid prefix with whitespace. Prefix will be set to empty.");
+            validatedPrefix = "";
+        }
+        
+        // Validate prefix: max 10 characters
+        if (validatedPrefix.length() > 10) {
+            Bukkit.getLogger().warning("Channel '" + id + "' prefix exceeds 10 characters. Prefix will be truncated.");
+            validatedPrefix = validatedPrefix.substring(0, 10);
+        }
+        
+        this.prefix = validatedPrefix;
         this.sendPermission = sendPermission;
         this.receivePermission = receivePermission;
         this.radius = radius;
@@ -95,13 +111,13 @@ public class BaseChannel implements Channel {
     }
 
     @Override
-    public char getCharacter() {
-        return character;
+    public String getPrefix() {
+        return prefix;
     }
     
     @Override
-    public boolean hasTriggerCharacter() {
-        return character != '\0';
+    public boolean hasPrefix() {
+        return prefix != null && !prefix.isEmpty();
     }
 
     @Override
