@@ -96,6 +96,10 @@ dimension-end: "El Fin"
 # Texto al pasar el cursor sobre enlaces
 link-hover: "Haz clic para abrir: {url}"
 
+# Notificaciones de detección de spam
+spam-detected-repetitive: "§#FFAFFB[nonchat] §f{player} detectó spam repetitivo: §#ff0000{message}"
+spam-detected-similar: "§#FFAFFB[nonchat] §f{player} detectó spam similar: §#ff0000{message}"
+spam-detected-flood: "§#FFAFFB[nonchat] §f{player} detectó spam por flood: §#ff0000{message}"
 
 # Comando de Canal
 channel-help-header: "&#FFAFFBComandos de Canales:"
@@ -125,11 +129,6 @@ no-channels: "&#ff0000No hay canales disponibles"
 message-too-short: "&#ff0000El mensaje es demasiado corto. Longitud mínima: {min}"
 message-too-long: "&#ff0000El mensaje es demasiado largo. Longitud máxima: {max}"
 channel-cooldown: "&#ff0000Debes esperar {seconds} segundos antes de enviar otro mensaje en {channel}"
-
-# Notificaciones de detección de spam
-spam-detected-repetitive: "§#FFAFFB[nonchat] §f{player} detectó spam repetitivo: §#ff0000{message}"
-spam-detected-similar: "§#FFAFFB[nonchat] §f{player} detectó spam similar: §#ff0000{message}"
-spam-detected-flood: "§#FFAFFB[nonchat] §f{player} detectó spam por flood: §#ff0000{message}"
 
 # Comandos de gestión de canales
 channel-help-create: "&#FFAFFB/channel create <id> <nombre-mostrar> [opciones]&#ffffff - crea un nuevo canal"
