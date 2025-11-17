@@ -50,18 +50,15 @@ public class DamageTrackingListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        // Fast path: Skip if tracking is disabled (master toggle check)
         if (!deathConfig.isIndirectTrackingEnabled()) {
             return;
         }
         
-        // Only track damage to players
         if (!(event.getEntity() instanceof Player)) {
             return;
         }
         Player victim = (Player) event.getEntity();
         
-        // Check minimum damage threshold (convert to hearts: 1 heart = 2 damage)
         double damageInHearts = event.getFinalDamage() / 2.0;
         if (damageInHearts < minimumDamage) {
             if (deathConfig.isDebugEnabled()) {
@@ -76,7 +73,6 @@ public class DamageTrackingListener implements Listener {
             return;
         }
         
-        // Extract the actual damager (handle projectiles, TNT, etc.)
         Player damager = extractDamager(event.getDamager());
         if (damager == null) {
             if (deathConfig.isDebugEnabled()) {
@@ -89,7 +85,6 @@ public class DamageTrackingListener implements Listener {
             return;
         }
         
-        // Don't track self-damage
         if (victim.getUniqueId().equals(damager.getUniqueId())) {
             if (deathConfig.isDebugEnabled()) {
                 logger.fine(String.format(
@@ -100,13 +95,9 @@ public class DamageTrackingListener implements Listener {
             return;
         }
         
-        // Classify the damage type
         DamageType damageType = classifyDamageType(event);
-        
-        // Record the damage event
         tracker.recordDamage(victim, damager, damageType);
         
-        // Debug logging
         if (deathConfig.isDebugEnabled()) {
             logger.info(String.format(
                 "[IndirectDeath] Recorded %s damage: %s -> %s (%.1f hearts, cause: %s)",
@@ -127,12 +118,10 @@ public class DamageTrackingListener implements Listener {
      * @return The player responsible for the damage, or null if not player-caused
      */
     private Player extractDamager(Entity damager) {
-        // Direct player attack
         if (damager instanceof Player) {
             return (Player) damager;
         }
         
-        // Projectile (arrow, snowball, trident, etc.)
         if (damager instanceof Projectile) {
             Projectile projectile = (Projectile) damager;
             ProjectileSource shooter = projectile.getShooter();
@@ -141,7 +130,6 @@ public class DamageTrackingListener implements Listener {
             }
         }
         
-        // TNT explosion
         if (damager instanceof TNTPrimed) {
             TNTPrimed tnt = (TNTPrimed) damager;
             Entity source = tnt.getSource();
@@ -150,7 +138,6 @@ public class DamageTrackingListener implements Listener {
             }
         }
         
-        // Other entity types not tracked
         return null;
     }
     
@@ -164,38 +151,31 @@ public class DamageTrackingListener implements Listener {
         Entity damager = event.getDamager();
         EntityDamageEvent.DamageCause cause = event.getCause();
         
-        // Projectile damage
         if (damager instanceof Projectile) {
             return DamageType.PROJECTILE;
         }
         
-        // Explosion damage
         if (cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION || 
             cause == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION ||
             damager instanceof TNTPrimed) {
             return DamageType.EXPLOSION;
         }
         
-        // Melee attack (direct entity attack)
         if (damager instanceof Player && 
             (cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK || 
              cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK)) {
             return DamageType.MELEE;
         }
         
-        // Knockback-focused damage (high knockback component)
-        // This is a heuristic - if the damage is low but there's knockback
+        // Heuristic: low damage with knockback
         if (damager instanceof Player) {
             double damage = event.getFinalDamage();
-            // If damage is less than 2 hearts but there's knockback, classify as knockback
             if (damage < 4.0) {
                 return DamageType.KNOCKBACK;
             }
-            // Otherwise, default to melee for player attacks
             return DamageType.MELEE;
         }
         
-        // Fallback for unclassified damage
         return DamageType.UNKNOWN;
     }
 }
