@@ -93,8 +93,129 @@ public class DeathMessageManager {
      * 
      * @param cause The damage cause
      * @return DeathMessage object, or null if no custom message exists
+     * @deprecated Use {@link #selectMessage(EntityDamageEvent.DamageCause, boolean, com.nonxedy.nonchat.util.death.DamageType)} instead
      */
+    @Deprecated
     public DeathMessage selectMessage(EntityDamageEvent.DamageCause cause) {
+        return selectMessage(cause, false, null);
+    }
+
+    /**
+     * Selects a random message variant for the given death cause
+     * Supports both standard and indirect death messages with damage type variants
+     * 
+     * @param cause The damage cause
+     * @param isIndirect Whether this is an indirect kill
+     * @param damageType The type of damage that caused the indirect kill (can be null)
+     * @return DeathMessage object, or null if no custom message exists
+     */
+    public DeathMessage selectMessage(EntityDamageEvent.DamageCause cause, boolean isIndirect, 
+                                     com.nonxedy.nonchat.util.death.DamageType damageType) {
+        try {
+            if (cause == null) {
+                if (deathConfig.isDebugEnabled()) {
+                    logger.warning("Attempted to select message for null death cause");
+                }
+                return null;
+            }
+            
+            // Try indirect message selection first if applicable
+            if (isIndirect) {
+                DeathMessage indirectMessage = selectIndirectMessage(cause, damageType);
+                if (indirectMessage != null) {
+                    return indirectMessage;
+                }
+                // If no indirect message found, fall through to standard selection
+                if (deathConfig.isDebugEnabled()) {
+                    logger.fine("No indirect message found for cause " + cause.name() + 
+                               ", falling back to standard message");
+                }
+            }
+            
+            // Standard message selection
+            return selectStandardMessage(cause);
+            
+        } catch (Exception e) {
+            logger.warning("Unexpected error in selectMessage() for cause " + (cause != null ? cause.name() : "null") + ": " + e.getMessage());
+            if (deathConfig.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Selects an indirect death message variant based on damage type
+     * Implements fallback logic: damage-type-specific → generic indirect → null
+     * 
+     * @param cause The death cause
+     * @param damageType The type of damage that caused the indirect kill
+     * @return DeathMessage object with indirect variant, or null if none found
+     */
+    private DeathMessage selectIndirectMessage(EntityDamageEvent.DamageCause cause, 
+                                              com.nonxedy.nonchat.util.death.DamageType damageType) {
+        try {
+            if (cause == null) {
+                return null;
+            }
+            
+            List<DeathMessage> messages = messageCache.get(cause);
+            if (messages == null || messages.isEmpty()) {
+                return null;
+            }
+            
+            // Filter to enabled messages that have indirect variants
+            List<DeathMessage> indirectMessages = new ArrayList<>();
+            for (DeathMessage message : messages) {
+                try {
+                    if (message != null && message.isEnabled() && message.hasIndirectVariants()) {
+                        // Prefer messages with damage-type-specific variants
+                        if (damageType != null && message.hasVariantForDamageType(damageType)) {
+                            indirectMessages.add(message);
+                        } else if (message.getGenericIndirectMessage() != null) {
+                            // Add messages with generic indirect variants as fallback
+                            indirectMessages.add(message);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warning("Error checking indirect variants for cause " + cause.name() + ": " + e.getMessage());
+                }
+            }
+            
+            if (indirectMessages.isEmpty()) {
+                if (deathConfig.isDebugEnabled()) {
+                    logger.fine("No indirect message variants found for cause: " + cause.name());
+                }
+                return null;
+            }
+            
+            // Select random variant
+            try {
+                int randomIndex = ThreadLocalRandom.current().nextInt(indirectMessages.size());
+                return indirectMessages.get(randomIndex);
+            } catch (Exception e) {
+                logger.warning("Error selecting random indirect message for cause " + cause.name() + ": " + e.getMessage());
+                return indirectMessages.get(0);
+            }
+            
+        } catch (Exception e) {
+            logger.warning("Unexpected error in selectIndirectMessage() for cause " + 
+                          (cause != null ? cause.name() : "null") + ": " + e.getMessage());
+            if (deathConfig.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Selects a standard death message (non-indirect)
+     * Refactored from original selectMessage logic
+     * 
+     * @param cause The death cause
+     * @return DeathMessage object, or null if no custom message exists
+     */
+    private DeathMessage selectStandardMessage(EntityDamageEvent.DamageCause cause) {
         try {
             if (cause == null) {
                 if (deathConfig.isDebugEnabled()) {
@@ -144,7 +265,8 @@ public class DeathMessageManager {
             }
             
         } catch (Exception e) {
-            logger.warning("Unexpected error in selectMessage() for cause " + (cause != null ? cause.name() : "null") + ": " + e.getMessage());
+            logger.warning("Unexpected error in selectStandardMessage() for cause " + 
+                          (cause != null ? cause.name() : "null") + ": " + e.getMessage());
             if (deathConfig.isDebugEnabled()) {
                 e.printStackTrace();
             }

@@ -107,6 +107,10 @@ public class DeathMessageLoader {
                         continue;
                     }
 
+                    // Load indirect variants if they exist
+                    Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> indirectVariantsByType = 
+                        loadIndirectVariants(causeSection, causeKey);
+
                     // Create DeathMessage objects for each variant
                     List<DeathMessage> deathMessages = new ArrayList<>();
                     int variantIndex = 0;
@@ -114,7 +118,18 @@ public class DeathMessageLoader {
                         variantIndex++;
                         // Validate that message variant is not empty
                         if (validateMessage(variant)) {
-                            deathMessages.add(new DeathMessage(cause, variant, enabled));
+                            // Create message with indirect variants if available
+                            if (!indirectVariantsByType.isEmpty()) {
+                                // Select one random indirect variant per damage type for this standard variant
+                                Map<com.nonxedy.nonchat.util.death.DamageType, String> indirectVariants = 
+                                    selectIndirectVariants(indirectVariantsByType);
+                                String genericIndirect = indirectVariants.get(com.nonxedy.nonchat.util.death.DamageType.UNKNOWN);
+                                indirectVariants.remove(com.nonxedy.nonchat.util.death.DamageType.UNKNOWN);
+                                
+                                deathMessages.add(new DeathMessage(cause, variant, enabled, indirectVariants, genericIndirect));
+                            } else {
+                                deathMessages.add(new DeathMessage(cause, variant, enabled));
+                            }
                             totalLoaded++;
                         } else {
                             if (deathConfig.isDebugEnabled()) {
@@ -464,6 +479,117 @@ public class DeathMessageLoader {
         }
         
         content.append("\n");
+    }
+
+    /**
+     * Loads indirect message variants from configuration
+     * Supports damage-type-specific variants and generic indirect messages
+     * 
+     * @param causeSection Configuration section for the death cause
+     * @param causeKey The death cause key for logging
+     * @return Map of damage type to list of indirect message variants
+     */
+    private Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> loadIndirectVariants(
+            ConfigurationSection causeSection, String causeKey) {
+        Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> indirectVariants = 
+            new EnumMap<>(com.nonxedy.nonchat.util.death.DamageType.class);
+        
+        try {
+            ConfigurationSection indirectSection = causeSection.getConfigurationSection("indirect-variants");
+            if (indirectSection == null) {
+                // No indirect variants configured
+                return indirectVariants;
+            }
+            
+            // Load generic indirect message (fallback)
+            if (indirectSection.contains("generic")) {
+                List<String> genericVariants = indirectSection.getStringList("generic");
+                if (genericVariants != null && !genericVariants.isEmpty()) {
+                    List<String> validGeneric = new ArrayList<>();
+                    for (String variant : genericVariants) {
+                        if (validateMessage(variant)) {
+                            validGeneric.add(variant);
+                        }
+                    }
+                    if (!validGeneric.isEmpty()) {
+                        indirectVariants.put(com.nonxedy.nonchat.util.death.DamageType.UNKNOWN, validGeneric);
+                    }
+                }
+            }
+            
+            // Load damage-type-specific variants
+            for (com.nonxedy.nonchat.util.death.DamageType damageType : com.nonxedy.nonchat.util.death.DamageType.values()) {
+                if (damageType == com.nonxedy.nonchat.util.death.DamageType.UNKNOWN) {
+                    continue; // Already handled as generic
+                }
+                
+                String configKey = damageType.getConfigKey();
+                if (indirectSection.contains(configKey)) {
+                    List<String> typeVariants = indirectSection.getStringList(configKey);
+                    if (typeVariants != null && !typeVariants.isEmpty()) {
+                        List<String> validVariants = new ArrayList<>();
+                        for (String variant : typeVariants) {
+                            if (validateMessage(variant)) {
+                                validVariants.add(variant);
+                            }
+                        }
+                        if (!validVariants.isEmpty()) {
+                            indirectVariants.put(damageType, validVariants);
+                        }
+                    }
+                }
+            }
+            
+            if (deathConfig.isDebugEnabled() && !indirectVariants.isEmpty()) {
+                logger.fine("Loaded " + indirectVariants.size() + " indirect variant types for cause: " + causeKey);
+            }
+            
+            // Validate that at least one indirect variant exists
+            if (indirectVariants.isEmpty() && indirectSection != null) {
+                if (deathConfig.isDebugEnabled()) {
+                    logger.warning("indirect-variants section exists for '" + causeKey + "' but no valid variants were loaded");
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.warning("Error loading indirect variants for cause '" + causeKey + "': " + e.getMessage());
+            if (deathConfig.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+        }
+        
+        return indirectVariants;
+    }
+
+    /**
+     * Selects one random indirect variant per damage type
+     * Creates a map of damage type to a single selected message
+     * 
+     * @param indirectVariantsByType Map of damage type to list of variants
+     * @return Map of damage type to selected message
+     */
+    private Map<com.nonxedy.nonchat.util.death.DamageType, String> selectIndirectVariants(
+            Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> indirectVariantsByType) {
+        Map<com.nonxedy.nonchat.util.death.DamageType, String> selected = 
+            new EnumMap<>(com.nonxedy.nonchat.util.death.DamageType.class);
+        
+        try {
+            for (Map.Entry<com.nonxedy.nonchat.util.death.DamageType, List<String>> entry : indirectVariantsByType.entrySet()) {
+                List<String> variants = entry.getValue();
+                if (variants != null && !variants.isEmpty()) {
+                    // Select random variant from the list
+                    int randomIndex = java.util.concurrent.ThreadLocalRandom.current().nextInt(variants.size());
+                    selected.put(entry.getKey(), variants.get(randomIndex));
+                }
+            }
+        } catch (Exception e) {
+            logger.warning("Error selecting indirect variants: " + e.getMessage());
+            if (deathConfig.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+        }
+        
+        return selected;
     }
 
     /**
