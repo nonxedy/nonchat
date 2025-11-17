@@ -41,6 +41,7 @@ permissions:
       - nonchat.admin.channel.edit
       - nonchat.admin.channel.delete
       - nonchat.admin.channel.default
+      - nonchat.admin.debug
       - nonchat.color
       - nonchat.ad.bypass
       - nonchat.ad.notify
@@ -115,6 +116,9 @@ permissions:
     default: op
   nonchat.spam.notify:
     description: Notify players about spam detection
+    default: op
+  nonchat.admin.debug:
+    description: Allows access to debug commands for tracking statistics
     default: op
 
 commands:
