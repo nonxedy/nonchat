@@ -196,6 +196,99 @@ public class DeathConfig {
         return config.getString("placeholders.unknown-player", "Someone");
     }
 
+    // ========================================
+    // Indirect Death Tracking Configuration
+    // ========================================
+
+    /**
+     * Checks if indirect death tracking is enabled
+     * @return true if indirect death tracking is enabled
+     */
+    public boolean isIndirectTrackingEnabled() {
+        return config.getBoolean("indirect-deaths.enabled", true);
+    }
+
+    /**
+     * Gets the tracking window in seconds for indirect deaths
+     * Valid range: 5-60 seconds
+     * @return Tracking window in seconds (default: 10)
+     */
+    public int getTrackingWindow() {
+        int window = config.getInt("indirect-deaths.tracking-window", 10);
+        
+        // Validate range: 5-60 seconds
+        if (window < 5) {
+            logger.log(Level.WARNING, "Indirect death tracking window is too low ({0}s). Using minimum value of 5 seconds.", window);
+            return 5;
+        }
+        if (window > 60) {
+            logger.log(Level.WARNING, "Indirect death tracking window is too high ({0}s). Using maximum value of 60 seconds.", window);
+            return 60;
+        }
+        
+        return window;
+    }
+
+    /**
+     * Gets the minimum damage required to trigger indirect death tracking (in hearts)
+     * Valid range: 0.5-20.0 hearts
+     * @return Minimum damage in hearts (default: 1.0)
+     */
+    public double getMinimumDamage() {
+        double damage = config.getDouble("indirect-deaths.minimum-damage", 1.0);
+        
+        // Validate range: 0.5-20.0 hearts
+        if (damage < 0.5) {
+            logger.log(Level.WARNING, "Indirect death minimum damage is too low ({0} hearts). Using minimum value of 0.5 hearts.", damage);
+            return 0.5;
+        }
+        if (damage > 20.0) {
+            logger.log(Level.WARNING, "Indirect death minimum damage is too high ({0} hearts). Using maximum value of 20.0 hearts.", damage);
+            return 20.0;
+        }
+        
+        return damage;
+    }
+
+    /**
+     * Checks if melee damage should be tracked for indirect deaths
+     * @return true if melee damage tracking is enabled
+     */
+    public boolean isTrackMelee() {
+        return config.getBoolean("indirect-deaths.track-melee", true);
+    }
+
+    /**
+     * Checks if projectile damage should be tracked for indirect deaths
+     * @return true if projectile damage tracking is enabled
+     */
+    public boolean isTrackProjectile() {
+        return config.getBoolean("indirect-deaths.track-projectile", true);
+    }
+
+    /**
+     * Checks if explosion damage should be tracked for indirect deaths
+     * @return true if explosion damage tracking is enabled
+     */
+    public boolean isTrackExplosion() {
+        return config.getBoolean("indirect-deaths.track-explosion", true);
+    }
+
+    /**
+     * Gets the list of death causes that are eligible for indirect attribution
+     * @return List of death cause names (e.g., "FALL", "VOID", "LAVA")
+     */
+    @NotNull
+    public List<String> getTrackedCauses() {
+        List<String> causes = config.getStringList("indirect-deaths.track-causes");
+        
+        // Return default list if not configured
+        if (causes.isEmpty()) {
+            return List.of("FALL", "VOID", "LAVA", "DROWNING", "FIRE", "FIRE_TICK", "SUFFOCATION", "CONTACT");
+        }
+        
+        return causes;
+    }
 
 
     /**
