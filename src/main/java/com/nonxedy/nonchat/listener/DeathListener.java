@@ -77,7 +77,8 @@ public class DeathListener implements Listener {
             return;
         }
 
-        // Log deprecation warning once per server start
+        // Log deprecation warning once per server start when legacy system is used
+        // This happens when deaths.yml is disabled or unavailable but config.yml death format is enabled
         logDeprecationWarning();
 
         // Apply PlaceholderAPI if available
