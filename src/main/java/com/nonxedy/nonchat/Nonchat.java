@@ -594,28 +594,5 @@ public class Nonchat extends JavaPlugin {
         }
     }
     
-    /**
-     * Logs detailed indirect death tracking statistics to the console
-     * Used by the /nonchat debug tracking command
-     */
-    public void logDeathTrackingStatistics() {
-        if (deathMessageService != null) {
-            deathMessageService.logTrackingStatistics();
-        } else {
-            getLogger().warning("Death message service is not initialized - cannot display tracking statistics");
-        }
-    }
-    
-    /**
-     * Gets death message statistics for display
-     * Used by the /nonchat debug stats command
-     * @return Map of death cause to message count
-     */
-    public Map<org.bukkit.event.entity.EntityDamageEvent.DamageCause, Integer> getDeathMessageStatistics() {
-        if (deathMessageService != null) {
-            return deathMessageService.getStatistics();
-        } else {
-            return new HashMap<>();
-        }
-    }
+
 }

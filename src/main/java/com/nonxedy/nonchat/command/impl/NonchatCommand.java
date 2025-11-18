@@ -67,9 +67,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             case "version" -> {
                 return handleVersionCommand(sender);
             }
-            case "debug" -> {
-                return handleDebugCommand(sender, args);
-            }
             default -> {
                 sendHelpMessage(sender);
                 return true;
@@ -155,57 +152,6 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
         // Send the version message
         sendVersionMessage(sender);
         return true;
-    }
-    
-    /**
-     * Handles the debug subcommand
-     */
-    private boolean handleDebugCommand(CommandSender sender, String[] args) {
-        // Check if sender has permission
-        if (!sender.hasPermission("nonchat.admin.debug")) {
-            sender.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
-            plugin.logError("No permission for /nonchat debug command: " + sender.getName());
-            return true;
-        }
-        
-        // Check for subcommand
-        if (args.length < 2) {
-            sender.sendMessage(ColorUtil.parseComponent("<red>Usage: /nonchat debug <tracking|stats>"));
-            return true;
-        }
-        
-        String debugSubCommand = args[1].toLowerCase();
-        switch (debugSubCommand) {
-            case "tracking" -> {
-                // Display indirect death tracking statistics
-                plugin.logDeathTrackingStatistics();
-                sender.sendMessage(ColorUtil.parseComponent("<green>Tracking statistics logged to console. Check server logs."));
-                return true;
-            }
-            case "stats" -> {
-                // Display death message statistics
-                java.util.Map<org.bukkit.event.entity.EntityDamageEvent.DamageCause, Integer> stats = 
-                    plugin.getDeathMessageStatistics();
-                if (stats.isEmpty()) {
-                    sender.sendMessage(ColorUtil.parseComponent("<yellow>No death message statistics available."));
-                } else {
-                    sender.sendMessage(ColorUtil.parseComponent("<green>=== Death Message Statistics ==="));
-                    int total = 0;
-                    for (java.util.Map.Entry<org.bukkit.event.entity.EntityDamageEvent.DamageCause, Integer> entry : stats.entrySet()) {
-                        sender.sendMessage(ColorUtil.parseComponent(
-                            "<gray>" + entry.getKey().name() + ": <white>" + entry.getValue() + " variants"
-                        ));
-                        total += entry.getValue();
-                    }
-                    sender.sendMessage(ColorUtil.parseComponent("<green>Total: <white>" + total + " message variants"));
-                }
-                return true;
-            }
-            default -> {
-                sender.sendMessage(ColorUtil.parseComponent("<red>Unknown debug subcommand. Use: tracking, stats"));
-                return true;
-            }
-        }
     }
 
     /**
@@ -310,21 +256,8 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("nonchat.version")) {
                 subCommands.add("version");
             }
-            
-            // Add debug subcommand if they have permission
-            if (sender.hasPermission("nonchat.admin.debug")) {
-                subCommands.add("debug");
-            }
 
             return filterStartingWith(args[0], subCommands);
-        }
-        
-        // Tab completion for debug subcommands
-        if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
-            if (sender.hasPermission("nonchat.admin.debug")) {
-                List<String> debugSubCommands = List.of("tracking", "stats");
-                return filterStartingWith(args[1], debugSubCommands);
-            }
         }
 
         // No completions for args beyond the first
