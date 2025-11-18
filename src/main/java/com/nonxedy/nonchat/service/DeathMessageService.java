@@ -126,7 +126,14 @@ public class DeathMessageService {
                         damageType = lastDamager.getDamageType();
                         
                         // Get the indirect killer player (may be offline) - must be on main thread
-                        killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
+                        if (lastDamager.getDamagerUUID() != null) {
+                            killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
+                            if (killer == null && deathConfig.isDebugEnabled()) {
+                                logger.fine("Indirect killer is offline: " + lastDamager.getDamagerName());
+                            }
+                        } else if (deathConfig.isDebugEnabled()) {
+                            logger.warning("Damage record has null UUID for damager: " + lastDamager.getDamagerName());
+                        }
                         
                         if (deathConfig.isDebugEnabled()) {
                             logger.info("Indirect death detected for " + player.getName() + 
@@ -256,7 +263,9 @@ public class DeathMessageService {
                         damageType = lastDamager.getDamageType();
                         
                         // Get the indirect killer player (may be offline) - must be on main thread
-                        killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
+                        if (lastDamager.getDamagerUUID() != null) {
+                            killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
+                        }
                     }
                 }
             }
@@ -348,6 +357,9 @@ public class DeathMessageService {
     private Entity extractKiller(PlayerDeathEvent event) {
         try {
             Player victim = event.getEntity();
+            if (victim == null) {
+                return null;
+            }
             
             // First try to get player killer (only works if killer is a player)
             Player playerKiller = victim.getKiller();
@@ -371,10 +383,24 @@ public class DeathMessageService {
                     logger.info("Damager entity found: " + (damager != null ? damager.getType().name() : "null"));
                 }
                 
+                if (damager == null) {
+                    if (deathConfig.isDebugEnabled()) {
+                        logger.fine("Damager is null, treating as environmental death");
+                    }
+                    return null;
+                }
+                
                 // Extract actual killer from projectiles
                 if (damager instanceof org.bukkit.entity.Projectile) {
                     org.bukkit.entity.Projectile projectile = (org.bukkit.entity.Projectile) damager;
                     org.bukkit.projectiles.ProjectileSource shooter = projectile.getShooter();
+                    
+                    if (shooter == null) {
+                        if (deathConfig.isDebugEnabled()) {
+                            logger.fine("Projectile has null shooter (environmental)");
+                        }
+                        return null;
+                    }
                     
                     if (shooter instanceof Player) {
                         if (deathConfig.isDebugEnabled()) {
@@ -387,7 +413,7 @@ public class DeathMessageService {
                         }
                         return (Entity) shooter;
                     }
-                    // If shooter is null or not an entity, return null (environmental)
+                    // If shooter is not an entity, return null (environmental)
                     if (deathConfig.isDebugEnabled()) {
                         logger.info("Projectile has no valid shooter (environmental)");
                     }
@@ -412,7 +438,7 @@ public class DeathMessageService {
                 }
                 
                 // For direct entity attacks (mobs, players), return the damager
-                if (deathConfig.isDebugEnabled()) {
+                if (deathConfig.isDebugEnabled() && damager != null) {
                     logger.info("Direct entity killer: " + damager.getType().name());
                 }
                 return damager;

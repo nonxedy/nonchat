@@ -118,6 +118,10 @@ public class DamageTrackingListener implements Listener {
      * @return The player responsible for the damage, or null if not player-caused
      */
     private Player extractDamager(Entity damager) {
+        if (damager == null) {
+            return null;
+        }
+        
         if (damager instanceof Player) {
             return (Player) damager;
         }
@@ -125,6 +129,12 @@ public class DamageTrackingListener implements Listener {
         if (damager instanceof Projectile) {
             Projectile projectile = (Projectile) damager;
             ProjectileSource shooter = projectile.getShooter();
+            if (shooter == null) {
+                if (deathConfig.isDebugEnabled()) {
+                    logger.fine("Projectile has null shooter");
+                }
+                return null;
+            }
             if (shooter instanceof Player) {
                 return (Player) shooter;
             }
@@ -149,6 +159,10 @@ public class DamageTrackingListener implements Listener {
      */
     private DamageType classifyDamageType(EntityDamageByEntityEvent event) {
         Entity damager = event.getDamager();
+        if (damager == null) {
+            return DamageType.UNKNOWN;
+        }
+        
         EntityDamageEvent.DamageCause cause = event.getCause();
         
         if (damager instanceof Projectile) {
