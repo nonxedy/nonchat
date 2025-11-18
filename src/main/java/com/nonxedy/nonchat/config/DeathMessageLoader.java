@@ -261,237 +261,32 @@ public class DeathMessageLoader {
      * @return Default YAML content as string
      */
     private String getDefaultFileContent() {
-        StringBuilder content = new StringBuilder();
-        
-        // Header comments
-        content.append("#========================================\n");
-        content.append("# nonchat - Custom Death Messages\n");
-        content.append("#========================================\n");
-        content.append("#\n");
-        content.append("# This file allows you to customize death messages based on the cause of death.\n");
-        content.append("# Each death cause can have multiple message variants that are randomly selected.\n");
-        content.append("#\n");
-        content.append("# Available Placeholders:\n");
-        content.append("#   PlaceholderAPI placeholders:\n");
-        content.append("#     %player_name% - The player's name\n");
-        content.append("#     %luckperms_prefix% - Player's LuckPerms prefix\n");
-        content.append("#     %luckperms_suffix% - Player's LuckPerms suffix\n");
-        content.append("#     (Any other PlaceholderAPI placeholder)\n");
-        content.append("#\n");
-        content.append("#   Death-specific placeholders:\n");
-        content.append("#     {death_cause} - The cause of death (e.g., FALL, FIRE)\n");
-        content.append("#     {killer_name} - Name of the killer (if applicable)\n");
-        content.append("#     {killer_type} - Type of killer (PLAYER, ZOMBIE, etc.)\n");
-        content.append("#     {world} - World where death occurred\n");
-        content.append("#     {x}, {y}, {z} - Death coordinates\n");
-        content.append("#\n");
-        content.append("# Color Codes:\n");
-        content.append("#   Legacy: Use § followed by color code (e.g., §c for red)\n");
-        content.append("#   Hex: Use &#RRGGBB format (e.g., &#FF5252 for red)\n");
-        content.append("#\n");
-        content.append("#========================================\n\n");
-        
-        // Settings section
-        content.append("# Global settings for the death message system\n");
-        content.append("settings:\n");
-        content.append("  # Enable or disable custom death messages\n");
-        content.append("  enabled: true\n");
-        content.append("  \n");
-        content.append("  # Use fallback message if no custom message is found for a cause\n");
-        content.append("  use-fallback: true\n");
-        content.append("  \n");
-        content.append("  # Enable debug logging for the death message system\n");
-        content.append("  debug: false\n\n");
-        
-        // Placeholders section
-        content.append("# Configurable placeholder values\n");
-        content.append("# These values are used when information is not available\n");
-        content.append("placeholders:\n");
-        content.append("  # Text to show when a value is unknown\n");
-        content.append("  unknown: \"?\"\n");
-        content.append("  \n");
-        content.append("  # Text to show when there is no value (e.g., no killer)\n");
-        content.append("  none: \"-\"\n");
-        content.append("  \n");
-        content.append("  # Text to show for unknown entities\n");
-        content.append("  unknown-entity: \"Something\"\n");
-        content.append("  \n");
-        content.append("  # Text to show for unknown players\n");
-        content.append("  unknown-player: \"Someone\"\n\n");
-        
-        // Messages section
-        content.append("# Death messages organized by cause\n");
-        content.append("# Each cause can have multiple variants that are randomly selected\n");
-        content.append("messages:\n\n");
-        
-        // Add all death causes with examples
-        addDeathCause(content, "FALL", "Fall damage deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7fell from a high place",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7forgot how to fly",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7experienced kinetic energy",
-            "§c☠ §f%player_name% §7hit the ground too hard",
-            "§c☠ §f%player_name% §7learned that gravity exists"
-        );
-        
-        addDeathCause(content, "FIRE", "Fire damage deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7went up in flames",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7burned to death",
-            "§c🔥 §f%player_name% §7became a human torch"
-        );
-        
-        addDeathCause(content, "LAVA", "Lava deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7tried to swim in lava",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7discovered that lava is hot",
-            "§c🌋 §f%player_name% §7became one with the lava"
-        );
-        
-        addDeathCause(content, "DROWNING", "Drowning deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7drowned",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7forgot to breathe",
-            "§9💧 §f%player_name% §7ran out of air"
-        );
-        
-        addDeathCause(content, "BLOCK_EXPLOSION", "Block explosion deaths (TNT, beds, etc.)",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7blew up",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7went out with a bang",
-            "§c💥 §f%player_name% §7was blown to bits"
-        );
-        
-        addDeathCause(content, "ENTITY_EXPLOSION", "Entity explosion deaths (Creepers, etc.)",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was blown up by {killer_name}",
-            "§c💥 §f%player_name% §7exploded thanks to {killer_name}",
-            "§c💥 §f%player_name% §7got too close to {killer_name}"
-        );
-        
-        addDeathCause(content, "ENTITY_ATTACK", "Entity attack deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was slain by {killer_name}",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was killed by {killer_name}",
-            "§c⚔ §f%player_name% §7lost a fight with {killer_name}"
-        );
-        
-        addDeathCause(content, "PROJECTILE", "Projectile deaths (arrows, tridents, etc.)",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was shot by {killer_name}",
-            "§c🏹 §f%player_name% §7was turned into a pincushion by {killer_name}",
-            "§c🏹 §f%player_name% §7couldn't dodge {killer_name}'s shot"
-        );
-        
-        addDeathCause(content, "VOID", "Void deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7fell into the void",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7fell out of the world",
-            "§5🌌 §f%player_name% §7discovered the void"
-        );
-        
-        addDeathCause(content, "SUFFOCATION", "Suffocation deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7suffocated in a wall",
-            "§7⬛ §f%player_name% §7became one with the wall",
-            "§7⬛ §f%player_name% §7forgot walls are solid"
-        );
-        
-        addDeathCause(content, "STARVATION", "Starvation deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7starved to death",
-            "§e🍖 §f%player_name% §7forgot to eat",
-            "§e🍖 §f%player_name% §7died of hunger"
-        );
-        
-        addDeathCause(content, "POISON", "Poison deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was poisoned",
-            "§2☠ §f%player_name% §7succumbed to poison",
-            "§2☠ §f%player_name% §7died from poisoning"
-        );
-        
-        addDeathCause(content, "MAGIC", "Magic deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was killed by magic",
-            "§d✨ §f%player_name% §7was killed by magic",
-            "§d✨ §f%player_name% §7couldn't handle the magic"
-        );
-        
-        addDeathCause(content, "WITHER", "Wither effect deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7withered away",
-            "§8💀 §f%player_name% §7was withered",
-            "§8💀 §f%player_name% §7succumbed to the wither effect"
-        );
-        
-        addDeathCause(content, "LIGHTNING", "Lightning deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was struck by lightning",
-            "§e⚡ §f%player_name% §7was electrocuted",
-            "§e⚡ §f%player_name% §7became a lightning rod"
-        );
-        
-        addDeathCause(content, "FALLING_BLOCK", "Falling block deaths (anvils, etc.)",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was squashed by a falling block",
-            "§7⬇ §f%player_name% §7was crushed",
-            "§7⬇ §f%player_name% §7didn't look up"
-        );
-        
-        addDeathCause(content, "CONTACT", "Contact deaths (cacti, berry bushes, etc.)",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was pricked to death",
-            "§a🌵 §f%player_name% §7discovered cacti are sharp",
-            "§a🌵 §f%player_name% §7hugged a cactus"
-        );
-        
-        addDeathCause(content, "FLY_INTO_WALL", "Elytra collision deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7experienced kinetic energy",
-            "§7💨 §f%player_name% §7flew into a wall",
-            "§7💨 §f%player_name% §7forgot to brake"
-        );
-        
-        addDeathCause(content, "HOT_FLOOR", "Magma block deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7discovered the floor was lava",
-            "§c🔥 §f%player_name% §7walked on hot floor",
-            "§c🔥 §f%player_name% §7burned their feet"
-        );
-        
-        addDeathCause(content, "CRAMMING", "Entity cramming deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was squished",
-            "§7⬛ §f%player_name% §7was crammed to death",
-            "§7⬛ §f%player_name% §7was in a tight spot"
-        );
-        
-        addDeathCause(content, "DRYOUT", "Dryout deaths (fish out of water)",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7dried out",
-            "§e☀ §f%player_name% §7needed water",
-            "§e☀ §f%player_name% §7couldn't find water"
-        );
-        
-        addDeathCause(content, "FREEZE", "Freezing deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7froze to death",
-            "§b❄ §f%player_name% §7became an ice sculpture",
-            "§b❄ §f%player_name% §7couldn't handle the cold"
-        );
-        
-        addDeathCause(content, "SONIC_BOOM", "Warden sonic boom deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was obliterated by a sonic boom",
-            "§5💥 §f%player_name% §7was sonic boomed",
-            "§5💥 §f%player_name% §7angered the Warden"
-        );
-        
-        addDeathCause(content, "THORNS", "Thorns enchantment deaths",
-            "%luckperms_prefix% §f%player_name%§r %luckperms_suffix% §7was killed trying to hurt {killer_name}",
-            "§a🌹 §f%player_name% §7was pricked by {killer_name}'s thorns",
-            "§a🌹 §f%player_name% §7learned about thorns the hard way"
-        );
-        
-        return content.toString();
-    }
-
-    /**
-     * Helper method to add a death cause section to the YAML content
-     * @param content StringBuilder to append to
-     * @param cause Death cause name
-     * @param description Description comment
-     * @param variants Message variants (3-5 examples)
-     */
-    private void addDeathCause(StringBuilder content, String cause, String description, String... variants) {
-        content.append("  # ").append(description).append("\n");
-        content.append("  ").append(cause).append(":\n");
-        content.append("    enabled: true\n");
-        content.append("    variants:\n");
-        
-        for (String variant : variants) {
-            content.append("      - \"").append(variant).append("\"\n");
+        try {
+            java.io.InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("deaths.yml");
+            if (resourceStream == null) {
+                logger.severe("Could not find deaths.yml in plugin resources");
+                return "";
+            }
+            
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(resourceStream, java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder content = new StringBuilder();
+            String line;
+            
+            while ((line = reader.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+            
+            reader.close();
+            return content.toString();
+            
+        } catch (java.io.IOException e) {
+            logger.severe("Failed to read deaths.yml from plugin resources: " + e.getMessage());
+            if (deathConfig.isDebugEnabled()) {
+                e.printStackTrace();
+            }
+            return "";
         }
-        
-        content.append("\n");
     }
 
     /**
