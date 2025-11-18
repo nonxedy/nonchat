@@ -106,6 +106,7 @@ public class IndirectDeathTracker {
      */
     public void clearAll() {
         damageCache.invalidateAll();
+        damageCache.cleanUp();
     }
     
     /**

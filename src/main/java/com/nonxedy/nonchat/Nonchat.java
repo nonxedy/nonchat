@@ -338,6 +338,7 @@ public class Nonchat extends JavaPlugin {
             // Clear display entity pool
             DisplayEntityUtil.clearPool();
             
+            // Cancel all scheduled tasks
             if (broadcastManager != null) {
                 broadcastManager.stop();
             }
@@ -354,10 +355,13 @@ public class Nonchat extends JavaPlugin {
                 discordSRVIntegration.unregister();
             }
             
-            // Clean up indirect death tracker
+            // Clean up indirect death tracker cache
             if (indirectDeathTracker != null) {
                 indirectDeathTracker.clearAll();
             }
+            
+            // Cancel all remaining Bukkit tasks for this plugin
+            Bukkit.getScheduler().cancelTasks(this);
 
             Bukkit.getConsoleSender().sendMessage(Component.text()
                     .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
