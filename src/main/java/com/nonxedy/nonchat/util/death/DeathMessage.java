@@ -1,9 +1,8 @@
 package com.nonxedy.nonchat.util.death;
 
 import lombok.Getter;
-import org.bukkit.event.entity.EntityDamageEvent;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Map;
  */
 @Getter
 public class DeathMessage {
-    private final EntityDamageEvent.DamageCause cause;
+    private final String causeKey;
     private final String standardMessage;
     private final boolean enabled;
     private final Map<DamageType, String> indirectVariants;
@@ -20,32 +19,32 @@ public class DeathMessage {
 
     /**
      * Creates a standard death message (no indirect variants)
-     * @param cause The death cause
+     * @param causeKey The death cause key (normalized)
      * @param message The message text
      * @param enabled Whether this message is enabled
      */
-    public DeathMessage(EntityDamageEvent.DamageCause cause, String message, boolean enabled) {
-        this.cause = cause;
+    public DeathMessage(String causeKey, String message, boolean enabled) {
+        this.causeKey = causeKey;
         this.standardMessage = message;
         this.enabled = enabled;
-        this.indirectVariants = new EnumMap<>(DamageType.class);
+        this.indirectVariants = new HashMap<>();
         this.genericIndirectMessage = null;
     }
 
     /**
      * Creates a death message with indirect variants
-     * @param cause The death cause
+     * @param causeKey The death cause key (normalized)
      * @param standardMessage The standard message text
      * @param enabled Whether this message is enabled
      * @param indirectVariants Map of damage type to indirect message variants
      * @param genericIndirectMessage Generic indirect message (fallback)
      */
-    public DeathMessage(EntityDamageEvent.DamageCause cause, String standardMessage, boolean enabled,
+    public DeathMessage(String causeKey, String standardMessage, boolean enabled,
                        Map<DamageType, String> indirectVariants, String genericIndirectMessage) {
-        this.cause = cause;
+        this.causeKey = causeKey;
         this.standardMessage = standardMessage;
         this.enabled = enabled;
-        this.indirectVariants = indirectVariants != null ? new EnumMap<>(indirectVariants) : new EnumMap<>(DamageType.class);
+        this.indirectVariants = indirectVariants != null ? new HashMap<>(indirectVariants) : new HashMap<>();
         this.genericIndirectMessage = genericIndirectMessage;
     }
 

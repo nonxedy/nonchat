@@ -76,8 +76,8 @@ public class DeathMessageService {
             Player player = event.getEntity();
             
             // Extract death cause from event
-            EntityDamageEvent.DamageCause cause = extractDeathCause(event);
-            if (cause == null) {
+            String causeKey = extractDeathCauseKey(event);
+            if (causeKey == null) {
                 if (deathConfig.isDebugEnabled()) {
                     logger.info("Could not determine death cause for player: " + player.getName());
                 }
@@ -89,17 +89,17 @@ public class DeathMessageService {
             
             // For environmental deaths, ignore Bukkit's automatic killer assignment
             // We want to use our own indirect tracking system instead
-            boolean isEnvironmental = isEnvironmentalDeath(cause);
+            boolean isEnvironmental = isEnvironmentalDeath(causeKey);
             if (isEnvironmental && killer instanceof Player) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("Ignoring Bukkit's automatic killer assignment for environmental death (cause: " + cause.name() + ")");
+                    logger.info("Ignoring Bukkit's automatic killer assignment for environmental death (cause: " + causeKey + ")");
                 }
                 killer = null;
             }
             
             if (deathConfig.isDebugEnabled()) {
                 logger.info("Death analysis for " + player.getName() + ":");
-                logger.info("  - Cause: " + cause.name());
+                logger.info("  - Cause: " + causeKey);
                 logger.info("  - Killer: " + (killer != null ? killer.getType().name() : "null"));
                 logger.info("  - Is environmental: " + isEnvironmental);
                 logger.info("  - Tracking enabled: " + deathConfig.isIndirectTrackingEnabled());
@@ -150,29 +150,29 @@ public class DeathMessageService {
                 } else {
                     if (deathConfig.isDebugEnabled()) {
                         logger.info("No recent damager found for environmental death of " + player.getName() + 
-                                  " (cause: " + cause.name() + ")");
+                                  " (cause: " + causeKey + ")");
                     }
                 }
             } else if (deathConfig.isDebugEnabled()) {
                 logger.info("  - Skipping indirect check: tracking=" + deathConfig.isIndirectTrackingEnabled() + 
                           ", killer==null=" + (killer == null) + 
-                          ", isEnvironmental=" + isEnvironmentalDeath(cause));
+                          ", isEnvironmental=" + isEnvironmentalDeath(causeKey));
             }
 
             // Check if custom messages exist for this cause
-            if (!messageManager.hasCustomMessages(cause)) {
+            if (!messageManager.hasCustomMessages(causeKey)) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("No custom messages for death cause: " + cause);
+                    logger.info("No custom messages for death cause: " + causeKey);
                 }
                 // Don't set message, let fallback handle it
                 return;
             }
 
             // Select a random message variant (with indirect support)
-            DeathMessage deathMessage = messageManager.selectMessage(cause, isIndirect, damageType);
+            DeathMessage deathMessage = messageManager.selectMessage(causeKey, isIndirect, damageType);
             if (deathMessage == null) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("Failed to select message for cause: " + cause + 
+                    logger.info("Failed to select message for cause: " + causeKey + 
                               " (indirect: " + isIndirect + ", damageType: " + damageType + ")");
                 }
                 return;
@@ -195,7 +195,7 @@ public class DeathMessageService {
 
             if (deathConfig.isDebugEnabled()) {
                 String messageType = isIndirect ? "indirect" : "standard";
-                logger.info("Death message for " + player.getName() + " (" + cause + ", " + messageType + "): " + formattedMessage);
+                logger.info("Death message for " + player.getName() + " (" + causeKey + ", " + messageType + "): " + formattedMessage);
             }
             
             // Track total death processing time (message selection + formatting)
@@ -237,8 +237,8 @@ public class DeathMessageService {
             Player player = event.getEntity();
             
             // Extract death cause from event
-            EntityDamageEvent.DamageCause cause = extractDeathCause(event);
-            if (cause == null) {
+            String causeKey = extractDeathCauseKey(event);
+            if (causeKey == null) {
                 if (deathConfig.isDebugEnabled()) {
                     logger.info("Could not determine death cause for player: " + player.getName());
                 }
@@ -253,7 +253,7 @@ public class DeathMessageService {
             DamageType damageType = null;
             DamageRecord lastDamager = null;
             
-            if (deathConfig.isIndirectTrackingEnabled() && killer == null && isEnvironmentalDeath(cause)) {
+            if (deathConfig.isIndirectTrackingEnabled() && killer == null && isEnvironmentalDeath(causeKey)) {
                 lastDamager = indirectDeathTracker.getLastDamager(player);
                 
                 if (lastDamager != null) {
@@ -271,19 +271,19 @@ public class DeathMessageService {
             }
 
             // Check if custom messages exist for this cause
-            if (!messageManager.hasCustomMessages(cause)) {
+            if (!messageManager.hasCustomMessages(causeKey)) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("No custom messages for death cause: " + cause);
+                    logger.info("No custom messages for death cause: " + causeKey);
                 }
                 // Return null to use fallback if enabled
                 return deathConfig.useFallback() ? null : Component.empty();
             }
 
             // Select a random message variant (with indirect support)
-            DeathMessage deathMessage = messageManager.selectMessage(cause, isIndirect, damageType);
+            DeathMessage deathMessage = messageManager.selectMessage(causeKey, isIndirect, damageType);
             if (deathMessage == null) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("Failed to select message for cause: " + cause);
+                    logger.info("Failed to select message for cause: " + causeKey);
                 }
                 return deathConfig.useFallback() ? null : Component.empty();
             }
@@ -301,7 +301,7 @@ public class DeathMessageService {
             Component finalComponent = ColorUtil.parseComponent(formattedMessage);
 
             if (deathConfig.isDebugEnabled()) {
-                logger.info("Death message for " + player.getName() + " (" + cause + "): " + formattedMessage);
+                logger.info("Death message for " + player.getName() + " (" + causeKey + "): " + formattedMessage);
             }
 
             return finalComponent;
@@ -314,15 +314,19 @@ public class DeathMessageService {
     }
 
     /**
-     * Extracts the death cause from the death event
+     * Extracts the death cause key from the death event
      * @param event The player death event
-     * @return The damage cause, or null if not available
+     * @return The damage cause key (normalized), or null if not available
      */
-    private EntityDamageEvent.DamageCause extractDeathCause(PlayerDeathEvent event) {
+    private String extractDeathCauseKey(PlayerDeathEvent event) {
         try {
             EntityDamageEvent damageEvent = event.getEntity().getLastDamageCause();
             if (damageEvent != null) {
-                return damageEvent.getCause();
+                EntityDamageEvent.DamageCause cause = damageEvent.getCause();
+                if (cause != null) {
+                    // Normalize to lowercase with underscores
+                    return cause.name().toLowerCase();
+                }
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error extracting death cause: " + e.getMessage(), e);
@@ -332,19 +336,22 @@ public class DeathMessageService {
     
     /**
      * Determines if a death cause is environmental and eligible for indirect attribution
-     * @param cause The damage cause to check
+     * @param causeKey The death cause key (normalized) to check
      * @return true if the cause is environmental and configured for tracking
      */
-    private boolean isEnvironmentalDeath(EntityDamageEvent.DamageCause cause) {
-        if (cause == null) {
+    private boolean isEnvironmentalDeath(String causeKey) {
+        if (causeKey == null || causeKey.isEmpty()) {
             return false;
         }
         
         // Get the list of tracked causes from configuration
         List<String> trackedCauses = deathConfig.getTrackedCauses();
         
-        // Check if this cause is in the tracked list
-        return trackedCauses.contains(cause.name());
+        // Normalize the cause key and check if it's in the tracked list
+        String normalizedKey = causeKey.toLowerCase().replace('-', '_');
+        
+        // Check both the normalized key and uppercase version (for backward compatibility)
+        return trackedCauses.contains(normalizedKey) || trackedCauses.contains(causeKey.toUpperCase());
     }
 
     /**
@@ -547,7 +554,7 @@ public class DeathMessageService {
      */
     public void reload() {
         // Store previous state in case reload fails
-        Map<EntityDamageEvent.DamageCause, Integer> previousStats = null;
+        Map<String, Integer> previousStats = null;
         boolean hadPreviousConfig = false;
         
         try {
@@ -570,7 +577,7 @@ public class DeathMessageService {
             messageManager.loadMessages();
             
             // Get new statistics
-            Map<EntityDamageEvent.DamageCause, Integer> newStats = getStatistics();
+            Map<String, Integer> newStats = getStatistics();
             int totalMessages = newStats.values().stream().mapToInt(Integer::intValue).sum();
             int totalCauses = newStats.size();
 
@@ -615,9 +622,9 @@ public class DeathMessageService {
 
     /**
      * Gets statistics about loaded death messages
-     * @return Map of death cause to message count
+     * @return Map of death cause key to message count
      */
-    public Map<EntityDamageEvent.DamageCause, Integer> getStatistics() {
+    public Map<String, Integer> getStatistics() {
         return messageManager.getStatistics();
     }
     

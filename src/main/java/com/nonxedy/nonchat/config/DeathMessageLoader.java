@@ -8,14 +8,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.entity.EntityDamageEvent;
 
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.death.DamageType;
@@ -43,10 +42,10 @@ public class DeathMessageLoader {
 
     /**
      * Loads all death messages from deaths.yml
-     * @return Map of death cause to list of death messages
+     * @return Map of death cause key to list of death messages
      */
-    public Map<EntityDamageEvent.DamageCause, List<DeathMessage>> loadAllMessages() {
-        Map<EntityDamageEvent.DamageCause, List<DeathMessage>> messages = new EnumMap<>(EntityDamageEvent.DamageCause.class);
+    public Map<String, List<DeathMessage>> loadAllMessages() {
+        Map<String, List<DeathMessage>> messages = new HashMap<>();
         
         try {
             // Check if file exists
@@ -78,17 +77,8 @@ public class DeathMessageLoader {
             // Iterate through each death cause in the config
             for (String causeKey : messagesSection.getKeys(false)) {
                 try {
-                    // Validate death cause against Minecraft's DamageCause enum
-                    EntityDamageEvent.DamageCause cause;
-                    try {
-                        cause = EntityDamageEvent.DamageCause.valueOf(causeKey.toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        logger.warning("Unknown death cause '" + causeKey + "' in deaths.yml at " + deathsFile.getAbsolutePath());
-                        logger.warning("Valid death causes are: " + getValidDeathCauses());
-                        unknownCauses++;
-                        totalSkipped++;
-                        continue;
-                    }
+                    // Normalize the cause key (lowercase with underscores)
+                    String normalizedKey = causeKey.toLowerCase().replace('-', '_');
 
                     ConfigurationSection causeSection = messagesSection.getConfigurationSection(causeKey);
                     if (causeSection == null) {
@@ -140,15 +130,15 @@ public class DeathMessageLoader {
                                 
                                 // Translate indirect variants
                                 Map<DamageType, String> translatedIndirectVariants = 
-                                    new EnumMap<>(DamageType.class);
+                                    new HashMap<>();
                                 for (Map.Entry<DamageType, String> entry : indirectVariants.entrySet()) {
                                     translatedIndirectVariants.put(entry.getKey(), ColorUtil.parseColor(entry.getValue()));
                                 }
                                 String translatedGenericIndirect = genericIndirect != null ? ColorUtil.parseColor(genericIndirect) : null;
                                 
-                                deathMessages.add(new DeathMessage(cause, translatedVariant, enabled, translatedIndirectVariants, translatedGenericIndirect));
+                                deathMessages.add(new DeathMessage(normalizedKey, translatedVariant, enabled, translatedIndirectVariants, translatedGenericIndirect));
                             } else {
-                                deathMessages.add(new DeathMessage(cause, translatedVariant, enabled));
+                                deathMessages.add(new DeathMessage(normalizedKey, translatedVariant, enabled));
                             }
                             totalLoaded++;
                         } else {
@@ -161,7 +151,7 @@ public class DeathMessageLoader {
                     }
 
                     if (!deathMessages.isEmpty()) {
-                        messages.put(cause, deathMessages);
+                        messages.put(normalizedKey, deathMessages);
                     } else {
                         logger.warning("Death cause '" + causeKey + "' has no valid message variants after validation");
                     }
@@ -188,27 +178,6 @@ public class DeathMessageLoader {
         }
 
         return messages;
-    }
-
-
-
-    /**
-     * Gets a comma-separated list of valid death causes for error messages
-     * @return String of valid death causes
-     */
-    private String getValidDeathCauses() {
-        StringBuilder causes = new StringBuilder();
-        EntityDamageEvent.DamageCause[] allCauses = EntityDamageEvent.DamageCause.values();
-        for (int i = 0; i < allCauses.length; i++) {
-            if (i > 0) causes.append(", ");
-            causes.append(allCauses[i].name());
-            // Limit output to avoid too long messages
-            if (i >= 9) {
-                causes.append(", ... (and ").append(allCauses.length - 10).append(" more)");
-                break;
-            }
-        }
-        return causes.toString();
     }
 
     /**
@@ -307,7 +276,7 @@ public class DeathMessageLoader {
     private Map<DamageType, List<String>> loadIndirectVariants(
             ConfigurationSection causeSection, String causeKey) {
         Map<DamageType, List<String>> indirectVariants = 
-            new EnumMap<>(DamageType.class);
+            new HashMap<>();
         
         try {
             ConfigurationSection indirectSection = causeSection.getConfigurationSection("indirect-variants");
@@ -386,7 +355,7 @@ public class DeathMessageLoader {
     private Map<DamageType, String> selectIndirectVariants(
             Map<DamageType, List<String>> indirectVariantsByType) {
         Map<DamageType, String> selected = 
-            new EnumMap<>(DamageType.class);
+            new HashMap<>();
         
         try {
             for (Map.Entry<DamageType, List<String>> entry : indirectVariantsByType.entrySet()) {

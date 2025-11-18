@@ -2,16 +2,15 @@ package com.nonxedy.nonchat.core;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-import org.bukkit.event.entity.EntityDamageEvent;
-
 import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.config.DeathMessageLoader;
+import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
 
 /**
@@ -19,7 +18,7 @@ import com.nonxedy.nonchat.util.death.DeathMessage;
  * Provides efficient random variant selection and cache management
  */
 public class DeathMessageManager {
-    private final Map<EntityDamageEvent.DamageCause, List<DeathMessage>> messageCache;
+    private final Map<String, List<DeathMessage>> messageCache;
     private final DeathMessageLoader loader;
     private final DeathConfig deathConfig;
     private final Logger logger;
@@ -31,7 +30,7 @@ public class DeathMessageManager {
      * @param deathConfig Death configuration instance
      */
     public DeathMessageManager(File dataFolder, Logger logger, DeathConfig deathConfig) {
-        this.messageCache = new EnumMap<>(EntityDamageEvent.DamageCause.class);
+        this.messageCache = new HashMap<>();
         this.loader = new DeathMessageLoader(dataFolder, logger, deathConfig);
         this.deathConfig = deathConfig;
         this.logger = logger;
@@ -47,7 +46,7 @@ public class DeathMessageManager {
             clearCache();
             
             // Load messages from configuration
-            Map<EntityDamageEvent.DamageCause, List<DeathMessage>> loadedMessages = null;
+            Map<String, List<DeathMessage>> loadedMessages = null;
             try {
                 loadedMessages = loader.loadAllMessages();
             } catch (Exception e) {
@@ -56,13 +55,13 @@ public class DeathMessageManager {
                     e.printStackTrace();
                 }
                 // Use empty map as fallback
-                loadedMessages = new EnumMap<>(EntityDamageEvent.DamageCause.class);
+                loadedMessages = new HashMap<>();
             }
             
             // Validate loaded messages
             if (loadedMessages == null) {
                 logger.warning("Death message loader returned null, using empty message cache");
-                loadedMessages = new EnumMap<>(EntityDamageEvent.DamageCause.class);
+                loadedMessages = new HashMap<>();
             }
             
             // Populate cache with loaded messages
@@ -88,55 +87,45 @@ public class DeathMessageManager {
     }
 
     /**
-     * Selects a random message variant for the given death cause
-     * Uses ThreadLocalRandom for efficient random selection
-     * 
-     * @param cause The damage cause
-     * @return DeathMessage object, or null if no custom message exists
-     * @deprecated Use {@link #selectMessage(EntityDamageEvent.DamageCause, boolean, com.nonxedy.nonchat.util.death.DamageType)} instead
-     */
-    @Deprecated
-    public DeathMessage selectMessage(EntityDamageEvent.DamageCause cause) {
-        return selectMessage(cause, false, null);
-    }
-
-    /**
-     * Selects a random message variant for the given death cause
+     * Selects a random message variant for the given death cause key
      * Supports both standard and indirect death messages with damage type variants
      * 
-     * @param cause The damage cause
+     * @param causeKey The death cause key (normalized)
      * @param isIndirect Whether this is an indirect kill
      * @param damageType The type of damage that caused the indirect kill (can be null)
      * @return DeathMessage object, or null if no custom message exists
      */
-    public DeathMessage selectMessage(EntityDamageEvent.DamageCause cause, boolean isIndirect, 
-                                     com.nonxedy.nonchat.util.death.DamageType damageType) {
+    public DeathMessage selectMessage(String causeKey, boolean isIndirect, 
+                                     DamageType damageType) {
         try {
-            if (cause == null) {
+            if (causeKey == null || causeKey.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Attempted to select message for null death cause");
+                    logger.warning("Attempted to select message for null or empty death cause key");
                 }
                 return null;
             }
             
+            // Normalize the cause key
+            String normalizedKey = causeKey.toLowerCase().replace('-', '_');
+            
             // Try indirect message selection first if applicable
             if (isIndirect) {
-                DeathMessage indirectMessage = selectIndirectMessage(cause, damageType);
+                DeathMessage indirectMessage = selectIndirectMessage(normalizedKey, damageType);
                 if (indirectMessage != null) {
                     return indirectMessage;
                 }
                 // If no indirect message found, fall through to standard selection
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No indirect message found for cause " + cause.name() + 
+                    logger.fine("No indirect message found for cause " + normalizedKey + 
                                ", falling back to standard message");
                 }
             }
             
             // Standard message selection
-            return selectStandardMessage(cause);
+            return selectStandardMessage(normalizedKey);
             
         } catch (Exception e) {
-            logger.warning("Unexpected error in selectMessage() for cause " + (cause != null ? cause.name() : "null") + ": " + e.getMessage());
+            logger.warning("Unexpected error in selectMessage() for cause " + (causeKey != null ? causeKey : "null") + ": " + e.getMessage());
             if (deathConfig.isDebugEnabled()) {
                 e.printStackTrace();
             }
@@ -148,18 +137,18 @@ public class DeathMessageManager {
      * Selects an indirect death message variant based on damage type
      * Implements fallback logic: damage-type-specific → generic indirect → null
      * 
-     * @param cause The death cause
+     * @param causeKey The death cause key (normalized)
      * @param damageType The type of damage that caused the indirect kill
      * @return DeathMessage object with indirect variant, or null if none found
      */
-    private DeathMessage selectIndirectMessage(EntityDamageEvent.DamageCause cause, 
-                                              com.nonxedy.nonchat.util.death.DamageType damageType) {
+    private DeathMessage selectIndirectMessage(String causeKey, 
+                                              DamageType damageType) {
         try {
-            if (cause == null) {
+            if (causeKey == null || causeKey.isEmpty()) {
                 return null;
             }
             
-            List<DeathMessage> messages = messageCache.get(cause);
+            List<DeathMessage> messages = messageCache.get(causeKey);
             if (messages == null || messages.isEmpty()) {
                 return null;
             }
@@ -178,13 +167,13 @@ public class DeathMessageManager {
                         }
                     }
                 } catch (Exception e) {
-                    logger.warning("Error checking indirect variants for cause " + cause.name() + ": " + e.getMessage());
+                    logger.warning("Error checking indirect variants for cause " + causeKey + ": " + e.getMessage());
                 }
             }
             
             if (indirectMessages.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No indirect message variants found for cause: " + cause.name());
+                    logger.fine("No indirect message variants found for cause: " + causeKey);
                 }
                 return null;
             }
@@ -194,13 +183,13 @@ public class DeathMessageManager {
                 int randomIndex = ThreadLocalRandom.current().nextInt(indirectMessages.size());
                 return indirectMessages.get(randomIndex);
             } catch (Exception e) {
-                logger.warning("Error selecting random indirect message for cause " + cause.name() + ": " + e.getMessage());
+                logger.warning("Error selecting random indirect message for cause " + causeKey + ": " + e.getMessage());
                 return indirectMessages.get(0);
             }
             
         } catch (Exception e) {
             logger.warning("Unexpected error in selectIndirectMessage() for cause " + 
-                          (cause != null ? cause.name() : "null") + ": " + e.getMessage());
+                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage());
             if (deathConfig.isDebugEnabled()) {
                 e.printStackTrace();
             }
@@ -212,24 +201,24 @@ public class DeathMessageManager {
      * Selects a standard death message (non-indirect)
      * Refactored from original selectMessage logic
      * 
-     * @param cause The death cause
+     * @param causeKey The death cause key (normalized)
      * @return DeathMessage object, or null if no custom message exists
      */
-    private DeathMessage selectStandardMessage(EntityDamageEvent.DamageCause cause) {
+    private DeathMessage selectStandardMessage(String causeKey) {
         try {
-            if (cause == null) {
+            if (causeKey == null || causeKey.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Attempted to select message for null death cause");
+                    logger.warning("Attempted to select message for null or empty death cause key");
                 }
                 return null;
             }
             
-            List<DeathMessage> messages = messageCache.get(cause);
+            List<DeathMessage> messages = messageCache.get(causeKey);
             
             // No custom messages for this cause
             if (messages == null || messages.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No custom messages configured for death cause: " + cause.name());
+                    logger.fine("No custom messages configured for death cause: " + causeKey);
                 }
                 return null;
             }
@@ -242,14 +231,14 @@ public class DeathMessageManager {
                         enabledMessages.add(message);
                     }
                 } catch (Exception e) {
-                    logger.warning("Error checking if message is enabled for cause " + cause.name() + ": " + e.getMessage());
+                    logger.warning("Error checking if message is enabled for cause " + causeKey + ": " + e.getMessage());
                 }
             }
             
             // No enabled messages for this cause
             if (enabledMessages.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No enabled messages for death cause: " + cause.name());
+                    logger.fine("No enabled messages for death cause: " + causeKey);
                 }
                 return null;
             }
@@ -259,14 +248,14 @@ public class DeathMessageManager {
                 int randomIndex = ThreadLocalRandom.current().nextInt(enabledMessages.size());
                 return enabledMessages.get(randomIndex);
             } catch (Exception e) {
-                logger.warning("Error selecting random message for cause " + cause.name() + ": " + e.getMessage());
+                logger.warning("Error selecting random message for cause " + causeKey + ": " + e.getMessage());
                 // Fallback to first message
                 return enabledMessages.get(0);
             }
             
         } catch (Exception e) {
             logger.warning("Unexpected error in selectStandardMessage() for cause " + 
-                          (cause != null ? cause.name() : "null") + ": " + e.getMessage());
+                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage());
             if (deathConfig.isDebugEnabled()) {
                 e.printStackTrace();
             }
@@ -276,15 +265,16 @@ public class DeathMessageManager {
 
     /**
      * Checks if a death cause has custom messages configured
-     * @param cause The damage cause
+     * @param causeKey The death cause key (normalized)
      * @return true if custom messages exist and at least one is enabled
      */
-    public boolean hasCustomMessages(EntityDamageEvent.DamageCause cause) {
-        if (cause == null) {
+    public boolean hasCustomMessages(String causeKey) {
+        if (causeKey == null || causeKey.isEmpty()) {
             return false;
         }
         
-        List<DeathMessage> messages = messageCache.get(cause);
+        String normalizedKey = causeKey.toLowerCase().replace('-', '_');
+        List<DeathMessage> messages = messageCache.get(normalizedKey);
         if (messages == null || messages.isEmpty()) {
             return false;
         }
@@ -303,15 +293,16 @@ public class DeathMessageManager {
      * Gets the number of message variants for a death cause
      * Only counts enabled messages
      * 
-     * @param cause The damage cause
+     * @param causeKey The death cause key (normalized)
      * @return Number of enabled variants
      */
-    public int getMessageCount(EntityDamageEvent.DamageCause cause) {
-        if (cause == null) {
+    public int getMessageCount(String causeKey) {
+        if (causeKey == null || causeKey.isEmpty()) {
             return 0;
         }
         
-        List<DeathMessage> messages = messageCache.get(cause);
+        String normalizedKey = causeKey.toLowerCase().replace('-', '_');
+        List<DeathMessage> messages = messageCache.get(normalizedKey);
         if (messages == null || messages.isEmpty()) {
             return 0;
         }
@@ -341,19 +332,19 @@ public class DeathMessageManager {
 
     /**
      * Gets statistics about loaded death messages
-     * Returns a map of death cause to enabled message count
+     * Returns a map of death cause key to enabled message count
      * 
-     * @return Map of death cause to message count
+     * @return Map of death cause key to message count
      */
-    public Map<EntityDamageEvent.DamageCause, Integer> getStatistics() {
-        Map<EntityDamageEvent.DamageCause, Integer> stats = new EnumMap<>(EntityDamageEvent.DamageCause.class);
+    public Map<String, Integer> getStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
         
-        for (Map.Entry<EntityDamageEvent.DamageCause, List<DeathMessage>> entry : messageCache.entrySet()) {
-            EntityDamageEvent.DamageCause cause = entry.getKey();
-            int enabledCount = getMessageCount(cause);
+        for (Map.Entry<String, List<DeathMessage>> entry : messageCache.entrySet()) {
+            String causeKey = entry.getKey();
+            int enabledCount = getMessageCount(causeKey);
             
             if (enabledCount > 0) {
-                stats.put(cause, enabledCount);
+                stats.put(causeKey, enabledCount);
             }
         }
         
@@ -365,7 +356,7 @@ public class DeathMessageManager {
      * Shows message counts per cause for debugging
      */
     private void logStatistics() {
-        Map<EntityDamageEvent.DamageCause, Integer> stats = getStatistics();
+        Map<String, Integer> stats = getStatistics();
         
         if (stats.isEmpty()) {
             logger.info("No death messages loaded");
@@ -375,7 +366,7 @@ public class DeathMessageManager {
         logger.info("Death message statistics:");
         int totalMessages = 0;
         
-        for (Map.Entry<EntityDamageEvent.DamageCause, Integer> entry : stats.entrySet()) {
+        for (Map.Entry<String, Integer> entry : stats.entrySet()) {
             int count = entry.getValue();
             logger.info("  " + entry.getKey() + ": " + count + " variant(s)");
             totalMessages += count;
