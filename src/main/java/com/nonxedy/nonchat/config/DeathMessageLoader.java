@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
 
 /**
@@ -108,7 +110,7 @@ public class DeathMessageLoader {
                     }
 
                     // Load indirect variants if they exist
-                    Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> indirectVariantsByType = 
+                    Map<DamageType, List<String>> indirectVariantsByType = 
                         loadIndirectVariants(causeSection, causeKey);
 
                     // Create DeathMessage objects for each variant
@@ -118,17 +120,28 @@ public class DeathMessageLoader {
                         variantIndex++;
                         // Validate that message variant is not empty
                         if (validateMessage(variant)) {
+                            // Translate color codes from & to §
+                            String translatedVariant = ColorUtil.parseColor(variant);
+                            
                             // Create message with indirect variants if available
                             if (!indirectVariantsByType.isEmpty()) {
                                 // Select one random indirect variant per damage type for this standard variant
-                                Map<com.nonxedy.nonchat.util.death.DamageType, String> indirectVariants = 
+                                Map<DamageType, String> indirectVariants = 
                                     selectIndirectVariants(indirectVariantsByType);
-                                String genericIndirect = indirectVariants.get(com.nonxedy.nonchat.util.death.DamageType.UNKNOWN);
-                                indirectVariants.remove(com.nonxedy.nonchat.util.death.DamageType.UNKNOWN);
+                                String genericIndirect = indirectVariants.get(DamageType.UNKNOWN);
+                                indirectVariants.remove(DamageType.UNKNOWN);
                                 
-                                deathMessages.add(new DeathMessage(cause, variant, enabled, indirectVariants, genericIndirect));
+                                // Translate indirect variants
+                                Map<DamageType, String> translatedIndirectVariants = 
+                                    new EnumMap<>(DamageType.class);
+                                for (Map.Entry<DamageType, String> entry : indirectVariants.entrySet()) {
+                                    translatedIndirectVariants.put(entry.getKey(), ColorUtil.parseColor(entry.getValue()));
+                                }
+                                String translatedGenericIndirect = genericIndirect != null ? ColorUtil.parseColor(genericIndirect) : null;
+                                
+                                deathMessages.add(new DeathMessage(cause, translatedVariant, enabled, translatedIndirectVariants, translatedGenericIndirect));
                             } else {
-                                deathMessages.add(new DeathMessage(cause, variant, enabled));
+                                deathMessages.add(new DeathMessage(cause, translatedVariant, enabled));
                             }
                             totalLoaded++;
                         } else {
@@ -489,10 +502,10 @@ public class DeathMessageLoader {
      * @param causeKey The death cause key for logging
      * @return Map of damage type to list of indirect message variants
      */
-    private Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> loadIndirectVariants(
+    private Map<DamageType, List<String>> loadIndirectVariants(
             ConfigurationSection causeSection, String causeKey) {
-        Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> indirectVariants = 
-            new EnumMap<>(com.nonxedy.nonchat.util.death.DamageType.class);
+        Map<DamageType, List<String>> indirectVariants = 
+            new EnumMap<>(DamageType.class);
         
         try {
             ConfigurationSection indirectSection = causeSection.getConfigurationSection("indirect-variants");
@@ -512,14 +525,14 @@ public class DeathMessageLoader {
                         }
                     }
                     if (!validGeneric.isEmpty()) {
-                        indirectVariants.put(com.nonxedy.nonchat.util.death.DamageType.UNKNOWN, validGeneric);
+                        indirectVariants.put(DamageType.UNKNOWN, validGeneric);
                     }
                 }
             }
             
             // Load damage-type-specific variants
-            for (com.nonxedy.nonchat.util.death.DamageType damageType : com.nonxedy.nonchat.util.death.DamageType.values()) {
-                if (damageType == com.nonxedy.nonchat.util.death.DamageType.UNKNOWN) {
+            for (DamageType damageType : DamageType.values()) {
+                if (damageType == DamageType.UNKNOWN) {
                     continue; // Already handled as generic
                 }
                 
@@ -568,13 +581,13 @@ public class DeathMessageLoader {
      * @param indirectVariantsByType Map of damage type to list of variants
      * @return Map of damage type to selected message
      */
-    private Map<com.nonxedy.nonchat.util.death.DamageType, String> selectIndirectVariants(
-            Map<com.nonxedy.nonchat.util.death.DamageType, List<String>> indirectVariantsByType) {
-        Map<com.nonxedy.nonchat.util.death.DamageType, String> selected = 
-            new EnumMap<>(com.nonxedy.nonchat.util.death.DamageType.class);
+    private Map<DamageType, String> selectIndirectVariants(
+            Map<DamageType, List<String>> indirectVariantsByType) {
+        Map<DamageType, String> selected = 
+            new EnumMap<>(DamageType.class);
         
         try {
-            for (Map.Entry<com.nonxedy.nonchat.util.death.DamageType, List<String>> entry : indirectVariantsByType.entrySet()) {
+            for (Map.Entry<DamageType, List<String>> entry : indirectVariantsByType.entrySet()) {
                 List<String> variants = entry.getValue();
                 if (variants != null && !variants.isEmpty()) {
                     // Select random variant from the list
