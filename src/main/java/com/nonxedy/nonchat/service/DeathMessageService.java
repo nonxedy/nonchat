@@ -507,9 +507,17 @@ public class DeathMessageService {
      * Applies PlaceholderAPI processing to the message
      * @param player The player who died
      * @param message The message to process
-     * @return Message with placeholders replaced
+     * @return Message with placeholders replaced, or original message if PlaceholderAPI is unavailable
      */
     private String applyPlaceholderAPI(Player player, String message) {
+        // Check if PlaceholderAPI is available before attempting to process
+        if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            if (deathConfig.isDebugEnabled()) {
+                logger.fine("PlaceholderAPI not available, skipping placeholder processing");
+            }
+            return message;
+        }
+        
         try {
             return IntegrationUtil.processPlaceholders(player, message);
         } catch (Exception e) {
