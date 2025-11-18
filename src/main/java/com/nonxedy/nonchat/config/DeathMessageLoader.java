@@ -1,10 +1,17 @@
 package com.nonxedy.nonchat.config;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.ConfigurationSection;
@@ -208,7 +215,7 @@ public class DeathMessageLoader {
      * Creates deaths.yml with default examples if it doesn't exist
      */
     public void createDefaultFile() {
-        java.io.FileWriter writer = null;
+        FileWriter writer = null;
         try {
             // Create parent directory if it doesn't exist
             File parentDir = deathsFile.getParentFile();
@@ -225,7 +232,7 @@ public class DeathMessageLoader {
                 logger.info("Creating default deaths.yml file at " + deathsFile.getAbsolutePath());
                 
                 // Write default content
-                writer = new java.io.FileWriter(deathsFile);
+                writer = new FileWriter(deathsFile);
                 writer.write(getDefaultFileContent());
                 writer.flush();
                 
@@ -233,7 +240,7 @@ public class DeathMessageLoader {
             } else {
                 logger.info("deaths.yml already exists at " + deathsFile.getAbsolutePath());
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             logger.severe("Failed to create default deaths.yml at " + deathsFile.getAbsolutePath() + ": " + e.getMessage());
             logger.severe("Please check file permissions and disk space");
             if (deathConfig.isDebugEnabled()) {
@@ -249,7 +256,7 @@ public class DeathMessageLoader {
             if (writer != null) {
                 try {
                     writer.close();
-                } catch (java.io.IOException e) {
+                } catch (IOException e) {
                     logger.warning("Failed to close file writer for deaths.yml: " + e.getMessage());
                 }
             }
@@ -262,14 +269,14 @@ public class DeathMessageLoader {
      */
     private String getDefaultFileContent() {
         try {
-            java.io.InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("deaths.yml");
+            InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("deaths.yml");
             if (resourceStream == null) {
                 logger.severe("Could not find deaths.yml in plugin resources");
                 return "";
             }
             
-            java.io.BufferedReader reader = new java.io.BufferedReader(
-                new java.io.InputStreamReader(resourceStream, java.nio.charset.StandardCharsets.UTF_8));
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(resourceStream, StandardCharsets.UTF_8));
             StringBuilder content = new StringBuilder();
             String line;
             
@@ -280,7 +287,7 @@ public class DeathMessageLoader {
             reader.close();
             return content.toString();
             
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             logger.severe("Failed to read deaths.yml from plugin resources: " + e.getMessage());
             if (deathConfig.isDebugEnabled()) {
                 e.printStackTrace();
@@ -386,7 +393,7 @@ public class DeathMessageLoader {
                 List<String> variants = entry.getValue();
                 if (variants != null && !variants.isEmpty()) {
                     // Select random variant from the list
-                    int randomIndex = java.util.concurrent.ThreadLocalRandom.current().nextInt(variants.size());
+                    int randomIndex = ThreadLocalRandom.current().nextInt(variants.size());
                     selected.put(entry.getKey(), variants.get(randomIndex));
                 }
             }
