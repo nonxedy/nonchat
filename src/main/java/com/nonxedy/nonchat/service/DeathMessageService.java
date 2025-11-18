@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
  * Handles death event processing, message selection, and formatting
  */
 public class DeathMessageService {
+    private final Nonchat plugin;
     private final DeathMessageManager messageManager;
     private final DeathConfig deathConfig;
     private final Logger logger;
@@ -43,6 +44,7 @@ public class DeathMessageService {
      */
     public DeathMessageService(Nonchat plugin, DeathConfig deathConfig, PluginMessages messages, 
                               IndirectDeathTracker indirectDeathTracker) {
+        this.plugin = plugin;
         this.deathConfig = deathConfig;
         this.logger = plugin.getLogger();
         this.messageManager = new DeathMessageManager(plugin.getDataFolder(), logger, deathConfig);
@@ -123,11 +125,8 @@ public class DeathMessageService {
                         isIndirect = true;
                         damageType = lastDamager.getDamageType();
                         
-                        // Get the indirect killer player (may be offline)
-                        Player indirectKiller = Bukkit.getPlayer(lastDamager.getDamagerUUID());
-                        if (indirectKiller != null) {
-                            killer = indirectKiller;
-                        }
+                        // Get the indirect killer player (may be offline) - must be on main thread
+                        killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
                         
                         if (deathConfig.isDebugEnabled()) {
                             logger.info("Indirect death detected for " + player.getName() + 
@@ -256,10 +255,8 @@ public class DeathMessageService {
                         isIndirect = true;
                         damageType = lastDamager.getDamageType();
                         
-                        Player indirectKiller = Bukkit.getPlayer(lastDamager.getDamagerUUID());
-                        if (indirectKiller != null) {
-                            killer = indirectKiller;
-                        }
+                        // Get the indirect killer player (may be offline) - must be on main thread
+                        killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
                     }
                 }
             }
