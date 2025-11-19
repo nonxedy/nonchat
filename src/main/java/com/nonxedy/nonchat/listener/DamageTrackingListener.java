@@ -2,6 +2,7 @@ package com.nonxedy.nonchat.listener;
 
 import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.core.IndirectDeathTracker;
+import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.death.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -14,8 +15,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
-import java.util.logging.Logger;
-
 /**
  * Listens to damage events and records them for indirect death tracking.
  * Uses MONITOR priority to observe final damage after other plugins have processed it.
@@ -23,7 +22,7 @@ import java.util.logging.Logger;
 public class DamageTrackingListener implements Listener {
     
     private final IndirectDeathTracker tracker;
-    private final Logger logger;
+    private final Debugger debugger;
     private final DeathConfig deathConfig;
     private final double minimumDamage;
     
@@ -31,13 +30,13 @@ public class DamageTrackingListener implements Listener {
      * Creates a new damage tracking listener.
      * 
      * @param tracker The indirect death tracker to record damage events
-     * @param logger Logger for debug output
+     * @param debugger Debug logger for output
      * @param deathConfig Death configuration for master toggle check
      * @param minimumDamage Minimum damage threshold (in hearts) to record
      */
-    public DamageTrackingListener(IndirectDeathTracker tracker, Logger logger, DeathConfig deathConfig, double minimumDamage) {
+    public DamageTrackingListener(IndirectDeathTracker tracker, Debugger debugger, DeathConfig deathConfig, double minimumDamage) {
         this.tracker = tracker;
-        this.logger = logger;
+        this.debugger = debugger;
         this.deathConfig = deathConfig;
         this.minimumDamage = minimumDamage;
     }
@@ -62,8 +61,8 @@ public class DamageTrackingListener implements Listener {
         double damageInHearts = event.getFinalDamage() / 2.0;
         if (damageInHearts < minimumDamage) {
             if (deathConfig.isDebugEnabled()) {
-                logger.fine(String.format(
-                    "[IndirectDeath] Damage below threshold: %s -> %s (%.1f hearts < %.1f hearts minimum)",
+                debugger.debug("DamageTrackingListener", String.format(
+                    "Damage below threshold: %s -> %s (%.1f hearts < %.1f hearts minimum)",
                     event.getDamager().getType().name(),
                     victim.getName(),
                     damageInHearts,
@@ -76,8 +75,8 @@ public class DamageTrackingListener implements Listener {
         Player damager = extractDamager(event.getDamager());
         if (damager == null) {
             if (deathConfig.isDebugEnabled()) {
-                logger.fine(String.format(
-                    "[IndirectDeath] No player damager found for damage to %s (damager type: %s)",
+                debugger.debug("DamageTrackingListener", String.format(
+                    "No player damager found for damage to %s (damager type: %s)",
                     victim.getName(),
                     event.getDamager().getType().name()
                 ));
@@ -87,8 +86,8 @@ public class DamageTrackingListener implements Listener {
         
         if (victim.getUniqueId().equals(damager.getUniqueId())) {
             if (deathConfig.isDebugEnabled()) {
-                logger.fine(String.format(
-                    "[IndirectDeath] Ignoring self-damage: %s",
+                debugger.debug("DamageTrackingListener", String.format(
+                    "Ignoring self-damage: %s",
                     victim.getName()
                 ));
             }
@@ -99,8 +98,8 @@ public class DamageTrackingListener implements Listener {
         tracker.recordDamage(victim, damager, damageType);
         
         if (deathConfig.isDebugEnabled()) {
-            logger.info(String.format(
-                "[IndirectDeath] Recorded %s damage: %s -> %s (%.1f hearts, cause: %s)",
+            debugger.info("DamageTrackingListener", String.format(
+                "Recorded %s damage: %s -> %s (%.1f hearts, cause: %s)",
                 damageType.name(),
                 damager.getName(),
                 victim.getName(),
@@ -131,7 +130,7 @@ public class DamageTrackingListener implements Listener {
             ProjectileSource shooter = projectile.getShooter();
             if (shooter == null) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("Projectile has null shooter");
+                    debugger.debug("DamageTrackingListener", "Projectile has null shooter");
                 }
                 return null;
             }

@@ -132,6 +132,12 @@ public class Nonchat extends JavaPlugin {
             // Initialize interactive placeholder manager
             initializeInteractivePlaceholders();
             
+            // Initialize debug system if enabled (must be before death message service)
+            if (configService.getConfig().isDebug()) {
+                this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
+                debugger.info("Core", "Debug system initialized");
+            }
+            
             // Initialize death message service with independent configuration
             // DeathConfig.load() will create deaths.yml if needed and auto-update with missing keys
             try {
@@ -142,8 +148,8 @@ public class Nonchat extends JavaPlugin {
                 int trackingWindow = deathConfig.getTrackingWindow();
                 this.indirectDeathTracker = new IndirectDeathTracker(trackingWindow);
                 
-                // Initialize death message service with indirect death tracker
-                this.deathMessageService = new DeathMessageService(this, deathConfig, configService.getMessages(), indirectDeathTracker);
+                // Initialize death message service with indirect death tracker and debugger
+                this.deathMessageService = new DeathMessageService(this, deathConfig, configService.getMessages(), indirectDeathTracker, debugger);
                 
                 getLogger().info("Death message service initialized successfully");
                 if (deathConfig.isIndirectTrackingEnabled()) {
@@ -156,10 +162,8 @@ public class Nonchat extends JavaPlugin {
                 this.deathMessageService = null;
                 this.indirectDeathTracker = null;
             }
-
-            // Initialize debug system if enabled
-            if (configService.getConfig().isDebug()) {
-                this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
+            
+            if (debugger != null) {
                 debugger.info("Core", "Services initialized successfully");
             }
 
@@ -225,7 +229,7 @@ public class Nonchat extends JavaPlugin {
                     
                     this.damageTrackingListener = new DamageTrackingListener(
                         indirectDeathTracker,
-                        getLogger(),
+                        debugger,
                         deathConfig,
                         minimumDamage
                     );
@@ -484,7 +488,7 @@ public class Nonchat extends JavaPlugin {
                 
                 this.damageTrackingListener = new DamageTrackingListener(
                     indirectDeathTracker,
-                    getLogger(),
+                    debugger,
                     deathConfig,
                     minimumDamage
                 );

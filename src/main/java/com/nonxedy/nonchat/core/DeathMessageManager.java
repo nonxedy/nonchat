@@ -1,15 +1,15 @@
 package com.nonxedy.nonchat.core;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.config.DeathMessageLoader;
+import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
 
@@ -21,19 +21,19 @@ public class DeathMessageManager {
     private final Map<String, List<DeathMessage>> messageCache;
     private final DeathMessageLoader loader;
     private final DeathConfig deathConfig;
-    private final Logger logger;
+    private final Debugger debugger;
 
     /**
      * Creates a new DeathMessageManager
      * @param dataFolder Plugin data folder
-     * @param logger Plugin logger
+     * @param debugger Debug logger instance
      * @param deathConfig Death configuration instance
      */
-    public DeathMessageManager(File dataFolder, Logger logger, DeathConfig deathConfig) {
+    public DeathMessageManager(File dataFolder, Debugger debugger, DeathConfig deathConfig) {
         this.messageCache = new HashMap<>();
-        this.loader = new DeathMessageLoader(dataFolder, logger, deathConfig);
+        this.loader = new DeathMessageLoader(dataFolder, debugger, deathConfig);
         this.deathConfig = deathConfig;
-        this.logger = logger;
+        this.debugger = debugger;
     }
 
     /**
@@ -42,47 +42,34 @@ public class DeathMessageManager {
      */
     public void loadMessages() {
         try {
-            // Clear existing cache before loading
             clearCache();
             
-            // Load messages from configuration
             Map<String, List<DeathMessage>> loadedMessages = null;
             try {
                 loadedMessages = loader.loadAllMessages();
             } catch (Exception e) {
-                logger.severe("Failed to load death messages from configuration: " + e.getMessage());
-                if (deathConfig.isDebugEnabled()) {
-                    e.printStackTrace();
-                }
-                // Use empty map as fallback
+                debugger.error("DeathMessageManager", "Failed to load death messages from configuration: " + e.getMessage(), e);
                 loadedMessages = new HashMap<>();
             }
             
-            // Validate loaded messages
             if (loadedMessages == null) {
-                logger.warning("Death message loader returned null, using empty message cache");
+                debugger.warn("DeathMessageManager", "Death message loader returned null, using empty message cache");
                 loadedMessages = new HashMap<>();
             }
             
-            // Populate cache with loaded messages
             messageCache.putAll(loadedMessages);
             
-            // Log statistics
             if (deathConfig.isDebugEnabled()) {
                 logStatistics();
             }
             
-            // Warn if no messages were loaded
             if (messageCache.isEmpty()) {
-                logger.warning("No death messages loaded. Death message system will use fallback behavior.");
-                logger.warning("Check deaths.yml for configuration errors or create a new file by deleting the existing one.");
+                debugger.warn("DeathMessageManager", "No death messages loaded. Death message system will use fallback behavior.");
+                debugger.warn("DeathMessageManager", "Check deaths.yml for configuration errors or create a new file by deleting the existing one.");
             }
             
         } catch (Exception e) {
-            logger.severe("Critical error in loadMessages(): " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageManager", "Critical error in loadMessages(): " + e.getMessage(), e);
         }
     }
 
@@ -95,40 +82,33 @@ public class DeathMessageManager {
      * @param damageType The type of damage that caused the indirect kill (can be null)
      * @return DeathMessage object, or null if no custom message exists
      */
-    public DeathMessage selectMessage(String causeKey, boolean isIndirect, 
-                                     DamageType damageType) {
+    public DeathMessage selectMessage(String causeKey, boolean isIndirect, DamageType damageType) {
         try {
             if (causeKey == null || causeKey.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Attempted to select message for null or empty death cause key");
+                    debugger.warn("DeathMessageManager", "Attempted to select message for null or empty death cause key");
                 }
                 return null;
             }
             
-            // Normalize the cause key
             String normalizedKey = causeKey.toLowerCase().replace('-', '_');
             
-            // Try indirect message selection first if applicable
             if (isIndirect) {
                 DeathMessage indirectMessage = selectIndirectMessage(normalizedKey, damageType);
                 if (indirectMessage != null) {
                     return indirectMessage;
                 }
-                // If no indirect message found, fall through to standard selection
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No indirect message found for cause " + normalizedKey + 
+                    debugger.debug("DeathMessageManager", "No indirect message found for cause " + normalizedKey + 
                                ", falling back to standard message");
                 }
             }
             
-            // Standard message selection
             return selectStandardMessage(normalizedKey);
             
         } catch (Exception e) {
-            logger.warning("Unexpected error in selectMessage() for cause " + (causeKey != null ? causeKey : "null") + ": " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageManager", "Unexpected error in selectMessage() for cause " + 
+                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage(), e);
             return null;
         }
     }
@@ -141,8 +121,7 @@ public class DeathMessageManager {
      * @param damageType The type of damage that caused the indirect kill
      * @return DeathMessage object with indirect variant, or null if none found
      */
-    private DeathMessage selectIndirectMessage(String causeKey, 
-                                              DamageType damageType) {
+    private DeathMessage selectIndirectMessage(String causeKey, DamageType damageType) {
         try {
             if (causeKey == null || causeKey.isEmpty()) {
                 return null;
@@ -153,46 +132,28 @@ public class DeathMessageManager {
                 return null;
             }
             
-            // Filter to enabled messages that have indirect variants
-            List<DeathMessage> indirectMessages = new ArrayList<>();
-            for (DeathMessage message : messages) {
-                try {
-                    if (message != null && message.isEnabled() && message.hasIndirectVariants()) {
-                        // Prefer messages with damage-type-specific variants
-                        if (damageType != null && message.hasVariantForDamageType(damageType)) {
-                            indirectMessages.add(message);
-                        } else if (message.getGenericIndirectMessage() != null) {
-                            // Add messages with generic indirect variants as fallback
-                            indirectMessages.add(message);
-                        }
+            List<DeathMessage> indirectMessages = messages.stream()
+                .filter(message -> message != null && message.isEnabled() && message.hasIndirectVariants())
+                .filter(message -> {
+                    if (damageType != null && message.hasVariantForDamageType(damageType)) {
+                        return true;
                     }
-                } catch (Exception e) {
-                    logger.warning("Error checking indirect variants for cause " + causeKey + ": " + e.getMessage());
-                }
-            }
+                    return message.getGenericIndirectMessage() != null;
+                })
+                .collect(Collectors.toList());
             
             if (indirectMessages.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No indirect message variants found for cause: " + causeKey);
+                    debugger.debug("DeathMessageManager", "No indirect message variants found for cause: " + causeKey);
                 }
                 return null;
             }
             
-            // Select random variant
-            try {
-                int randomIndex = ThreadLocalRandom.current().nextInt(indirectMessages.size());
-                return indirectMessages.get(randomIndex);
-            } catch (Exception e) {
-                logger.warning("Error selecting random indirect message for cause " + causeKey + ": " + e.getMessage());
-                return indirectMessages.get(0);
-            }
+            return selectRandomVariant(indirectMessages);
             
         } catch (Exception e) {
-            logger.warning("Unexpected error in selectIndirectMessage() for cause " + 
-                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageManager", "Unexpected error in selectIndirectMessage() for cause " + 
+                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage(), e);
             return null;
         }
     }
@@ -208,58 +169,58 @@ public class DeathMessageManager {
         try {
             if (causeKey == null || causeKey.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Attempted to select message for null or empty death cause key");
+                    debugger.warn("DeathMessageManager", "Attempted to select message for null or empty death cause key");
                 }
                 return null;
             }
             
             List<DeathMessage> messages = messageCache.get(causeKey);
             
-            // No custom messages for this cause
             if (messages == null || messages.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No custom messages configured for death cause: " + causeKey);
+                    debugger.debug("DeathMessageManager", "No custom messages configured for death cause: " + causeKey);
                 }
                 return null;
             }
             
-            // Filter to only enabled messages
-            List<DeathMessage> enabledMessages = new ArrayList<>();
-            for (DeathMessage message : messages) {
-                try {
-                    if (message != null && message.isEnabled()) {
-                        enabledMessages.add(message);
-                    }
-                } catch (Exception e) {
-                    logger.warning("Error checking if message is enabled for cause " + causeKey + ": " + e.getMessage());
-                }
-            }
+            List<DeathMessage> enabledMessages = messages.stream()
+                .filter(message -> message != null && message.isEnabled())
+                .collect(Collectors.toList());
             
-            // No enabled messages for this cause
             if (enabledMessages.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.fine("No enabled messages for death cause: " + causeKey);
+                    debugger.debug("DeathMessageManager", "No enabled messages for death cause: " + causeKey);
                 }
                 return null;
             }
             
-            // Select random variant using ThreadLocalRandom for better performance
-            try {
-                int randomIndex = ThreadLocalRandom.current().nextInt(enabledMessages.size());
-                return enabledMessages.get(randomIndex);
-            } catch (Exception e) {
-                logger.warning("Error selecting random message for cause " + causeKey + ": " + e.getMessage());
-                // Fallback to first message
-                return enabledMessages.get(0);
-            }
+            return selectRandomVariant(enabledMessages);
             
         } catch (Exception e) {
-            logger.warning("Unexpected error in selectStandardMessage() for cause " + 
-                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageManager", "Unexpected error in selectStandardMessage() for cause " + 
+                          (causeKey != null ? causeKey : "null") + ": " + e.getMessage(), e);
             return null;
+        }
+    }
+
+    /**
+     * Selects a random variant from a list of death messages
+     * Unified helper method to avoid code duplication
+     * 
+     * @param messages List of death messages to select from
+     * @return Random DeathMessage from the list, or first element on error
+     */
+    private DeathMessage selectRandomVariant(List<DeathMessage> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return null;
+        }
+        
+        try {
+            int randomIndex = ThreadLocalRandom.current().nextInt(messages.size());
+            return messages.get(randomIndex);
+        } catch (Exception e) {
+            debugger.warn("DeathMessageManager", "Error selecting random variant, using first: " + e.getMessage());
+            return messages.get(0);
         }
     }
 
@@ -326,7 +287,7 @@ public class DeathMessageManager {
         messageCache.clear();
         
         if (deathConfig.isDebugEnabled()) {
-            logger.info("Death message cache cleared");
+            debugger.info("DeathMessageManager", "Death message cache cleared");
         }
     }
 
@@ -359,19 +320,19 @@ public class DeathMessageManager {
         Map<String, Integer> stats = getStatistics();
         
         if (stats.isEmpty()) {
-            logger.info("No death messages loaded");
+            debugger.info("DeathMessageManager", "No death messages loaded");
             return;
         }
         
-        logger.info("Death message statistics:");
+        debugger.info("DeathMessageManager", "Death message statistics:");
         int totalMessages = 0;
         
         for (Map.Entry<String, Integer> entry : stats.entrySet()) {
             int count = entry.getValue();
-            logger.info("  " + entry.getKey() + ": " + count + " variant(s)");
+            debugger.info("DeathMessageManager", "  " + entry.getKey() + ": " + count + " variant(s)");
             totalMessages += count;
         }
         
-        logger.info("Total: " + totalMessages + " message variants across " + stats.size() + " causes");
+        debugger.info("DeathMessageManager", "Total: " + totalMessages + " message variants across " + stats.size() + " causes");
     }
 }

@@ -17,6 +17,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.core.DeathMessageManager;
 import com.nonxedy.nonchat.core.IndirectDeathTracker;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.death.DamageRecord;
 import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
@@ -41,13 +42,14 @@ public class DeathMessageService {
      * @param deathConfig Death configuration instance
      * @param messages Plugin messages instance (reserved for future use)
      * @param indirectDeathTracker Indirect death tracker instance
+     * @param debugger Debug logger instance
      */
     public DeathMessageService(Nonchat plugin, DeathConfig deathConfig, PluginMessages messages, 
-                              IndirectDeathTracker indirectDeathTracker) {
+                              IndirectDeathTracker indirectDeathTracker, Debugger debugger) {
         this.plugin = plugin;
         this.deathConfig = deathConfig;
         this.logger = plugin.getLogger();
-        this.messageManager = new DeathMessageManager(plugin.getDataFolder(), logger, deathConfig);
+        this.messageManager = new DeathMessageManager(plugin.getDataFolder(), debugger, deathConfig);
         this.indirectDeathTracker = indirectDeathTracker;
         
         // Load messages on initialization

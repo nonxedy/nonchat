@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Logger;
 
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
+import com.nonxedy.nonchat.util.core.debugging.Debugger;
 import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
 
@@ -25,18 +25,18 @@ import com.nonxedy.nonchat.util.death.DeathMessage;
  */
 public class DeathMessageLoader {
     private final File deathsFile;
-    private final Logger logger;
+    private final Debugger debugger;
     private final DeathConfig deathConfig;
 
     /**
      * Creates a new DeathMessageLoader
      * @param dataFolder Plugin data folder
-     * @param logger Plugin logger
+     * @param debugger Debug logger instance
      * @param deathConfig Death configuration instance
      */
-    public DeathMessageLoader(File dataFolder, Logger logger, DeathConfig deathConfig) {
+    public DeathMessageLoader(File dataFolder, Debugger debugger, DeathConfig deathConfig) {
         this.deathsFile = new File(dataFolder, "deaths.yml");
-        this.logger = logger;
+        this.debugger = debugger;
         this.deathConfig = deathConfig;
     }
 
@@ -50,7 +50,7 @@ public class DeathMessageLoader {
         try {
             // Check if file exists
             if (!deathsFile.exists()) {
-                logger.warning("deaths.yml not found at " + deathsFile.getAbsolutePath() + ". Creating default file...");
+                debugger.warn("DeathMessageLoader", "deaths.yml not found at " + deathsFile.getAbsolutePath() + ". Creating default file...");
                 createDefaultFile();
                 // Reload config after creating default file
                 deathConfig.reload();
@@ -58,14 +58,14 @@ public class DeathMessageLoader {
 
             // Validate configuration is loaded
             if (deathConfig.getConfig() == null) {
-                logger.severe("Death configuration is null, cannot load messages");
+                debugger.error("DeathMessageLoader", "Death configuration is null, cannot load messages", null);
                 return messages;
             }
 
             ConfigurationSection messagesSection = deathConfig.getConfig().getConfigurationSection("messages");
             if (messagesSection == null) {
-                logger.warning("No 'messages' section found in deaths.yml at " + deathsFile.getAbsolutePath());
-                logger.warning("Please ensure the file has a 'messages:' section with death cause configurations");
+                debugger.warn("DeathMessageLoader", "No 'messages' section found in deaths.yml at " + deathsFile.getAbsolutePath());
+                debugger.warn("DeathMessageLoader", "Please ensure the file has a 'messages:' section with death cause configurations");
                 return messages;
             }
 
@@ -82,7 +82,7 @@ public class DeathMessageLoader {
 
                     ConfigurationSection causeSection = messagesSection.getConfigurationSection(causeKey);
                     if (causeSection == null) {
-                        logger.warning("Invalid configuration structure for death cause '" + causeKey + "' in deaths.yml");
+                        debugger.warn("DeathMessageLoader", "Invalid configuration structure for death cause '" + causeKey + "' in deaths.yml");
                         totalSkipped++;
                         continue;
                     }
@@ -93,14 +93,14 @@ public class DeathMessageLoader {
                     try {
                         variants = causeSection.getStringList("variants");
                     } catch (Exception e) {
-                        logger.warning("Failed to read variants for death cause '" + causeKey + "': " + e.getMessage());
+                        debugger.warn("DeathMessageLoader", "Failed to read variants for death cause '" + causeKey + "': " + e.getMessage());
                         totalSkipped++;
                         continue;
                     }
 
                     if (variants == null || variants.isEmpty()) {
                         if (deathConfig.isDebugEnabled()) {
-                            logger.warning("No message variants found for death cause: " + causeKey + " in " + deathsFile.getAbsolutePath());
+                            debugger.warn("DeathMessageLoader", "No message variants found for death cause: " + causeKey + " in " + deathsFile.getAbsolutePath());
                         }
                         totalSkipped++;
                         continue;
@@ -143,7 +143,7 @@ public class DeathMessageLoader {
                             totalLoaded++;
                         } else {
                             if (deathConfig.isDebugEnabled()) {
-                                logger.warning("Empty or null message variant #" + variantIndex + " found for cause '" + causeKey + "' in " + deathsFile.getAbsolutePath() + " - skipping");
+                                debugger.warn("DeathMessageLoader", "Empty or null message variant #" + variantIndex + " found for cause '" + causeKey + "' in " + deathsFile.getAbsolutePath() + " - skipping");
                             }
                             emptyVariants++;
                             totalSkipped++;
@@ -153,28 +153,22 @@ public class DeathMessageLoader {
                     if (!deathMessages.isEmpty()) {
                         messages.put(normalizedKey, deathMessages);
                     } else {
-                        logger.warning("Death cause '" + causeKey + "' has no valid message variants after validation");
+                        debugger.warn("DeathMessageLoader", "Death cause '" + causeKey + "' has no valid message variants after validation");
                     }
                     
                 } catch (Exception e) {
-                    logger.warning("Error processing death cause '" + causeKey + "' in deaths.yml: " + e.getMessage());
-                    if (deathConfig.isDebugEnabled()) {
-                        e.printStackTrace();
-                    }
+                    debugger.error("DeathMessageLoader", "Error processing death cause '" + causeKey + "' in deaths.yml: " + e.getMessage(), e);
                     totalSkipped++;
                 }
             }
 
-            logger.info("Loaded " + totalLoaded + " death message variants across " + messages.size() + " causes from " + deathsFile.getName());
+            debugger.info("DeathMessageLoader", "Loaded " + totalLoaded + " death message variants across " + messages.size() + " causes from " + deathsFile.getName());
             if (totalSkipped > 0) {
-                logger.info("Skipped " + totalSkipped + " invalid entries (" + unknownCauses + " unknown causes, " + emptyVariants + " empty variants)");
+                debugger.info("DeathMessageLoader", "Skipped " + totalSkipped + " invalid entries (" + unknownCauses + " unknown causes, " + emptyVariants + " empty variants)");
             }
 
         } catch (Exception e) {
-            logger.severe("Critical error loading death messages from " + deathsFile.getAbsolutePath() + ": " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageLoader", "Critical error loading death messages from " + deathsFile.getAbsolutePath() + ": " + e.getMessage(), e);
         }
 
         return messages;
@@ -191,42 +185,36 @@ public class DeathMessageLoader {
             if (parentDir != null && !parentDir.exists()) {
                 boolean created = parentDir.mkdirs();
                 if (!created) {
-                    logger.severe("Failed to create parent directory for deaths.yml at " + parentDir.getAbsolutePath());
+                    debugger.error("DeathMessageLoader", "Failed to create parent directory for deaths.yml at " + parentDir.getAbsolutePath(), null);
                     return;
                 }
             }
 
             // Create the file with default content
             if (deathsFile.createNewFile()) {
-                logger.info("Creating default deaths.yml file at " + deathsFile.getAbsolutePath());
+                debugger.info("DeathMessageLoader", "Creating default deaths.yml file at " + deathsFile.getAbsolutePath());
                 
                 // Write default content
                 writer = new FileWriter(deathsFile);
                 writer.write(getDefaultFileContent());
                 writer.flush();
                 
-                logger.info("Default deaths.yml created successfully with example messages for all death causes");
+                debugger.info("DeathMessageLoader", "Default deaths.yml created successfully with example messages for all death causes");
             } else {
-                logger.info("deaths.yml already exists at " + deathsFile.getAbsolutePath());
+                debugger.info("DeathMessageLoader", "deaths.yml already exists at " + deathsFile.getAbsolutePath());
             }
         } catch (IOException e) {
-            logger.severe("Failed to create default deaths.yml at " + deathsFile.getAbsolutePath() + ": " + e.getMessage());
-            logger.severe("Please check file permissions and disk space");
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageLoader", "Failed to create default deaths.yml at " + deathsFile.getAbsolutePath() + ": " + e.getMessage(), e);
+            debugger.error("DeathMessageLoader", "Please check file permissions and disk space", null);
         } catch (Exception e) {
-            logger.severe("Unexpected error creating default deaths.yml: " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageLoader", "Unexpected error creating default deaths.yml: " + e.getMessage(), e);
         } finally {
             // Ensure writer is closed even if an error occurs
             if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
-                    logger.warning("Failed to close file writer for deaths.yml: " + e.getMessage());
+                    debugger.warn("DeathMessageLoader", "Failed to close file writer for deaths.yml: " + e.getMessage());
                 }
             }
         }
@@ -240,7 +228,7 @@ public class DeathMessageLoader {
         try {
             InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("deaths.yml");
             if (resourceStream == null) {
-                logger.severe("Could not find deaths.yml in plugin resources");
+                debugger.error("DeathMessageLoader", "Could not find deaths.yml in plugin resources", null);
                 return "";
             }
             
@@ -257,10 +245,7 @@ public class DeathMessageLoader {
             return content.toString();
             
         } catch (IOException e) {
-            logger.severe("Failed to read deaths.yml from plugin resources: " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageLoader", "Failed to read deaths.yml from plugin resources: " + e.getMessage(), e);
             return "";
         }
     }
@@ -325,21 +310,18 @@ public class DeathMessageLoader {
             }
             
             if (deathConfig.isDebugEnabled() && !indirectVariants.isEmpty()) {
-                logger.fine("Loaded " + indirectVariants.size() + " indirect variant types for cause: " + causeKey);
+                debugger.debug("DeathMessageLoader", "Loaded " + indirectVariants.size() + " indirect variant types for cause: " + causeKey);
             }
             
             // Validate that at least one indirect variant exists
             if (indirectVariants.isEmpty() && indirectSection != null) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("indirect-variants section exists for '" + causeKey + "' but no valid variants were loaded");
+                    debugger.warn("DeathMessageLoader", "indirect-variants section exists for '" + causeKey + "' but no valid variants were loaded");
                 }
             }
             
         } catch (Exception e) {
-            logger.warning("Error loading indirect variants for cause '" + causeKey + "': " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageLoader", "Error loading indirect variants for cause '" + causeKey + "': " + e.getMessage(), e);
         }
         
         return indirectVariants;
@@ -367,10 +349,7 @@ public class DeathMessageLoader {
                 }
             }
         } catch (Exception e) {
-            logger.warning("Error selecting indirect variants: " + e.getMessage());
-            if (deathConfig.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            debugger.error("DeathMessageLoader", "Error selecting indirect variants: " + e.getMessage(), e);
         }
         
         return selected;
@@ -388,7 +367,7 @@ public class DeathMessageLoader {
             // Check if message is null
             if (message == null) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Null message variant detected during validation");
+                    debugger.warn("DeathMessageLoader", "Null message variant detected during validation");
                 }
                 return false;
             }
@@ -397,7 +376,7 @@ public class DeathMessageLoader {
             String trimmed = message.trim();
             if (trimmed.isEmpty()) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Empty or whitespace-only message variant detected during validation");
+                    debugger.warn("DeathMessageLoader", "Empty or whitespace-only message variant detected during validation");
                 }
                 return false;
             }
@@ -405,7 +384,7 @@ public class DeathMessageLoader {
             // Additional validation: check minimum length
             if (trimmed.length() < 3) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.warning("Message variant too short (less than 3 characters): '" + trimmed + "'");
+                    debugger.warn("DeathMessageLoader", "Message variant too short (less than 3 characters): '" + trimmed + "'");
                 }
                 return false;
             }
@@ -413,7 +392,7 @@ public class DeathMessageLoader {
             return true;
             
         } catch (Exception e) {
-            logger.warning("Error validating message variant: " + e.getMessage());
+            debugger.warn("DeathMessageLoader", "Error validating message variant: " + e.getMessage());
             return false;
         }
     }
