@@ -1,9 +1,8 @@
 package com.nonxedy.nonchat.service;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -33,7 +32,7 @@ public class DeathMessageService {
     private final Nonchat plugin;
     private final DeathMessageManager messageManager;
     private final DeathConfig deathConfig;
-    private final Logger logger;
+    private final Debugger debugger;
     private final IndirectDeathTracker indirectDeathTracker;
 
     /**
@@ -48,7 +47,7 @@ public class DeathMessageService {
                               IndirectDeathTracker indirectDeathTracker, Debugger debugger) {
         this.plugin = plugin;
         this.deathConfig = deathConfig;
-        this.logger = plugin.getLogger();
+        this.debugger = debugger;
         this.messageManager = new DeathMessageManager(plugin.getDataFolder(), debugger, deathConfig);
         this.indirectDeathTracker = indirectDeathTracker;
         
@@ -66,156 +65,38 @@ public class DeathMessageService {
         long startTime = System.currentTimeMillis();
         
         try {
-            // Check if death message system is enabled
-            if (!deathConfig.isEnabled()) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Death message system is disabled");
-                }
+            // Process death and get formatted component
+            DeathMessageResult result = processDeathEvent(event);
+            
+            if (result == null) {
+                // No custom message available, let fallback handle it
                 return;
             }
-
-            // Get the player who died
-            Player player = event.getEntity();
-            
-            // Extract death cause from event
-            String causeKey = extractDeathCauseKey(event);
-            if (causeKey == null) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Could not determine death cause for player: " + player.getName());
-                }
-                return;
-            }
-
-            // Extract killer information (may be null for environmental deaths)
-            Entity killer = extractKiller(event);
-            
-            // For environmental deaths, ignore Bukkit's automatic killer assignment
-            // We want to use our own indirect tracking system instead
-            boolean isEnvironmental = isEnvironmentalDeath(causeKey);
-            if (isEnvironmental && killer instanceof Player) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Ignoring Bukkit's automatic killer assignment for environmental death (cause: " + causeKey + ")");
-                }
-                killer = null;
-            }
-            
-            if (deathConfig.isDebugEnabled()) {
-                logger.info("Death analysis for " + player.getName() + ":");
-                logger.info("  - Cause: " + causeKey);
-                logger.info("  - Killer: " + (killer != null ? killer.getType().name() : "null"));
-                logger.info("  - Is environmental: " + isEnvironmental);
-                logger.info("  - Tracking enabled: " + deathConfig.isIndirectTrackingEnabled());
-            }
-            
-            // Check for indirect death attribution
-            boolean isIndirect = false;
-            DamageType damageType = null;
-            DamageRecord lastDamager = null;
-            
-            if (deathConfig.isIndirectTrackingEnabled() && killer == null && isEnvironmental) {
-                // Query IndirectDeathTracker for recent damager
-                lastDamager = indirectDeathTracker.getLastDamager(player);
-                
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("  - Checking for indirect death (lastDamager: " + (lastDamager != null ? "found" : "null") + ")");
-                }
-                
-                if (lastDamager != null) {
-                    // Check if damager is still valid (within tracking window)
-                    long trackingWindowMs = deathConfig.getTrackingWindow() * 1000L;
-                    if (lastDamager.isValid(trackingWindowMs)) {
-                        isIndirect = true;
-                        damageType = lastDamager.getDamageType();
-                        
-                        // Get the indirect killer player (may be offline) - must be on main thread
-                        if (lastDamager.getDamagerUUID() != null) {
-                            killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
-                            if (killer == null && deathConfig.isDebugEnabled()) {
-                                logger.fine("Indirect killer is offline: " + lastDamager.getDamagerName());
-                            }
-                        } else if (deathConfig.isDebugEnabled()) {
-                            logger.warning("Damage record has null UUID for damager: " + lastDamager.getDamagerName());
-                        }
-                        
-                        if (deathConfig.isDebugEnabled()) {
-                            logger.info("Indirect death detected for " + player.getName() + 
-                                      " - Killer: " + lastDamager.getDamagerName() + 
-                                      " - Damage Type: " + damageType.name() + 
-                                      " - Age: " + lastDamager.getAge() + "ms");
-                        }
-                    } else {
-                        if (deathConfig.isDebugEnabled()) {
-                            logger.info("Damage record found for " + player.getName() + 
-                                      " but expired (age: " + lastDamager.getAge() + "ms, window: " + trackingWindowMs + "ms)");
-                        }
-                    }
-                } else {
-                    if (deathConfig.isDebugEnabled()) {
-                        logger.info("No recent damager found for environmental death of " + player.getName() + 
-                                  " (cause: " + causeKey + ")");
-                    }
-                }
-            } else if (deathConfig.isDebugEnabled()) {
-                logger.info("  - Skipping indirect check: tracking=" + deathConfig.isIndirectTrackingEnabled() + 
-                          ", killer==null=" + (killer == null) + 
-                          ", isEnvironmental=" + isEnvironmentalDeath(causeKey));
-            }
-
-            // Check if custom messages exist for this cause
-            if (!messageManager.hasCustomMessages(causeKey)) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("No custom messages for death cause: " + causeKey);
-                }
-                // Don't set message, let fallback handle it
-                return;
-            }
-
-            // Select a random message variant (with indirect support)
-            DeathMessage deathMessage = messageManager.selectMessage(causeKey, isIndirect, damageType);
-            if (deathMessage == null) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Failed to select message for cause: " + causeKey + 
-                              " (indirect: " + isIndirect + ", damageType: " + damageType + ")");
-                }
-                return;
-            }
-
-            // Get the appropriate message text based on indirect status and damage type
-            String messageText = deathMessage.getMessage(isIndirect, damageType);
-            
-            // Format the message with death-specific placeholders
-            String formattedMessage = formatDeathMessage(messageText, player, killer, lastDamager, event);
-
-            // Apply PlaceholderAPI processing
-            formattedMessage = applyPlaceholderAPI(player, formattedMessage);
-
-            // Apply color formatting using ColorUtil
-            Component finalComponent = ColorUtil.parseComponent(formattedMessage);
 
             // Set the death message on the event
-            event.deathMessage(finalComponent);
+            event.deathMessage(result.component);
 
             if (deathConfig.isDebugEnabled()) {
-                String messageType = isIndirect ? "indirect" : "standard";
-                logger.info("Death message for " + player.getName() + " (" + causeKey + ", " + messageType + "): " + formattedMessage);
+                String messageType = result.isIndirect ? "indirect" : "standard";
+                debugger.info("DeathMessageService", "Death message for " + result.player.getName() + " (" + result.causeKey + ", " + messageType + "): " + result.formattedMessage);
             }
             
             // Track total death processing time (message selection + formatting)
             long processingTime = System.currentTimeMillis() - startTime;
             
             if (deathConfig.isDebugEnabled()) {
-                logger.info("Total death processing time for " + player.getName() + ": " + processingTime + "ms" +
-                          (isIndirect ? " (with indirect tracking)" : ""));
+                debugger.info("DeathMessageService", "Total death processing time for " + result.player.getName() + ": " + processingTime + "ms" +
+                          (result.isIndirect ? " (with indirect tracking)" : ""));
             }
             
             // Log warning if death processing exceeds performance target (100ms total)
             if (processingTime > 100) {
-                logger.warning("Death processing took " + processingTime + "ms for " + player.getName() + 
+                debugger.warn("DeathMessageService", "Death processing took " + processingTime + "ms for " + result.player.getName() + 
                              " (target: <100ms) - this may indicate performance issues");
             }
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error handling death: " + e.getMessage(), e);
+            debugger.error("DeathMessageService", "Error handling death: " + e.getMessage(), e);
         }
     }
 
@@ -227,92 +108,180 @@ public class DeathMessageService {
      */
     public Component getDeathMessage(PlayerDeathEvent event) {
         try {
-            // Check if death message system is enabled
-            if (!deathConfig.isEnabled()) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Death message system is disabled");
-                }
-                return null;
-            }
-
-            // Get the player who died
-            Player player = event.getEntity();
+            // Process death and get formatted component
+            DeathMessageResult result = processDeathEvent(event);
             
-            // Extract death cause from event
-            String causeKey = extractDeathCauseKey(event);
-            if (causeKey == null) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Could not determine death cause for player: " + player.getName());
-                }
-                return null;
-            }
-
-            // Extract killer information (may be null for environmental deaths)
-            Entity killer = extractKiller(event);
-            
-            // Check for indirect death attribution
-            boolean isIndirect = false;
-            DamageType damageType = null;
-            DamageRecord lastDamager = null;
-            
-            if (deathConfig.isIndirectTrackingEnabled() && killer == null && isEnvironmentalDeath(causeKey)) {
-                lastDamager = indirectDeathTracker.getLastDamager(player);
-                
-                if (lastDamager != null) {
-                    long trackingWindowMs = deathConfig.getTrackingWindow() * 1000L;
-                    if (lastDamager.isValid(trackingWindowMs)) {
-                        isIndirect = true;
-                        damageType = lastDamager.getDamageType();
-                        
-                        // Get the indirect killer player (may be offline) - must be on main thread
-                        if (lastDamager.getDamagerUUID() != null) {
-                            killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
-                        }
-                    }
-                }
-            }
-
-            // Check if custom messages exist for this cause
-            if (!messageManager.hasCustomMessages(causeKey)) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("No custom messages for death cause: " + causeKey);
-                }
-                // Return null to use fallback if enabled
+            if (result == null) {
+                // Return null to use fallback if enabled, empty component otherwise
                 return deathConfig.useFallback() ? null : Component.empty();
             }
-
-            // Select a random message variant (with indirect support)
-            DeathMessage deathMessage = messageManager.selectMessage(causeKey, isIndirect, damageType);
-            if (deathMessage == null) {
-                if (deathConfig.isDebugEnabled()) {
-                    logger.info("Failed to select message for cause: " + causeKey);
-                }
-                return deathConfig.useFallback() ? null : Component.empty();
-            }
-
-            // Get the appropriate message text based on indirect status and damage type
-            String messageText = deathMessage.getMessage(isIndirect, damageType);
-            
-            // Format the message with death-specific placeholders
-            String formattedMessage = formatDeathMessage(messageText, player, killer, lastDamager, event);
-
-            // Apply PlaceholderAPI processing
-            formattedMessage = applyPlaceholderAPI(player, formattedMessage);
-
-            // Apply color formatting using ColorUtil
-            Component finalComponent = ColorUtil.parseComponent(formattedMessage);
 
             if (deathConfig.isDebugEnabled()) {
-                logger.info("Death message for " + player.getName() + " (" + causeKey + "): " + formattedMessage);
+                debugger.info("DeathMessageService", "Death message for " + result.player.getName() + " (" + result.causeKey + "): " + result.formattedMessage);
             }
 
-            return finalComponent;
+            return result.component;
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error processing death message: " + e.getMessage(), e);
+            debugger.error("DeathMessageService", "Error processing death message: " + e.getMessage(), e);
             // Return null to use fallback on error
             return null;
         }
+    }
+
+    /**
+     * Internal class to hold death message processing results
+     */
+    private static class DeathMessageResult {
+        final Player player;
+        final String causeKey;
+        final boolean isIndirect;
+        final String formattedMessage;
+        final Component component;
+        
+        DeathMessageResult(Player player, String causeKey, boolean isIndirect, String formattedMessage, Component component) {
+            this.player = player;
+            this.causeKey = causeKey;
+            this.isIndirect = isIndirect;
+            this.formattedMessage = formattedMessage;
+            this.component = component;
+        }
+    }
+
+    /**
+     * Processes a death event and returns the formatted death message result
+     * This method contains the shared logic between handleDeath() and getDeathMessage()
+     * 
+     * @param event The player death event
+     * @return DeathMessageResult containing all processed information, or null if no custom message available
+     */
+    private DeathMessageResult processDeathEvent(PlayerDeathEvent event) {
+        // Check if death message system is enabled
+        if (!deathConfig.isEnabled()) {
+            if (deathConfig.isDebugEnabled()) {
+                debugger.info("DeathMessageService", "Death message system is disabled");
+            }
+            return null;
+        }
+
+        // Get the player who died
+        Player player = event.getEntity();
+        
+        // Extract death cause from event
+        String causeKey = extractDeathCauseKey(event);
+        if (causeKey == null) {
+            if (deathConfig.isDebugEnabled()) {
+                debugger.info("DeathMessageService", "Could not determine death cause for player: " + player.getName());
+            }
+            return null;
+        }
+
+        // Extract killer information (may be null for environmental deaths)
+        Entity killer = extractKiller(event);
+        
+        // For environmental deaths, ignore Bukkit's automatic killer assignment
+        // We want to use our own indirect tracking system instead
+        boolean isEnvironmental = isEnvironmentalDeath(causeKey);
+        if (isEnvironmental && killer instanceof Player) {
+            if (deathConfig.isDebugEnabled()) {
+                debugger.info("DeathMessageService", "Ignoring Bukkit's automatic killer assignment for environmental death (cause: " + causeKey + ")");
+            }
+            killer = null;
+        }
+        
+        if (deathConfig.isDebugEnabled()) {
+            debugger.info("DeathMessageService", "Death analysis for " + player.getName() + ":");
+            debugger.info("DeathMessageService", "  - Cause: " + causeKey);
+            debugger.info("DeathMessageService", "  - Killer: " + (killer != null ? killer.getType().name() : "null"));
+            debugger.info("DeathMessageService", "  - Is environmental: " + isEnvironmental);
+            debugger.info("DeathMessageService", "  - Tracking enabled: " + deathConfig.isIndirectTrackingEnabled());
+        }
+        
+        // Check for indirect death attribution
+        boolean isIndirect = false;
+        DamageType damageType = null;
+        DamageRecord lastDamager = null;
+        
+        if (deathConfig.isIndirectTrackingEnabled() && killer == null && isEnvironmental) {
+            // Query IndirectDeathTracker for recent damager
+            lastDamager = indirectDeathTracker.getLastDamager(player);
+            
+            if (deathConfig.isDebugEnabled()) {
+                debugger.info("DeathMessageService", "  - Checking for indirect death (lastDamager: " + (lastDamager != null ? "found" : "null") + ")");
+            }
+            
+            if (lastDamager != null) {
+                // Check if damager is still valid (within tracking window)
+                long trackingWindowMs = deathConfig.getTrackingWindow() * 1000L;
+                if (lastDamager.isValid(trackingWindowMs)) {
+                    isIndirect = true;
+                    damageType = lastDamager.getDamageType();
+                    
+                    // Get the indirect killer player (may be offline) - must be on main thread
+                    if (lastDamager.getDamagerUUID() != null) {
+                        killer = Bukkit.getPlayer(lastDamager.getDamagerUUID());
+                        if (killer == null && deathConfig.isDebugEnabled()) {
+                            debugger.debug("DeathMessageService", "Indirect killer is offline: " + lastDamager.getDamagerName());
+                        }
+                    } else if (deathConfig.isDebugEnabled()) {
+                        debugger.warn("DeathMessageService", "Damage record has null UUID for damager: " + lastDamager.getDamagerName());
+                    }
+                    
+                    if (deathConfig.isDebugEnabled()) {
+                        debugger.info("DeathMessageService", "Indirect death detected for " + player.getName() + 
+                                  " - Killer: " + lastDamager.getDamagerName() + 
+                                  " - Damage Type: " + damageType.name() + 
+                                  " - Age: " + lastDamager.getAge() + "ms");
+                    }
+                } else {
+                    if (deathConfig.isDebugEnabled()) {
+                        debugger.info("DeathMessageService", "Damage record found for " + player.getName() + 
+                                  " but expired (age: " + lastDamager.getAge() + "ms, window: " + trackingWindowMs + "ms)");
+                    }
+                }
+            } else {
+                if (deathConfig.isDebugEnabled()) {
+                    debugger.info("DeathMessageService", "No recent damager found for environmental death of " + player.getName() + 
+                              " (cause: " + causeKey + ")");
+                }
+            }
+        } else if (deathConfig.isDebugEnabled()) {
+            debugger.info("DeathMessageService", "  - Skipping indirect check: tracking=" + deathConfig.isIndirectTrackingEnabled() + 
+                      ", killer==null=" + (killer == null) + 
+                      ", isEnvironmental=" + isEnvironmentalDeath(causeKey));
+        }
+
+        // Check if custom messages exist for this cause
+        if (!messageManager.hasCustomMessages(causeKey)) {
+            if (deathConfig.isDebugEnabled()) {
+                debugger.info("DeathMessageService", "No custom messages for death cause: " + causeKey);
+            }
+            return null;
+        }
+
+        // Select a random message variant (with indirect support)
+        DeathMessage deathMessage = messageManager.selectMessage(causeKey, isIndirect, damageType);
+        if (deathMessage == null) {
+            if (deathConfig.isDebugEnabled()) {
+                debugger.info("DeathMessageService", "Failed to select message for cause: " + causeKey + 
+                          " (indirect: " + isIndirect + ", damageType: " + damageType + ")");
+            }
+            return null;
+        }
+
+        // Get the appropriate message text based on indirect status and damage type
+        String messageText = deathMessage.getMessage(isIndirect, damageType);
+        
+        // Format the message with death-specific placeholders
+        String formattedMessage = formatDeathMessage(messageText, player, killer, lastDamager, event);
+
+        // Apply PlaceholderAPI processing
+        formattedMessage = applyPlaceholderAPI(player, formattedMessage);
+
+        // Apply color formatting using ColorUtil
+        Component finalComponent = ColorUtil.parseComponent(formattedMessage);
+
+        return new DeathMessageResult(player, causeKey, isIndirect, formattedMessage, finalComponent);
     }
 
     /**
@@ -331,7 +300,7 @@ public class DeathMessageService {
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error extracting death cause: " + e.getMessage(), e);
+            debugger.warn("DeathMessageService", "Error extracting death cause: " + e.getMessage());
         }
         return null;
     }
@@ -374,7 +343,7 @@ public class DeathMessageService {
             Player playerKiller = victim.getKiller();
             if (playerKiller != null) {
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("Direct player killer found: " + playerKiller.getName());
+                    debugger.info("DeathMessageService", "Direct player killer found: " + playerKiller.getName());
                 }
                 return playerKiller;
             }
@@ -389,12 +358,12 @@ public class DeathMessageService {
                 Entity damager = entityDamageEvent.getDamager();
                 
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("Damager entity found: " + (damager != null ? damager.getType().name() : "null"));
+                    debugger.info("DeathMessageService", "Damager entity found: " + (damager != null ? damager.getType().name() : "null"));
                 }
                 
                 if (damager == null) {
                     if (deathConfig.isDebugEnabled()) {
-                        logger.fine("Damager is null, treating as environmental death");
+                        debugger.debug("DeathMessageService", "Damager is null, treating as environmental death");
                     }
                     return null;
                 }
@@ -406,25 +375,25 @@ public class DeathMessageService {
                     
                     if (shooter == null) {
                         if (deathConfig.isDebugEnabled()) {
-                            logger.fine("Projectile has null shooter (environmental)");
+                            debugger.debug("DeathMessageService", "Projectile has null shooter (environmental)");
                         }
                         return null;
                     }
                     
                     if (shooter instanceof Player) {
                         if (deathConfig.isDebugEnabled()) {
-                            logger.info("Projectile shooter is player: " + ((Player) shooter).getName());
+                            debugger.info("DeathMessageService", "Projectile shooter is player: " + ((Player) shooter).getName());
                         }
                         return (Player) shooter;
                     } else if (shooter instanceof Entity) {
                         if (deathConfig.isDebugEnabled()) {
-                            logger.info("Projectile shooter is entity: " + ((Entity) shooter).getType().name());
+                            debugger.info("DeathMessageService", "Projectile shooter is entity: " + ((Entity) shooter).getType().name());
                         }
                         return (Entity) shooter;
                     }
                     // If shooter is not an entity, return null (environmental)
                     if (deathConfig.isDebugEnabled()) {
-                        logger.info("Projectile has no valid shooter (environmental)");
+                        debugger.info("DeathMessageService", "Projectile has no valid shooter (environmental)");
                     }
                     return null;
                 }
@@ -435,30 +404,30 @@ public class DeathMessageService {
                     Entity source = tnt.getSource();
                     if (source != null) {
                         if (deathConfig.isDebugEnabled()) {
-                            logger.info("TNT source: " + source.getType().name());
+                            debugger.info("DeathMessageService", "TNT source: " + source.getType().name());
                         }
                         return source;
                     }
                     // TNT with no source is environmental
                     if (deathConfig.isDebugEnabled()) {
-                        logger.info("TNT has no source (environmental)");
+                        debugger.info("DeathMessageService", "TNT has no source (environmental)");
                     }
                     return null;
                 }
                 
                 // For direct entity attacks (mobs, players), return the damager
                 if (deathConfig.isDebugEnabled() && damager != null) {
-                    logger.info("Direct entity killer: " + damager.getType().name());
+                    debugger.info("DeathMessageService", "Direct entity killer: " + damager.getType().name());
                 }
                 return damager;
             }
             
             if (deathConfig.isDebugEnabled()) {
-                logger.info("No killer found for death event (environmental death)");
+                debugger.info("DeathMessageService", "No killer found for death event (environmental death)");
             }
             
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error extracting killer: " + e.getMessage(), e);
+            debugger.warn("DeathMessageService", "Error extracting killer: " + e.getMessage());
         }
         return null;
     }
@@ -522,7 +491,7 @@ public class DeathMessageService {
         // Check if PlaceholderAPI is available before attempting to process
         if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             if (deathConfig.isDebugEnabled()) {
-                logger.fine("PlaceholderAPI not available, skipping placeholder processing");
+                debugger.debug("DeathMessageService", "PlaceholderAPI not available, skipping placeholder processing");
             }
             return message;
         }
@@ -530,7 +499,7 @@ public class DeathMessageService {
         try {
             return IntegrationUtil.processPlaceholders(player, message);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error processing PlaceholderAPI placeholders: " + e.getMessage(), e);
+            debugger.warn("DeathMessageService", "Error processing PlaceholderAPI placeholders: " + e.getMessage());
             // Return original message if PlaceholderAPI processing fails
             return message;
         }
@@ -542,9 +511,9 @@ public class DeathMessageService {
     private void loadMessages() {
         try {
             messageManager.loadMessages();
-            logger.info("Death messages loaded successfully");
+            debugger.info("DeathMessageService", "Death messages loaded successfully");
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to load death messages: " + e.getMessage(), e);
+            debugger.error("DeathMessageService", "Failed to load death messages: " + e.getMessage(), e);
         }
     }
 
@@ -568,7 +537,7 @@ public class DeathMessageService {
             if (indirectDeathTracker != null) {
                 indirectDeathTracker.clearAll();
                 if (deathConfig.isDebugEnabled()) {
-                    logger.info("Cleared indirect death tracking data");
+                    debugger.info("DeathMessageService", "Cleared indirect death tracking data");
                 }
             }
             
@@ -584,11 +553,11 @@ public class DeathMessageService {
             int totalCauses = newStats.size();
 
             // Log success with statistics
-            logger.info("Death messages reloaded successfully: " + totalMessages + " message variants across " + totalCauses + " death causes");
+            debugger.info("DeathMessageService", "Death messages reloaded successfully: " + totalMessages + " message variants across " + totalCauses + " death causes");
             
             // Log indirect tracking status with updated configuration values
             if (deathConfig.isIndirectTrackingEnabled()) {
-                logger.info("Indirect death tracking is enabled (window: " + deathConfig.getTrackingWindow() + 
+                debugger.info("DeathMessageService", "Indirect death tracking is enabled (window: " + deathConfig.getTrackingWindow() + 
                           "s, min damage: " + deathConfig.getMinimumDamage() + " hearts)");
                 
                 // Log tracked damage types
@@ -596,25 +565,25 @@ public class DeathMessageService {
                 if (deathConfig.isTrackMelee()) trackedTypes.append("melee ");
                 if (deathConfig.isTrackProjectile()) trackedTypes.append("projectile ");
                 if (deathConfig.isTrackExplosion()) trackedTypes.append("explosion");
-                logger.info(trackedTypes.toString().trim());
+                debugger.info("DeathMessageService", trackedTypes.toString().trim());
                 
                 // Log tracked causes
                 List<String> trackedCauses = deathConfig.getTrackedCauses();
-                logger.info("Tracking " + trackedCauses.size() + " environmental death causes: " + 
+                debugger.info("DeathMessageService", "Tracking " + trackedCauses.size() + " environmental death causes: " + 
                           String.join(", ", trackedCauses));
             } else {
-                logger.info("Indirect death tracking is disabled");
+                debugger.info("DeathMessageService", "Indirect death tracking is disabled");
             }
             
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to reload death messages: " + e.getMessage(), e);
+            debugger.error("DeathMessageService", "Failed to reload death messages: " + e.getMessage(), e);
             
             // If we had a previous configuration, it's still in memory
             if (hadPreviousConfig && previousStats != null) {
                 int previousTotal = previousStats.values().stream().mapToInt(Integer::intValue).sum();
-                logger.warning("Maintaining previous configuration with " + previousTotal + " message variants");
+                debugger.warn("DeathMessageService", "Maintaining previous configuration with " + previousTotal + " message variants");
             } else {
-                logger.warning("No previous configuration available, death message system may be unavailable");
+                debugger.warn("DeathMessageService", "No previous configuration available, death message system may be unavailable");
             }
             
             // Re-throw to notify caller of failure
@@ -647,26 +616,43 @@ public class DeathMessageService {
      */
     public void logTrackingStatistics() {
         if (!deathConfig.isIndirectTrackingEnabled()) {
-            logger.info("[IndirectDeath] Tracking is disabled");
+            debugger.info("DeathMessageService", "[IndirectDeath] Tracking is disabled");
             return;
         }
         
         Map<String, Object> stats = getTrackingStatistics();
+        DecimalFormat percentFormat = new DecimalFormat("0.00");
         
-        logger.info("=== Indirect Death Tracking Statistics ===");
-        logger.info("Cache Size: " + stats.get("size") + " entries");
-        logger.info("Hit Rate: " + String.format("%.2f%%", ((Number) stats.get("hitRate")).doubleValue() * 100));
-        logger.info("Miss Rate: " + String.format("%.2f%%", ((Number) stats.get("missRate")).doubleValue() * 100));
-        logger.info("Total Hits: " + stats.get("hitCount"));
-        logger.info("Total Misses: " + stats.get("missCount"));
-        logger.info("Evictions: " + stats.get("evictionCount"));
-        logger.info("Configuration:");
-        logger.info("  - Tracking Window: " + deathConfig.getTrackingWindow() + " seconds");
-        logger.info("  - Minimum Damage: " + deathConfig.getMinimumDamage() + " hearts");
-        logger.info("  - Track Melee: " + deathConfig.isTrackMelee());
-        logger.info("  - Track Projectile: " + deathConfig.isTrackProjectile());
-        logger.info("  - Track Explosion: " + deathConfig.isTrackExplosion());
-        logger.info("  - Tracked Causes: " + String.join(", ", deathConfig.getTrackedCauses()));
-        logger.info("==========================================");
+        String statsMessage = String.format(
+            "=== Indirect Death Tracking Statistics ===%n" +
+            "Cache Size: %s entries%n" +
+            "Hit Rate: %s%%%n" +
+            "Miss Rate: %s%%%n" +
+            "Total Hits: %s%n" +
+            "Total Misses: %s%n" +
+            "Evictions: %s%n" +
+            "Configuration:%n" +
+            "  - Tracking Window: %s seconds%n" +
+            "  - Minimum Damage: %s hearts%n" +
+            "  - Track Melee: %s%n" +
+            "  - Track Projectile: %s%n" +
+            "  - Track Explosion: %s%n" +
+            "  - Tracked Causes: %s%n" +
+            "==========================================",
+            stats.get("size"),
+            percentFormat.format(((Number) stats.get("hitRate")).doubleValue() * 100),
+            percentFormat.format(((Number) stats.get("missRate")).doubleValue() * 100),
+            stats.get("hitCount"),
+            stats.get("missCount"),
+            stats.get("evictionCount"),
+            deathConfig.getTrackingWindow(),
+            deathConfig.getMinimumDamage(),
+            deathConfig.isTrackMelee(),
+            deathConfig.isTrackProjectile(),
+            deathConfig.isTrackExplosion(),
+            String.join(", ", deathConfig.getTrackedCauses())
+        );
+        
+        debugger.info("DeathMessageService", statsMessage);
     }
 }
