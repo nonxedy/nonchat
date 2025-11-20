@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
+import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.core.MessageManager;
@@ -25,13 +26,17 @@ import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.listener.ChatListener;
 import com.nonxedy.nonchat.listener.ChatListenerFactory;
 import com.nonxedy.nonchat.listener.DeathCoordinates;
+import com.nonxedy.nonchat.listener.DamageTrackingListener;
 import com.nonxedy.nonchat.listener.DeathListener;
 import com.nonxedy.nonchat.listener.DiscordSRVListener;
 import com.nonxedy.nonchat.listener.JoinQuitListener;
+import com.nonxedy.nonchat.listener.PlayerCleanupListener;
 import com.nonxedy.nonchat.placeholders.NonchatExpansion;
 import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
+import com.nonxedy.nonchat.service.DeathMessageService;
+import com.nonxedy.nonchat.core.IndirectDeathTracker;
 import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
@@ -50,6 +55,8 @@ public class Nonchat extends JavaPlugin {
     private ChatService chatService;
     private CommandService commandService;
     private ConfigService configService;
+    private DeathConfig deathConfig;
+    private DeathMessageService deathMessageService;
     private ChatManager chatManager;
     private MessageManager messageManager;
     private BroadcastManager broadcastManager;
@@ -62,6 +69,9 @@ public class Nonchat extends JavaPlugin {
     private DiscordSRVIntegration discordSRVIntegration;
     private Metrics metrics;
     private InteractivePlaceholderManager placeholderManager;
+    private IndirectDeathTracker indirectDeathTracker;
+    private DamageTrackingListener damageTrackingListener;
+    private PlayerCleanupListener playerCleanupListener;
     private final Map<Player, List<TextDisplay>> bubbles = new HashMap<>();
 
     @Override
@@ -121,10 +131,39 @@ public class Nonchat extends JavaPlugin {
 
             // Initialize interactive placeholder manager
             initializeInteractivePlaceholders();
-
-            // Initialize debug system if enabled
+            
+            // Initialize debug system if enabled (must be before death message service)
             if (configService.getConfig().isDebug()) {
                 this.debugger = new Debugger(this, configService.getConfig().getDebugLogRetentionDays());
+                debugger.info("Core", "Debug system initialized");
+            }
+            
+            // Initialize death message service with independent configuration
+            // DeathConfig.load() will create deaths.yml if needed and auto-update with missing keys
+            try {
+                this.deathConfig = new DeathConfig(getDataFolder(), getLogger(), this);
+                this.deathConfig.load(); // This calls saveDefaultConfig() and setupConfigFile() before loading
+                
+                // Initialize indirect death tracker with configurable tracking window
+                int trackingWindow = deathConfig.getTrackingWindow();
+                this.indirectDeathTracker = new IndirectDeathTracker(trackingWindow);
+                
+                // Initialize death message service with indirect death tracker and debugger
+                this.deathMessageService = new DeathMessageService(this, deathConfig, configService.getMessages(), indirectDeathTracker, debugger);
+                
+                getLogger().info("Death message service initialized successfully");
+                if (deathConfig.isIndirectTrackingEnabled()) {
+                    getLogger().info("Indirect death tracking enabled (window: " + trackingWindow + "s)");
+                }
+            } catch (Exception e) {
+                getLogger().log(Level.WARNING, "Failed to initialize death message service: {0}", e.getMessage());
+                getLogger().log(Level.WARNING, "Death messages will be disabled. Error: " + e.getMessage(), e);
+                this.deathConfig = null;
+                this.deathMessageService = null;
+                this.indirectDeathTracker = null;
+            }
+            
+            if (debugger != null) {
                 debugger.info("Core", "Services initialized successfully");
             }
 
@@ -180,8 +219,34 @@ public class Nonchat extends JavaPlugin {
             getServer().getPluginManager().registerEvents(chatListener, this);
 
             // Register death-related listeners
-            Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
-            Bukkit.getPluginManager().registerEvents(new DeathCoordinates(configService.getConfig(), configService.getMessages()), this);
+            if (deathMessageService != null && deathConfig != null) {
+                Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig(), deathMessageService), this);
+                Bukkit.getPluginManager().registerEvents(new DeathCoordinates(deathConfig, configService.getMessages()), this);
+                
+                // Register damage tracking listener for indirect death tracking (conditional based on master toggle)
+                if (indirectDeathTracker != null && deathConfig.isIndirectTrackingEnabled()) {
+                    double minimumDamage = deathConfig.getMinimumDamage();
+                    
+                    this.damageTrackingListener = new DamageTrackingListener(
+                        indirectDeathTracker,
+                        debugger,
+                        deathConfig,
+                        minimumDamage
+                    );
+                    Bukkit.getPluginManager().registerEvents(damageTrackingListener, this);
+                    getLogger().info("Indirect death tracking enabled (window: " + deathConfig.getTrackingWindow() + "s, min damage: " + minimumDamage + " hearts)");
+                } else {
+                    getLogger().info("Indirect death tracking disabled");
+                }
+                
+                // Register player cleanup listener to clear tracking data on logout
+                if (indirectDeathTracker != null) {
+                    this.playerCleanupListener = new PlayerCleanupListener(indirectDeathTracker);
+                    Bukkit.getPluginManager().registerEvents(playerCleanupListener, this);
+                }
+            } else {
+                Bukkit.getPluginManager().registerEvents(new DeathListener(configService.getConfig()), this);
+            }
 
             // Register join/quit listener
             Bukkit.getPluginManager().registerEvents(new JoinQuitListener(configService.getConfig(), chatManager.getChannelManager()), this);
@@ -277,6 +342,7 @@ public class Nonchat extends JavaPlugin {
             // Clear display entity pool
             DisplayEntityUtil.clearPool();
             
+            // Cancel all scheduled tasks
             if (broadcastManager != null) {
                 broadcastManager.stop();
             }
@@ -292,6 +358,14 @@ public class Nonchat extends JavaPlugin {
             if (discordSRVIntegration != null) {
                 discordSRVIntegration.unregister();
             }
+            
+            // Clean up indirect death tracker cache
+            if (indirectDeathTracker != null) {
+                indirectDeathTracker.clearAll();
+            }
+            
+            // Cancel all remaining Bukkit tasks for this plugin
+            Bukkit.getScheduler().cancelTasks(this);
 
             Bukkit.getConsoleSender().sendMessage(Component.text()
                     .append(Component.text("[nonchat] ", TextColor.fromHexString("#E088FF")))
@@ -366,6 +440,19 @@ public class Nonchat extends JavaPlugin {
 
             // Reload interactive placeholders
             reloadInteractivePlaceholders();
+            
+            // Reload death message service (includes indirect tracking configuration hot-reload)
+            if (deathMessageService != null && deathConfig != null) {
+                try {
+                    deathMessageService.reload();
+                    
+                    // Handle listener re-registration based on updated master toggle
+                    reloadDeathTrackingListeners();
+                    
+                } catch (Exception e) {
+                    getLogger().log(Level.WARNING, "Failed to reload death message service: {0}", e.getMessage());
+                }
+            }
 
             // Reinitialize debugger if needed
             if (configService != null && configService.getConfig().isDebug()) {
@@ -380,6 +467,40 @@ public class Nonchat extends JavaPlugin {
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, "Failed to reload services: {0}", e.getMessage());
             throw new RuntimeException("Failed to reload services", e);
+        }
+    }
+    
+    /**
+     * Reloads death tracking listeners based on updated configuration.
+     * Handles conditional listener registration based on master toggle.
+     */
+    private void reloadDeathTrackingListeners() {
+        try {
+            // Unregister existing damage tracking listener if it exists
+            if (damageTrackingListener != null) {
+                org.bukkit.event.HandlerList.unregisterAll(damageTrackingListener);
+                damageTrackingListener = null;
+            }
+            
+            // Re-register damage tracking listener if indirect tracking is enabled
+            if (indirectDeathTracker != null && deathConfig != null && deathConfig.isIndirectTrackingEnabled()) {
+                double minimumDamage = deathConfig.getMinimumDamage();
+                
+                this.damageTrackingListener = new DamageTrackingListener(
+                    indirectDeathTracker,
+                    debugger,
+                    deathConfig,
+                    minimumDamage
+                );
+                Bukkit.getPluginManager().registerEvents(damageTrackingListener, this);
+                getLogger().info("Damage tracking listener re-registered (window: " + deathConfig.getTrackingWindow() + 
+                               "s, min damage: " + minimumDamage + " hearts)");
+            } else {
+                getLogger().info("Damage tracking listener unregistered (indirect tracking disabled)");
+            }
+            
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Failed to reload death tracking listeners: {0}", e.getMessage());
         }
     }
 
@@ -459,4 +580,27 @@ public class Nonchat extends JavaPlugin {
     public InteractivePlaceholderManager getPlaceholderManager() {
         return placeholderManager;
     }
+    
+    public DeathMessageService getDeathMessageService() {
+        return deathMessageService;
+    }
+    
+    public IndirectDeathTracker getIndirectDeathTracker() {
+        return indirectDeathTracker;
+    }
+    
+    /**
+     * Reloads death message configuration
+     * @throws RuntimeException if reload fails
+     */
+    public void reloadDeathMessages() {
+        if (deathMessageService != null) {
+            deathMessageService.reload();
+        } else {
+            getLogger().warning("Death message service is not initialized");
+            throw new RuntimeException("Death message service is not initialized");
+        }
+    }
+    
+
 }
