@@ -8,7 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import com.nonxedy.nonchat.config.PluginConfig;
+import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
@@ -18,11 +18,11 @@ import com.nonxedy.nonchat.util.core.colors.ColorUtil;
  */
 public class DeathCoordinates implements Listener {
     
-    private final PluginConfig config;
+    private final DeathConfig deathConfig;
     private final PluginMessages messages;
     
-    public DeathCoordinates(PluginConfig config, PluginMessages messages) {
-        this.config = config;
+    public DeathCoordinates(DeathConfig deathConfig, PluginMessages messages) {
+        this.deathConfig = deathConfig;
         this.messages = messages;
     }
     
@@ -38,8 +38,8 @@ public class DeathCoordinates implements Listener {
         Location deathLoc = player.getLocation();
         Environment dimension = deathLoc.getWorld().getEnvironment();
         
-        // Only send coordinates if enabled in config
-        if (config.isShowDeathCoordinatesEnabled()) {
+        // Only send coordinates if enabled in deaths.yml config
+        if (deathConfig.showCoordinates()) {
             String coordsMessage = String.format(
                 messages.getString("death-coordinates"),
                 formatDimension(dimension),
