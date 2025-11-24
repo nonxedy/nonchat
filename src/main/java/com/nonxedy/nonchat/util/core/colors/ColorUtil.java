@@ -327,7 +327,7 @@ public class ColorUtil {
      * @param message The message to check
      * @return true if the message contains MiniMessage tags
      */
-    private static boolean containsMiniMessageTags(String message) {
+    public static boolean containsMiniMessageTags(String message) {
         if (message == null || message.isEmpty()) return false;
         return MINIMESSAGE_TAG_PATTERN.matcher(message).find();
     }

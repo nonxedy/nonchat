@@ -64,8 +64,18 @@ public class BroadcastManager {
 
     public void broadcast(CommandSender sender, String message) {
         try {
+            Component formatted;
+
+            // Check if message contains MiniMessage tags
+            if (ColorUtil.containsMiniMessageTags(message)) {
+                // Parse with MiniMessage for full tag support (including click events)
+                formatted = ColorUtil.parseMiniMessageComponent(message);
+            } else {
+                // Use LinkDetector to make links clickable for legacy messages
+                formatted = LinkDetector.makeLinksClickable(message);
+            }
+
             // Try to use Adventure API first
-            Component formatted = LinkDetector.makeLinksClickable(message);
             Bukkit.broadcast(formatted);
         } catch (NoSuchMethodError e) {
             // Fall back to traditional Bukkit broadcast if Adventure API is not available
