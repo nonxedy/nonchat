@@ -157,24 +157,15 @@ public class ColorUtil {
      */
     public static Component parseMiniMessageComponent(String message) {
         if (message == null || message.isEmpty()) return Component.empty();
-        
+
         try {
             // Check if message contains legacy codes that need conversion
             if (containsLegacyCodes(message)) {
-                // Use a smarter approach for mixed formats
-                // First, try to parse as MiniMessage directly to see if it works
-                try {
-                    return MINI_MESSAGE.deserialize(message);
-                } catch (Exception miniMessageException) {
-                    // If MiniMessage parsing fails, it means we have legacy codes that need conversion
-                    // Convert legacy codes to MiniMessage format
-                    String preparedMessage = prepareMixedFormatMessage(message);
-                    return MINI_MESSAGE.deserialize(preparedMessage);
-                }
-            } else {
-                // Parse directly with MiniMessage
-                return MINI_MESSAGE.deserialize(message);
+                // Convert legacy codes to MiniMessage format before parsing
+                message = prepareMixedFormatMessage(message);
             }
+            // Parse with MiniMessage
+            return MINI_MESSAGE.deserialize(message);
         } catch (Exception e) {
             // Fallback to legacy parsing if MiniMessage parsing fails
             String legacyMessage = parseColor(message);
@@ -327,7 +318,7 @@ public class ColorUtil {
      * @param message The message to check
      * @return true if the message contains MiniMessage tags
      */
-    private static boolean containsMiniMessageTags(String message) {
+    public static boolean containsMiniMessageTags(String message) {
         if (message == null || message.isEmpty()) return false;
         return MINIMESSAGE_TAG_PATTERN.matcher(message).find();
     }

@@ -96,12 +96,12 @@ dimension-end: "Энд"
 link-hover: "Нажмите, чтобы открыть: {url}"
 
 # Death messages system
-death-messages-reloading: "&#FFAFFBReloading death messages..."
-death-messages-reloaded: "&#84FFB8Death messages reloaded! Loaded {count} message variants across {causes} death causes."
-death-messages-reloaded-simple: "&#84FFB8Death messages reloaded successfully!"
-death-messages-reload-failed: "&#ff0000Failed to reload death messages!"
-death-messages-load-error: "&#ff0000Error loading death messages: {error}"
-death-messages-validation-warning: "&#FFAFFBWarning: {warning}"
+death-messages-reloading: "&#FFAFFBПерезагрузка сообщений о смерти..."
+death-messages-reloaded: "&#84FFB8Сообщения о смерти перещагружены! Загружено {count} вариантов сообщений по {causes} причинам смерти."
+death-messages-reloaded-simple: "&#84FFB8Сообщения о смерти успешно перезагружены!"
+death-messages-reload-failed: "&#ff0000Не удалось загрузить сообщения о смерти!"
+death-messages-load-error: "&#ff0000Ошибка загрузки сообщений о смерти: {error}"
+death-messages-validation-warning: "&#FFAFFBПредупреждение: {warning}"
 
 # Spam detection notifications
 spam-detected-repetitive: "§#FFAFFB[nonchat] §fу {player} обнаружен повторяющийся спам: §#ff0000{message}"
