@@ -511,9 +511,13 @@ public class DeathMessageService {
     private void loadMessages() {
         try {
             messageManager.loadMessages();
-            debugger.info("DeathMessageService", "Death messages loaded successfully");
+            if (debugger != null) {
+                debugger.info("DeathMessageService", "Death messages loaded successfully");
+            }
         } catch (Exception e) {
-            debugger.error("DeathMessageService", "Failed to load death messages: " + e.getMessage(), e);
+            if (debugger != null) {
+                debugger.error("DeathMessageService", "Failed to load death messages: " + e.getMessage(), e);
+            }
         }
     }
 
