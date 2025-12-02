@@ -110,13 +110,10 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
      * Execute reload operations using the config service
      */
     private void executeReload() {
-        configService.reload();
+        // Use the plugin's reloadConfig method which handles everything properly
         plugin.reloadConfig();
 
-        // Reload death messages
-        plugin.reloadDeathMessages();
-
-        // These methods need to be added to the nonchat class if not already there
+        // Reload services if additional reloading is needed
         if (plugin instanceof Nonchat nonchat) {
             nonchat.reloadServices();
         }

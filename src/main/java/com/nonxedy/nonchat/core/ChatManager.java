@@ -112,10 +112,11 @@ public class ChatManager {
             Channel channel = channelManager.getChannelForMessage(messageContent);
             String finalMessage;
 
-            // If a channel was found by prefix, remove the prefix from the message
+            // If a channel was found by prefix, update player's active channel and remove the prefix from the message
             if (channel != null && channel.hasPrefix() && messageContent.startsWith(channel.getPrefix())) {
+                // Update player's active channel for DiscordSRV integration
+                channelManager.setPlayerChannel(player, channel.getId());
                 finalMessage = messageContent.substring(channel.getPrefix().length());
-                
                 // Check if the message is empty after removing channel prefix
                 if (finalMessage.trim().isEmpty()) {
                     return; // Silently cancel empty messages
