@@ -64,8 +64,22 @@ public class ChannelManager {
             boolean enabled = channelSection.getBoolean("enabled", true);
             String displayName = channelSection.getString("display-name", channelId);
             String format = channelSection.getString("format", "{prefix}{sender}{suffix}: {message}");
-            String charStr = channelSection.getString("character", "");
-            char character = charStr.isEmpty() ? '\0' : charStr.charAt(0);
+            String prefix = channelSection.getString("character", "");
+            
+            // Validate prefix
+            if (prefix != null && !prefix.isEmpty()) {
+                // Check for whitespace
+                if (prefix.contains(" ")) {
+                    Bukkit.getLogger().warning("Channel " + channelId + " has invalid prefix with whitespace. Prefix will be ignored.");
+                    prefix = "";
+                }
+                // Check length (max 10 characters)
+                else if (prefix.length() > 10) {
+                    Bukkit.getLogger().warning("Channel " + channelId + " prefix too long (max 10 characters). Prefix will be truncated.");
+                    prefix = prefix.substring(0, 10);
+                }
+            }
+            
             String sendPermission = channelSection.getString("send-permission", "");
             String receivePermission = channelSection.getString("receive-permission", "");
             
@@ -99,7 +113,7 @@ public class ChannelManager {
 
             // Create and register channel
             Channel channel = new BaseChannel(
-                channelId, displayName, format, character, sendPermission, receivePermission,
+                channelId, displayName, format, prefix, sendPermission, receivePermission,
                 radius, world, enabled, hoverTextUtil, cooldown, minLength, maxLength
             );
             
@@ -125,14 +139,14 @@ public class ChannelManager {
         // Create global channel
         Channel globalChannel = new BaseChannel(
             "global", "Global", "§7(§6G§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}",
-            '!', "", "", -1, true, hoverTextUtil, 0, 0, 256
+            "!", "", "", -1, true, hoverTextUtil, 0, 0, 256
         );
         channels.put("global", globalChannel);
         
         // Create local channel
         Channel localChannel = new BaseChannel(
             "local", "Local", "§7(§6L§7)§r {prefix} §f{sender}§r {suffix}§7: §f{message}",
-            '\0', "", "", 100, true, hoverTextUtil, 0, 0, 256
+            "", "", "", 100, true, hoverTextUtil, 0, 0, 256
         );
         channels.put("local", localChannel);
         
@@ -146,21 +160,38 @@ public class ChannelManager {
     }
     
     /**
+     * Checks if a prefix is unique among all channels.
+     * @param prefix The prefix to check
+     * @param excludeChannelId Channel ID to exclude from the check (for updates), or null
+     * @return true if the prefix is unique or empty, false if already in use
+     */
+    public boolean isPrefixUnique(String prefix, String excludeChannelId) {
+        if (prefix == null || prefix.isEmpty()) {
+            return true; // Empty prefixes are always valid
+        }
+        
+        return channels.values().stream()
+            .filter(channel -> excludeChannelId == null || !channel.getId().equals(excludeChannelId))
+            .filter(Channel::hasPrefix)
+            .noneMatch(channel -> channel.getPrefix().equals(prefix));
+    }
+    
+    /**
      * Creates a new channel with the specified properties.
      * @param channelId The unique channel ID (must be lowercase letters, numbers and hyphens only)
      * @param displayName The display name for the channel
      * @param format The message format for the channel
-     * @param character The trigger character, or null for none
+     * @param prefix The trigger prefix, or null/empty for none
      * @param sendPermission Permission to send to this channel, or empty for everyone
      * @param receivePermission Permission to receive from this channel, or empty for everyone
      * @param radius Radius of the channel in blocks, or -1 for global
      * @param cooldown Cooldown between messages in seconds
      * @param minLength Minimum message length
      * @param maxLength Maximum message length, or -1 for unlimited
-     * @return The created channel, or null if the ID already exists
+     * @return The created channel, or null if the ID already exists or prefix is invalid
      */
     public Channel createChannel(String channelId, String displayName, String format,
-                                Character character, String sendPermission, String receivePermission,
+                                String prefix, String sendPermission, String receivePermission,
                                 int radius, int cooldown, int minLength, int maxLength) {
         // Check if channel already exists
         if (channels.containsKey(channelId)) {
@@ -173,12 +204,33 @@ public class ChannelManager {
             return null; // Invalid channel ID
         }
         
+        // Validate prefix
+        if (prefix != null && !prefix.isEmpty()) {
+            // Check for whitespace
+            if (prefix.contains(" ")) {
+                return null; // Invalid prefix with whitespace
+            }
+            // Check length (max 10 characters)
+            if (prefix.length() > 10) {
+                return null; // Prefix too long
+            }
+            // Check uniqueness
+            if (!isPrefixUnique(prefix, null)) {
+                return null; // Prefix already in use
+            }
+        }
+        
+        // Normalize null prefix to empty string
+        if (prefix == null) {
+            prefix = "";
+        }
+        
         // Create the channel
         Channel channel = new BaseChannel(
             channelId,
             displayName,
             format,
-            character != null ? character : '\0',
+            prefix,
             sendPermission,
             receivePermission,
             radius,
@@ -205,7 +257,7 @@ public class ChannelManager {
      * @param channelId The channel ID to update
      * @param displayName The display name for the channel (null to keep existing)
      * @param format The message format for the channel (null to keep existing)
-     * @param character The trigger character (null to keep existing, '\0' to remove)
+     * @param prefix The trigger prefix (null to keep existing, empty string to remove)
      * @param sendPermission Permission to send to this channel (null to keep existing)
      * @param receivePermission Permission to receive from this channel (null to keep existing)
      * @param radius Radius of the channel in blocks (-1 for global, null to keep existing)
@@ -216,13 +268,32 @@ public class ChannelManager {
      * @return True if the channel was updated, false otherwise
      */
     public boolean updateChannel(String channelId, String displayName, String format,
-                                Character character, String sendPermission, String receivePermission,
+                                String prefix, String sendPermission, String receivePermission,
                                 Integer radius, Boolean enabled, Integer cooldown, 
                                 Integer minLength, Integer maxLength) {
         // Get existing channel
         Channel existingChannel = getChannel(channelId);
         if (existingChannel == null) {
             return false;
+        }
+        
+        // Determine the prefix to use
+        String finalPrefix = prefix != null ? prefix : existingChannel.getPrefix();
+        
+        // Validate prefix if it's being changed
+        if (prefix != null && !prefix.isEmpty()) {
+            // Check for whitespace
+            if (prefix.contains(" ")) {
+                return false; // Invalid prefix with whitespace
+            }
+            // Check length (max 10 characters)
+            if (prefix.length() > 10) {
+                return false; // Prefix too long
+            }
+            // Check uniqueness (excluding current channel)
+            if (!isPrefixUnique(prefix, channelId)) {
+                return false; // Prefix already in use by another channel
+            }
         }
         
         // Since we can't modify the existing channel directly (it's immutable), 
@@ -232,7 +303,7 @@ public class ChannelManager {
             channelId,
             displayName != null ? displayName : existingChannel.getDisplayName(),
             format != null ? format : existingChannel.getFormat(),
-            character != null ? character : existingChannel.getCharacter(),
+            finalPrefix,
             sendPermission != null ? sendPermission : existingChannel.getSendPermission(),
             receivePermission != null ? receivePermission : existingChannel.getReceivePermission(),
             radius != null ? radius : existingChannel.getRadius(),
@@ -316,7 +387,7 @@ public class ChannelManager {
         config.set(basePath + "enabled", channel.isEnabled());
         config.set(basePath + "display-name", channel.getDisplayName());
         config.set(basePath + "format", channel.getFormat());
-        config.set(basePath + "character", channel.hasTriggerCharacter() ? String.valueOf(channel.getCharacter()) : "");
+        config.set(basePath + "character", channel.hasPrefix() ? channel.getPrefix() : "");
         config.set(basePath + "send-permission", channel.getSendPermission());
         config.set(basePath + "receive-permission", channel.getReceivePermission());
         
@@ -413,36 +484,43 @@ public class ChannelManager {
     }
     
     /**
-     * Determines the channel for a message based on its prefix character.
+     * Determines the channel for a message based on its prefix.
+     * If multiple channels have prefixes that match the message start,
+     * the channel with the longest matching prefix is selected.
      * @param message The message to check
      * @return The appropriate channel, or default if no match
      */
     @NotNull
     public Channel getChannelForMessage(String message) {
-        if (message.isEmpty()) {
+        if (message == null || message.isEmpty()) {
             return getDefaultChannel();
         }
         
-        final char firstChar = message.charAt(0);
-        
+        // Find all channels whose prefix matches the start of the message
+        // Sort by prefix length (longest first) to prioritize longer prefixes
         return channels.values().stream()
             .filter(Channel::isEnabled)
-            .filter(Channel::hasTriggerCharacter)
-            .filter(channel -> channel.getCharacter() == firstChar)
+            .filter(Channel::hasPrefix)
+            .filter(channel -> message.startsWith(channel.getPrefix()))
+            .sorted((c1, c2) -> Integer.compare(c2.getPrefix().length(), c1.getPrefix().length()))
             .findFirst()
             .orElse(getDefaultChannel());
     }
     
     /**
-     * Finds a channel by its trigger character.
-     * @param triggerChar The character to search for
+     * Finds a channel by its trigger prefix.
+     * @param prefix The prefix to search for
      * @return Optional containing the channel, or empty if not found
      */
-    public Optional<Channel> findChannelByCharacter(char triggerChar) {
+    public Optional<Channel> findChannelByPrefix(String prefix) {
+        if (prefix == null || prefix.isEmpty()) {
+            return Optional.empty();
+        }
+        
         return channels.values().stream()
             .filter(Channel::isEnabled)
-            .filter(Channel::hasTriggerCharacter)
-            .filter(channel -> channel.getCharacter() == triggerChar)
+            .filter(Channel::hasPrefix)
+            .filter(channel -> channel.getPrefix().equals(prefix))
             .findFirst();
     }
     

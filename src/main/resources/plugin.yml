@@ -2,7 +2,7 @@ name: nonchat
 author: nonxedy
 main: com.nonxedy.nonchat.Nonchat
 description: The best chat plugin for 1.16-1.21.10
-version: 1.5.5
+version: 1.5.6
 prefix: nonchat
 api-version: 1.16
 load: STARTUP
@@ -109,6 +109,12 @@ permissions:
     default: op
   nonchat.ad.notify:
     description: Notify players about advertisements
+    default: op
+  nonchat.spam.bypass:
+    description: Bypass anti-spam detection
+    default: op
+  nonchat.spam.notify:
+    description: Notify players about spam detection
     default: op
 
 commands:

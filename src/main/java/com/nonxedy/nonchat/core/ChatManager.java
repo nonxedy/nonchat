@@ -24,6 +24,7 @@ import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.util.AsyncFilterService;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
+import com.nonxedy.nonchat.util.chat.filters.SpamDetector;
 import com.nonxedy.nonchat.util.chat.filters.WordBlocker;
 import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
@@ -42,6 +43,7 @@ public class ChatManager {
     private final Map<Player, ReentrantLock> playerLocks = new ConcurrentHashMap<>();
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
+    private final SpamDetector spamDetector;
     private final AsyncFilterService asyncFilterService;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
@@ -51,6 +53,7 @@ public class ChatManager {
         this.adDetector = new AdDetector(config,
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
+        this.spamDetector = new SpamDetector(config, messages);
         this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
         this.channelManager = new ChannelManager(plugin, config);
         this.ignoreCommand = plugin.getIgnoreCommand();
@@ -78,6 +81,14 @@ public class ChatManager {
                 return;
             }
 
+            // Check for spam
+            if (config.isAntiSpamEnabled() && !player.hasPermission("nonchat.spam.bypass")) {
+                if (spamDetector.shouldFilter(player, messageContent)) {
+                    // Warning message is already sent by SpamDetector
+                    return;
+                }
+            }
+
             // Check for advertisements
             if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
                 if (adDetector.shouldFilter(player, messageContent)) {
@@ -98,31 +109,26 @@ public class ChatManager {
             }
 
             // Determine which channel to use based on message prefix or player's active channel
-            Channel channel;
+            Channel channel = channelManager.getChannelForMessage(messageContent);
             String finalMessage;
 
-            // First check if message starts with a channel character
-            if (messageContent.length() > 0) {
-                char firstChar = messageContent.charAt(0);
-                channel = findChannelByChar(firstChar);
-
-                // If a channel was found by character, remove the character from the message
-                if (channel != null) {
-                    finalMessage = messageContent.substring(1);
-                    
-                    // Check if the message is empty after removing channel character
-                    if (finalMessage.trim().isEmpty()) {
-                        return; // Silently cancel empty messages
-                    }
-                } else {
-                    // No character match, use player's active channel or default
-                    channel = channelManager.getPlayerChannel(player);
-                    finalMessage = messageContent;
+            // If a channel was found by prefix, update player's active channel and remove the prefix from the message
+            if (channel != null && channel.hasPrefix() && messageContent.startsWith(channel.getPrefix())) {
+                // Update player's active channel for DiscordSRV integration
+                channelManager.setPlayerChannel(player, channel.getId());
+                finalMessage = messageContent.substring(channel.getPrefix().length());
+                // Check if the message is empty after removing channel prefix
+                if (finalMessage.trim().isEmpty()) {
+                    return; // Silently cancel empty messages
                 }
             } else {
-                // Empty message, use player's active channel
-                channel = channelManager.getPlayerChannel(player);
+                // No prefix match, use the message as-is
                 finalMessage = messageContent;
+            }
+
+            // Ensure we have a valid channel (should not be null from getChannelForMessage)
+            if (channel == null) {
+                return; // Silently cancel if no channel available
             }
 
             // Check if channel is enabled
@@ -585,7 +591,7 @@ public class ChatManager {
      * @return The channel, or null if not found
      */
     private Channel findChannelByChar(char c) {
-        return channelManager.findChannelByCharacter(c).orElse(null);
+        return channelManager.findChannelByPrefix(String.valueOf(c)).orElse(null);
     }
 
     /**
@@ -664,7 +670,8 @@ public class ChatManager {
     public Channel createChannel(String channelId, String displayName, String format,
             Character character, String sendPermission, String receivePermission,
             int radius, int cooldown, int minLength, int maxLength) {
-        return channelManager.createChannel(channelId, displayName, format, character,
+        String prefix = character != null ? String.valueOf(character) : "";
+        return channelManager.createChannel(channelId, displayName, format, prefix,
                 sendPermission, receivePermission, radius,
                 cooldown, minLength, maxLength);
     }
@@ -696,7 +703,8 @@ public class ChatManager {
             Character character, String sendPermission, String receivePermission,
             Integer radius, Boolean enabled, Integer cooldown,
             Integer minLength, Integer maxLength) {
-        return channelManager.updateChannel(channelId, displayName, format, character,
+        String prefix = character != null ? String.valueOf(character) : null;
+        return channelManager.updateChannel(channelId, displayName, format, prefix,
                 sendPermission, receivePermission, radius, enabled,
                 cooldown, minLength, maxLength);
     }

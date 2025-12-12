@@ -105,16 +105,24 @@ public class AutoBroadcastSender {
      * @param message The message to broadcast
      */
     private void broadcastMessage(String message) {
-        // Use LinkDetector to make links clickable
-        Component clickableMessage = LinkDetector.makeLinksClickable(message);
-    
+        Component broadcastMessage;
+
+        // Check if message contains MiniMessage tags
+        if (ColorUtil.containsMiniMessageTags(message)) {
+            // Parse with MiniMessage for full tag support (including click events)
+            broadcastMessage = ColorUtil.parseMiniMessageComponent(message);
+        } else {
+            // Use LinkDetector to make links clickable for legacy messages
+            broadcastMessage = LinkDetector.makeLinksClickable(message);
+        }
+
         // Send to all players
         for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(clickableMessage);
+            player.sendMessage(broadcastMessage);
         }
-    
-        // Log to console
-        plugin.getLogger().info(ColorUtil.parseColor(message));
+
+        // Log to console (strip formatting for cleaner logs)
+        plugin.getLogger().info(ColorUtil.stripAllColors(message));
     }
 
     // Stops all broadcast tasks and clears message pools

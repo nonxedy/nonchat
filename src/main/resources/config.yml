@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.5
+# Version of the plugin: 1.5.6
 #
 # - LuckPerms support.
 # - Vault support.
@@ -216,7 +216,7 @@ channels:
     display-name: "Staff"
     format: "§7(§bSC§7)§r %luckperms_prefix% §f%player_name%§r %luckperms_suffix%§7: §f{message}"
     radius: -1
-    character: '*'
+    character: '!staff' # Supports any string without spaces (up to 10 characters)
     send-permission: "nonchat.chat.staff"
     receive-permission: "nonchat.chat.staff"
     cooldown: 0
@@ -224,12 +224,22 @@ channels:
     max-length: -1
   
 # ==================================================
-# CUSTOM DEATH MESSAGES
+# CUSTOM DEATH MESSAGES (DEPRECATED)
+# ==================================================
+# WARNING: This section is DEPRECATED and will be removed in a future version.
+# Please use the new 'deaths.yml' file for death message configuration.
+# The new system provides:
+#   - Custom messages per death cause (drowning, fall damage, etc.)
+#   - Advanced placeholder support
+#   - Better organization and maintainability
+# 
+# This legacy system is kept for backward compatibility only.
 # ==================================================
 death:
-  # Enable/disable custom death messages.
+  # Enable/disable custom death messages (legacy system).
+  # NOTE: This is overridden by deaths.yml if it exists.
   enabled: true
-  # The death message format.
+  # The death message format (legacy - single format for all death types).
   format: "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died"
   # Show death coordinates to the player who died.
   show-coordinates: true
@@ -281,7 +291,7 @@ private-chat:
         - "§8Click to reply"
   receiver:
     # Format for the message seen by the receiver.
-    format: "§8[§f{sender} §f-> §6You§8] §f{message}"
+    format: "§8[§f{sender} §f-> §fYou§8] §f{message}"
     hover:
       # Enable/disable hover text on the receiver's message.
       enabled: true
@@ -308,7 +318,7 @@ spy-format: "§f{sender} §7-> §f{target}§7: §7{message}"
 broadcast:
   # Format for broadcast messages. Use {message} for content and \n for new lines.
   format: "\n§#FFAFFBBroadcast: §f{message}\n"
-  # Enable/disable random auto-broadcast messages from the list below.
+  # Enable/disable randomization of auto-broadcast messages.
   random: true
 
   # Example auto-broadcast message. You can add more by copying this section.
@@ -423,3 +433,89 @@ anti-ad:
   staff-notify: true
   # Command to execute when an advertisement is detected. Leave empty for no punishment.
   punish-command: "ban %player_name% advertising"
+
+# ==================================================
+# ANTI-SPAM SYSTEM
+# Intelligent spam detection with contextual analysis.
+# Detects repetitive messages, similar messages, and message flooding.
+# ==================================================
+anti-spam:
+  # Enable/disable the anti-spam filter.
+  enabled: true
+  
+  # Enable/disable console notifications when spam is detected.
+  # If true, spam notifications will be logged to the console.
+  # If false, only staff members with 'nonchat.spam.notify' permission will see notifications.
+  console-notify: true
+  
+  # ==================================================
+  # REPETITIVE MESSAGE DETECTION
+  # Detects when a player sends the exact same message multiple times.
+  # ==================================================
+  repetitive:
+    # Enable/disable repetitive message detection.
+    enabled: true
+    # Maximum number of identical messages allowed within the time window.
+    threshold: 3
+    # Time window in seconds to check for repetitive messages.
+    time-window: 10
+    # Warning message sent to the player when repetitive spam is detected.
+    # Supports color codes and PlaceholderAPI placeholders.
+    # Use %player_name% as placeholder for the player's name.
+    message: "&cPlease do not send the same message repeatedly!"
+    # Actions to execute when repetitive spam is detected.
+    # Special actions: 'block' (blocks the message), 'notify-staff' (notifies staff)
+    # Regular commands: Any command that will be executed (use %player_name% placeholder)
+    # Example: ["block", "tell %player_name% Stop spamming!", "notify-staff"]
+    actions:
+      - block
+      - notify-staff
+  
+  # ==================================================
+  # SIMILAR MESSAGE DETECTION
+  # Detects when a player sends similar messages (variations of the same content).
+  # Uses text similarity algorithms to catch spam attempts with slight modifications.
+  # ==================================================
+  similar:
+    # Enable/disable similar message detection.
+    enabled: true
+    # Similarity threshold (0.0-1.0). Higher values (closer to 1.0) require more similarity.
+    # Recommended: 0.80-0.90 for strict detection, 0.70-0.80 for moderate detection.
+    threshold: 0.85
+    # Time window in seconds to check for similar messages.
+    time-window: 30
+    # Warning message sent to the player when similar spam is detected.
+    # Supports color codes and PlaceholderAPI placeholders.
+    # Use %player_name% as placeholder for the player's name.
+    message: "&cPlease do not send similar messages repeatedly!"
+    # Actions to execute when similar spam is detected.
+    # Special actions: 'block' (blocks the message), 'notify-staff' (notifies staff)
+    # Regular commands: Any command that will be executed (use %player_name% placeholder)
+    # Example: ["block", "tell %player_name% Stop spamming!", "mute %player_name% 60"]
+    actions:
+      - block
+      - notify-staff
+  
+  # ==================================================
+  # FLOOD DETECTION
+  # Detects when a player sends too many messages in a short time period.
+  # ==================================================
+  flood:
+    # Enable/disable flood detection.
+    enabled: true
+    # Maximum number of messages allowed within the time window.
+    max-messages: 5
+    # Time window in seconds to check for message flooding.
+    time-window: 5
+    # Warning message sent to the player when flood spam is detected.
+    # Supports color codes and PlaceholderAPI placeholders.
+    # Use %player_name% as placeholder for the player's name.
+    message: "&cYou are sending messages too quickly! Please slow down."
+    # Actions to execute when flood spam is detected.
+    # Special actions: 'block' (blocks the message), 'notify-staff' (notifies staff)
+    # Regular commands: Any command that will be executed (use %player_name% placeholder)
+    # Example: ["block", "tell %player_name% Slow down!", "mute %player_name% 30", "notify-staff"]
+    actions:
+      - block
+      - notify-staff
+      - "tell %player_name% Slow down!" # Custom commands

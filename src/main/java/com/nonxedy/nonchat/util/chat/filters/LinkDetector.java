@@ -42,39 +42,49 @@ public class LinkDetector {
             return Component.empty();
         }
 
-        // Find all URLs in the text
-        Matcher matcher = URL_PATTERN.matcher(text);
-        
-        // If no URLs found, just return the text as a component
+        // Strip color codes from the text to avoid interference with URL detection
+        String cleanText = ColorUtil.stripAllColors(text);
+
+        // Calculate offset between original and clean text
+        int offset = text.length() - cleanText.length();
+
+        // Find all URLs in the cleaned text
+        Matcher matcher = URL_PATTERN.matcher(cleanText);
+
+        // If no URLs found, just return the original text as a component
         if (!matcher.find()) {
             return ColorUtil.parseComponent(text);
         }
-        
+
         // Reset matcher to start from beginning
         matcher.reset();
-        
+
         // Build the component with clickable links
         TextComponent.Builder builder = Component.text();
         int lastEnd = 0;
-        
+
         while (matcher.find()) {
+            // Calculate actual positions in original text
+            int actualStart = matcher.start() + offset;
+            int actualEnd = matcher.end() + offset;
+
             // Add text before the URL
-            String beforeUrl = text.substring(lastEnd, matcher.start());
+            String beforeUrl = text.substring(lastEnd, actualStart);
             if (!beforeUrl.isEmpty()) {
                 builder.append(ColorUtil.parseComponent(beforeUrl));
             }
-            
-            // Get the URL
-            String url = matcher.group();
-            
+
+            // Get the URL from original text
+            String url = text.substring(actualStart, actualEnd);
+
             // Create clickable link component
             Component linkComponent = createLinkComponent(url);
-            
+
             builder.append(linkComponent);
-            
-            lastEnd = matcher.end();
+
+            lastEnd = actualEnd;
         }
-        
+
         // Add any remaining text after the last URL
         String afterLastUrl = text.substring(lastEnd);
         if (!afterLastUrl.isEmpty()) {
@@ -85,6 +95,7 @@ public class LinkDetector {
     }
 
     private static Component createLinkComponent(String url) {
+        // URL is already cleaned of color codes
         String clickableUrl = url;
         if (url.toLowerCase().startsWith("www.")) {
             clickableUrl = "https://" + url;

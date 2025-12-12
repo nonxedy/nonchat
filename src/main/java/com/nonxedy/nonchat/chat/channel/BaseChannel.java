@@ -32,7 +32,7 @@ public class BaseChannel implements Channel {
     private final String id;
     private final String displayName;
     private final String format;
-    private final char character;
+    private final String prefix;
     private final String sendPermission;
     private final String receivePermission;
     private final int radius;
@@ -49,25 +49,41 @@ public class BaseChannel implements Channel {
     /**
      * Creates a new BaseChannel with all properties.
      */
-    public BaseChannel(String id, String displayName, String format, char character,
+    public BaseChannel(String id, String displayName, String format, String prefix,
                        String sendPermission, String receivePermission, int radius,
                        boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
                        int minLength, int maxLength) {
-        this(id, displayName, format, character, sendPermission, receivePermission, radius, 
+        this(id, displayName, format, prefix, sendPermission, receivePermission, radius, 
              "", enabled, hoverTextUtil, cooldown, minLength, maxLength);
     }
     
     /**
      * Creates a new BaseChannel with all properties including world.
      */
-    public BaseChannel(String id, String displayName, String format, char character,
+    public BaseChannel(String id, String displayName, String format, String prefix,
                        String sendPermission, String receivePermission, int radius,
                        String world, boolean enabled, HoverTextUtil hoverTextUtil, int cooldown,
                        int minLength, int maxLength) {
         this.id = id;
         this.displayName = displayName;
         this.format = format;
-        this.character = character;
+        
+        // Initialize prefix with empty string if null
+        String validatedPrefix = prefix != null ? prefix : "";
+        
+        // Validate prefix: no whitespace
+        if (validatedPrefix.contains(" ")) {
+            Bukkit.getLogger().warning("Channel '" + id + "' has invalid prefix with whitespace. Prefix will be set to empty.");
+            validatedPrefix = "";
+        }
+        
+        // Validate prefix: max 10 characters
+        if (validatedPrefix.length() > 10) {
+            Bukkit.getLogger().warning("Channel '" + id + "' prefix exceeds 10 characters. Prefix will be truncated.");
+            validatedPrefix = validatedPrefix.substring(0, 10);
+        }
+        
+        this.prefix = validatedPrefix;
         this.sendPermission = sendPermission;
         this.receivePermission = receivePermission;
         this.radius = radius;
@@ -95,13 +111,13 @@ public class BaseChannel implements Channel {
     }
 
     @Override
-    public char getCharacter() {
-        return character;
+    public String getPrefix() {
+        return prefix;
     }
     
     @Override
-    public boolean hasTriggerCharacter() {
-        return character != '\0';
+    public boolean hasPrefix() {
+        return prefix != null && !prefix.isEmpty();
     }
 
     @Override
@@ -345,25 +361,26 @@ public class BaseChannel implements Channel {
 
             // Use the new InteractivePlaceholderManager
             if (nonchatPlugin.getPlaceholderManager() != null) {
-                // Apply inherited color if message doesn't have its own colors and player has permission
+                // Always apply inherited color from the format
                 String processedMessage = message;
-                if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+                if (!inheritedColor.isEmpty()) {
                     processedMessage = inheritedColor + message;
                 }
 
-                // Process interactive placeholders
-                Component placeholderProcessed = nonchatPlugin.getPlaceholderManager().processMessage(player, processedMessage);
-
-                // Handle color permissions for non-placeholder text
+                // Handle color permissions - only strip player's own colors, keep format colors
                 if (!player.hasPermission("nonchat.color")) {
-                    // We need to strip colors from text parts while preserving placeholder components
-                    // This is complex, so for now we'll fall back to the old method if placeholders are present
-                    if (processedMessage.contains("[") && processedMessage.contains("]")) {
-                        return processLegacyPlaceholdersWithColorPermission(player, processedMessage, inheritedColor);
+                    // Strip colors from the player's message content, but preserve the inherited color
+                    if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
+                        String playerMessagePart = processedMessage.substring(inheritedColor.length());
+                        String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
+                        processedMessage = inheritedColor + strippedPlayerPart;
+                    } else {
+                        processedMessage = ColorUtil.stripAllColors(processedMessage);
                     }
                 }
 
-                return placeholderProcessed;
+                // Process interactive placeholders
+                return nonchatPlugin.getPlaceholderManager().processMessage(player, processedMessage);
             }
         }
 
@@ -393,18 +410,21 @@ public class BaseChannel implements Channel {
      * Processes legacy placeholders with color permission handling
      */
     private Component processLegacyPlaceholdersWithColorPermission(Player player, String message, String inheritedColor) {
-        // Apply inherited color if message doesn't have its own colors and player has permission
+        // Always apply inherited color from the format
         String processedMessage = message;
-        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+        if (!inheritedColor.isEmpty()) {
             processedMessage = inheritedColor + message;
         }
 
-        // Strip colors from text parts while keeping placeholders
+        // Handle color permissions - only strip player's own colors, keep format colors
         if (!player.hasPermission("nonchat.color")) {
-            // Simple approach: strip colors but keep placeholder brackets
-            processedMessage = ColorUtil.stripAllColors(processedMessage);
-            if (!inheritedColor.isEmpty()) {
-                processedMessage = inheritedColor + processedMessage;
+            // Strip colors from the player's message content, but preserve the inherited color
+            if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
+                String playerMessagePart = processedMessage.substring(inheritedColor.length());
+                String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
+                processedMessage = inheritedColor + strippedPlayerPart;
+            } else {
+                processedMessage = ColorUtil.stripAllColors(processedMessage);
             }
         }
 
@@ -422,26 +442,25 @@ public class BaseChannel implements Channel {
      * Processes message content with color permission check
      */
     private Component processMessageWithColorPermission(Player player, String message, String inheritedColor) {
-        // Apply inherited color if message doesn't have its own colors and player has permission
+        // Always apply inherited color from the format
         String processedMessage = message;
-        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+        if (!inheritedColor.isEmpty()) {
             processedMessage = inheritedColor + message;
         }
-        
-        // First make links clickable, then apply color permission
-        Component linkProcessed = LinkDetector.makeLinksClickable(processedMessage);
-        
-        // If player doesn't have color permission, strip colors from the message part only
+
+        // Handle color permissions - only strip player's own colors, keep format colors
         if (!player.hasPermission("nonchat.color")) {
-            String strippedMessage = ColorUtil.stripAllColors(message);
-            // Apply inherited color from format even if player doesn't have color permission
-            if (!inheritedColor.isEmpty()) {
-                strippedMessage = inheritedColor + strippedMessage;
+            // Strip colors from the player's message content, but preserve the inherited color
+            if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
+                String playerMessagePart = processedMessage.substring(inheritedColor.length());
+                String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
+                processedMessage = inheritedColor + strippedPlayerPart;
+            } else {
+                processedMessage = ColorUtil.stripAllColors(processedMessage);
             }
-            return LinkDetector.makeLinksClickable(strippedMessage);
         }
-        
-        return linkProcessed;
+
+        return LinkDetector.makeLinksClickable(processedMessage);
     }
 
     /**
@@ -451,32 +470,33 @@ public class BaseChannel implements Channel {
         // Check if item placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
-        
+
         if (plugin instanceof Nonchat nonchatPlugin) {
             itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
         }
-        
+
         if (!itemEnabled) {
             return processMessageWithColorPermission(player, message, inheritedColor);
         }
-        
-        // Apply inherited color if message doesn't have its own colors and player has permission
+
+        // Always apply inherited color from the format
         String processedMessage = message;
-        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+        if (!inheritedColor.isEmpty()) {
             processedMessage = inheritedColor + message;
         }
-        
-        // Process item placeholder but respect color permissions for the rest of the message
+
+        // Handle color permissions - only strip player's own colors, keep format colors
         if (!player.hasPermission("nonchat.color")) {
-            // Strip colors from message but keep item placeholder functionality
-            String messageWithoutColors = ColorUtil.stripAllColors(message);
-            // Apply inherited color from format even if player doesn't have color permission
-            if (!inheritedColor.isEmpty()) {
-                messageWithoutColors = inheritedColor + messageWithoutColors;
+            // Strip colors from the player's message content, but preserve the inherited color
+            if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
+                String playerMessagePart = processedMessage.substring(inheritedColor.length());
+                String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
+                processedMessage = inheritedColor + strippedPlayerPart;
+            } else {
+                processedMessage = ColorUtil.stripAllColors(processedMessage);
             }
-            return ItemDetector.processItemPlaceholders(player, messageWithoutColors);
         }
-        
+
         return ItemDetector.processItemPlaceholders(player, processedMessage);
     }
 
@@ -487,32 +507,33 @@ public class BaseChannel implements Channel {
         // Check if ping placeholders are enabled
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean pingEnabled = true;
-        
+
         if (plugin instanceof Nonchat nonchatPlugin) {
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }
-        
+
         if (!pingEnabled) {
             return processMessageWithColorPermission(player, message, inheritedColor);
         }
-        
-        // Apply inherited color if message doesn't have its own colors and player has permission
+
+        // Always apply inherited color from the format
         String processedMessage = message;
-        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+        if (!inheritedColor.isEmpty()) {
             processedMessage = inheritedColor + message;
         }
-        
-        // Process ping placeholder but respect color permissions for the rest of the message
+
+        // Handle color permissions - only strip player's own colors, keep format colors
         if (!player.hasPermission("nonchat.color")) {
-            // Strip colors from message but keep ping placeholder functionality
-            String messageWithoutColors = ColorUtil.stripAllColors(message);
-            // Apply inherited color from format even if player doesn't have color permission
-            if (!inheritedColor.isEmpty()) {
-                messageWithoutColors = inheritedColor + messageWithoutColors;
+            // Strip colors from the player's message content, but preserve the inherited color
+            if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
+                String playerMessagePart = processedMessage.substring(inheritedColor.length());
+                String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
+                processedMessage = inheritedColor + strippedPlayerPart;
+            } else {
+                processedMessage = ColorUtil.stripAllColors(processedMessage);
             }
-            return PingDetector.processPingPlaceholders(player, messageWithoutColors);
         }
-        
+
         return PingDetector.processPingPlaceholders(player, processedMessage);
     }
 
@@ -524,50 +545,49 @@ public class BaseChannel implements Channel {
         Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
         boolean itemEnabled = true;
         boolean pingEnabled = true;
-        
+
         if (plugin instanceof Nonchat nonchatPlugin) {
             itemEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.item-enabled", true);
             pingEnabled = nonchatPlugin.getConfig().getBoolean("interactive-placeholders.ping-enabled", true);
         }
-        
-        // Apply inherited color if message doesn't have its own colors and player has permission
+
+        // Always apply inherited color from the format
         String processedMessage = message;
-        if (player.hasPermission("nonchat.color") && !inheritedColor.isEmpty() && !ColorUtil.hasColorCodes(message)) {
+        if (!inheritedColor.isEmpty()) {
             processedMessage = inheritedColor + message;
         }
-        
-        // Check color permission
+
+        // Handle color permissions - only strip player's own colors, keep format colors
         boolean hasColorPermission = player.hasPermission("nonchat.color");
-        processedMessage = hasColorPermission ? processedMessage : ColorUtil.stripAllColors(message);
-        
-        // Apply inherited color from format even if player doesn't have color permission
-        if (!hasColorPermission && !inheritedColor.isEmpty()) {
-            // We need to apply inherited color to text parts, but not to placeholders
-            // This is more complex, so we'll handle it in the text processing below
+        if (!hasColorPermission) {
+            // Strip colors from the player's message content, but preserve the inherited color
+            if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
+                String playerMessagePart = processedMessage.substring(inheritedColor.length());
+                String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
+                processedMessage = inheritedColor + strippedPlayerPart;
+            } else {
+                processedMessage = ColorUtil.stripAllColors(processedMessage);
+            }
         }
-        
+
         // Use TextComponent.Builder instead of Component.Builder
         TextComponent.Builder builder = Component.text();
-    
+
         // Split by [item] and [ping] and process each part
         String[] parts = processedMessage.split("(?i)\\[(item|ping)\\]");
         Pattern pattern = Pattern.compile("(?i)\\[(item|ping)\\]");
         Matcher matcher = pattern.matcher(processedMessage);
-    
+
         int partIndex = 0;
-    
+
         while (matcher.find()) {
             // Add text before placeholder
             if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
                 String textPart = parts[partIndex];
-                // Apply inherited color if player doesn't have color permission
-                if (!hasColorPermission && !inheritedColor.isEmpty()) {
-                    textPart = inheritedColor + textPart;
-                }
                 builder.append(LinkDetector.makeLinksClickable(textPart));
             }
             partIndex++;
-            
+
             String placeholder = matcher.group().toLowerCase();
             if (placeholder.equals("[item]") && itemEnabled) {
                 // Process item using the new bracketed method with client-side localization
@@ -589,24 +609,16 @@ public class BaseChannel implements Channel {
             } else {
                 // If placeholder is disabled, add it as plain text
                 String placeholderText = matcher.group();
-                // Apply inherited color if player doesn't have color permission
-                if (!hasColorPermission && !inheritedColor.isEmpty()) {
-                    placeholderText = inheritedColor + placeholderText;
-                }
                 builder.append(Component.text(placeholderText));
             }
         }
-        
+
         // Add remaining text
         if (partIndex < parts.length && !parts[partIndex].isEmpty()) {
             String textPart = parts[partIndex];
-            // Apply inherited color if player doesn't have color permission
-            if (!hasColorPermission && !inheritedColor.isEmpty()) {
-                textPart = inheritedColor + textPart;
-            }
             builder.append(LinkDetector.makeLinksClickable(textPart));
         }
-        
+
         return builder.build();
     }
     
@@ -644,8 +656,23 @@ public class BaseChannel implements Channel {
         String beforeName = beforeMessage.substring(0, nameIndex);
         String afterName = beforeMessage.substring(nameIndex + playerName.length());
 
+        // Extract trailing color from beforeName to apply to the player name
+        String trailingColor = extractTrailingColor(beforeName);
+
+        Component nameComponent;
+        if (!trailingColor.isEmpty()) {
+            // Remove the trailing color from beforeName if it's at the end
+            if (beforeName.endsWith(trailingColor)) {
+                beforeName = beforeName.substring(0, beforeName.length() - trailingColor.length());
+            }
+            // Create name component with the trailing color applied
+            Component coloredNameComponent = ColorUtil.parseConfigComponent(trailingColor + playerName);
+            nameComponent = hoverTextUtil.addHoverToComponent(coloredNameComponent, player);
+        } else {
+            nameComponent = hoverTextUtil.createHoverableText(playerName, player);
+        }
+
         Component beforeComponent = ColorUtil.parseConfigComponent(beforeName);
-        Component nameComponent = hoverTextUtil.createHoverableText(playerName, player);
         Component afterComponent = ColorUtil.parseConfigComponent(afterName);
 
         return beforeComponent.append(nameComponent).append(afterComponent);
@@ -669,8 +696,23 @@ public class BaseChannel implements Channel {
         String beforeName = fullFormat.substring(0, nameIndex);
         String afterName = fullFormat.substring(nameIndex + playerName.length());
 
+        // Extract trailing color from beforeName to apply to the player name
+        String trailingColor = extractTrailingColor(beforeName);
+
+        Component nameComponent;
+        if (!trailingColor.isEmpty()) {
+            // Remove the trailing color from beforeName if it's at the end
+            if (beforeName.endsWith(trailingColor)) {
+                beforeName = beforeName.substring(0, beforeName.length() - trailingColor.length());
+            }
+            // Create name component with the trailing color applied
+            Component coloredNameComponent = ColorUtil.parseConfigComponent(trailingColor + playerName);
+            nameComponent = hoverTextUtil.addHoverToComponent(coloredNameComponent, player);
+        } else {
+            nameComponent = hoverTextUtil.createHoverableText(playerName, player);
+        }
+
         Component beforeComponent = ColorUtil.parseConfigComponent(beforeName);
-        Component nameComponent = hoverTextUtil.createHoverableText(playerName, player);
         Component afterComponent = ColorUtil.parseConfigComponent(afterName);
 
         return beforeComponent.append(nameComponent).append(afterComponent);

@@ -29,16 +29,16 @@ public interface Channel {
     String getFormat();
     
     /**
-     * Gets the character that triggers this channel.
-     * @return Trigger character.
+     * Gets the prefix that triggers this channel.
+     * @return Trigger prefix string.
      */
-    char getCharacter();
+    String getPrefix();
     
     /**
-     * Checks if this channel has a trigger character.
-     * @return True if the channel has a trigger character.
+     * Checks if this channel has a trigger prefix.
+     * @return True if the channel has a trigger prefix.
      */
-    boolean hasTriggerCharacter();
+    boolean hasPrefix();
     
     /**
      * Checks if this channel is enabled.

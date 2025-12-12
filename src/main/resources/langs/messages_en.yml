@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.5
+# Version of the plugin: 1.5.6
 #
 # - LuckPerms support.
 # - Vault support.
@@ -29,7 +29,7 @@ reloaded: "&#84FFB8Plugin reloaded!"
 reload-failed: "&#ff0000Failed to reload plugin!"
 
 # Version.
-version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.5\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.5"
+version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.6\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.6"
 
 # Help.
 help: "&#FFAFFBnonchat | commands:"
@@ -94,6 +94,18 @@ dimension-end: "The End"
 # Link hover text
 link-hover: "Click to open: {url}"
 
+# Death messages system
+death-messages-reloading: "&#FFAFFBReloading death messages..."
+death-messages-reloaded: "&#84FFB8Death messages reloaded! Loaded {count} message variants across {causes} death causes."
+death-messages-reloaded-simple: "&#84FFB8Death messages reloaded successfully!"
+death-messages-reload-failed: "&#ff0000Failed to reload death messages!"
+death-messages-load-error: "&#ff0000Error loading death messages: {error}"
+death-messages-validation-warning: "&#FFAFFBWarning: {warning}"
+
+# Spam detection notifications
+spam-detected-repetitive: "§#FFAFFB[nonchat] §f{player} detected repetitive spam: §#ff0000{message}"
+spam-detected-similar: "§#FFAFFB[nonchat] §f{player} detected similar spam: §#ff0000{message}"
+spam-detected-flood: "§#FFAFFB[nonchat] §f{player} detected flood spam: §#ff0000{message}"
 
 # Channel Command
 channel-help-header: "&#FFAFFBChannel Commands:"
@@ -145,6 +157,9 @@ channel-deleted: "&#84FFB8Channel {channel} deleted"
 channel-delete-failed: "&#ff0000Failed to delete channel {channel}. Channel may be the default channel."
 channel-default-set: "&#84FFB8Default channel set to {channel}"
 channel-default-failed: "&#ff0000Failed to set default channel to {channel}"
+channel-prefix-no-spaces: "&#ff0000Error: Channel prefix cannot contain spaces"
+channel-prefix-too-long: "&#ff0000Error: Channel prefix cannot be longer than 10 characters"
+channel-prefix-exists: "&#ff0000Error: A channel with prefix '{prefix}' already exists"
 
 # Placeholders.
 placeholders:

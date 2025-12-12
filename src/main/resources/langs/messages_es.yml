@@ -3,7 +3,7 @@
 # Plugin creado por nonxedy (@nonxedy).
 # Publicado en github https://github.com/nonxedy/nonchat
 # Publicado en modrinth https://modrinth.com/plugin/nonchat
-# Versión del plugin: 1.5.5
+# Versión del plugin: 1.5.6
 #
 # - Soporte para LuckPerms.
 # - Soporte para Vault.
@@ -31,7 +31,7 @@ reloaded: "&#84FFB8¡Plugin recargado exitosamente!"
 reload-failed: "&#ff0000¡Error al recargar el plugin!"
 
 # Versión.
-version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.5\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.5"
+version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.6\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.6"
 
 # Ayuda.
 help: "&#FFAFFBnonchat | comandos:"
@@ -96,6 +96,18 @@ dimension-end: "El Fin"
 # Texto al pasar el cursor sobre enlaces
 link-hover: "Haz clic para abrir: {url}"
 
+# Sistema de mensajes de muerte
+death-messages-reloading: "&#FFAFFBRecargando mensajes de muerte..."
+death-messages-reloaded: "&#84FFB8¡Mensajes de muerte recargados! Se cargaron {count} variantes de mensajes en {causes} causas de muerte."
+death-messages-reloaded-simple: "&#84FFB8¡Mensajes de muerte recargados exitosamente!"
+death-messages-reload-failed: "&#ff0000¡Error al recargar los mensajes de muerte!"
+death-messages-load-error: "&#ff0000Error al cargar mensajes de muerte: {error}"
+death-messages-validation-warning: "&#FFAFFBAdvertencia: {warning}"
+
+# Notificaciones de detección de spam
+spam-detected-repetitive: "§#FFAFFB[nonchat] §f{player} detectó spam repetitivo: §#ff0000{message}"
+spam-detected-similar: "§#FFAFFB[nonchat] §f{player} detectó spam similar: §#ff0000{message}"
+spam-detected-flood: "§#FFAFFB[nonchat] §f{player} detectó spam por flood: §#ff0000{message}"
 
 # Comando de Canal
 channel-help-header: "&#FFAFFBComandos de Canales:"
@@ -147,6 +159,9 @@ channel-deleted: "&#84FFB8Canal {channel} eliminado"
 channel-delete-failed: "&#ff0000Error al eliminar el canal {channel}. El canal puede ser el canal predeterminado."
 channel-default-set: "&#84FFB8Canal predeterminado establecido como {channel}"
 channel-default-failed: "&#ff0000Error al establecer el canal predeterminado como {channel}"
+channel-prefix-no-spaces: "&#ff0000Error: El prefijo del canal no puede contener espacios"
+channel-prefix-too-long: "&#ff0000Error: El prefijo del canal no puede tener más de 10 caracteres"
+channel-prefix-exists: "&#ff0000Error: Ya existe un canal con el prefijo '{prefix}'"
 
 # Variables de reemplazo.
 placeholders:

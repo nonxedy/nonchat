@@ -3,8 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.nonxedy.nonchat</groupId>
   <artifactId>nonchat</artifactId>
-  <version>1.5.5</version>
+  <version>1.5.6</version>
   <build>
+    <finalName>nonchat-${project.version}${dev.build.suffix}</finalName>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -75,6 +76,14 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <dev.build.suffix>-dev</dev.build.suffix>
+      </properties>
+    </profile>
+  </profiles>
   <repositories>
     <repository>
       <id>papermc-repo</id>
