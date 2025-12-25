@@ -223,26 +223,6 @@ channels:
     min-length: 0
     max-length: -1
   
-# ==================================================
-# CUSTOM DEATH MESSAGES (DEPRECATED)
-# ==================================================
-# WARNING: This section is DEPRECATED and will be removed in a future version.
-# Please use the new 'deaths.yml' file for death message configuration.
-# The new system provides:
-#   - Custom messages per death cause (drowning, fall damage, etc.)
-#   - Advanced placeholder support
-#   - Better organization and maintainability
-# 
-# This legacy system is kept for backward compatibility only.
-# ==================================================
-death:
-  # Enable/disable custom death messages (legacy system).
-  # NOTE: This is overridden by deaths.yml if it exists.
-  enabled: true
-  # The death message format (legacy - single format for all death types).
-  format: "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died"
-  # Show death coordinates to the player who died.
-  show-coordinates: true
 
 # ==================================================
 # JOIN & QUIT MESSAGES
