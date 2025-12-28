@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -399,9 +400,12 @@ public class ChatManager {
         try {
             Location loc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
 
-            List<TextDisplay> playerBubbles = DisplayEntityUtil.spawnMultilineBubble(player, message, loc, 
-                config.getChatBubblesScale(), config.getChatBubblesScaleX(), config.getChatBubblesScaleY(), config.getChatBubblesScaleZ());
-            
+            // Get background color from config
+            Color backgroundColor = ColorUtil.parseHexColor(config.getChatBubblesBackgroundColor());
+
+            List<TextDisplay> playerBubbles = DisplayEntityUtil.spawnMultilineBubble(player, message, loc,
+                config.getChatBubblesScale(), config.getChatBubblesScaleX(), config.getChatBubblesScaleY(), config.getChatBubblesScaleZ(), backgroundColor);
+
             // Only add bubbles if they were successfully created
             if (playerBubbles != null && !playerBubbles.isEmpty()) {
                 bubbles.put(player, playerBubbles);

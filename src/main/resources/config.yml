@@ -327,6 +327,8 @@ chat-bubbles:
   scale-x: 1.0
   scale-y: 1.0
   scale-z: 1.0
+  # Background color of the chat bubble (hex color code, e.g., #000000 for black).
+  background-color: "#000000"
 
 # ==================================================
 # ROLEPLAY COMMANDS

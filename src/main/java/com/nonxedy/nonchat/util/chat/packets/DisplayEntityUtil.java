@@ -30,19 +30,7 @@ public class DisplayEntityUtil {
     private static final ObjectPool<TextDisplay> displayPool = new ObjectPool<>(50);
     
     /**
-     * Creates and configures multiple chat bubble TextDisplay entities for multiline text using pooled entities
-     * @param player The player to create bubbles for
-     * @param text The text to display in bubbles
-     * @param location The base location to spawn bubbles at
-     * @param scale The scale multiplier for the bubbles
-     * @return List of configured TextDisplay entities
-     */
-    public static List<TextDisplay> spawnMultilineBubble(Player player, String text, Location location, double scale) {
-        return spawnMultilineBubble(player, text, location, scale, scale, scale, scale);
-    }
-
-    /**
-     * Creates and configures multiple chat bubble TextDisplay entities for multiline text using pooled entities with individual axis scales
+     * Creates and configures multiple chat bubble TextDisplay entities for multiline text using pooled entities with individual axis scales and background color
      * @param player The player to create bubbles for
      * @param text The text to display in bubbles
      * @param location The base location to spawn bubbles at
@@ -50,21 +38,22 @@ public class DisplayEntityUtil {
      * @param scaleX The X axis scale multiplier
      * @param scaleY The Y axis scale multiplier
      * @param scaleZ The Z axis scale multiplier
+     * @param backgroundColor The background color for the text displays
      * @return List of configured TextDisplay entities
      */
-    public static List<TextDisplay> spawnMultilineBubble(Player player, String text, Location location, double overallScale, double scaleX, double scaleY, double scaleZ) {
+    public static List<TextDisplay> spawnMultilineBubble(Player player, String text, Location location, double overallScale, double scaleX, double scaleY, double scaleZ, Color backgroundColor) {
         List<String> lines = splitTextIntoLines(text, MAX_LINE_LENGTH);
         List<TextDisplay> bubbleDisplays = new ArrayList<>();
-        
+
         for (int i = 0; i < lines.size(); i++) {
             Location lineLocation = location.clone().add(0, (lines.size() - 1 - i) * LINE_SPACING, 0);
-            
+
             TextDisplay bubble = displayPool.acquire(() -> {
                 try {
                     // Use the player's world to spawn the entity to ensure proper region handling
                     World world = player.getWorld();
                     TextDisplay display = (TextDisplay) world.spawnEntity(lineLocation, EntityType.TEXT_DISPLAY);
-                    configureTextDisplay(display, overallScale, scaleX, scaleY, scaleZ);
+                    configureTextDisplay(display, overallScale, scaleX, scaleY, scaleZ, backgroundColor);
                     return display;
                 } catch (Exception e) {
                     // Log error and return null if entity creation fails
@@ -72,20 +61,20 @@ public class DisplayEntityUtil {
                     return null;
                 }
             });
-            
+
             // Skip if bubble creation failed
             if (bubble == null) {
                 continue;
             }
-            
+
             try {
                 bubble.teleport(lineLocation);
-                
+
                 // Use parseComponent to handle all color formats (legacy, hex, minimessage)
                 // Don't strip colors in splitTextIntoLines, let parseComponent handle it
                 Component component = ColorUtil.parseComponent(lines.get(i));
                 bubble.text(component);
-                
+
                 bubbleDisplays.add(bubble);
             } catch (Exception e) {
                 // Remove the bubble if configuration fails
@@ -95,7 +84,7 @@ public class DisplayEntityUtil {
                 Bukkit.getLogger().log(Level.WARNING, "[nonchat] Failed to configure text display: {0}", e.getMessage());
             }
         }
-        
+
         return bubbleDisplays;
     }
     
@@ -105,18 +94,19 @@ public class DisplayEntityUtil {
      * @param scale The scale multiplier
      */
     private static void configureTextDisplay(TextDisplay display, double scale) {
-        configureTextDisplay(display, scale, scale, scale, scale);
+        configureTextDisplay(display, scale, scale, scale, scale, Color.BLACK);
     }
 
     /**
-     * Configures a TextDisplay entity with chat bubble properties using individual axis scales
+     * Configures a TextDisplay entity with chat bubble properties using individual axis scales and background color
      * @param display The TextDisplay to configure
      * @param overallScale The overall scale multiplier (for backward compatibility)
      * @param scaleX The X axis scale multiplier
      * @param scaleY The Y axis scale multiplier
      * @param scaleZ The Z axis scale multiplier
+     * @param backgroundColor The background color for the text display
      */
-    private static void configureTextDisplay(TextDisplay display, double overallScale, double scaleX, double scaleY, double scaleZ) {
+    private static void configureTextDisplay(TextDisplay display, double overallScale, double scaleX, double scaleY, double scaleZ, Color backgroundColor) {
         try {
             // Set display properties
             display.setCustomNameVisible(false);
@@ -134,8 +124,8 @@ public class DisplayEntityUtil {
             transformation.getScale().set(scaleVector.x, scaleVector.y, scaleVector.z);
             display.setTransformation(transformation);
             
-            // Set background color (semi-transparent black) - using Color from Bukkit
-            display.setBackgroundColor(Color.BLACK);
+            // Set background color - using Color from Bukkit
+            display.setBackgroundColor(backgroundColor);
             
             // Set text alignment to center
             display.setAlignment(TextDisplay.TextAlignment.CENTER);

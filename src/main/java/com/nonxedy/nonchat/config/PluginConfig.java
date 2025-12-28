@@ -158,6 +158,7 @@ public class PluginConfig {
         config.set("chat-bubbles.scale-x", 1.0);
         config.set("chat-bubbles.scale-y", 1.0);
         config.set("chat-bubbles.scale-z", 1.0);
+        config.set("chat-bubbles.background-color", "#000000");
         
         // Create default channel configurations
         createDefaultChannels();
@@ -801,6 +802,15 @@ public class PluginConfig {
      */
     public double getChatBubblesScaleZ() {
         return config.getDouble("chat-bubbles.scale-z", 1.0);
+    }
+
+    /**
+     * Gets chat bubble background color
+     * @return Background color as hex string (e.g., "#000000")
+     */
+    @NotNull
+    public String getChatBubblesBackgroundColor() {
+        return config.getString("chat-bubbles.background-color", "#000000");
     }
 
     /**
