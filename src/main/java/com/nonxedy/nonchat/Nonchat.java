@@ -20,13 +20,14 @@ import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.DeathConfig;
 import com.nonxedy.nonchat.core.BroadcastManager;
 import com.nonxedy.nonchat.core.ChatManager;
+import com.nonxedy.nonchat.core.IndirectDeathTracker;
 import com.nonxedy.nonchat.core.MessageManager;
 import com.nonxedy.nonchat.hook.DiscordSRVHook;
 import com.nonxedy.nonchat.integration.DiscordSRVIntegration;
 import com.nonxedy.nonchat.listener.ChatListener;
 import com.nonxedy.nonchat.listener.ChatListenerFactory;
-import com.nonxedy.nonchat.listener.DeathCoordinates;
 import com.nonxedy.nonchat.listener.DamageTrackingListener;
+import com.nonxedy.nonchat.listener.DeathCoordinates;
 import com.nonxedy.nonchat.listener.DeathListener;
 import com.nonxedy.nonchat.listener.DiscordSRVListener;
 import com.nonxedy.nonchat.listener.JoinQuitListener;
@@ -36,7 +37,6 @@ import com.nonxedy.nonchat.service.ChatService;
 import com.nonxedy.nonchat.service.CommandService;
 import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.service.DeathMessageService;
-import com.nonxedy.nonchat.core.IndirectDeathTracker;
 import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.packets.DisplayEntityUtil;
@@ -338,10 +338,10 @@ public class Nonchat extends JavaPlugin {
             if (chatManager != null) {
                 chatManager.cleanup();
             }
-            
+
             // Clear display entity pool
             DisplayEntityUtil.clearPool();
-            
+
             // Cancel all scheduled tasks
             if (broadcastManager != null) {
                 broadcastManager.stop();
@@ -358,12 +358,15 @@ public class Nonchat extends JavaPlugin {
             if (discordSRVIntegration != null) {
                 discordSRVIntegration.unregister();
             }
-            
+
             // Clean up indirect death tracker cache
             if (indirectDeathTracker != null) {
                 indirectDeathTracker.clearAll();
             }
-            
+
+            // Clean up ChannelAPI registrations
+            ChannelAPI.cleanupAll();
+
             // Cancel all remaining Bukkit tasks for this plugin
             Bukkit.getScheduler().cancelTasks(this);
 

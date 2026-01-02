@@ -66,183 +66,41 @@ public class ChatManager {
         ReentrantLock lock = playerLocks.computeIfAbsent(player, p -> new ReentrantLock());
         lock.lock();
         try {
-            // Check if the message is empty or contains only whitespace
-            if (messageContent == null || messageContent.trim().isEmpty()) {
-                return; // Silently cancel empty messages
-            }
-            
-            if (handleBlockedWords(player, messageContent)) {
+            ChatProcessingContext context = new ChatProcessingContext(player, messageContent);
+
+            // Basic validation
+            if (!validateBasicMessage(context)) {
                 return;
             }
 
-            CapsFilter capsFilter = config.getCapsFilter();
-            if (!player.hasPermission("nonchat.caps.bypass") && capsFilter.shouldFilter(messageContent)) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
-                        .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
+            // Apply filters
+            if (!applyFilters(context)) {
                 return;
             }
 
-            // Check for spam
-            if (config.isAntiSpamEnabled() && !player.hasPermission("nonchat.spam.bypass")) {
-                if (spamDetector.shouldFilter(player, messageContent)) {
-                    // Warning message is already sent by SpamDetector
-                    return;
-                }
-            }
-
-            // Check for advertisements
-            if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
-                if (adDetector.shouldFilter(player, messageContent)) {
-                    player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
-                    return;
-                }
-            }
-
-            // Check if player is trying to use colors without permission
-            if (!player.hasPermission("nonchat.color") && ColorUtil.hasColorCodes(messageContent)) {
-                // Strip colors but continue processing the message
-                messageContent = ColorUtil.stripAllColors(messageContent);
-                
-                // Check if the message is empty after stripping colors
-                if (messageContent.trim().isEmpty()) {
-                    return; // Silently cancel empty messages
-                }
-            }
-
-            // Determine which channel to use based on message prefix or player's active channel
-            Channel channel = channelManager.getChannelForMessage(messageContent);
-            String finalMessage;
-
-            // If a channel was found by prefix, update player's active channel and remove the prefix from the message
-            if (channel != null && channel.hasPrefix() && messageContent.startsWith(channel.getPrefix())) {
-                // Update player's active channel for DiscordSRV integration
-                channelManager.setPlayerChannel(player, channel.getId());
-                finalMessage = messageContent.substring(channel.getPrefix().length());
-                // Check if the message is empty after removing channel prefix
-                if (finalMessage.trim().isEmpty()) {
-                    return; // Silently cancel empty messages
-                }
-            } else {
-                // No prefix match, use the message as-is
-                finalMessage = messageContent;
-            }
-
-            // Ensure we have a valid channel (should not be null from getChannelForMessage)
-            if (channel == null) {
-                return; // Silently cancel if no channel available
-            }
-
-            // Check if channel is enabled
-            if (!channel.isEnabled()) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("chat-disabled")));
+            // Handle channel logic
+            if (!handleChannelLogic(context)) {
                 return;
             }
 
-            // Check if player has permission to use this channel
-            if (!channel.canSend(player)) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            // Validate channel permissions and limits
+            if (!validateChannelAccess(context)) {
                 return;
             }
 
-            // Check message length restrictions (use stripped message for length check)
-            String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage : ColorUtil.stripAllColors(finalMessage);
-
-            if (messageForLengthCheck.length() < channel.getMinLength()) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-short")
-                        .replace("{min}", String.valueOf(channel.getMinLength()))));
+            // Process message through API
+            if (!processMessageThroughAPI(context)) {
                 return;
             }
 
-            if (channel.getMaxLength() > 0 && messageForLengthCheck.length() > channel.getMaxLength()) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-long")
-                        .replace("{max}", String.valueOf(channel.getMaxLength()))));
-                return;
-            }
+            // Handle mentions
+            handleMentions(player, context.processedMessage);
 
-            // Check cooldown
-            if (!channelManager.canSendMessage(player, channel)) {
-                int remainingSeconds = channelManager.getRemainingCooldown(player, channel);
-                player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-cooldown")
-                        .replace("{seconds}", String.valueOf(remainingSeconds))
-                        .replace("{channel}", channel.getDisplayName())));
-                return;
-            }
+            // Format and broadcast
+            broadcastProcessedMessage(context);
 
-            // Record message sent immediately after passing cooldown check
-            // This prevents the cooldown from getting stuck when multiple messages are sent rapidly
-            channelManager.recordMessageSent(player);
-
-            // Check if message should be filtered by registered filters
-            if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-filtered")));
-                return;
-            }
-
-            // Process message through registered processors
-            String processedMessage = ChannelAPI.processMessage(player, finalMessage, channel.getId());
-            if (processedMessage == null) {
-                // Message was cancelled by a processor
-                return;
-            }
-
-            // Apply mention coloring for all recipients if enabled
-            final String messageToSend = config.isMentionColoringEnabled()
-                ? processMentionColoring(processedMessage)
-                : processedMessage;
-
-            // Only show chat bubbles for public channels (channels without receive permission requirements)
-            // or if the channel doesn't have restricted access
-            boolean shouldShowBubble = config.isChatBubblesEnabled()
-                    && player.hasPermission("nonchat.chatbubbles")
-                    && isPublicChannel(channel);
-
-            if (shouldShowBubble) {
-                try {
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        try {
-                            removeBubble(player);
-                            // For bubbles, use the message without colors if player doesn't have permission
-                            String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
-                            createBubble(player, bubbleMessage);
-                        } catch (Exception e) {
-                            plugin.logError("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
-                        }
-                    });
-                } catch (IllegalArgumentException e) {
-                    plugin.logError("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
-                    // Try to create bubble immediately as fallback
-                    try {
-                        removeBubble(player);
-                        String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
-                        createBubble(player, bubbleMessage);
-                    } catch (Exception fallbackError) {
-                        plugin.logError("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
-                        // Try to create bubble using global scheduler as last resort
-                        try {
-                            Bukkit.getScheduler().runTask(plugin, () -> {
-                                try {
-                                    removeBubble(player);
-                                    String bubbleMessage = player.hasPermission("nonchat.color") ? messageToSend : ColorUtil.stripAllColors(messageToSend);
-                                    createBubble(player, bubbleMessage);
-                                } catch (Exception globalError) {
-                                    plugin.logError("Global scheduler bubble creation also failed for player " + player.getName() + ": " + globalError.getMessage());
-                                }
-                            });
-                        } catch (IllegalArgumentException globalSchedulerError) {
-                            plugin.logError("Failed to schedule global bubble creation for player " + player.getName() + ": " + globalSchedulerError.getMessage());
-                        }
-                    }
-                }
-            }
-
-            handleMentions(player, processedMessage); // Use original message for mention detection
-            Component formattedMessage = channel.formatMessage(player, messageToSend);
-            boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, processedMessage); // Use original message for console
-
-            // Check if undelivered message notifications are enabled and notify if message wasn't delivered
-            if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
-                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
-            }
+            // Handle bubble creation if needed
+            handleBubbleCreation(context);
 
         } finally {
             lock.unlock();
@@ -250,6 +108,232 @@ public class ChatManager {
             // Clean up lock if player is offline
             if (!player.isOnline()) {
                 playerLocks.remove(player);
+            }
+        }
+    }
+
+    /**
+     * Context class to hold chat processing state
+     */
+    private static class ChatProcessingContext {
+        final Player player;
+        String messageContent;
+        Channel channel;
+        String finalMessage;
+        String processedMessage;
+        boolean messageDelivered;
+
+        ChatProcessingContext(Player player, String messageContent) {
+            this.player = player;
+            this.messageContent = messageContent;
+        }
+    }
+
+    private boolean validateBasicMessage(ChatProcessingContext context) {
+        // Check if the message is empty or contains only whitespace
+        if (context.messageContent == null || context.messageContent.trim().isEmpty()) {
+            return false; // Silently cancel empty messages
+        }
+        return true;
+    }
+
+    private boolean applyFilters(ChatProcessingContext context) {
+        Player player = context.player;
+        String message = context.messageContent;
+
+        // Check blocked words
+        if (handleBlockedWords(player, message)) {
+            return false;
+        }
+
+        // Check caps filter
+        CapsFilter capsFilter = config.getCapsFilter();
+        if (!player.hasPermission("nonchat.caps.bypass") && capsFilter.shouldFilter(message)) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("caps-filter")
+                    .replace("{percentage}", String.valueOf(capsFilter.getMaxCapsPercentage()))));
+            return false;
+        }
+
+        // Check spam
+        if (config.isAntiSpamEnabled() && !player.hasPermission("nonchat.spam.bypass")) {
+            if (spamDetector.shouldFilter(player, message)) {
+                return false;
+            }
+        }
+
+        // Check advertisements
+        if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
+            if (adDetector.shouldFilter(player, message)) {
+                player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
+                return false;
+            }
+        }
+
+        // Handle color permissions
+        if (!player.hasPermission("nonchat.color") && ColorUtil.hasColorCodes(message)) {
+            message = ColorUtil.stripAllColors(message);
+            if (message.trim().isEmpty()) {
+                return false; // Silently cancel empty messages after stripping colors
+            }
+            context.messageContent = message;
+        }
+
+        return true;
+    }
+
+    private boolean handleChannelLogic(ChatProcessingContext context) {
+        Player player = context.player;
+        String message = context.messageContent;
+
+        // Determine which channel to use based on message prefix or player's active channel
+        Channel channel = channelManager.getChannelForMessage(message);
+        if (channel == null) {
+            return false; // Silently cancel if no channel available
+        }
+
+        String finalMessage;
+        // If a channel was found by prefix, update player's active channel and remove the prefix
+        if (channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
+            channelManager.setPlayerChannel(player, channel.getId());
+            finalMessage = message.substring(channel.getPrefix().length());
+            if (finalMessage.trim().isEmpty()) {
+                return false; // Silently cancel empty messages after removing prefix
+            }
+        } else {
+            finalMessage = message;
+        }
+
+        context.channel = channel;
+        context.finalMessage = finalMessage;
+        return true;
+    }
+
+    private boolean validateChannelAccess(ChatProcessingContext context) {
+        Player player = context.player;
+        Channel channel = context.channel;
+        String finalMessage = context.finalMessage;
+
+        // Check if channel is enabled
+        if (!channel.isEnabled()) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("chat-disabled")));
+            return false;
+        }
+
+        // Check permissions
+        if (!channel.canSend(player)) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("no-permission")));
+            return false;
+        }
+
+        // Check message length
+        String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage : ColorUtil.stripAllColors(finalMessage);
+        if (messageForLengthCheck.length() < channel.getMinLength()) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-short")
+                    .replace("{min}", String.valueOf(channel.getMinLength()))));
+            return false;
+        }
+        if (channel.getMaxLength() > 0 && messageForLengthCheck.length() > channel.getMaxLength()) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-long")
+                    .replace("{max}", String.valueOf(channel.getMaxLength()))));
+            return false;
+        }
+
+        // Check cooldown
+        if (!channelManager.canSendMessage(player, channel)) {
+            int remainingSeconds = channelManager.getRemainingCooldown(player, channel);
+            player.sendMessage(ColorUtil.parseComponent(messages.getString("channel-cooldown")
+                    .replace("{seconds}", String.valueOf(remainingSeconds))
+                    .replace("{channel}", channel.getDisplayName())));
+            return false;
+        }
+
+        // Record message sent
+        channelManager.recordMessageSent(player);
+        return true;
+    }
+
+    private boolean processMessageThroughAPI(ChatProcessingContext context) {
+        Player player = context.player;
+        Channel channel = context.channel;
+        String finalMessage = context.finalMessage;
+
+        // Check API filters
+        if (ChannelAPI.shouldFilterMessage(player, finalMessage, channel.getId())) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-filtered")));
+            return false;
+        }
+
+        // Process through API processors
+        String processedMessage = ChannelAPI.processMessage(player, finalMessage, channel.getId());
+        if (processedMessage == null) {
+            return false; // Message was cancelled by a processor
+        }
+
+        // Apply mention coloring if enabled
+        String messageToSend = config.isMentionColoringEnabled()
+            ? processMentionColoring(processedMessage)
+            : processedMessage;
+
+        context.processedMessage = processedMessage;
+        context.finalMessage = messageToSend;
+        return true;
+    }
+
+    private void broadcastProcessedMessage(ChatProcessingContext context) {
+        Player player = context.player;
+        Channel channel = context.channel;
+        String messageToSend = context.finalMessage;
+        String processedMessage = context.processedMessage;
+
+        Component formattedMessage = channel.formatMessage(player, messageToSend);
+        boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, processedMessage);
+
+        // Notify if message wasn't delivered
+        if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
+            player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
+        }
+
+        context.messageDelivered = messageDelivered;
+    }
+
+    private void handleBubbleCreation(ChatProcessingContext context) {
+        Player player = context.player;
+        Channel channel = context.channel;
+        String messageToSend = context.finalMessage;
+
+        // Only show chat bubbles for public channels with permission
+        boolean shouldShowBubble = config.isChatBubblesEnabled()
+                && player.hasPermission("nonchat.chatbubbles")
+                && isPublicChannel(channel);
+
+        if (shouldShowBubble) {
+            scheduleBubbleCreation(player, messageToSend);
+        }
+    }
+
+    /**
+     * Schedules bubble creation with robust error handling and fallbacks
+     */
+    private void scheduleBubbleCreation(Player player, String message) {
+        String bubbleMessage = player.hasPermission("nonchat.color") ? message : ColorUtil.stripAllColors(message);
+
+        try {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                try {
+                    removeBubble(player);
+                    createBubble(player, bubbleMessage);
+                } catch (Exception e) {
+                    plugin.logError("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
+                }
+            });
+        } catch (IllegalArgumentException e) {
+            plugin.logError("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
+            // Try immediate execution as fallback
+            try {
+                removeBubble(player);
+                createBubble(player, bubbleMessage);
+            } catch (Exception fallbackError) {
+                plugin.logError("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
             }
         }
     }
@@ -276,119 +360,80 @@ public class ChatManager {
     }
 
     private void startBubbleUpdater() {
+        Runnable bubbleUpdateTask = this::updateBubbles;
+
+        // Try different scheduling strategies in order of preference
+        if (tryScheduleTask(bubbleUpdateTask, 1L, 1L, "primary")) {
+            return;
+        }
+
+        if (tryScheduleTask(bubbleUpdateTask, 1L, 1L, "fallback")) {
+            plugin.logResponse("Bubble updater started with fallback scheduler");
+            return;
+        }
+
+        // Last resort: run once immediately
+        plugin.logResponse("Starting bubble updater with immediate execution as last resort");
         try {
-            Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-                try {
-                    // Use Stream API to handle updating bubbles
-                    bubbles.entrySet().stream()
-                            .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
-                            .forEach(entry -> {
-                                try {
-                                    Player player = entry.getKey();
-                                    Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                                    DisplayEntityUtil.updateBubblesLocation(entry.getValue(), newLoc);
-                                } catch (Exception e) {
-                                    plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
-                                }
-                            });
+            Bukkit.getScheduler().runTask(plugin, bubbleUpdateTask);
+            plugin.logResponse("Bubble updater started with immediate execution");
+        } catch (IllegalArgumentException immediateError) {
+            plugin.logError("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
+        }
+    }
 
-                    // Clean up bubbles for offline players
-                    bubbles.entrySet().removeIf(entry -> {
-                        try {
-                            if (!entry.getKey().isOnline()) {
-                                DisplayEntityUtil.removeBubbles(entry.getValue());
-                                return true;
-                            }
-                        } catch (Exception e) {
-                            plugin.logError("Error cleaning up bubbles for offline player: " + e.getMessage());
-                            return true; // Remove entry on error
-                        }
-                        return false;
-                    });
-                } catch (Exception e) {
-                    plugin.logError("Error in bubble updater: " + e.getMessage());
-                }
-            }, 1L, 1L);
-        } catch (IllegalArgumentException e) {
-            plugin.logError("Failed to start bubble updater: " + e.getMessage());
-            // Try to start with global scheduler as fallback
-            try {
-                Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-                    try {
-                        // Use Stream API to handle updating bubbles
-                        bubbles.entrySet().stream()
-                                .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
-                                .forEach(entry -> {
-                                    try {
-                                        Player player = entry.getKey();
-                                        Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                                        DisplayEntityUtil.updateBubblesLocation(entry.getValue(), newLoc);
-                                    } catch (Exception e2) {
-                                        plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
-                                    }
-                                });
-
-                        // Clean up bubbles for offline players
-                        bubbles.entrySet().removeIf(entry -> {
-                            try {
-                                if (!entry.getKey().isOnline()) {
-                                    DisplayEntityUtil.removeBubbles(entry.getValue());
-                                    return true;
-                                }
-                            } catch (Exception e2) {
-                                plugin.logError("Error cleaning up bubbles for offline player: " + e2.getMessage());
-                                return true; // Remove entry on error
-                            }
-                            return false;
-                        });
-                    } catch (Exception e2) {
-                        plugin.logError("Error in fallback bubble updater: " + e2.getMessage());
-                    }
-                }, 1L, 1L);
-                plugin.logResponse("Bubble updater started with fallback scheduler");
-            } catch (IllegalArgumentException fallbackError) {
-                plugin.logError("Failed to start bubble updater with fallback scheduler: " + fallbackError.getMessage());
-                // Try to start with immediate execution as last resort
-                try {
-                    plugin.logResponse("Starting bubble updater with immediate execution as last resort");
-                    // This will run the updater immediately and then stop
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        try {
-                            // Use Stream API to handle updating bubbles
-                            bubbles.entrySet().stream()
-                                    .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
-                                    .forEach(entry -> {
-                                        try {
-                                            Player player = entry.getKey();
-                                            Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
-                                            DisplayEntityUtil.updateBubblesLocation(entry.getValue(), newLoc);
-                                        } catch (Exception e2) {
-                                            plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e2.getMessage());
-                                        }
-                                    });
-
-                            // Clean up bubbles for offline players
-                            bubbles.entrySet().removeIf(entry -> {
-                                try {
-                                    if (!entry.getKey().isOnline()) {
-                                        DisplayEntityUtil.removeBubbles(entry.getValue());
-                                        return true;
-                                    }
-                                } catch (Exception e2) {
-                                    plugin.logError("Error cleaning up bubbles for offline player: " + e2.getMessage());
-                                    return true; // Remove entry on error
-                                }
-                                return false;
-                            });
-                        } catch (Exception e2) {
-                            plugin.logError("Error in immediate bubble updater: " + e2.getMessage());
-                        }
-                    });
-                    plugin.logResponse("Bubble updater started with immediate execution");
-                } catch (IllegalArgumentException immediateError) {
-                    plugin.logError("Failed to start bubble updater with immediate execution: " + immediateError.getMessage());
+    /**
+     * Attempts to schedule a task with the given scheduler type
+     */
+    private boolean tryScheduleTask(Runnable task, long delay, long period, String schedulerType) {
+        try {
+            switch (schedulerType) {
+                case "primary" -> Bukkit.getScheduler().runTaskTimer(plugin, task, delay, period);
+                case "fallback" -> Bukkit.getScheduler().runTaskTimer(plugin, task, delay, period);
+                default -> {
+                    return false;
                 }
             }
+            return true;
+        } catch (IllegalArgumentException e) {
+            plugin.logError("Failed to start bubble updater with " + schedulerType + " scheduler: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Updates bubble positions and cleans up offline players
+     */
+    private void updateBubbles() {
+        try {
+            // Update bubble positions for online players
+            bubbles.entrySet().stream()
+                    .filter(entry -> entry.getKey().isOnline() && !entry.getValue().isEmpty())
+                    .forEach(entry -> {
+                        try {
+                            Player player = entry.getKey();
+                            Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
+                            DisplayEntityUtil.updateBubblesLocation(entry.getValue(), newLoc);
+                        } catch (Exception e) {
+                            plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
+                        }
+                    });
+
+            // Clean up bubbles for offline players
+            bubbles.entrySet().removeIf(entry -> {
+                try {
+                    if (!entry.getKey().isOnline()) {
+                        DisplayEntityUtil.removeBubbles(entry.getValue());
+                        return true;
+                    }
+                } catch (Exception e) {
+                    plugin.logError("Error cleaning up bubbles for offline player: " + e.getMessage());
+                    return true; // Remove entry on error
+                }
+                return false;
+            });
+        } catch (Exception e) {
+            plugin.logError("Error in bubble updater: " + e.getMessage());
         }
     }
 
@@ -523,16 +568,20 @@ public class ChatManager {
      * @return The message with colored mentions
      */
     private String processMentionColoring(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+
         String mentionColor = config.getMentionColor();
         Matcher mentionMatcher = mentionPattern.matcher(message);
 
         // Use StringBuilder for efficient string manipulation
-        StringBuilder coloredMessage = new StringBuilder();
+        StringBuilder coloredMessage = new StringBuilder(message.length() + 32); // Add some buffer for color codes
         int lastEnd = 0;
 
         while (mentionMatcher.find()) {
             // Add text before the mention
-            coloredMessage.append(message.substring(lastEnd, mentionMatcher.start()));
+            coloredMessage.append(message, lastEnd, mentionMatcher.start());
             // Add the colored mention with reset after it
             coloredMessage.append(mentionColor).append(mentionMatcher.group(0)).append("&r");
             lastEnd = mentionMatcher.end();
