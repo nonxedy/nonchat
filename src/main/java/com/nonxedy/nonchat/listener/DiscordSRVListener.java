@@ -1,16 +1,11 @@
 package com.nonxedy.nonchat.listener;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import com.nonxedy.nonchat.Nonchat;
-import com.nonxedy.nonchat.api.Channel;
-import com.nonxedy.nonchat.core.ChatManager;
 
 import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.api.Subscribe;
-import github.scarsz.discordsrv.api.events.GameChatMessagePreProcessEvent;
 
 /**
  * Listener for DiscordSRV events
@@ -37,38 +32,38 @@ public class DiscordSRVListener implements Listener {
      * We need to inspect the message and determine whether it should be sent to
      * Discord and which channel it should go to.
      */
-    @Subscribe
-    public void onGameChatMessagePreProcess(GameChatMessagePreProcessEvent event) {
-        // Get the player and message
-        Player player = event.getPlayer();
-        String message = event.getMessage();
+    // @Subscribe
+    // public void onGameChatMessagePreProcess(GameChatMessagePreProcessEvent event) {
+    //     // Get the player and message
+    //     Player player = event.getPlayer();
+    //     String message = event.getMessage();
     
-        if (player == null) {
-            return;
-        }
+    //     if (player == null) {
+    //         return;
+    //     }
     
-        // Get channel for this message
-        ChatManager chatManager = plugin.getChatManager();
-        if (chatManager == null) {
-            return;
-        }
+    //     // Get channel for this message
+    //     ChatManager chatManager = plugin.getChatManager();
+    //     if (chatManager == null) {
+    //         return;
+    //     }
 
-        // Determine which channel handles this message
-        Channel channel = chatManager.getChannelManager().getChannelForMessage(message);
+    //     // Determine which channel handles this message
+    //     Channel channel = chatManager.getChannelManager().getChannelForMessage(message);
         
-        // If the channel has a prefix and the message starts with it, remove the prefix
-        if (channel != null && channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
-            message = message.substring(channel.getPrefix().length());
-        }
+    //     // If the channel has a prefix and the message starts with it, remove the prefix
+    //     if (channel != null && channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
+    //         message = message.substring(channel.getPrefix().length());
+    //     }
         
-        // If no channel was found by prefix, use the player's active channel
-        if (channel == null) {
-            channel = chatManager.getPlayerChannel(player);
-        }
+    //     // If no channel was found by prefix, use the player's active channel
+    //     if (channel == null) {
+    //         channel = chatManager.getPlayerChannel(player);
+    //     }
     
-        // Cancel the event by default - we'll send to Discord ourselves
-        event.setCancelled(true);
-    }
+    //     // Cancel the event by default - we'll send to Discord ourselves
+    //     event.setCancelled(true);
+    // }
 
     
     /**
