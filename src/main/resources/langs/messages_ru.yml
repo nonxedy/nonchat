@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.6
+# Version of the plugin: 1.5.7
 #
 # - LuckPerms support.
 # - Vault support.
@@ -29,7 +29,7 @@ reloaded: "&#84FFB8Плагин перезагружен!"
 reload-failed: "&#ff0000Не удалось перезагрузить плагин!"
 
 # Version.
-version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.6\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.6"
+version: "&#FFAFFBnonchat v{version}\n&#ffffffGitHub: https://github.com/nonxedy/nonchat/releases/tag/1.5.7\n&#ffffffModrinth: https://modrinth.com/plugin/nonchat/version/1.5.7"
 
 
 # Help.

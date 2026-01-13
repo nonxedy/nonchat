@@ -8,6 +8,7 @@ import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Color;
 import org.bukkit.entity.Player;
 
 import net.kyori.adventure.text.Component;
@@ -405,7 +406,7 @@ public class ColorUtil {
      */
     public static Component parseConfigComponent(String message) {
         if (message == null || message.isEmpty()) return Component.empty();
-        
+
         // For config strings, always try MiniMessage first if it contains any MiniMessage-like tags
         // This ensures gradients and other MiniMessage features work properly in config
         if (containsMiniMessageTags(message) || containsGradient(message)) {
@@ -421,6 +422,45 @@ public class ColorUtil {
             // Use legacy format parsing for traditional color codes
             String legacyMessage = parseColor(message);
             return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
+        }
+    }
+
+    /**
+     * Converts a hex color string to a Bukkit Color object
+     * Supports formats like "#RRGGBB", "#RGB", or "RRGGBB"
+     * @param hexColor The hex color string
+     * @return Bukkit Color object, or Color.BLACK if parsing fails
+     */
+    public static Color parseHexColor(String hexColor) {
+        if (hexColor == null || hexColor.isEmpty()) {
+            return Color.BLACK;
+        }
+
+        try {
+            // Remove # prefix if present
+            String hex = hexColor.startsWith("#") ? hexColor.substring(1) : hexColor;
+
+            // Handle 3-digit hex (e.g., "RGB" -> "RRGGBB")
+            if (hex.length() == 3) {
+                hex = "" + hex.charAt(0) + hex.charAt(0) +
+                      hex.charAt(1) + hex.charAt(1) +
+                      hex.charAt(2) + hex.charAt(2);
+            }
+
+            // Ensure we have exactly 6 digits
+            if (hex.length() != 6) {
+                return Color.BLACK;
+            }
+
+            // Parse RGB components
+            int r = Integer.parseInt(hex.substring(0, 2), 16);
+            int g = Integer.parseInt(hex.substring(2, 4), 16);
+            int b = Integer.parseInt(hex.substring(4, 6), 16);
+
+            return Color.fromRGB(r, g, b);
+        } catch (IllegalArgumentException e) {
+            // Return black color if parsing fails
+            return Color.BLACK;
         }
     }
 }

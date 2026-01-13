@@ -126,12 +126,7 @@ public class PluginConfig {
         
         // Message delivery notifications
         config.set("message-delivery.notify-undelivered", true);
-        
-        // Death settings
-        config.set("death.enabled", true);
-        config.set("death.format", "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died");
-        config.set("death.show-coordinates", true);
-        
+
         // Join/Quit messages settings
         config.set("join-messages.enabled", true);
         config.set("join-messages.format", "§8(§a+§8) %luckperms_prefix% §f%player_name%§r %luckperms_suffix%");
@@ -163,6 +158,7 @@ public class PluginConfig {
         config.set("chat-bubbles.scale-x", 1.0);
         config.set("chat-bubbles.scale-y", 1.0);
         config.set("chat-bubbles.scale-z", 1.0);
+        config.set("chat-bubbles.background-color", "#000000");
         
         // Create default channel configurations
         createDefaultChannels();
@@ -446,38 +442,7 @@ public class PluginConfig {
 
 
 
-    
-    /**
-     * Checks if custom death messages are enabled
-     * @return true if enabled
-     * @deprecated Use deaths.yml configuration instead. This legacy config.yml system will be removed in a future version.
-     */
-    @Deprecated
-    public boolean isDeathMessagesEnabled() {
-        return config.getBoolean("death.enabled", true);
-    }
-    
-    /**
-     * Checks if showing death coordinates is enabled
-     * @return true if enabled
-     * @deprecated Use deaths.yml configuration instead. This legacy config.yml system will be removed in a future version.
-     */
-    @Deprecated
-    public boolean isShowDeathCoordinatesEnabled() {
-        return config.getBoolean("death.show-coordinates", true);
-    }
-    
-    /**
-     * Gets death message format
-     * @return Formatted death message string
-     * @deprecated Use deaths.yml configuration instead. This legacy config.yml system will be removed in a future version.
-     */
-    @Deprecated
-    @NotNull
-    public String getDeathFormat() {
-        return config.getString("death.format", "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died");
-    }
-    
+
     /**
      * Checks if join messages are enabled
      * @return true if enabled
@@ -837,6 +802,15 @@ public class PluginConfig {
      */
     public double getChatBubblesScaleZ() {
         return config.getDouble("chat-bubbles.scale-z", 1.0);
+    }
+
+    /**
+     * Gets chat bubble background color
+     * @return Background color as hex string (e.g., "#000000")
+     */
+    @NotNull
+    public String getChatBubblesBackgroundColor() {
+        return config.getString("chat-bubbles.background-color", "#000000");
     }
 
     /**

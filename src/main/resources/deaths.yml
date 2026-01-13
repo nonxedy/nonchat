@@ -28,7 +28,7 @@
 # Global settings for the death message system
 settings:
   # Enable or disable custom death messages
-  enabled: false
+  enabled: true
   
   # Use fallback message if no custom message is found for a cause
   use-fallback: true
