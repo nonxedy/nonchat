@@ -252,4 +252,23 @@ public class ChannelAPI {
         return getMessageFilters(channelId).stream()
             .anyMatch(filter -> filter.shouldFilter(player, message));
     }
+
+    /**
+     * Cleans up all registered processors and filters for a specific channel
+     * Should be called when a channel is deleted
+     * @param channelId The channel ID to clean up
+     */
+    public static void cleanupChannel(String channelId) {
+        channelProcessors.remove(channelId);
+        channelFilters.remove(channelId);
+    }
+
+    /**
+     * Cleans up all registered processors and filters
+     * Should be called when the plugin is disabled
+     */
+    public static void cleanupAll() {
+        channelProcessors.clear();
+        channelFilters.clear();
+    }
 }

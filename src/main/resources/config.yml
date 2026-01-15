@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.5
+# Version of the plugin: 1.5.7
 #
 # - LuckPerms support.
 # - Vault support.
@@ -223,26 +223,6 @@ channels:
     min-length: 0
     max-length: -1
   
-# ==================================================
-# CUSTOM DEATH MESSAGES (DEPRECATED)
-# ==================================================
-# WARNING: This section is DEPRECATED and will be removed in a future version.
-# Please use the new 'deaths.yml' file for death message configuration.
-# The new system provides:
-#   - Custom messages per death cause (drowning, fall damage, etc.)
-#   - Advanced placeholder support
-#   - Better organization and maintainability
-# 
-# This legacy system is kept for backward compatibility only.
-# ==================================================
-death:
-  # Enable/disable custom death messages (legacy system).
-  # NOTE: This is overridden by deaths.yml if it exists.
-  enabled: true
-  # The death message format (legacy - single format for all death types).
-  format: "%luckperms_prefix% §f%player_name%§r %luckperms_suffix%§f died"
-  # Show death coordinates to the player who died.
-  show-coordinates: true
 
 # ==================================================
 # JOIN & QUIT MESSAGES
@@ -347,6 +327,8 @@ chat-bubbles:
   scale-x: 1.0
   scale-y: 1.0
   scale-z: 1.0
+  # Background color of the chat bubble (hex color code, e.g., #000000 for black).
+  background-color: "#000000"
 
 # ==================================================
 # ROLEPLAY COMMANDS

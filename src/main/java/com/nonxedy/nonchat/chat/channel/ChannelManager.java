@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
+import com.nonxedy.nonchat.api.ChannelAPI;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.util.AsyncConfigSaver;
 import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
@@ -335,19 +336,22 @@ public class ChannelManager {
         if (channelId.equals(defaultChannelId)) {
             return false;
         }
-        
+
         // Check if channel exists
         if (!channels.containsKey(channelId)) {
             return false;
         }
-        
+
+        // Clean up API registrations before removing the channel
+        ChannelAPI.cleanupChannel(channelId);
+
         // Remove from channels map
         channels.remove(channelId);
-        
+
         // Remove from config asynchronously
         config.set("channels." + channelId, null);
         asyncConfigSaver.saveNow();
-        
+
         // Switch any players using this channel to the default
         Channel defaultChannel = getDefaultChannel();
         for (Player player : playerChannels.keySet()) {
@@ -355,7 +359,7 @@ public class ChannelManager {
                 playerChannels.put(player, defaultChannel);
             }
         }
-        
+
         return true;
     }
     

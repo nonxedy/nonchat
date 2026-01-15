@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.nonxedy.nonchat.api.InteractivePlaceholder;
+import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -88,7 +89,7 @@ public class InteractivePlaceholderManager {
             // Add text before the placeholder
             if (matcher.start() > lastEnd) {
                 String textBefore = message.substring(lastEnd, matcher.start());
-                builder.append(Component.text(textBefore));
+                builder.append(LinkDetector.makeLinksClickable(textBefore));
             }
 
             String placeholderName = matcher.group(1).toLowerCase();
@@ -118,7 +119,7 @@ public class InteractivePlaceholderManager {
         // Add remaining text
         if (lastEnd < message.length()) {
             String remainingText = message.substring(lastEnd);
-            builder.append(Component.text(remainingText));
+            builder.append(LinkDetector.makeLinksClickable(remainingText));
         }
 
         return builder.build();
