@@ -103,10 +103,10 @@ public class ColorUtil {
         
         return COMPONENT_CACHE.computeIfAbsent(message, m -> {
             if (containsMiniMessageTags(m)) {
-                // Parse with MiniMessage if it contains MiniMessage format tags
+                // Parse with MiniMessage only if it contains actual MiniMessage format tags
                 return parseMiniMessageComponent(m);
             } else {
-                // Otherwise use legacy format parsing
+                // Use legacy format parsing for &#RRGGBB hex codes and &X color codes
                 String legacyMessage = parseColor(m);
                 return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
             }
