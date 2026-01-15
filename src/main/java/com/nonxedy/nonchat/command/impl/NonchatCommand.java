@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 
@@ -28,16 +27,13 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private final Nonchat plugin;
     // Store reference to plugin messages configuration
     private final PluginMessages messages;
-    // Store reference to config service for reloading
-    private final ConfigService configService;
 
     /**
      * Constructor to initialize command with dependencies
      */
-    public NonchatCommand(Nonchat plugin, ConfigService configService) {
+    public NonchatCommand(Nonchat plugin, PluginMessages messages) {
         this.plugin = plugin;
-        this.configService = configService;
-        this.messages = configService.getMessages();
+        this.messages = messages;
     }
 
     /**
@@ -175,7 +171,7 @@ public class NonchatCommand implements CommandExecutor, TabCompleter {
     private void sendVersionMessage(CommandSender sender) {
         try {
             // Get plugin version from plugin.yml
-            String version = plugin.getDescription().getVersion();
+            String version = plugin.getPluginMeta().getVersion();
             // Replace placeholder in version message
             String versionMessage = messages.getString("version").replace("{version}", version);
             // Make links clickable in the version message
