@@ -18,8 +18,6 @@ import java.util.logging.Level;
 
 import org.bukkit.plugin.Plugin;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.nonxedy.nonchat.Nonchat;
 
 /**
@@ -31,7 +29,6 @@ public class Debugger {
     private final int logRetentionDays;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private final Gson gson = new GsonBuilder().create();
 
     /**
      * Constructor sets up debugger with rotation settings
