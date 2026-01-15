@@ -21,10 +21,8 @@ import net.md_5.bungee.api.ChatColor;
  */
 class LRUCache<K,V> {
     private final Map<K,V> cache;
-    private final int maxSize;
     
     public LRUCache(int maxSize) {
-        this.maxSize = maxSize;
         this.cache = Collections.synchronizedMap(
             new LinkedHashMap<K,V>(maxSize, 0.75f, true) {
                 @Override
