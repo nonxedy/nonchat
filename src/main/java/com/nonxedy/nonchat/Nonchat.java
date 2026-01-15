@@ -62,12 +62,9 @@ public class Nonchat extends JavaPlugin {
     private BroadcastManager broadcastManager;
     private SpyCommand spyCommand;
     private Debugger debugger;
-    private ChatListener chatListener;
     private IgnoreCommand ignoreCommand;
-    private DiscordSRVHook discordSRVHook;
     private DiscordSRVListener discordSRVListener;
     private DiscordSRVIntegration discordSRVIntegration;
-    private Metrics metrics;
     private InteractivePlaceholderManager placeholderManager;
     private IndirectDeathTracker indirectDeathTracker;
     private DamageTrackingListener damageTrackingListener;
@@ -127,7 +124,7 @@ public class Nonchat extends JavaPlugin {
             this.chatService = new ChatService(chatManager, messageManager, broadcastManager, configService.getConfig());
 
             // Initialize command service last as it depends on all other services
-            this.commandService = new CommandService(this, chatService, configService);
+            this.commandService = new CommandService(this, configService);
 
             // Initialize interactive placeholder manager
             initializeInteractivePlaceholders();
@@ -289,7 +286,7 @@ public class Nonchat extends JavaPlugin {
 
         try {
             // Initialize metrics
-            this.metrics = new Metrics(this, 25786);
+            new Metrics(this, 25786);
             getLogger().info("Metrics initialized successfully");
         } catch (NoClassDefFoundError e) {
             getLogger().info("Metrics not available - metrics will be disabled");
@@ -299,7 +296,7 @@ public class Nonchat extends JavaPlugin {
 
         try {
             // Initialize DiscordSRV
-            this.discordSRVHook = new DiscordSRVHook(this);
+            new DiscordSRVHook(this);
             ChannelAPI.initialize(this);
 
             // Initialize DiscordSRV listener
