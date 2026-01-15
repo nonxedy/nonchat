@@ -29,7 +29,6 @@ import net.kyori.adventure.text.Component;
  * Handles death event processing, message selection, and formatting
  */
 public class DeathMessageService {
-    private final Nonchat plugin;
     private final DeathMessageManager messageManager;
     private final DeathConfig deathConfig;
     private final Debugger debugger;
@@ -45,7 +44,6 @@ public class DeathMessageService {
      */
     public DeathMessageService(Nonchat plugin, DeathConfig deathConfig, PluginMessages messages, 
                               IndirectDeathTracker indirectDeathTracker, Debugger debugger) {
-        this.plugin = plugin;
         this.deathConfig = deathConfig;
         this.debugger = debugger;
         this.messageManager = new DeathMessageManager(plugin.getDataFolder(), debugger, deathConfig);
