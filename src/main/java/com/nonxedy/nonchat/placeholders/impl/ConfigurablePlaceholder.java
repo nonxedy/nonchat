@@ -278,16 +278,6 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             processed = processed.replace("{ping_quality}", quality);
         }
 
-        // Try to get TPS (this is a rough approximation)
-        double tps = 20.0; // Default to 20 TPS
-        try {
-            // This would require a TPS monitoring plugin or custom implementation
-            // For now, we'll use a placeholder
-            processed = processed.replace("{tps}", "20.0");
-        } catch (Exception e) {
-            processed = processed.replace("{tps}", "20.0");
-        }
-
         // Process PlaceholderAPI placeholders if available
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
@@ -377,23 +367,13 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
 
         // Special placeholders for item and ping
         if (placeholder.equals("item")) {
-            org.bukkit.inventory.ItemStack item = player.getInventory().getItemInMainHand();
+            ItemStack item = player.getInventory().getItemInMainHand();
             processed = processItemPlaceholders(processed, item);
         } else if (placeholder.equals("ping")) {
             int ping = player.getPing();
             processed = processed.replace("{ping}", String.valueOf(ping));
             String quality = ping < 100 ? "Excellent" : ping < 300 ? "Good" : "Poor";
             processed = processed.replace("{ping_quality}", quality);
-        }
-
-        // Try to get TPS (this is a rough approximation)
-        double tps = 20.0; // Default to 20 TPS
-        try {
-            // This would require a TPS monitoring plugin or custom implementation
-            // For now, we'll use a placeholder
-            processed = processed.replace("{tps}", "20.0");
-        } catch (Exception e) {
-            processed = processed.replace("{tps}", "20.0");
         }
 
         // Process PlaceholderAPI placeholders if available
