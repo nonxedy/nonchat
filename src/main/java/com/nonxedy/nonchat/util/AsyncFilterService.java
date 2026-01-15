@@ -3,35 +3,32 @@ package com.nonxedy.nonchat.util;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.bukkit.entity.Player;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 
 /**
  * Asynchronous service for processing heavy chat filters
  * Prevents main thread blocking during filter operations
+ * 
+ * TODO: This service is instantiated but never actually used in ChatManager 🙋‍♀️
+ *       Either wire it up to run filter checks asynchronously,
+ *       or just get rid of it if it's not pulling its weight.
+ *       If we do end up using it, adding a cache (e.g. Caffeine)
+ *       would be a good idea to avoid re-checking the same messages
+ *       over and over again.
  */
 public class AsyncFilterService {
 
     private final ExecutorService filterExecutor;
     private final AdDetector adDetector;
     private final Nonchat plugin;
-    private final Cache<String, Boolean> filterCache;
 
     public AsyncFilterService(Nonchat plugin, AdDetector adDetector) {
         this.plugin = plugin;
         this.adDetector = adDetector;
-
-        // Initialize cache for filter results
-        this.filterCache = Caffeine.newBuilder()
-            .maximumSize(10000)
-            .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build();
 
         // Use cached thread pool for dynamic scaling
         this.filterExecutor = Executors.newCachedThreadPool(r -> {
