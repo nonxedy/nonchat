@@ -504,20 +504,6 @@ public class DeathConfig {
     }
 
     /**
-     * Reads a file into a list of strings
-     */
-    private List<String> readFileToList(File file) throws IOException {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-        }
-        return lines;
-    }
-
-    /**
      * Reads a resource into a list of strings
      */
     private List<String> readResourceToList(String resourcePath) throws IOException {
