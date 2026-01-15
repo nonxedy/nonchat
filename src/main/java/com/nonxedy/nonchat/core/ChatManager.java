@@ -22,7 +22,6 @@ import com.nonxedy.nonchat.chat.channel.ChannelManager;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
-import com.nonxedy.nonchat.util.AsyncFilterService;
 import com.nonxedy.nonchat.util.chat.filters.AdDetector;
 import com.nonxedy.nonchat.util.chat.filters.CapsFilter;
 import com.nonxedy.nonchat.util.chat.filters.SpamDetector;
@@ -45,7 +44,6 @@ public class ChatManager {
     private IgnoreCommand ignoreCommand;
     private final AdDetector adDetector;
     private final SpamDetector spamDetector;
-    private final AsyncFilterService asyncFilterService;
 
     public ChatManager(Nonchat plugin, PluginConfig config, PluginMessages messages) {
         this.plugin = plugin;
@@ -55,7 +53,6 @@ public class ChatManager {
                                       config.getAntiAdSensitivity(),
                                       config.getAntiAdPunishCommand());
         this.spamDetector = new SpamDetector(config, messages);
-        this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
         this.channelManager = new ChannelManager(plugin, config);
         this.ignoreCommand = plugin.getIgnoreCommand();
         startBubbleUpdater();
@@ -121,7 +118,6 @@ public class ChatManager {
         Channel channel;
         String finalMessage;
         String processedMessage;
-        boolean messageDelivered;
 
         ChatProcessingContext(Player player, String messageContent) {
             this.player = player;
@@ -292,8 +288,6 @@ public class ChatManager {
         if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
             player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
         }
-
-        context.messageDelivered = messageDelivered;
     }
 
     private void handleBubbleCreation(ChatProcessingContext context) {
@@ -635,16 +629,6 @@ public class ChatManager {
         // Return true if at least one player (other than sender) received the message
         // We subtract 1 because the sender is also counted in the recipients
         return recipientCount > 1;
-    }
-
-    /**
-     * Finds a channel by its trigger character.
-     *
-     * @param c The character to find
-     * @return The channel, or null if not found
-     */
-    private Channel findChannelByChar(char c) {
-        return channelManager.findChannelByPrefix(String.valueOf(c)).orElse(null);
     }
 
     /**

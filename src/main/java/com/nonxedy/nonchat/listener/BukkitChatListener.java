@@ -4,20 +4,21 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.core.ChatManager;
 import com.nonxedy.nonchat.service.ChatService;
 
+/**
+ * Fallback chat listener for non-Paper servers (Spigot, CraftBukkit)
+ * Uses the deprecated AsyncPlayerChatEvent as it's the only option on these platforms
+ */
 public class BukkitChatListener extends ChatListener {
 
-    private final Nonchat plugin;
-
-    public BukkitChatListener(Nonchat plugin, ChatManager chatManager, ChatService chatService) {
+    public BukkitChatListener(ChatManager chatManager, ChatService chatService) {
         super(chatManager, chatService);
-        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @SuppressWarnings("deprecation") // AsyncPlayerChatEvent is deprecated but required for non-Paper servers
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
         // Cancel the default event handling
         event.setCancelled(true);
