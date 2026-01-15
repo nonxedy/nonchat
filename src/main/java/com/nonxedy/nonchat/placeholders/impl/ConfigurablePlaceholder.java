@@ -194,9 +194,6 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             processed = processed.replace("{ping_quality}", quality);
         }
 
-        // TPS placeholder (default to 20.0 as we don't have a TPS monitoring system)
-        processed = processed.replace("{tps}", "20.0");
-
         // Process PlaceholderAPI placeholders if available
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
@@ -307,9 +304,6 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             String quality = ping < 100 ? "Excellent" : ping < 300 ? "Good" : "Poor";
             processed = processed.replace("{ping_quality}", quality);
         }
-
-        // TPS placeholder (default to 20.0 as we don't have a TPS monitoring system)
-        processed = processed.replace("{tps}", "20.0");
 
         // Process PlaceholderAPI placeholders if available
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
