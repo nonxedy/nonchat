@@ -306,9 +306,9 @@ broadcast:
     # Enable/disable this specific broadcast.
     enabled: true
     # The message to be broadcasted.
-    message: "This message will be sent every 60 seconds"
+    message: "§eThis message is sent every §b5§e minutes. You can change the interval in the §bbroadcast.example.interval§e setting."
     # Interval in seconds for this message to be sent.
-    interval: 60
+    interval: 300
 
 # ==================================================
 # CHAT BUBBLE CONFIGURATION
