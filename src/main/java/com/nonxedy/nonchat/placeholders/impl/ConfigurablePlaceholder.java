@@ -17,9 +17,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
- * A configurable interactive placeholder that reads its settings from config.yml
+ * A configurable interactive placeholder that reads its settings from
+ * config.yml
  * Supports hover text, click actions, and permissions
  */
 public class ConfigurablePlaceholder implements InteractivePlaceholder {
@@ -35,8 +37,8 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
     private ClickAction clickAction;
 
     public ConfigurablePlaceholder(String placeholder, String activationKey, String displayName, String description,
-                                 boolean enabled, String permission, String format, List<String> hoverText,
-                                 String clickActionType, String clickActionValue) {
+            boolean enabled, String permission, String format, List<String> hoverText,
+            String clickActionType, String clickActionValue) {
         this.placeholder = placeholder;
         this.activationKey = activationKey != null && !activationKey.isEmpty() ? activationKey : placeholder;
         this.displayName = displayName;
@@ -217,12 +219,13 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             return text;
         }
 
-        // Basic item info - use Adventure API's displayName() instead of deprecated getDisplayName()
+        // Basic item info - use Adventure API's displayName() instead of deprecated
+        // getDisplayName()
         String itemName;
         if (item.getItemMeta() != null && item.getItemMeta().hasDisplayName()) {
             // Use Adventure API to get display name as plain text
-            itemName = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
-                .serialize(item.getItemMeta().displayName());
+            itemName = PlainTextComponentSerializer.plainText()
+                    .serialize(item.getItemMeta().displayName());
         } else {
             itemName = item.getType().name().replace("_", " ").toLowerCase();
         }
@@ -236,10 +239,11 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             List<Component> loreComponents = item.getItemMeta().lore();
             if (loreComponents != null) {
                 for (Component loreLine : loreComponents) {
-                    if (loreBuilder.length() > 0) loreBuilder.append("\n");
+                    if (loreBuilder.length() > 0)
+                        loreBuilder.append("\n");
                     // Convert Component to plain text
-                    String plainLore = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
-                        .serialize(loreLine);
+                    String plainLore = PlainTextComponentSerializer.plainText()
+                            .serialize(loreLine);
                     loreBuilder.append(plainLore);
                 }
             }
@@ -252,7 +256,8 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
         if (item.getItemMeta() != null && item.getItemMeta().hasEnchants()) {
             StringBuilder enchantBuilder = new StringBuilder();
             for (Enchantment enchantment : item.getItemMeta().getEnchants().keySet()) {
-                if (enchantBuilder.length() > 0) enchantBuilder.append(", ");
+                if (enchantBuilder.length() > 0)
+                    enchantBuilder.append(", ");
                 int level = item.getItemMeta().getEnchantLevel(enchantment);
                 String enchantName = enchantment.getKey().getKey().replace("_", " ").toLowerCase();
                 enchantBuilder.append(enchantName).append(" ").append(level);
@@ -269,7 +274,8 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             int damage = damageable.hasDamage() ? damageable.getDamage() : 0;
             int currentDurability = maxDurability - damage;
             double percentage = (double) currentDurability / maxDurability * 100;
-            String durabilityText = currentDurability + "/" + maxDurability + " (" + String.format("%.1f", percentage) + "%)";
+            String durabilityText = currentDurability + "/" + maxDurability + " (" + String.format("%.1f", percentage)
+                    + "%)";
             text = text.replace("{item_durability}", durabilityText);
         } else {
             text = text.replace("{item_durability}", "");
@@ -365,39 +371,39 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
         }
     }
 
-// ⡿⠿⠿⣿⠿⠿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠿⡿⠿⢿⠿⠿⢿⡿⠿⠿⢿⠿⢿⠿⢿⠿⠿⢿⠿⠿⣿⣿⣿⠿⠿⠿⢿⠿⠿⢿⣿⡿⠿⠿⡿⠿⠿⠿⠿⡿⠿⠿⡿⠿⡿⠿⠿⠿⡿⠿⠿⠿⠿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣀⡀⠀⡿⠀⠀⢸⡇⠀⠀⠘⠀⠀⠀⠀⠀⠁⠀⢸⠀⠀⢸⡇⠀⠀⢸⠀⠀⠀⠀⠀⡆⠀⠀⠀⣿⣿⣿⠀⠀⠀⢸⠀⠀⢸⣿⠁⢰⠀⢰⠀⢠⡆⠀⡇⠀⠀⠁⠀⡇⠀⡄⠀⡇⠀⠀⢸⠀⠃⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⠿⢄⠀⠃⠀⠀⢸⠇⠀⠀⠀⡇⠀⢀⠀⠀⠀⠀⠸⠀⠄⠈⡇⠀⠀⢸⠀⠀⠀⠀⠀⡷⠶⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠄⠸⣿⠀⢸⠶⢆⠀⢀⡇⠀⠀⠸⡄⠀⢸⡇⠀⡇⠀⡇⠀⠀⢸⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⡀⠘⠀⡄⠀⡄⠘⠀⠐⠀⠀⠇⠀⢸⠀⢀⠀⠀⠀⠀⡄⠀⠃⠀⠀⢸⠀⢠⠀⢀⠀⠃⢀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⡄⠀⣿⡀⠘⠀⡘⠀⠘⠃⠀⡇⠀⠇⠀⢸⠀⠀⠃⠀⡇⠀⠀⢸⠇⠀⡘⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣿⣶⣿⣷⣾⣷⣆⣀⣶⣶⣀⣷⣶⣿⣷⣾⣾⣷⣶⣶⣷⣶⣶⣿⣷⣾⣶⣾⣶⣿⣷⣶⣿⣷⣶⣶⣿⣿⣶⣾⣶⣷⣶⣷⣶⣿⣿⣶⣾⣿⣶⣶⣷⣶⣷⣶⣶⣾⣿⣀⣶⣶⣀⣷⣾⣶⣾⣶⣾⣯⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀
-// ⠉⠉⠉⠉⠉⠉⠹⠋⠉⠙⠏⠉⠉⠉⡏⠉⠉⠟⠉⠙⢿⠋⠉⠙⣿⣿⠉⠉⠉⠙⠉⠉⠉⠉⠉⠉⠉⠉⢻⠉⠉⢿⡏⠉⠉⢹⡏⠉⠉⡏⠉⠉⠉⠉⢹⠉⢹⠉⡏⠉⣿⡏⠉⠉⠉⠉⠉⠉⠏⠉⠉⠉⠉⠉⠋⠉⠉⠹⡏⠉⠉⡏⠉⠀⠀
-// ⠀⢸⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⡇⠀⠻⠀⢸⣀⡀⠀⢀⣀⣿⣿⠀⠀⠀⠀⠀⠘⡇⠀⣿⠀⠀⠀⠈⠀⠀⢸⡇⠀⠀⠈⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⠀⠀⠀⠛⠀⠀⠀⠀⠀⠃⢀⠇⠀⠀⡇⠀⠂⠀
-// ⠀⢸⠀⠀⠀⢰⣾⠀⠸⠀⠀⠀⠀⠀⡇⠀⣶⠀⢸⠉⠁⠀⠈⠉⣿⡿⠀⢘⠀⢀⠀⢰⡇⠀⣿⠀⠀⣶⡇⠀⠀⢸⠀⢀⠀⢸⠀⠘⠀⠁⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⣶⡇⠀⣶⠀⠀⣶⡇⠀⡆⠀⠀⠐⠀⠃⠀⡆⠀
-// ⣀⣸⣀⣀⣀⣸⣿⣄⣀⣠⣆⣀⣀⠀⢀⣀⣀⣆⣀⣠⣾⣄⣀⣠⣿⡇⢀⣀⡀⢘⣀⣀⣀⣀⣿⣀⣀⣿⣃⣀⣁⡀⠀⣀⣀⠀⣀⣸⣀⣀⣀⣀⠀⣀⣀⣀⣸⣀⣀⣀⣿⣇⣀⣃⣀⣀⣀⣿⣇⣀⣀⣀⣀⣿⣇⣀⣀⣠⣀⣸⡀⣀⣀⣇⣀
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣿⣿⣶⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣱⣿⣿⣿⣿
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣻⠿⡻⠿⠻⢟⣻⢿⠛⣿⣿⣟⢻⣏⡿⡿⣟⣿⠿⢿⣿⣻⣻⣿⣿⡧⡿⣿⣛⣻⡿⠟⢩⣾⠿⠿⠿⣟⣹⣿⠻⠿⠞⢼⢽⡋⠿⠿⠾⢻⠿⠿⣽⠻⡿⠿⣻⢟⣛⣟⣟⣷⠀⠀⠀⡆⠸⡿⢻⢿⡿⠋⠉⠀⠈⠻⣿⣿⡿⣫⠒⠛⠻⠿⠿
-// ⠀⠁⠀⠀⠁⠀⠀⠁⢸⢣⡇⠈⠀⠀⠀⠀⠁⠈⠀⠀⠀⣠⠷⣄⢹⠃⣨⡼⠟⠉⢀⡴⠓⠁⠀⠀⠈⠁⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠈⣄⣨⠾⠚⠋⢉⡉⠆⠀⢠⠀⠀⠷⡴⠋⠀⠀⡀⠀⠀⠀⠈⢳⡀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⡏⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⢀⡜⠁⠀⠈⣿⠋⠁⠀⠀⠴⢯⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡶⠂⠀⠀⠀⠀⠀⠀⠀⢀⡠⠞⠉⠀⠀⠀⠒⠂⠀⠉⠀⠂⠓⢄⣀⣀⣀⣀⣀⠨⡴⢤⣀⠀⠀⠹⡄⠀⠀⠀⠀⠀
-// ⠀⠀⠘⢦⠀⠀⠀⠀⣇⠈⡇⠀⠀⠀⠀⠀⠀⣀⣤⠏⠀⠀⠀⠀⠉⡆⠀⠀⠀⠀⠀⠀⠈⠉⠛⠒⠒⠒⠒⢚⣫⠝⠉⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀⠀⠀⠀⠌⠀⠀⠀⠀⢀⡄⠀⠜⠋⡄⠈⠐⠨⢢⡈⠢⡈⠉⠒⠒⠘⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠑⢄⡀⠀⠈⠳⠬⣦⣄⣀⡠⠖⠋⠁⠀⠀⠀⠀⠀⠀⠀⢸⡀⠀⠀⠀⠀⠀⠀⠈⢢⠘⢿⣟⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⡈⠀⠀⠀⢀⠔⡙⠀⠌⢠⠀⠉⠆⠀⠀⠀⠉⠀⠈⢆⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠉⠒⠤⠤⣤⢤⡼⠛⠀⠀⠀⠀⠀⠀⢠⠀⠀⠀⠀⠈⡎⢢⠀⠀⢠⠀⠀⠀⠀⠳⡈⢮⠳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠎⠀⠀⠀⠀⠀⢰⠰⠀⠀⠠⡤⠆⠰⢃⠎⠀⡈⠀⢸⠈⡄⠀⢀⠀⠀⠀⠀⢣⡀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠋⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⠀⠀⠀⠀⣿⡀⠳⡒⠚⣖⠦⠄⠀⠀⠱⡌⢦⠈⢦⠀⠀⠀⠀⠀⠀⠀⠸⠀⠀⠀⠀⠀⠀⢸⡇⠀⢀⠊⠀⠠⡡⠁⠀⢀⠁⠀⠸⠀⠘⡐⡈⡀⠀⠀⠀⠀⢳⣄⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠁⠀⠀⠀⠀⠀⠀⠀⠀⡰⠃⡆⢠⠀⠀⠀⢸⢇⠀⠘⡄⠸⡄⠀⠀⠀⣄⢱⠈⢇⠀⠱⡀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠘⠁⡐⠁⠀⢠⠏⠀⠀⠀⠌⠀⠀⠀⠀⠀⢡⠈⡇⠀⠀⠀⠀⠈⡎⢆⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠀⡔⠀⠀⠀⠀⣠⢶⠁⠀⡇⢸⡄⠀⠀⢸⢸⠀⠀⠘⣆⢳⠀⠀⠀⣿⢦⢧⠈⣆⠀⠁⠀⠀⠀⠀⢰⠀⡄⠀⠀⠀⠀⠀⠀⡗⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⡇⠀⠀⠀⠀⠀⠸⠈⢆⠀⠀⠀
-// ⠀⠀⠀⣀⣀⣀⣀⡀⢸⠀⠀⢰⠃⠀⠀⠠⠞⢡⠇⠀⠀⢳⢸⢳⠀⠀⢸⠘⣆⣀⣀⣘⣎⣆⠀⠀⣿⣌⣾⡆⠘⡄⠀⠀⠀⠀⠀⢸⠀⡇⠀⢰⠀⠀⠀⠀⣿⣶⣶⣶⣶⡶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⡁⠀⠀⠀⠀⠀⠀⠇⠘⡄⠀⠀
-// ⠀⠉⠁⠀⠀⠀⠀⠀⢹⠁⠀⡞⠀⠀⠀⠀⢀⡎⠀⠀⢀⣸⣾⠈⣇⠀⢸⠀⠡⣶⣶⣿⣿⣿⡄⢠⣿⣿⣾⣧⠀⠘⢆⠀⠀⠀⠀⢸⠀⡇⠀⢸⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣈⠂⢀⠀⡇⠀⠀⠀⡀⠀⠀⢰⠀⠘⡀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠈⡆⠀⡇⠀⠀⠀⠀⣼⣠⠴⢚⣩⣴⣿⠀⠘⡄⠘⠀⠀⠈⠉⠛⠛⠻⣧⢸⣿⣿⣿⢿⣦⡀⠈⢦⠀⠀⠀⢸⢀⡇⠀⡁⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⢿⣷⣦⡄⡇⠀⠀⠀⠇⠀⢇⠘⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⢀⠤⠃⢰⠇⠀⠀⠀⢰⣿⣷⣾⣿⣿⠿⠉⠀⠀⠘⡇⠀⠀⠀⠀⠀⠀⠀⠘⠏⢿⣿⣿⣇⠉⠙⠓⠤⢕⣄⠀⢸⢸⢰⠀⠣⣁⠀⠀⠀⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠁⠃⠀⠀⢸⠀⢸⠈⡄⡆⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠉⠓⠒⡶⢼⠀⢠⠀⢀⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⣀⠄⠂⠉⠐⡄⠀⠀⠀⢸⡇⠏⢿⣆⠀⠀⠀⠀⠀⠀⢸⠸⠘⡄⠀⠸⠀⠀⠀⡇⠀⠀⠀⠀⢀⠂⢱⠀⠀⠀⠀⠀⠀⠀⠀⣼⠀⠀⢀⡇⠀⡈⠀⢡⡇⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⢸⢠⢿⡀⡼⣿⣿⣿⣧⠀⠀⠀⠀⢀⠔⠂⠉⠀⠀⠀⠀⠀⡁⠀⠀⢀⣾⡇⢸⠀⠙⢆⠀⠀⠀⠀⠀⠈⡆⠀⢃⠀⠀⡇⠀⠀⣇⠀⠀⠀⠀⠀⠑⡎⠀⠀⠀⠀⠀⠀⠀⡸⡇⠀⠀⡜⡄⢀⠃⠀⠸⠁⠀⠀⠄
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⡇⡇⢿⣿⣿⣿⡆⠀⠀⠀⡇⠀⠀⠀⠀⠀⢀⡀⢀⠁⣠⣴⣿⣿⢰⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠘⡀⢰⢱⠀⠀⠇⠈⠒⡤⢀⡀⠀⠀⠀⢀⣀⣀⡀⠤⠔⣡⠇⠀⡐⠀⡇⠸⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠁⢱⡇⢸⡘⢿⣿⣿⡀⠀⠀⠣⡀⠂⠈⠉⠉⠀⢀⡟⣾⣿⣿⣿⠃⠸⣌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⠜⠀⠆⢸⠅⠀⢀⡇⠀⠀⠈⣹⠉⠁⠀⢀⢴⠀⡰⢹⠀⡐⠁⠀⣇⠇⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣄⡏⠁⠀⣇⢎⠻⣿⣷⣶⣤⣤⣤⡤⠤⠤⠐⣶⣿⡇⣿⣿⣿⠏⠀⡇⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠘⡸⣸⣾⣿⠇⠀⠀⠀⢿⣿⣦⡔⠋⢸⡜⠀⡆⠔⠀⠀⠀⡟⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠋⠇⠀⡄⣸⡘⡄⠘⢿⣿⣿⣿⣿⣷⠀⠀⠀⢿⣿⣧⣿⣿⡟⠀⢰⠇⢻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠟⠛⠛⡇⠠⠀⡀⠀⠈⣻⣿⣷⡄⠏⠀⢰⠊⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠜⠁⠀⢠⢸⢀⣿⣧⢱⡀⠀⠙⢿⣿⣿⠟⠀⠀⠀⠈⣿⠛⢿⣿⡇⢠⣿⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡞⠁⠀⠀⢰⡇⠀⠀⠀⠑⣰⠿⠿⠿⠿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡇⢸⣿⣿⣎⣷⡄⠀⠘⣿⣿⣦⡀⠔⠂⠉⢻⡀⠀⢹⣧⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠫⣀⠀⠀⠀⠸⡇⠀⠀⠀⣰⠃⠀⠀⣠⠔⣫⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⡿⠿⠿⣿⠿⠿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠿⡿⠿⢿⠿⠿⢿⡿⠿⠿⢿⠿⢿⠿⢿⠿⠿⢿⠿⠿⣿⣿⣿⠿⠿⠿⢿⠿⠿⢿⣿⡿⠿⠿⡿⠿⠿⠿⠿⡿⠿⠿⡿⠿⡿⠿⠿⠿⡿⠿⠿⠿⠿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣀⡀⠀⡿⠀⠀⢸⡇⠀⠀⠘⠀⠀⠀⠀⠀⠁⠀⢸⠀⠀⢸⡇⠀⠀⢸⠀⠀⠀⠀⠀⡆⠀⠀⠀⣿⣿⣿⠀⠀⠀⢸⠀⠀⢸⣿⠁⢰⠀⢰⠀⢠⡆⠀⡇⠀⠀⠁⠀⡇⠀⡄⠀⡇⠀⠀⢸⠀⠃⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⠿⢄⠀⠃⠀⠀⢸⠇⠀⠀⠀⡇⠀⢀⠀⠀⠀⠀⠸⠀⠄⠈⡇⠀⠀⢸⠀⠀⠀⠀⠀⡷⠶⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠄⠸⣿⠀⢸⠶⢆⠀⢀⡇⠀⠀⠸⡄⠀⢸⡇⠀⡇⠀⡇⠀⠀⢸⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⡀⠘⠀⡄⠀⡄⠘⠀⠐⠀⠀⠇⠀⢸⠀⢀⠀⠀⠀⠀⡄⠀⠃⠀⠀⢸⠀⢠⠀⢀⠀⠃⢀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⡄⠀⣿⡀⠘⠀⡘⠀⠘⠃⠀⡇⠀⠇⠀⢸⠀⠀⠃⠀⡇⠀⠀⢸⠇⠀⡘⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣿⣶⣿⣷⣾⣷⣆⣀⣶⣶⣀⣷⣶⣿⣷⣾⣾⣷⣶⣶⣷⣶⣶⣿⣷⣾⣶⣾⣶⣿⣷⣶⣿⣷⣶⣶⣿⣿⣶⣾⣶⣷⣶⣷⣶⣿⣿⣶⣾⣿⣶⣶⣷⣶⣷⣶⣶⣾⣿⣀⣶⣶⣀⣷⣾⣶⣾⣶⣾⣯⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀
+    // ⠉⠉⠉⠉⠉⠉⠹⠋⠉⠙⠏⠉⠉⠉⡏⠉⠉⠟⠉⠙⢿⠋⠉⠙⣿⣿⠉⠉⠉⠙⠉⠉⠉⠉⠉⠉⠉⠉⢻⠉⠉⢿⡏⠉⠉⢹⡏⠉⠉⡏⠉⠉⠉⠉⢹⠉⢹⠉⡏⠉⣿⡏⠉⠉⠉⠉⠉⠉⠏⠉⠉⠉⠉⠉⠋⠉⠉⠹⡏⠉⠉⡏⠉⠀⠀
+    // ⠀⢸⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⡇⠀⠻⠀⢸⣀⡀⠀⢀⣀⣿⣿⠀⠀⠀⠀⠀⠘⡇⠀⣿⠀⠀⠀⠈⠀⠀⢸⡇⠀⠀⠈⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⠀⠀⠀⠛⠀⠀⠀⠀⠀⠃⢀⠇⠀⠀⡇⠀⠂⠀
+    // ⠀⢸⠀⠀⠀⢰⣾⠀⠸⠀⠀⠀⠀⠀⡇⠀⣶⠀⢸⠉⠁⠀⠈⠉⣿⡿⠀⢘⠀⢀⠀⢰⡇⠀⣿⠀⠀⣶⡇⠀⠀⢸⠀⢀⠀⢸⠀⠘⠀⠁⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⣶⡇⠀⣶⠀⠀⣶⡇⠀⡆⠀⠀⠐⠀⠃⠀⡆⠀
+    // ⣀⣸⣀⣀⣀⣸⣿⣄⣀⣠⣆⣀⣀⠀⢀⣀⣀⣆⣀⣠⣾⣄⣀⣠⣿⡇⢀⣀⡀⢘⣀⣀⣀⣀⣿⣀⣀⣿⣃⣀⣁⡀⠀⣀⣀⠀⣀⣸⣀⣀⣀⣀⠀⣀⣀⣀⣸⣀⣀⣀⣿⣇⣀⣃⣀⣀⣀⣿⣇⣀⣀⣀⣀⣿⣇⣀⣀⣠⣀⣸⡀⣀⣀⣇⣀
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣿⣿⣶⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣱⣿⣿⣿⣿
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣻⠿⡻⠿⠻⢟⣻⢿⠛⣿⣿⣟⢻⣏⡿⡿⣟⣿⠿⢿⣿⣻⣻⣿⣿⡧⡿⣿⣛⣻⡿⠟⢩⣾⠿⠿⠿⣟⣹⣿⠻⠿⠞⢼⢽⡋⠿⠿⠾⢻⠿⠿⣽⠻⡿⠿⣻⢟⣛⣟⣟⣷⠀⠀⠀⡆⠸⡿⢻⢿⡿⠋⠉⠀⠈⠻⣿⣿⡿⣫⠒⠛⠻⠿⠿
+    // ⠀⠁⠀⠀⠁⠀⠀⠁⢸⢣⡇⠈⠀⠀⠀⠀⠁⠈⠀⠀⠀⣠⠷⣄⢹⠃⣨⡼⠟⠉⢀⡴⠓⠁⠀⠀⠈⠁⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠈⣄⣨⠾⠚⠋⢉⡉⠆⠀⢠⠀⠀⠷⡴⠋⠀⠀⡀⠀⠀⠀⠈⢳⡀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⡏⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⢀⡜⠁⠀⠈⣿⠋⠁⠀⠀⠴⢯⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡶⠂⠀⠀⠀⠀⠀⠀⠀⢀⡠⠞⠉⠀⠀⠀⠒⠂⠀⠉⠀⠂⠓⢄⣀⣀⣀⣀⣀⠨⡴⢤⣀⠀⠀⠹⡄⠀⠀⠀⠀⠀
+    // ⠀⠀⠘⢦⠀⠀⠀⠀⣇⠈⡇⠀⠀⠀⠀⠀⠀⣀⣤⠏⠀⠀⠀⠀⠉⡆⠀⠀⠀⠀⠀⠀⠈⠉⠛⠒⠒⠒⠒⢚⣫⠝⠉⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀⠀⠀⠀⠌⠀⠀⠀⠀⢀⡄⠀⠜⠋⡄⠈⠐⠨⢢⡈⠢⡈⠉⠒⠒⠘⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠑⢄⡀⠀⠈⠳⠬⣦⣄⣀⡠⠖⠋⠁⠀⠀⠀⠀⠀⠀⠀⢸⡀⠀⠀⠀⠀⠀⠀⠈⢢⠘⢿⣟⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⡈⠀⠀⠀⢀⠔⡙⠀⠌⢠⠀⠉⠆⠀⠀⠀⠉⠀⠈⢆⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠉⠒⠤⠤⣤⢤⡼⠛⠀⠀⠀⠀⠀⠀⢠⠀⠀⠀⠀⠈⡎⢢⠀⠀⢠⠀⠀⠀⠀⠳⡈⢮⠳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠎⠀⠀⠀⠀⠀⢰⠰⠀⠀⠠⡤⠆⠰⢃⠎⠀⡈⠀⢸⠈⡄⠀⢀⠀⠀⠀⠀⢣⡀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠋⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⠀⠀⠀⠀⣿⡀⠳⡒⠚⣖⠦⠄⠀⠀⠱⡌⢦⠈⢦⠀⠀⠀⠀⠀⠀⠀⠸⠀⠀⠀⠀⠀⠀⢸⡇⠀⢀⠊⠀⠠⡡⠁⠀⢀⠁⠀⠸⠀⠘⡐⡈⡀⠀⠀⠀⠀⢳⣄⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠁⠀⠀⠀⠀⠀⠀⠀⠀⡰⠃⡆⢠⠀⠀⠀⢸⢇⠀⠘⡄⠸⡄⠀⠀⠀⣄⢱⠈⢇⠀⠱⡀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠘⠁⡐⠁⠀⢠⠏⠀⠀⠀⠌⠀⠀⠀⠀⠀⢡⠈⡇⠀⠀⠀⠀⠈⡎⢆⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠀⡔⠀⠀⠀⠀⣠⢶⠁⠀⡇⢸⡄⠀⠀⢸⢸⠀⠀⠘⣆⢳⠀⠀⠀⣿⢦⢧⠈⣆⠀⠁⠀⠀⠀⠀⢰⠀⡄⠀⠀⠀⠀⠀⠀⡗⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⡇⠀⠀⠀⠀⠀⠸⠈⢆⠀⠀⠀
+    // ⠀⠀⠀⣀⣀⣀⣀⡀⢸⠀⠀⢰⠃⠀⠀⠠⠞⢡⠇⠀⠀⢳⢸⢳⠀⠀⢸⠘⣆⣀⣀⣘⣎⣆⠀⠀⣿⣌⣾⡆⠘⡄⠀⠀⠀⠀⠀⢸⠀⡇⠀⢰⠀⠀⠀⠀⣿⣶⣶⣶⣶⡶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⡁⠀⠀⠀⠀⠀⠀⠇⠘⡄⠀⠀
+    // ⠀⠉⠁⠀⠀⠀⠀⠀⢹⠁⠀⡞⠀⠀⠀⠀⢀⡎⠀⠀⢀⣸⣾⠈⣇⠀⢸⠀⠡⣶⣶⣿⣿⣿⡄⢠⣿⣿⣾⣧⠀⠘⢆⠀⠀⠀⠀⢸⠀⡇⠀⢸⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣈⠂⢀⠀⡇⠀⠀⠀⡀⠀⠀⢰⠀⠘⡀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠈⡆⠀⡇⠀⠀⠀⠀⣼⣠⠴⢚⣩⣴⣿⠀⠘⡄⠘⠀⠀⠈⠉⠛⠛⠻⣧⢸⣿⣿⣿⢿⣦⡀⠈⢦⠀⠀⠀⢸⢀⡇⠀⡁⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⢿⣷⣦⡄⡇⠀⠀⠀⠇⠀⢇⠘⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⢀⠤⠃⢰⠇⠀⠀⠀⢰⣿⣷⣾⣿⣿⠿⠉⠀⠀⠘⡇⠀⠀⠀⠀⠀⠀⠀⠘⠏⢿⣿⣿⣇⠉⠙⠓⠤⢕⣄⠀⢸⢸⢰⠀⠣⣁⠀⠀⠀⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠁⠃⠀⠀⢸⠀⢸⠈⡄⡆⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠉⠓⠒⡶⢼⠀⢠⠀⢀⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⣀⠄⠂⠉⠐⡄⠀⠀⠀⢸⡇⠏⢿⣆⠀⠀⠀⠀⠀⠀⢸⠸⠘⡄⠀⠸⠀⠀⠀⡇⠀⠀⠀⠀⢀⠂⢱⠀⠀⠀⠀⠀⠀⠀⠀⣼⠀⠀⢀⡇⠀⡈⠀⢡⡇⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⢸⢠⢿⡀⡼⣿⣿⣿⣧⠀⠀⠀⠀⢀⠔⠂⠉⠀⠀⠀⠀⠀⡁⠀⠀⢀⣾⡇⢸⠀⠙⢆⠀⠀⠀⠀⠀⠈⡆⠀⢃⠀⠀⡇⠀⠀⣇⠀⠀⠀⠀⠀⠑⡎⠀⠀⠀⠀⠀⠀⠀⡸⡇⠀⠀⡜⡄⢀⠃⠀⠸⠁⠀⠀⠄
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⡇⡇⢿⣿⣿⣿⡆⠀⠀⠀⡇⠀⠀⠀⠀⠀⢀⡀⢀⠁⣠⣴⣿⣿⢰⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠘⡀⢰⢱⠀⠀⠇⠈⠒⡤⢀⡀⠀⠀⠀⢀⣀⣀⡀⠤⠔⣡⠇⠀⡐⠀⡇⠸⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠁⢱⡇⢸⡘⢿⣿⣿⡀⠀⠀⠣⡀⠂⠈⠉⠉⠀⢀⡟⣾⣿⣿⣿⠃⠸⣌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⠜⠀⠆⢸⠅⠀⢀⡇⠀⠀⠈⣹⠉⠁⠀⢀⢴⠀⡰⢹⠀⡐⠁⠀⣇⠇⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣄⡏⠁⠀⣇⢎⠻⣿⣷⣶⣤⣤⣤⡤⠤⠤⠐⣶⣿⡇⣿⣿⣿⠏⠀⡇⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠘⡸⣸⣾⣿⠇⠀⠀⠀⢿⣿⣦⡔⠋⢸⡜⠀⡆⠔⠀⠀⠀⡟⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠋⠇⠀⡄⣸⡘⡄⠘⢿⣿⣿⣿⣿⣷⠀⠀⠀⢿⣿⣧⣿⣿⡟⠀⢰⠇⢻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠟⠛⠛⡇⠠⠀⡀⠀⠈⣻⣿⣷⡄⠏⠀⢰⠊⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠜⠁⠀⢠⢸⢀⣿⣧⢱⡀⠀⠙⢿⣿⣿⠟⠀⠀⠀⠈⣿⠛⢿⣿⡇⢠⣿⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡞⠁⠀⠀⢰⡇⠀⠀⠀⠑⣰⠿⠿⠿⠿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡇⢸⣿⣿⣎⣷⡄⠀⠘⣿⣿⣦⡀⠔⠂⠉⢻⡀⠀⢹⣧⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠫⣀⠀⠀⠀⠸⡇⠀⠀⠀⣰⠃⠀⠀⣠⠔⣫⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 }
