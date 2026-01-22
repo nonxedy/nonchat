@@ -51,9 +51,7 @@ public class ChatManager {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
-        this.adDetector = new AdDetector(config,
-                config.getAntiAdSensitivity(),
-                config.getAntiAdPunishCommand());
+        this.adDetector = new AdDetector(config, config.getAntiAdSensitivity(), config.getAntiAdPunishCommand());
         this.spamDetector = new SpamDetector(config, messages);
         this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
         this.channelManager = new ChannelManager(plugin, config);

@@ -274,8 +274,7 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             int damage = damageable.hasDamage() ? damageable.getDamage() : 0;
             int currentDurability = maxDurability - damage;
             double percentage = (double) currentDurability / maxDurability * 100;
-            String durabilityText = currentDurability + "/" + maxDurability + " (" + String.format("%.1f", percentage)
-                    + "%)";
+            String durabilityText = currentDurability + "/" + maxDurability + " (" + String.format("%.1f", percentage) + "%)";
             text = text.replace("{item_durability}", durabilityText);
         } else {
             text = text.replace("{item_durability}", "");
