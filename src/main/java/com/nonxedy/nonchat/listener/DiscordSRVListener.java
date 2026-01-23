@@ -38,6 +38,7 @@ public class DiscordSRVListener implements Listener {
      * Discord and which channel it should go to.
      */
     @Subscribe
+    @SuppressWarnings("deprecation") // getMessage() is deprecated but replacement uses incompatible shaded Adventure API
     public void onGameChatMessagePreProcess(GameChatMessagePreProcessEvent event) {
         // Get the player and message
         Player player = event.getPlayer();

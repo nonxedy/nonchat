@@ -51,9 +51,7 @@ public class ChatManager {
         this.plugin = plugin;
         this.config = config;
         this.messages = messages;
-        this.adDetector = new AdDetector(config,
-                                      config.getAntiAdSensitivity(),
-                                      config.getAntiAdPunishCommand());
+        this.adDetector = new AdDetector(config, config.getAntiAdSensitivity(), config.getAntiAdPunishCommand());
         this.spamDetector = new SpamDetector(config, messages);
         this.asyncFilterService = new AsyncFilterService(plugin, adDetector);
         this.channelManager = new ChannelManager(plugin, config);
@@ -163,7 +161,7 @@ public class ChatManager {
 
         // Check advertisements
         if (config.isAntiAdEnabled() && !player.hasPermission("nonchat.ad.bypass")) {
-            if (adDetector.shouldFilter(player, message)) {
+            if (asyncFilterService.shouldFilterAsync(player, message).join()) {
                 player.sendMessage(ColorUtil.parseComponentCached(messages.getString("blocked-words")));
                 return false;
             }
@@ -185,14 +183,16 @@ public class ChatManager {
         Player player = context.player;
         String message = context.messageContent;
 
-        // Determine which channel to use based on message prefix or player's active channel
+        // Determine which channel to use based on message prefix or player's active
+        // channel
         Channel channel = channelManager.getChannelForMessage(message);
         if (channel == null) {
             return false; // Silently cancel if no channel available
         }
 
         String finalMessage;
-        // If a channel was found by prefix, update player's active channel and remove the prefix
+        // If a channel was found by prefix, update player's active channel and remove
+        // the prefix
         if (channel.hasPrefix() && message.startsWith(channel.getPrefix())) {
             channelManager.setPlayerChannel(player, channel.getId());
             finalMessage = message.substring(channel.getPrefix().length());
@@ -226,7 +226,8 @@ public class ChatManager {
         }
 
         // Check message length
-        String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage : ColorUtil.stripAllColors(finalMessage);
+        String messageForLengthCheck = player.hasPermission("nonchat.color") ? finalMessage
+                : ColorUtil.stripAllColors(finalMessage);
         if (messageForLengthCheck.length() < channel.getMinLength()) {
             player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-too-short")
                     .replace("{min}", String.valueOf(channel.getMinLength()))));
@@ -271,8 +272,8 @@ public class ChatManager {
 
         // Apply mention coloring if enabled
         String messageToSend = config.isMentionColoringEnabled()
-            ? processMentionColoring(processedMessage)
-            : processedMessage;
+                ? processMentionColoring(processedMessage)
+                : processedMessage;
 
         context.processedMessage = processedMessage;
         context.finalMessage = messageToSend;
@@ -286,14 +287,12 @@ public class ChatManager {
         String processedMessage = context.processedMessage;
 
         Component formattedMessage = channel.formatMessage(player, messageToSend);
-        boolean messageDelivered = broadcastMessage(player, formattedMessage, channel, processedMessage);
+        context.messageDelivered = broadcastMessage(player, formattedMessage, channel, processedMessage);
 
         // Notify if message wasn't delivered
-        if (config.isUndeliveredMessageNotificationEnabled() && !messageDelivered) {
+        if (config.isUndeliveredMessageNotificationEnabled() && !context.messageDelivered) {
             player.sendMessage(ColorUtil.parseComponentCached(messages.getString("message-not-delivered")));
         }
-
-        context.messageDelivered = messageDelivered;
     }
 
     private void handleBubbleCreation(ChatProcessingContext context) {
@@ -301,10 +300,12 @@ public class ChatManager {
         Channel channel = context.channel;
         String messageToSend = context.finalMessage;
 
-        // Only show chat bubbles for public channels with permission
+        // Only show chat bubbles for public channels with permission and if message was
+        // delivered
         boolean shouldShowBubble = config.isChatBubblesEnabled()
                 && player.hasPermission("nonchat.chatbubbles")
-                && isPublicChannel(channel);
+                && isPublicChannel(channel)
+                && context.messageDelivered;
 
         if (shouldShowBubble) {
             scheduleBubbleCreation(player, messageToSend);
@@ -323,17 +324,20 @@ public class ChatManager {
                     removeBubble(player);
                     createBubble(player, bubbleMessage);
                 } catch (Exception e) {
-                    plugin.logError("Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
+                    plugin.logError(
+                            "Error in bubble creation task for player " + player.getName() + ": " + e.getMessage());
                 }
             });
         } catch (IllegalArgumentException e) {
-            plugin.logError("Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
+            plugin.logError(
+                    "Failed to schedule bubble creation for player " + player.getName() + ": " + e.getMessage());
             // Try immediate execution as fallback
             try {
                 removeBubble(player);
                 createBubble(player, bubbleMessage);
             } catch (Exception fallbackError) {
-                plugin.logError("Fallback bubble creation also failed for player " + player.getName() + ": " + fallbackError.getMessage());
+                plugin.logError("Fallback bubble creation also failed for player " + player.getName() + ": "
+                        + fallbackError.getMessage());
             }
         }
     }
@@ -415,7 +419,8 @@ public class ChatManager {
                             Location newLoc = player.getLocation().add(0, config.getChatBubblesHeight(), 0);
                             DisplayEntityUtil.updateBubblesLocation(entry.getValue(), newLoc);
                         } catch (Exception e) {
-                            plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": " + e.getMessage());
+                            plugin.logError("Error updating bubbles for player " + entry.getKey().getName() + ": "
+                                    + e.getMessage());
                         }
                     });
 
@@ -449,7 +454,8 @@ public class ChatManager {
             Color backgroundColor = ColorUtil.parseHexColor(config.getChatBubblesBackgroundColor());
 
             List<TextDisplay> playerBubbles = DisplayEntityUtil.spawnMultilineBubble(player, message, loc,
-                config.getChatBubblesScale(), config.getChatBubblesScaleX(), config.getChatBubblesScaleY(), config.getChatBubblesScaleZ(), backgroundColor);
+                    config.getChatBubblesScale(), config.getChatBubblesScaleX(), config.getChatBubblesScaleY(),
+                    config.getChatBubblesScaleZ(), backgroundColor);
 
             // Only add bubbles if they were successfully created
             if (playerBubbles != null && !playerBubbles.isEmpty()) {
@@ -460,19 +466,22 @@ public class ChatManager {
                         removeBubble(player);
                     }, config.getChatBubblesDuration() * 20L);
                 } catch (IllegalArgumentException e) {
-                    plugin.logError("Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
+                    plugin.logError(
+                            "Failed to schedule bubble removal for player " + player.getName() + ": " + e.getMessage());
                     // Schedule removal using global scheduler as fallback
                     try {
                         Bukkit.getScheduler().runTaskLater(plugin, () -> {
                             removeBubble(player);
                         }, config.getChatBubblesDuration() * 20L);
                     } catch (IllegalArgumentException fallbackError) {
-                        plugin.logError("Fallback bubble removal scheduling also failed for player " + player.getName() + ": " + fallbackError.getMessage());
+                        plugin.logError("Fallback bubble removal scheduling also failed for player " + player.getName()
+                                + ": " + fallbackError.getMessage());
                         // Try to remove bubble immediately as last resort
                         try {
                             removeBubble(player);
                         } catch (Exception immediateError) {
-                            plugin.logError("Immediate bubble removal also failed for player " + player.getName() + ": " + immediateError.getMessage());
+                            plugin.logError("Immediate bubble removal also failed for player " + player.getName() + ": "
+                                    + immediateError.getMessage());
                         }
                     }
                 }
@@ -496,7 +505,8 @@ public class ChatManager {
             try {
                 bubbles.remove(player);
             } catch (Exception cleanupError) {
-                plugin.logError("Error cleaning up bubble map for player " + player.getName() + ": " + cleanupError.getMessage());
+                plugin.logError("Error cleaning up bubble map for player " + player.getName() + ": "
+                        + cleanupError.getMessage());
             }
         }
     }
@@ -554,8 +564,8 @@ public class ChatManager {
         if (config.isMentionSoundEnabled()) {
             try {
                 mentioned.playSound(mentioned.getLocation(),
-                    config.getMentionSound(),
-                    config.getMentionSoundVolume(), config.getMentionSoundPitch());
+                        config.getMentionSound(),
+                        config.getMentionSoundVolume(), config.getMentionSoundPitch());
             } catch (Exception e) {
                 plugin.logError("Error playing mention sound: " + e.getMessage());
             }
@@ -564,6 +574,7 @@ public class ChatManager {
 
     /**
      * Processes mention coloring in a message for the sender's view
+     * 
      * @param message The message to process
      * @return The message with colored mentions
      */
@@ -597,17 +608,18 @@ public class ChatManager {
      * Broadcasts a message to all eligible recipients and returns whether it
      * was delivered to any players.
      *
-     * @param sender The player sending the message
-     * @param message The formatted message component
-     * @param channel The channel being used
+     * @param sender          The player sending the message
+     * @param message         The formatted message component
+     * @param channel         The channel being used
      * @param originalMessage The original message content
      * @return true if the message was delivered to at least one player, false
-     * otherwise
+     *         otherwise
      */
     private boolean broadcastMessage(Player sender, Component message, Channel channel, String originalMessage) {
-        // For console, create a simple message without our color modifications to avoid &f appearing
+        // For console, create a simple message without our color modifications to avoid
+        // &f appearing
         String consoleFormat = channel.getFormat().replace("{message}", originalMessage);
-        
+
         // Apply PlaceholderAPI for console
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
@@ -616,7 +628,7 @@ public class ChatManager {
                 plugin.logError("Error processing format placeholders for console: " + e.getMessage());
             }
         }
-        
+
         // Send to console with processed format
         Bukkit.getConsoleSender().sendMessage(ColorUtil.parseComponent(consoleFormat));
 
@@ -638,19 +650,9 @@ public class ChatManager {
     }
 
     /**
-     * Finds a channel by its trigger character.
-     *
-     * @param c The character to find
-     * @return The channel, or null if not found
-     */
-    private Channel findChannelByChar(char c) {
-        return channelManager.findChannelByPrefix(String.valueOf(c)).orElse(null);
-    }
-
-    /**
      * Sets a player's active channel.
      *
-     * @param player The player
+     * @param player    The player
      * @param channelId The channel ID
      * @return true if successful, false if channel not found or not enabled
      */
@@ -706,18 +708,18 @@ public class ChatManager {
     /**
      * Creates a new channel with the specified properties.
      *
-     * @param channelId The unique channel ID
-     * @param displayName The display name for the channel
-     * @param format The message format for the channel
-     * @param character The trigger character, or null for none
-     * @param sendPermission Permission to send to this channel, or empty for
-     * everyone
+     * @param channelId         The unique channel ID
+     * @param displayName       The display name for the channel
+     * @param format            The message format for the channel
+     * @param character         The trigger character, or null for none
+     * @param sendPermission    Permission to send to this channel, or empty for
+     *                          everyone
      * @param receivePermission Permission to receive from this channel, or
-     * empty for everyone
-     * @param radius Radius of the channel in blocks, or -1 for global
-     * @param cooldown Cooldown between messages in seconds
-     * @param minLength Minimum message length
-     * @param maxLength Maximum message length, or -1 for unlimited
+     *                          empty for everyone
+     * @param radius            Radius of the channel in blocks, or -1 for global
+     * @param cooldown          Cooldown between messages in seconds
+     * @param minLength         Minimum message length
+     * @param maxLength         Maximum message length, or -1 for unlimited
      * @return The created channel, or null if the ID already exists
      */
     public Channel createChannel(String channelId, String displayName, String format,
@@ -733,23 +735,27 @@ public class ChatManager {
      * Updates an existing channel with new properties, including Discord
      * channel ID.
      *
-     * @param channelId The channel ID to update
-     * @param displayName The display name for the channel (null to keep
-     * existing)
-     * @param format The message format for the channel (null to keep existing)
-     * @param character The trigger character (null to keep existing, '\0' to
-     * remove)
-     * @param sendPermission Permission to send to this channel (null to keep
-     * existing)
+     * @param channelId         The channel ID to update
+     * @param displayName       The display name for the channel (null to keep
+     *                          existing)
+     * @param format            The message format for the channel (null to keep
+     *                          existing)
+     * @param character         The trigger character (null to keep existing, '\0'
+     *                          to
+     *                          remove)
+     * @param sendPermission    Permission to send to this channel (null to keep
+     *                          existing)
      * @param receivePermission Permission to receive from this channel (null to
-     * keep existing)
-     * @param radius Radius of the channel in blocks (-1 for global, null to
-     * keep existing)
-     * @param enabled Whether the channel is enabled (null to keep existing)
-     * @param cooldown Cooldown between messages in seconds (null to keep
-     * existing)
-     * @param minLength Minimum message length (null to keep existing)
-     * @param maxLength Maximum message length (null to keep existing)
+     *                          keep existing)
+     * @param radius            Radius of the channel in blocks (-1 for global, null
+     *                          to
+     *                          keep existing)
+     * @param enabled           Whether the channel is enabled (null to keep
+     *                          existing)
+     * @param cooldown          Cooldown between messages in seconds (null to keep
+     *                          existing)
+     * @param minLength         Minimum message length (null to keep existing)
+     * @param maxLength         Maximum message length (null to keep existing)
      * @return True if the channel was updated, false otherwise
      */
     public boolean updateChannel(String channelId, String displayName, String format,
@@ -777,7 +783,7 @@ public class ChatManager {
      *
      * @param channelId The channel ID to set as default
      * @return True if successful, false if channel doesn't exist or isn't
-     * enabled
+     *         enabled
      */
     public boolean setDefaultChannel(String channelId) {
         return channelManager.setDefaultChannel(channelId);
@@ -795,11 +801,14 @@ public class ChatManager {
     public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
         this.ignoreCommand = ignoreCommand;
     }
-    
+
     /**
      * Cleanup method to remove all bubbles when plugin is disabled
      */
     public void cleanup() {
+        if (asyncFilterService != null) {
+            asyncFilterService.shutdown();
+        }
         bubbles.values().forEach(DisplayEntityUtil::removeBubbles);
         bubbles.clear();
         playerLocks.clear();

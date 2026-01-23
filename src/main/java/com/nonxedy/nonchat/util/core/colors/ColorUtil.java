@@ -21,10 +21,8 @@ import net.md_5.bungee.api.ChatColor;
  */
 class LRUCache<K,V> {
     private final Map<K,V> cache;
-    private final int maxSize;
     
     public LRUCache(int maxSize) {
-        this.maxSize = maxSize;
         this.cache = Collections.synchronizedMap(
             new LinkedHashMap<K,V>(maxSize, 0.75f, true) {
                 @Override
@@ -105,10 +103,10 @@ public class ColorUtil {
         
         return COMPONENT_CACHE.computeIfAbsent(message, m -> {
             if (containsMiniMessageTags(m)) {
-                // Parse with MiniMessage if it contains MiniMessage format tags
+                // Parse with MiniMessage only if it contains actual MiniMessage format tags
                 return parseMiniMessageComponent(m);
             } else {
-                // Otherwise use legacy format parsing
+                // Use legacy format parsing for &#RRGGBB hex codes and &X color codes
                 String legacyMessage = parseColor(m);
                 return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
             }

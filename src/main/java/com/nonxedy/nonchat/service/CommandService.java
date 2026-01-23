@@ -26,7 +26,6 @@ import com.nonxedy.nonchat.command.impl.SpyCommand;
  */
 public class CommandService {
     private final Nonchat plugin;
-    private final ChatService chatService;
     private final ConfigService configService;
     private final Map<String, CommandExecutor> commands;
 
@@ -34,12 +33,10 @@ public class CommandService {
      * Creates new command service.
      *
      * @param plugin Plugin instance
-     * @param chatService Chat service
      * @param configService Configuration service
      */
-    public CommandService(Nonchat plugin, ChatService chatService, ConfigService configService) {
+    public CommandService(Nonchat plugin, ConfigService configService) {
         this.plugin = plugin;
-        this.chatService = chatService;
         this.configService = configService;
         this.commands = new HashMap<>();
         registerCommands();
@@ -79,7 +76,7 @@ public class CommandService {
         registerCommand("roll", new RollCommand(plugin, configService.getConfig(), configService.getMessages()));
     
         // Utility commands
-        registerCommand("nonchat", new NonchatCommand(plugin, configService));
+        registerCommand("nonchat", new NonchatCommand(plugin, configService.getMessages()));
         
         plugin.logResponse("Registered " + commands.size() + " traditional commands");
     }

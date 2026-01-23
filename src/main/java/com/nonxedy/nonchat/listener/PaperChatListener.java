@@ -16,6 +16,19 @@ import com.nonxedy.nonchat.service.ChatService;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
+/**
+ * Paper chat listener that bridges the old AsyncPlayerChatEvent with the newer AsyncChatEvent.
+ *
+ * This keeps things compatible with ChatColor2 and other plugins that still rely on
+ * the deprecated AsyncPlayerChatEvent, while also playing nicely with Paper’s modern
+ * AsyncChatEvent setup.
+ *
+ * How it works, step by step:
+ * 1. AsyncPlayerChatEvent (LOWEST) – Strip the channel prefix so ChatColor2 can do its thing
+ * 2. ChatColor2 processes the message and adds colors
+ * 3. AsyncPlayerChatEvent (HIGHEST) – Put the channel prefix back and grab the colored message
+ * 4. AsyncChatEvent (MONITOR) – Feed the final colored message into our chat system
+ */
 public class PaperChatListener extends ChatListener {
 
     private final Nonchat plugin;
@@ -27,7 +40,12 @@ public class PaperChatListener extends ChatListener {
         this.plugin = plugin;
     }
 
+    /**
+     * LOWEST priority - Intercept message before ChatColor2 processes it
+     * Temporarily remove channel prefix so ChatColor2 can color the actual message content
+     */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @SuppressWarnings("deprecation") // Required for ChatColor2 compatibility
     public void onAsyncPlayerChatLowest(AsyncPlayerChatEvent event) {
         // Check if message starts with a channel prefix and temporarily remove it for ChatColor2
         String message = event.getMessage();
@@ -42,7 +60,12 @@ public class PaperChatListener extends ChatListener {
         }
     }
 
+    /**
+     * HIGHEST priority - Capture the colored message after ChatColor2 has processed it
+     * Restore the channel prefix that was temporarily removed
+     */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @SuppressWarnings("deprecation") // Required for ChatColor2 compatibility
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         String playerId = player.getUniqueId().toString();
@@ -58,6 +81,10 @@ public class PaperChatListener extends ChatListener {
         playerMessages.put(playerId, message);
     }
 
+    /**
+     * MONITOR priority - Process the final message using Paper's modern AsyncChatEvent
+     * This is the modern Paper API that uses Adventure Components
+     */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onAsyncChat(AsyncChatEvent event) {
         event.setCancelled(true);

@@ -13,18 +13,15 @@ import com.nonxedy.nonchat.config.PluginConfig;
 import com.nonxedy.nonchat.config.PluginMessages;
 import com.nonxedy.nonchat.placeholders.impl.ConfigurablePlaceholder;
 import com.nonxedy.nonchat.util.InteractivePlaceholderManager;
-import com.nonxedy.nonchat.util.lang.LanguageManager;
 
 public class ConfigService implements IConfigurable {
     private final Nonchat plugin;
     private final PluginConfig config;
     private final PluginMessages messages;
-    private final LanguageManager languageManager;
 
     public ConfigService(Nonchat plugin) {
         this.plugin = plugin;
         this.config = new PluginConfig(plugin);
-        this.languageManager = new LanguageManager(plugin.getDataFolder());
         this.messages = new PluginMessages(plugin);
         load();
         this.messages.loadLanguage();

@@ -6,7 +6,6 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.nonxedy.nonchat.util.core.colors.ColorUtil;
 import com.nonxedy.nonchat.util.items.localization.ItemLocalizationUtil;
 import com.nonxedy.nonchat.util.lang.TranslationUtil;
 
@@ -136,16 +135,15 @@ public class ItemDisplayUtil {
         
         // Add lore if exists
         if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
-            List<String> lore = item.getItemMeta().getLore();
+            List<Component> lore = item.getItemMeta().lore();
             
             if (lore != null && !lore.isEmpty()) {
                 // Add a blank line after name
                 lines.add(Component.text(""));
                 
-                // Add each lore line
-                for (String loreLine : lore) {
-                    Component loreComponent = ColorUtil.parseComponent(loreLine);
-                    lines.add(loreComponent);
+                // Add each lore line (already as Component)
+                for (Component loreLine : lore) {
+                    lines.add(loreLine);
                 }
             }
         }
