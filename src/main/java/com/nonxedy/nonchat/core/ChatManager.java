@@ -186,8 +186,13 @@ public class ChatManager {
         // Determine which channel to use based on message prefix or player's active
         // channel
         Channel channel = channelManager.getChannelForMessage(message);
-        if (channel == null) {
-            return false; // Silently cancel if no channel available
+
+        // If no channel was found by prefix, use the player's active channel
+        if (channel == null || !channel.hasPrefix() || !message.startsWith(channel.getPrefix())) {
+            channel = channelManager.getPlayerChannel(player);
+            if (channel == null) {
+                return false; // Silently cancel if no channel available
+            }
         }
 
         String finalMessage;
