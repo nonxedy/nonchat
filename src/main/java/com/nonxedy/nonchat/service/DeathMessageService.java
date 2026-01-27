@@ -21,6 +21,7 @@ import com.nonxedy.nonchat.util.death.DamageRecord;
 import com.nonxedy.nonchat.util.death.DamageType;
 import com.nonxedy.nonchat.util.death.DeathMessage;
 import com.nonxedy.nonchat.util.integration.external.IntegrationUtil;
+import com.nonxedy.nonchat.util.lang.EntityLocalizationUtil;
 
 import net.kyori.adventure.text.Component;
 
@@ -274,14 +275,15 @@ public class DeathMessageService {
         // Get the appropriate message text based on indirect status and damage type
         String messageText = deathMessage.getMessage(isIndirect, damageType);
         
-        // Format the message with death-specific placeholders
-        String formattedMessage = formatDeathMessage(messageText, player, killer, lastDamager, event);
-
-        // Apply PlaceholderAPI processing
-        formattedMessage = applyPlaceholderAPI(player, formattedMessage);
-
-        // Apply color formatting using ColorUtil
-        Component finalComponent = ColorUtil.parseComponent(formattedMessage);
+        // Format the message with death-specific placeholders and create component
+        // This now supports translatable entity names for client-side localization
+        Component finalComponent = formatDeathMessageComponent(messageText, player, killer, lastDamager, event);
+        
+        // For logging purposes, create a simple string representation
+        String formattedMessage = messageText
+            .replace("%player_name%", player.getName())
+            .replace("{victim}", player.getName())
+            .replace("{player}", player.getName());
 
         return new DeathMessageResult(player, causeKey, isIndirect, formattedMessage, finalComponent);
     }
@@ -440,41 +442,28 @@ public class DeathMessageService {
 
     /**
      * Formats a death message with player and killer placeholders
+     * Now supports translatable entity names for client-side localization
+     * 
      * @param messageText The raw message text with placeholders
      * @param victim The player who died
      * @param killer The killer entity (may be null)
      * @param lastDamager The last damager record for indirect kills (may be null)
      * @param event The death event
-     * @return Formatted message with placeholders replaced
+     * @return Formatted message component with placeholders replaced
      */
-    private String formatDeathMessage(String messageText, Player victim, Entity killer, 
-                                     DamageRecord lastDamager, PlayerDeathEvent event) {
+    private Component formatDeathMessageComponent(String messageText, Player victim, Entity killer, 
+                                                  DamageRecord lastDamager, PlayerDeathEvent event) {
         if (messageText == null) {
-            return "";
+            return Component.empty();
         }
         
+        // First, replace all non-killer placeholders with actual values
         String formatted = messageText;
         
         // Replace victim placeholders
         formatted = formatted.replace("%player_name%", victim.getName());
         formatted = formatted.replace("{victim}", victim.getName());
         formatted = formatted.replace("{player}", victim.getName());
-        
-        // Replace killer placeholders
-        String killerName = deathConfig.getUnknownPlayerPlaceholder();
-        if (killer instanceof Player) {
-            killerName = ((Player) killer).getName();
-        } else if (lastDamager != null) {
-            // Use cached killer name for indirect kills when killer is offline
-            killerName = lastDamager.getDamagerName();
-        } else if (killer != null) {
-            // For non-player entities
-            killerName = killer.getName();
-        }
-        
-        formatted = formatted.replace("{killer_name}", killerName);
-        formatted = formatted.replace("{killer}", killerName);
-        formatted = formatted.replace("%killer_name%", killerName);
         
         // Replace coordinates if enabled
         if (deathConfig.showCoordinates()) {
@@ -484,7 +473,66 @@ public class DeathMessageService {
             formatted = formatted.replace("{world}", victim.getWorld().getName());
         }
         
-        return formatted;
+        // Apply PlaceholderAPI processing before handling killer name
+        formatted = applyPlaceholderAPI(victim, formatted);
+        
+        // Now handle killer name with translation support
+        Component killerComponent;
+        if (killer instanceof Player) {
+            // Players use their actual name
+            killerComponent = Component.text(((Player) killer).getName());
+        } else if (lastDamager != null) {
+            // Use cached killer name for indirect kills when killer is offline
+            killerComponent = Component.text(lastDamager.getDamagerName());
+        } else if (killer != null) {
+            // For non-player entities, use translatable component with custom name support
+            killerComponent = EntityLocalizationUtil.getTranslatableEntityName(killer, deathConfig);
+        } else {
+            // No killer - use unknown placeholder
+            killerComponent = Component.text(deathConfig.getUnknownPlayerPlaceholder());
+        }
+        
+        // Split the message by killer placeholders and rebuild with components
+        Component finalComponent = buildComponentWithKillerName(formatted, killerComponent);
+        
+        return finalComponent;
+    }
+    
+    /**
+     * Builds a component by replacing killer name placeholders with the translatable killer component
+     * This preserves color codes and allows client-side translation of entity names
+     * 
+     * @param message The message with killer placeholders
+     * @param killerComponent The translatable killer component
+     * @return Final component with killer name properly inserted
+     */
+    private Component buildComponentWithKillerName(String message, Component killerComponent) {
+        // Check for killer placeholders
+        String[] killerPlaceholders = {"{killer_name}", "{killer}", "%killer_name%"};
+        
+        for (String placeholder : killerPlaceholders) {
+            if (message.contains(placeholder)) {
+                // Split message by placeholder
+                String[] parts = message.split(java.util.regex.Pattern.quote(placeholder), -1);
+                
+                // Build component by joining parts with killer component
+                Component result = Component.empty();
+                for (int i = 0; i < parts.length; i++) {
+                    if (i > 0) {
+                        // Add killer component between parts
+                        result = result.append(killerComponent);
+                    }
+                    // Parse and add the text part with color codes
+                    if (!parts[i].isEmpty()) {
+                        result = result.append(ColorUtil.parseComponent(parts[i]));
+                    }
+                }
+                return result;
+            }
+        }
+        
+        // No killer placeholder found, just parse the message normally
+        return ColorUtil.parseComponent(message);
     }
     
     /**
