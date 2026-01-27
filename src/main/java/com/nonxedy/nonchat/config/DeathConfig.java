@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -414,7 +415,7 @@ public class DeathConfig {
                         Object value = currentConfig.get(path.toString());
                         
                         // Skip if this is actually a configuration section (should be a header, not a value)
-                        if (value instanceof org.bukkit.configuration.ConfigurationSection) {
+                        if (value instanceof ConfigurationSection) {
                             // This shouldn't happen, but if it does, treat it as empty collection
                             builder.append("{}\n");
                             continue;
