@@ -43,7 +43,7 @@ settings:
   entity-names:
     # If true, use the entity's custom name (name tag) if it has one
     # If false, always use the translated entity type name
-    use-custom-names: true
+    use-entity-nametags: true
     
     # Priority order for entity names
     # Options: "nametag" or "custom-type"

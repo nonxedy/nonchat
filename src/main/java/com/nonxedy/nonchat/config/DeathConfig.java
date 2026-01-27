@@ -296,7 +296,7 @@ public class DeathConfig {
      * @return true if custom names should be used (default: true)
      */
     public boolean useCustomEntityNames() {
-        return config.getBoolean("settings.entity-names.use-custom-names", true);
+        return config.getBoolean("settings.entity-names.use-entity-nametags", true);
     }
 
     /**
