@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -290,6 +291,49 @@ public class DeathConfig {
         return causes;
     }
 
+    /**
+     * Checks if custom entity names (name tags) should be used in death messages
+     * @return true if custom names should be used (default: true)
+     */
+    public boolean useCustomEntityNames() {
+        return config.getBoolean("settings.entity-names.use-entity-nametags", true);
+    }
+
+    /**
+     * Gets the priority order for entity names
+     * @return "nametag" if name tags have priority, "custom-type" if custom-type-names have priority
+     */
+    @NotNull
+    public String getEntityNamePriority() {
+        String priority = config.getString("settings.entity-names.priority", "nametag");
+        
+        // Validate the priority value
+        if (!"nametag".equalsIgnoreCase(priority) && !"custom-type".equalsIgnoreCase(priority)) {
+            logger.log(Level.WARNING, "Invalid entity name priority: {0}. Using default: nametag", priority);
+            return "nametag";
+        }
+        
+        return priority.toLowerCase();
+    }
+
+    /**
+     * Gets a custom name for an entity type if configured
+     * @param entityType The entity type (e.g., "ZOMBIE", "SKELETON")
+     * @return Custom name if configured, null otherwise
+     */
+    public String getCustomEntityTypeName(String entityType) {
+        if (entityType == null || entityType.isEmpty()) {
+            return null;
+        }
+        
+        String path = "settings.entity-names.custom-type-names." + entityType.toUpperCase();
+        if (config.contains(path)) {
+            return config.getString(path);
+        }
+        
+        return null;
+    }
+
 
     /**
      * Updates deaths.yml with missing keys from default configuration
@@ -369,6 +413,23 @@ public class DeathConfig {
                         builder.append(identifier).append(": ");
 
                         Object value = currentConfig.get(path.toString());
+                        
+                        // Skip if this is actually a configuration section (should be a header, not a value)
+                        if (value instanceof ConfigurationSection) {
+                            // This shouldn't happen, but if it does, treat it as empty collection
+                            builder.append("{}\n");
+                            continue;
+                        }
+                        
+                        // Special handling for empty maps (should be {} not null)
+                        if (value == null && currentConfig.isConfigurationSection(path.toString())) {
+                            var section = currentConfig.getConfigurationSection(path.toString());
+                            if (section != null && section.getKeys(false).isEmpty()) {
+                                builder.append("{}\n");
+                                continue;
+                            }
+                        }
+                        
                         if (value instanceof String string) {
                             String stringValue = string.replace("\n", "\\n");
                             builder.append("\"").append(stringValue).append("\"\n");
@@ -402,6 +463,37 @@ public class DeathConfig {
                             }
                         }
                         continue;
+                    }
+
+                    // Handle headers (including empty collections like {})
+                    if (fileLine.isHeader()) {
+                        // Check if this is an empty collection in the template
+                        String trimmedLine = line.trim();
+                        if (trimmedLine.endsWith(": {}") || trimmedLine.endsWith(": []")) {
+                            // Build the path for this header
+                            StringBuilder path = new StringBuilder();
+                            for (int i = 0; i <= point - 1; i++) {
+                                String header = headers.get(i);
+                                if (header != null) path.append(header).append(".");
+                            }
+                            path.append(identifier);
+                            
+                            // Check if it's a configuration section in the current config
+                            if (currentConfig.isConfigurationSection(path.toString())) {
+                                var section = currentConfig.getConfigurationSection(path.toString());
+                                if (section != null && section.getKeys(false).isEmpty()) {
+                                    // Keep it as empty collection
+                                    for (int i = 0; i < spaces; i++) builder.append(" ");
+                                    builder.append(identifier);
+                                    if (trimmedLine.endsWith(": {}")) {
+                                        builder.append(": {}\n");
+                                    } else {
+                                        builder.append(": []\n");
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
                     }
 
                     builder.append(line).append("\n");
@@ -530,9 +622,14 @@ public class DeathConfig {
             if (isListContent(line)) continue;
 
             if (!line.isEmpty() && !isComment(line) && line.contains(":")) {
-                String[] split = line.split(":");
-                boolean isValue = split.length > 1 && !isComment(split[1]);
-                boolean isHeader = split.length == 1 || isComment(split[1]);
+                String[] split = line.split(":", 2);
+                String afterColon = split.length > 1 ? split[1].trim() : "";
+                
+                // Check if it's an empty map {} or empty array []
+                boolean isEmptyCollection = afterColon.equals("{}") || afterColon.equals("[]");
+
+                boolean isValue = split.length > 1 && !isComment(split[1]) && !isEmptyCollection;
+                boolean isHeader = split.length == 1 || isComment(split[1]) || isEmptyCollection;
                 boolean isList = isHeader && i + 1 < fileLines.size() && isListContent(fileLines.get(i + 1));
                 
                 processedLines.put(positions, new FileLine(line, isValue, isHeader, isList));
