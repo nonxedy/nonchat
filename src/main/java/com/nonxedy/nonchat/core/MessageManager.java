@@ -45,7 +45,6 @@ public class MessageManager {
 
         if (ignoreCommand != null && ignoreCommand.isIgnoring(sender, receiver)) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
-                    .replace("%player%", receiver.getName())
                     .replace("{player}", receiver.getName())));
             return;
         }
