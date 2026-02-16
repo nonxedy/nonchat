@@ -60,6 +60,9 @@ public class ChatManager {
     }
 
     public void processChat(Player player, String messageContent) {
+        // Log incoming message
+        plugin.logChatMessage("Incoming: Player=" + player.getName() + " Message=\"" + messageContent + "\"");
+
         // Get or create player-specific lock
         ReentrantLock lock = playerLocks.computeIfAbsent(player, p -> new ReentrantLock());
         lock.lock();
@@ -73,6 +76,7 @@ public class ChatManager {
 
             // Apply filters
             if (!applyFilters(context)) {
+                plugin.logChatMessage("Filtered: Player=" + player.getName() + " Message=\"" + messageContent + "\" Reason=filter_blocked");
                 return;
             }
 
@@ -83,11 +87,13 @@ public class ChatManager {
 
             // Validate channel permissions and limits
             if (!validateChannelAccess(context)) {
+                plugin.logChatMessage("Filtered: Player=" + player.getName() + " Message=\"" + messageContent + "\" Reason=channel_access_denied");
                 return;
             }
 
             // Process message through API
             if (!processMessageThroughAPI(context)) {
+                plugin.logChatMessage("Filtered: Player=" + player.getName() + " Message=\"" + messageContent + "\" Reason=api_blocked");
                 return;
             }
 
@@ -96,6 +102,9 @@ public class ChatManager {
 
             // Format and broadcast
             broadcastProcessedMessage(context);
+
+            // Log delivered message
+            plugin.logChatMessage("Delivered: Player=" + player.getName() + " Channel=" + context.channel.getId() + " Message=\"" + context.finalMessage + "\"");
 
             // Handle bubble creation if needed
             handleBubbleCreation(context);

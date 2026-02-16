@@ -556,6 +556,20 @@ public class Nonchat extends JavaPlugin {
         }
     }
 
+    /**
+     * Logs chat messages to debug file
+     * @param message The message to log
+     */
+    public void logChatMessage(String message) {
+        try {
+            if (debugger != null) {
+                debugger.debug("Chat", message);
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.FINE, "Failed to log chat message: {0}", e.getMessage());
+        }
+    }
+
     // -----------------------------------------------------------------------------------------
     public ChatManager getChatManager() {
         return chatManager;
