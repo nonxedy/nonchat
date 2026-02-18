@@ -62,6 +62,7 @@ public class BroadcastManager {
         }
     }
 
+    @SuppressWarnings("deprecation") // broadcastMessage() is deprecated but required for legacy server compatibility
     public void broadcast(CommandSender sender, String message) {
         try {
             Component formatted;
@@ -79,7 +80,7 @@ public class BroadcastManager {
             Bukkit.broadcast(formatted);
         } catch (NoSuchMethodError e) {
             // Fall back to traditional Bukkit broadcast if Adventure API is not available
-            plugin.logError("Adventure API isn't avaible: " + e.getMessage());
+            plugin.logError("Adventure API isn't available: " + e.getMessage());
             String legacyMessage = ColorUtil.parseColor(message);
             Bukkit.broadcastMessage(legacyMessage);
         }

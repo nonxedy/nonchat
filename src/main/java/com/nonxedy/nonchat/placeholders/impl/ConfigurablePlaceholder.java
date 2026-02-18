@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.NotNull;
 
 import com.nonxedy.nonchat.api.InteractivePlaceholder;
@@ -16,11 +17,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
- * A configurable interactive placeholder that reads its settings from config.yml
+ * A configurable interactive placeholder that reads its settings from
+ * config.yml
  * Supports hover text, click actions, and permissions
  */
 public class ConfigurablePlaceholder implements InteractivePlaceholder {
@@ -36,8 +37,8 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
     private ClickAction clickAction;
 
     public ConfigurablePlaceholder(String placeholder, String activationKey, String displayName, String description,
-                                 boolean enabled, String permission, String format, List<String> hoverText,
-                                 String clickActionType, String clickActionValue) {
+            boolean enabled, String permission, String format, List<String> hoverText,
+            String clickActionType, String clickActionValue) {
         this.placeholder = placeholder;
         this.activationKey = activationKey != null && !activationKey.isEmpty() ? activationKey : placeholder;
         this.displayName = displayName;
@@ -125,89 +126,6 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
         return itemComponent;
     }
 
-    private String getItemDisplayName(ItemStack item) {
-        if (item == null || item.getType().isAir()) {
-            return "Air";
-        }
-
-        // Get item name (use display name if available, otherwise material name)
-        return item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
-            ? item.getItemMeta().getDisplayName()
-            : item.getType().name().replace("_", " ").toLowerCase();
-    }
-
-    private Component createItemCard(ItemStack item) {
-        if (item == null || item.getType().isAir()) {
-            return Component.text("[Air]").color(NamedTextColor.GRAY);
-        }
-
-        // Get item name (use display name if available, otherwise material name)
-        String itemName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
-            ? item.getItemMeta().getDisplayName()
-            : item.getType().name().replace("_", " ").toLowerCase();
-
-        // Create the main item component
-        Component itemComponent = Component.text("[" + itemName + "]")
-                .color(NamedTextColor.AQUA)
-                .decorate(TextDecoration.BOLD);
-
-        // Create hover text with item details
-        TextComponent.Builder hoverBuilder = Component.text();
-
-        // Item name
-        hoverBuilder.append(Component.text("Item: ", NamedTextColor.GOLD))
-                   .append(Component.text(itemName, NamedTextColor.WHITE))
-                   .append(Component.newline());
-
-        // Amount
-        if (item.getAmount() > 1) {
-            hoverBuilder.append(Component.text("Amount: ", NamedTextColor.GOLD))
-                       .append(Component.text(item.getAmount() + "x", NamedTextColor.WHITE))
-                       .append(Component.newline());
-        }
-
-        // Lore (description)
-        if (item.getItemMeta() != null && item.getItemMeta().hasLore()) {
-            hoverBuilder.append(Component.text("Description:", NamedTextColor.GOLD))
-                       .append(Component.newline());
-
-            for (String loreLine : item.getItemMeta().getLore()) {
-                hoverBuilder.append(Component.text("  " + loreLine, NamedTextColor.GRAY))
-                           .append(Component.newline());
-            }
-        }
-
-        // Enchantments
-        if (item.getItemMeta() != null && item.getItemMeta().hasEnchants()) {
-            hoverBuilder.append(Component.text("Enchantments:", NamedTextColor.GOLD))
-                       .append(Component.newline());
-
-            for (org.bukkit.enchantments.Enchantment enchantment : item.getItemMeta().getEnchants().keySet()) {
-                int level = item.getItemMeta().getEnchantLevel(enchantment);
-                String enchantName = enchantment.getKey().getKey().replace("_", " ").toLowerCase();
-                hoverBuilder.append(Component.text("  " + enchantName + " " + level, NamedTextColor.BLUE))
-                           .append(Component.newline());
-            }
-        }
-
-        // Durability for damageable items
-        if (item.getType().getMaxDurability() > 0) {
-            int maxDurability = item.getType().getMaxDurability();
-            int currentDurability = maxDurability - (item.getDurability() & 0xFFFF);
-            double percentage = (double) currentDurability / maxDurability * 100;
-
-            NamedTextColor durabilityColor = percentage > 75 ? NamedTextColor.GREEN :
-                                           percentage > 50 ? NamedTextColor.YELLOW :
-                                           percentage > 25 ? NamedTextColor.GOLD : NamedTextColor.RED;
-
-            hoverBuilder.append(Component.text("Durability: ", NamedTextColor.GOLD))
-                       .append(Component.text(currentDurability + "/" + maxDurability +
-                                            " (" + String.format("%.1f", percentage) + "%)", durabilityColor));
-        }
-
-        return itemComponent.hoverEvent(HoverEvent.showText(hoverBuilder.build()));
-    }
-
     private Component processPingPlaceholder(Player player) {
         // Process the format string with placeholders (get plain text)
         String processedFormat = processPlaceholdersAsString(player, format);
@@ -278,16 +196,6 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             processed = processed.replace("{ping_quality}", quality);
         }
 
-        // Try to get TPS (this is a rough approximation)
-        double tps = 20.0; // Default to 20 TPS
-        try {
-            // This would require a TPS monitoring plugin or custom implementation
-            // For now, we'll use a placeholder
-            processed = processed.replace("{tps}", "20.0");
-        } catch (Exception e) {
-            processed = processed.replace("{tps}", "20.0");
-        }
-
         // Process PlaceholderAPI placeholders if available
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
@@ -311,20 +219,33 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             return text;
         }
 
-        // Basic item info
-        String itemName = item.getItemMeta() != null && item.getItemMeta().hasDisplayName()
-            ? item.getItemMeta().getDisplayName()
-            : item.getType().name().replace("_", " ").toLowerCase();
+        // Basic item info - use Adventure API's displayName() instead of deprecated
+        // getDisplayName()
+        String itemName;
+        if (item.getItemMeta() != null && item.getItemMeta().hasDisplayName()) {
+            // Use Adventure API to get display name as plain text
+            itemName = PlainTextComponentSerializer.plainText()
+                    .serialize(item.getItemMeta().displayName());
+        } else {
+            itemName = item.getType().name().replace("_", " ").toLowerCase();
+        }
 
         text = text.replace("{item_name}", itemName);
         text = text.replace("{item_amount}", String.valueOf(item.getAmount()));
 
-        // Lore
+        // Lore - use Adventure API's lore() instead of deprecated getLore()
         if (item.getItemMeta() != null && item.getItemMeta().hasLore()) {
             StringBuilder loreBuilder = new StringBuilder();
-            for (String loreLine : item.getItemMeta().getLore()) {
-                if (loreBuilder.length() > 0) loreBuilder.append("\n");
-                loreBuilder.append(loreLine);
+            List<Component> loreComponents = item.getItemMeta().lore();
+            if (loreComponents != null) {
+                for (Component loreLine : loreComponents) {
+                    if (loreBuilder.length() > 0)
+                        loreBuilder.append("\n");
+                    // Convert Component to plain text
+                    String plainLore = PlainTextComponentSerializer.plainText()
+                            .serialize(loreLine);
+                    loreBuilder.append(plainLore);
+                }
             }
             text = text.replace("{item_lore}", loreBuilder.toString());
         } else {
@@ -335,7 +256,8 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
         if (item.getItemMeta() != null && item.getItemMeta().hasEnchants()) {
             StringBuilder enchantBuilder = new StringBuilder();
             for (Enchantment enchantment : item.getItemMeta().getEnchants().keySet()) {
-                if (enchantBuilder.length() > 0) enchantBuilder.append(", ");
+                if (enchantBuilder.length() > 0)
+                    enchantBuilder.append(", ");
                 int level = item.getItemMeta().getEnchantLevel(enchantment);
                 String enchantName = enchantment.getKey().getKey().replace("_", " ").toLowerCase();
                 enchantBuilder.append(enchantName).append(" ").append(level);
@@ -345,10 +267,12 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
             text = text.replace("{item_enchantments}", "");
         }
 
-        // Durability
-        if (item.getType().getMaxDurability() > 0) {
+        // Durability - use Damageable interface instead of deprecated getDurability()
+        if (item.getType().getMaxDurability() > 0 && item.getItemMeta() instanceof Damageable) {
+            Damageable damageable = (Damageable) item.getItemMeta();
             int maxDurability = item.getType().getMaxDurability();
-            int currentDurability = maxDurability - (item.getDurability() & 0xFFFF);
+            int damage = damageable.hasDamage() ? damageable.getDamage() : 0;
+            int currentDurability = maxDurability - damage;
             double percentage = (double) currentDurability / maxDurability * 100;
             String durabilityText = currentDurability + "/" + maxDurability + " (" + String.format("%.1f", percentage) + "%)";
             text = text.replace("{item_durability}", durabilityText);
@@ -377,23 +301,13 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
 
         // Special placeholders for item and ping
         if (placeholder.equals("item")) {
-            org.bukkit.inventory.ItemStack item = player.getInventory().getItemInMainHand();
+            ItemStack item = player.getInventory().getItemInMainHand();
             processed = processItemPlaceholders(processed, item);
         } else if (placeholder.equals("ping")) {
             int ping = player.getPing();
             processed = processed.replace("{ping}", String.valueOf(ping));
             String quality = ping < 100 ? "Excellent" : ping < 300 ? "Good" : "Poor";
             processed = processed.replace("{ping_quality}", quality);
-        }
-
-        // Try to get TPS (this is a rough approximation)
-        double tps = 20.0; // Default to 20 TPS
-        try {
-            // This would require a TPS monitoring plugin or custom implementation
-            // For now, we'll use a placeholder
-            processed = processed.replace("{tps}", "20.0");
-        } catch (Exception e) {
-            processed = processed.replace("{tps}", "20.0");
         }
 
         // Process PlaceholderAPI placeholders if available
@@ -456,39 +370,39 @@ public class ConfigurablePlaceholder implements InteractivePlaceholder {
         }
     }
 
-// ⡿⠿⠿⣿⠿⠿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠿⡿⠿⢿⠿⠿⢿⡿⠿⠿⢿⠿⢿⠿⢿⠿⠿⢿⠿⠿⣿⣿⣿⠿⠿⠿⢿⠿⠿⢿⣿⡿⠿⠿⡿⠿⠿⠿⠿⡿⠿⠿⡿⠿⡿⠿⠿⠿⡿⠿⠿⠿⠿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣀⡀⠀⡿⠀⠀⢸⡇⠀⠀⠘⠀⠀⠀⠀⠀⠁⠀⢸⠀⠀⢸⡇⠀⠀⢸⠀⠀⠀⠀⠀⡆⠀⠀⠀⣿⣿⣿⠀⠀⠀⢸⠀⠀⢸⣿⠁⢰⠀⢰⠀⢠⡆⠀⡇⠀⠀⠁⠀⡇⠀⡄⠀⡇⠀⠀⢸⠀⠃⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⠿⢄⠀⠃⠀⠀⢸⠇⠀⠀⠀⡇⠀⢀⠀⠀⠀⠀⠸⠀⠄⠈⡇⠀⠀⢸⠀⠀⠀⠀⠀⡷⠶⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠄⠸⣿⠀⢸⠶⢆⠀⢀⡇⠀⠀⠸⡄⠀⢸⡇⠀⡇⠀⡇⠀⠀⢸⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⡀⠘⠀⡄⠀⡄⠘⠀⠐⠀⠀⠇⠀⢸⠀⢀⠀⠀⠀⠀⡄⠀⠃⠀⠀⢸⠀⢠⠀⢀⠀⠃⢀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⡄⠀⣿⡀⠘⠀⡘⠀⠘⠃⠀⡇⠀⠇⠀⢸⠀⠀⠃⠀⡇⠀⠀⢸⠇⠀⡘⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣿⣶⣿⣷⣾⣷⣆⣀⣶⣶⣀⣷⣶⣿⣷⣾⣾⣷⣶⣶⣷⣶⣶⣿⣷⣾⣶⣾⣶⣿⣷⣶⣿⣷⣶⣶⣿⣿⣶⣾⣶⣷⣶⣷⣶⣿⣿⣶⣾⣿⣶⣶⣷⣶⣷⣶⣶⣾⣿⣀⣶⣶⣀⣷⣾⣶⣾⣶⣾⣯⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀
-// ⠉⠉⠉⠉⠉⠉⠹⠋⠉⠙⠏⠉⠉⠉⡏⠉⠉⠟⠉⠙⢿⠋⠉⠙⣿⣿⠉⠉⠉⠙⠉⠉⠉⠉⠉⠉⠉⠉⢻⠉⠉⢿⡏⠉⠉⢹⡏⠉⠉⡏⠉⠉⠉⠉⢹⠉⢹⠉⡏⠉⣿⡏⠉⠉⠉⠉⠉⠉⠏⠉⠉⠉⠉⠉⠋⠉⠉⠹⡏⠉⠉⡏⠉⠀⠀
-// ⠀⢸⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⡇⠀⠻⠀⢸⣀⡀⠀⢀⣀⣿⣿⠀⠀⠀⠀⠀⠘⡇⠀⣿⠀⠀⠀⠈⠀⠀⢸⡇⠀⠀⠈⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⠀⠀⠀⠛⠀⠀⠀⠀⠀⠃⢀⠇⠀⠀⡇⠀⠂⠀
-// ⠀⢸⠀⠀⠀⢰⣾⠀⠸⠀⠀⠀⠀⠀⡇⠀⣶⠀⢸⠉⠁⠀⠈⠉⣿⡿⠀⢘⠀⢀⠀⢰⡇⠀⣿⠀⠀⣶⡇⠀⠀⢸⠀⢀⠀⢸⠀⠘⠀⠁⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⣶⡇⠀⣶⠀⠀⣶⡇⠀⡆⠀⠀⠐⠀⠃⠀⡆⠀
-// ⣀⣸⣀⣀⣀⣸⣿⣄⣀⣠⣆⣀⣀⠀⢀⣀⣀⣆⣀⣠⣾⣄⣀⣠⣿⡇⢀⣀⡀⢘⣀⣀⣀⣀⣿⣀⣀⣿⣃⣀⣁⡀⠀⣀⣀⠀⣀⣸⣀⣀⣀⣀⠀⣀⣀⣀⣸⣀⣀⣀⣿⣇⣀⣃⣀⣀⣀⣿⣇⣀⣀⣀⣀⣿⣇⣀⣀⣠⣀⣸⡀⣀⣀⣇⣀
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣿⣿⣶⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣱⣿⣿⣿⣿
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-// ⣻⠿⡻⠿⠻⢟⣻⢿⠛⣿⣿⣟⢻⣏⡿⡿⣟⣿⠿⢿⣿⣻⣻⣿⣿⡧⡿⣿⣛⣻⡿⠟⢩⣾⠿⠿⠿⣟⣹⣿⠻⠿⠞⢼⢽⡋⠿⠿⠾⢻⠿⠿⣽⠻⡿⠿⣻⢟⣛⣟⣟⣷⠀⠀⠀⡆⠸⡿⢻⢿⡿⠋⠉⠀⠈⠻⣿⣿⡿⣫⠒⠛⠻⠿⠿
-// ⠀⠁⠀⠀⠁⠀⠀⠁⢸⢣⡇⠈⠀⠀⠀⠀⠁⠈⠀⠀⠀⣠⠷⣄⢹⠃⣨⡼⠟⠉⢀⡴⠓⠁⠀⠀⠈⠁⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠈⣄⣨⠾⠚⠋⢉⡉⠆⠀⢠⠀⠀⠷⡴⠋⠀⠀⡀⠀⠀⠀⠈⢳⡀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⡏⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⢀⡜⠁⠀⠈⣿⠋⠁⠀⠀⠴⢯⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡶⠂⠀⠀⠀⠀⠀⠀⠀⢀⡠⠞⠉⠀⠀⠀⠒⠂⠀⠉⠀⠂⠓⢄⣀⣀⣀⣀⣀⠨⡴⢤⣀⠀⠀⠹⡄⠀⠀⠀⠀⠀
-// ⠀⠀⠘⢦⠀⠀⠀⠀⣇⠈⡇⠀⠀⠀⠀⠀⠀⣀⣤⠏⠀⠀⠀⠀⠉⡆⠀⠀⠀⠀⠀⠀⠈⠉⠛⠒⠒⠒⠒⢚⣫⠝⠉⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀⠀⠀⠀⠌⠀⠀⠀⠀⢀⡄⠀⠜⠋⡄⠈⠐⠨⢢⡈⠢⡈⠉⠒⠒⠘⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠑⢄⡀⠀⠈⠳⠬⣦⣄⣀⡠⠖⠋⠁⠀⠀⠀⠀⠀⠀⠀⢸⡀⠀⠀⠀⠀⠀⠀⠈⢢⠘⢿⣟⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⡈⠀⠀⠀⢀⠔⡙⠀⠌⢠⠀⠉⠆⠀⠀⠀⠉⠀⠈⢆⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠉⠒⠤⠤⣤⢤⡼⠛⠀⠀⠀⠀⠀⠀⢠⠀⠀⠀⠀⠈⡎⢢⠀⠀⢠⠀⠀⠀⠀⠳⡈⢮⠳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠎⠀⠀⠀⠀⠀⢰⠰⠀⠀⠠⡤⠆⠰⢃⠎⠀⡈⠀⢸⠈⡄⠀⢀⠀⠀⠀⠀⢣⡀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠋⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⠀⠀⠀⠀⣿⡀⠳⡒⠚⣖⠦⠄⠀⠀⠱⡌⢦⠈⢦⠀⠀⠀⠀⠀⠀⠀⠸⠀⠀⠀⠀⠀⠀⢸⡇⠀⢀⠊⠀⠠⡡⠁⠀⢀⠁⠀⠸⠀⠘⡐⡈⡀⠀⠀⠀⠀⢳⣄⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠁⠀⠀⠀⠀⠀⠀⠀⠀⡰⠃⡆⢠⠀⠀⠀⢸⢇⠀⠘⡄⠸⡄⠀⠀⠀⣄⢱⠈⢇⠀⠱⡀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠘⠁⡐⠁⠀⢠⠏⠀⠀⠀⠌⠀⠀⠀⠀⠀⢡⠈⡇⠀⠀⠀⠀⠈⡎⢆⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠀⡔⠀⠀⠀⠀⣠⢶⠁⠀⡇⢸⡄⠀⠀⢸⢸⠀⠀⠘⣆⢳⠀⠀⠀⣿⢦⢧⠈⣆⠀⠁⠀⠀⠀⠀⢰⠀⡄⠀⠀⠀⠀⠀⠀⡗⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⡇⠀⠀⠀⠀⠀⠸⠈⢆⠀⠀⠀
-// ⠀⠀⠀⣀⣀⣀⣀⡀⢸⠀⠀⢰⠃⠀⠀⠠⠞⢡⠇⠀⠀⢳⢸⢳⠀⠀⢸⠘⣆⣀⣀⣘⣎⣆⠀⠀⣿⣌⣾⡆⠘⡄⠀⠀⠀⠀⠀⢸⠀⡇⠀⢰⠀⠀⠀⠀⣿⣶⣶⣶⣶⡶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⡁⠀⠀⠀⠀⠀⠀⠇⠘⡄⠀⠀
-// ⠀⠉⠁⠀⠀⠀⠀⠀⢹⠁⠀⡞⠀⠀⠀⠀⢀⡎⠀⠀⢀⣸⣾⠈⣇⠀⢸⠀⠡⣶⣶⣿⣿⣿⡄⢠⣿⣿⣾⣧⠀⠘⢆⠀⠀⠀⠀⢸⠀⡇⠀⢸⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣈⠂⢀⠀⡇⠀⠀⠀⡀⠀⠀⢰⠀⠘⡀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠈⡆⠀⡇⠀⠀⠀⠀⣼⣠⠴⢚⣩⣴⣿⠀⠘⡄⠘⠀⠀⠈⠉⠛⠛⠻⣧⢸⣿⣿⣿⢿⣦⡀⠈⢦⠀⠀⠀⢸⢀⡇⠀⡁⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⢿⣷⣦⡄⡇⠀⠀⠀⠇⠀⢇⠘⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⢀⠤⠃⢰⠇⠀⠀⠀⢰⣿⣷⣾⣿⣿⠿⠉⠀⠀⠘⡇⠀⠀⠀⠀⠀⠀⠀⠘⠏⢿⣿⣿⣇⠉⠙⠓⠤⢕⣄⠀⢸⢸⢰⠀⠣⣁⠀⠀⠀⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠁⠃⠀⠀⢸⠀⢸⠈⡄⡆⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠉⠓⠒⡶⢼⠀⢠⠀⢀⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⣀⠄⠂⠉⠐⡄⠀⠀⠀⢸⡇⠏⢿⣆⠀⠀⠀⠀⠀⠀⢸⠸⠘⡄⠀⠸⠀⠀⠀⡇⠀⠀⠀⠀⢀⠂⢱⠀⠀⠀⠀⠀⠀⠀⠀⣼⠀⠀⢀⡇⠀⡈⠀⢡⡇⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⢸⢠⢿⡀⡼⣿⣿⣿⣧⠀⠀⠀⠀⢀⠔⠂⠉⠀⠀⠀⠀⠀⡁⠀⠀⢀⣾⡇⢸⠀⠙⢆⠀⠀⠀⠀⠀⠈⡆⠀⢃⠀⠀⡇⠀⠀⣇⠀⠀⠀⠀⠀⠑⡎⠀⠀⠀⠀⠀⠀⠀⡸⡇⠀⠀⡜⡄⢀⠃⠀⠸⠁⠀⠀⠄
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⡇⡇⢿⣿⣿⣿⡆⠀⠀⠀⡇⠀⠀⠀⠀⠀⢀⡀⢀⠁⣠⣴⣿⣿⢰⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠘⡀⢰⢱⠀⠀⠇⠈⠒⡤⢀⡀⠀⠀⠀⢀⣀⣀⡀⠤⠔⣡⠇⠀⡐⠀⡇⠸⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠁⢱⡇⢸⡘⢿⣿⣿⡀⠀⠀⠣⡀⠂⠈⠉⠉⠀⢀⡟⣾⣿⣿⣿⠃⠸⣌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⠜⠀⠆⢸⠅⠀⢀⡇⠀⠀⠈⣹⠉⠁⠀⢀⢴⠀⡰⢹⠀⡐⠁⠀⣇⠇⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣄⡏⠁⠀⣇⢎⠻⣿⣷⣶⣤⣤⣤⡤⠤⠤⠐⣶⣿⡇⣿⣿⣿⠏⠀⡇⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠘⡸⣸⣾⣿⠇⠀⠀⠀⢿⣿⣦⡔⠋⢸⡜⠀⡆⠔⠀⠀⠀⡟⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠋⠇⠀⡄⣸⡘⡄⠘⢿⣿⣿⣿⣿⣷⠀⠀⠀⢿⣿⣧⣿⣿⡟⠀⢰⠇⢻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠟⠛⠛⡇⠠⠀⡀⠀⠈⣻⣿⣷⡄⠏⠀⢰⠊⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠜⠁⠀⢠⢸⢀⣿⣧⢱⡀⠀⠙⢿⣿⣿⠟⠀⠀⠀⠈⣿⠛⢿⣿⡇⢠⣿⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡞⠁⠀⠀⢰⡇⠀⠀⠀⠑⣰⠿⠿⠿⠿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡇⢸⣿⣿⣎⣷⡄⠀⠘⣿⣿⣦⡀⠔⠂⠉⢻⡀⠀⢹⣧⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠫⣀⠀⠀⠀⠸⡇⠀⠀⠀⣰⠃⠀⠀⣠⠔⣫⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⡿⠿⠿⣿⠿⠿⣿⡿⠿⠿⠿⠿⠿⠿⠿⠿⡿⠿⢿⠿⠿⢿⡿⠿⠿⢿⠿⢿⠿⢿⠿⠿⢿⠿⠿⣿⣿⣿⠿⠿⠿⢿⠿⠿⢿⣿⡿⠿⠿⡿⠿⠿⠿⠿⡿⠿⠿⡿⠿⡿⠿⠿⠿⡿⠿⠿⠿⠿⡿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣀⡀⠀⡿⠀⠀⢸⡇⠀⠀⠘⠀⠀⠀⠀⠀⠁⠀⢸⠀⠀⢸⡇⠀⠀⢸⠀⠀⠀⠀⠀⡆⠀⠀⠀⣿⣿⣿⠀⠀⠀⢸⠀⠀⢸⣿⠁⢰⠀⢰⠀⢠⡆⠀⡇⠀⠀⠁⠀⡇⠀⡄⠀⡇⠀⠀⢸⠀⠃⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⠿⢄⠀⠃⠀⠀⢸⠇⠀⠀⠀⡇⠀⢀⠀⠀⠀⠀⠸⠀⠄⠈⡇⠀⠀⢸⠀⠀⠀⠀⠀⡷⠶⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠄⠸⣿⠀⢸⠶⢆⠀⢀⡇⠀⠀⠸⡄⠀⢸⡇⠀⡇⠀⡇⠀⠀⢸⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⡀⠘⠀⡄⠀⡄⠘⠀⠐⠀⠀⠇⠀⢸⠀⢀⠀⠀⠀⠀⡄⠀⠃⠀⠀⢸⠀⢠⠀⢀⠀⠃⢀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⡄⠀⣿⡀⠘⠀⡘⠀⠘⠃⠀⡇⠀⠇⠀⢸⠀⠀⠃⠀⡇⠀⠀⢸⠇⠀⡘⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣿⣶⣿⣷⣾⣷⣆⣀⣶⣶⣀⣷⣶⣿⣷⣾⣾⣷⣶⣶⣷⣶⣶⣿⣷⣾⣶⣾⣶⣿⣷⣶⣿⣷⣶⣶⣿⣿⣶⣾⣶⣷⣶⣷⣶⣿⣿⣶⣾⣿⣶⣶⣷⣶⣷⣶⣶⣾⣿⣀⣶⣶⣀⣷⣾⣶⣾⣶⣾⣯⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀
+    // ⠉⠉⠉⠉⠉⠉⠹⠋⠉⠙⠏⠉⠉⠉⡏⠉⠉⠟⠉⠙⢿⠋⠉⠙⣿⣿⠉⠉⠉⠙⠉⠉⠉⠉⠉⠉⠉⠉⢻⠉⠉⢿⡏⠉⠉⢹⡏⠉⠉⡏⠉⠉⠉⠉⢹⠉⢹⠉⡏⠉⣿⡏⠉⠉⠉⠉⠉⠉⠏⠉⠉⠉⠉⠉⠋⠉⠉⠹⡏⠉⠉⡏⠉⠀⠀
+    // ⠀⢸⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⡇⠀⠻⠀⢸⣀⡀⠀⢀⣀⣿⣿⠀⠀⠀⠀⠀⠘⡇⠀⣿⠀⠀⠀⠈⠀⠀⢸⡇⠀⠀⠈⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⠀⠀⠀⠛⠀⠀⠀⠀⠀⠃⢀⠇⠀⠀⡇⠀⠂⠀
+    // ⠀⢸⠀⠀⠀⢰⣾⠀⠸⠀⠀⠀⠀⠀⡇⠀⣶⠀⢸⠉⠁⠀⠈⠉⣿⡿⠀⢘⠀⢀⠀⢰⡇⠀⣿⠀⠀⣶⡇⠀⠀⢸⠀⢀⠀⢸⠀⠘⠀⠁⠀⠀⠀⠀⠀⠀⢸⠀⠀⠀⣿⡇⠀⡇⠀⠀⠀⣶⡇⠀⣶⠀⠀⣶⡇⠀⡆⠀⠀⠐⠀⠃⠀⡆⠀
+    // ⣀⣸⣀⣀⣀⣸⣿⣄⣀⣠⣆⣀⣀⠀⢀⣀⣀⣆⣀⣠⣾⣄⣀⣠⣿⡇⢀⣀⡀⢘⣀⣀⣀⣀⣿⣀⣀⣿⣃⣀⣁⡀⠀⣀⣀⠀⣀⣸⣀⣀⣀⣀⠀⣀⣀⣀⣸⣀⣀⣀⣿⣇⣀⣃⣀⣀⣀⣿⣇⣀⣀⣀⣀⣿⣇⣀⣀⣠⣀⣸⡀⣀⣀⣇⣀
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣾⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣿⣿⣶⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣱⣿⣿⣿⣿
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠉⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+    // ⣻⠿⡻⠿⠻⢟⣻⢿⠛⣿⣿⣟⢻⣏⡿⡿⣟⣿⠿⢿⣿⣻⣻⣿⣿⡧⡿⣿⣛⣻⡿⠟⢩⣾⠿⠿⠿⣟⣹⣿⠻⠿⠞⢼⢽⡋⠿⠿⠾⢻⠿⠿⣽⠻⡿⠿⣻⢟⣛⣟⣟⣷⠀⠀⠀⡆⠸⡿⢻⢿⡿⠋⠉⠀⠈⠻⣿⣿⡿⣫⠒⠛⠻⠿⠿
+    // ⠀⠁⠀⠀⠁⠀⠀⠁⢸⢣⡇⠈⠀⠀⠀⠀⠁⠈⠀⠀⠀⣠⠷⣄⢹⠃⣨⡼⠟⠉⢀⡴⠓⠁⠀⠀⠈⠁⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠈⣄⣨⠾⠚⠋⢉⡉⠆⠀⢠⠀⠀⠷⡴⠋⠀⠀⡀⠀⠀⠀⠈⢳⡀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⡏⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀⢀⡜⠁⠀⠈⣿⠋⠁⠀⠀⠴⢯⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⣀⣠⡶⠂⠀⠀⠀⠀⠀⠀⠀⢀⡠⠞⠉⠀⠀⠀⠒⠂⠀⠉⠀⠂⠓⢄⣀⣀⣀⣀⣀⠨⡴⢤⣀⠀⠀⠹⡄⠀⠀⠀⠀⠀
+    // ⠀⠀⠘⢦⠀⠀⠀⠀⣇⠈⡇⠀⠀⠀⠀⠀⠀⣀⣤⠏⠀⠀⠀⠀⠉⡆⠀⠀⠀⠀⠀⠀⠈⠉⠛⠒⠒⠒⠒⢚⣫⠝⠉⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀⠀⠀⠀⠌⠀⠀⠀⠀⢀⡄⠀⠜⠋⡄⠈⠐⠨⢢⡈⠢⡈⠉⠒⠒⠘⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠑⢄⡀⠀⠈⠳⠬⣦⣄⣀⡠⠖⠋⠁⠀⠀⠀⠀⠀⠀⠀⢸⡀⠀⠀⠀⠀⠀⠀⠈⢢⠘⢿⣟⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠞⠀⠀⠀⠀⠀⠀⡈⠀⠀⠀⢀⠔⡙⠀⠌⢠⠀⠉⠆⠀⠀⠀⠉⠀⠈⢆⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠉⠒⠤⠤⣤⢤⡼⠛⠀⠀⠀⠀⠀⠀⢠⠀⠀⠀⠀⠈⡎⢢⠀⠀⢠⠀⠀⠀⠀⠳⡈⢮⠳⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠎⠀⠀⠀⠀⠀⢰⠰⠀⠀⠠⡤⠆⠰⢃⠎⠀⡈⠀⢸⠈⡄⠀⢀⠀⠀⠀⠀⢣⡀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠋⠀⠀⠀⠀⠀⠀⠀⠀⡼⠀⠀⠀⠀⠀⣿⡀⠳⡒⠚⣖⠦⠄⠀⠀⠱⡌⢦⠈⢦⠀⠀⠀⠀⠀⠀⠀⠸⠀⠀⠀⠀⠀⠀⢸⡇⠀⢀⠊⠀⠠⡡⠁⠀⢀⠁⠀⠸⠀⠘⡐⡈⡀⠀⠀⠀⠀⢳⣄⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠁⠀⠀⠀⠀⠀⠀⠀⠀⡰⠃⡆⢠⠀⠀⠀⢸⢇⠀⠘⡄⠸⡄⠀⠀⠀⣄⢱⠈⢇⠀⠱⡀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠘⠁⡐⠁⠀⢠⠏⠀⠀⠀⠌⠀⠀⠀⠀⠀⢡⠈⡇⠀⠀⠀⠀⠈⡎⢆⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠀⡔⠀⠀⠀⠀⣠⢶⠁⠀⡇⢸⡄⠀⠀⢸⢸⠀⠀⠘⣆⢳⠀⠀⠀⣿⢦⢧⠈⣆⠀⠁⠀⠀⠀⠀⢰⠀⡄⠀⠀⠀⠀⠀⠀⡗⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡆⡇⠀⠀⠀⠀⠀⠸⠈⢆⠀⠀⠀
+    // ⠀⠀⠀⣀⣀⣀⣀⡀⢸⠀⠀⢰⠃⠀⠀⠠⠞⢡⠇⠀⠀⢳⢸⢳⠀⠀⢸⠘⣆⣀⣀⣘⣎⣆⠀⠀⣿⣌⣾⡆⠘⡄⠀⠀⠀⠀⠀⢸⠀⡇⠀⢰⠀⠀⠀⠀⣿⣶⣶⣶⣶⡶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⡁⠀⠀⠀⠀⠀⠀⠇⠘⡄⠀⠀
+    // ⠀⠉⠁⠀⠀⠀⠀⠀⢹⠁⠀⡞⠀⠀⠀⠀⢀⡎⠀⠀⢀⣸⣾⠈⣇⠀⢸⠀⠡⣶⣶⣿⣿⣿⡄⢠⣿⣿⣾⣧⠀⠘⢆⠀⠀⠀⠀⢸⠀⡇⠀⢸⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣈⠂⢀⠀⡇⠀⠀⠀⡀⠀⠀⢰⠀⠘⡀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠈⡆⠀⡇⠀⠀⠀⠀⣼⣠⠴⢚⣩⣴⣿⠀⠘⡄⠘⠀⠀⠈⠉⠛⠛⠻⣧⢸⣿⣿⣿⢿⣦⡀⠈⢦⠀⠀⠀⢸⢀⡇⠀⡁⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⢿⣷⣦⡄⡇⠀⠀⠀⠇⠀⢇⠘⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⢀⠤⠃⢰⠇⠀⠀⠀⢰⣿⣷⣾⣿⣿⠿⠉⠀⠀⠘⡇⠀⠀⠀⠀⠀⠀⠀⠘⠏⢿⣿⣿⣇⠉⠙⠓⠤⢕⣄⠀⢸⢸⢰⠀⠣⣁⠀⠀⠀⡂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠁⠃⠀⠀⢸⠀⢸⠈⡄⡆⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠉⠓⠒⡶⢼⠀⢠⠀⢀⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⣀⠄⠂⠉⠐⡄⠀⠀⠀⢸⡇⠏⢿⣆⠀⠀⠀⠀⠀⠀⢸⠸⠘⡄⠀⠸⠀⠀⠀⡇⠀⠀⠀⠀⢀⠂⢱⠀⠀⠀⠀⠀⠀⠀⠀⣼⠀⠀⢀⡇⠀⡈⠀⢡⡇⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⢸⢠⢿⡀⡼⣿⣿⣿⣧⠀⠀⠀⠀⢀⠔⠂⠉⠀⠀⠀⠀⠀⡁⠀⠀⢀⣾⡇⢸⠀⠙⢆⠀⠀⠀⠀⠀⠈⡆⠀⢃⠀⠀⡇⠀⠀⣇⠀⠀⠀⠀⠀⠑⡎⠀⠀⠀⠀⠀⠀⠀⡸⡇⠀⠀⡜⡄⢀⠃⠀⠸⠁⠀⠀⠄
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡿⠀⡇⡇⢿⣿⣿⣿⡆⠀⠀⠀⡇⠀⠀⠀⠀⠀⢀⡀⢀⠁⣠⣴⣿⣿⢰⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠘⡀⢰⢱⠀⠀⠇⠈⠒⡤⢀⡀⠀⠀⠀⢀⣀⣀⡀⠤⠔⣡⠇⠀⡐⠀⡇⠸⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠃⠁⢱⡇⢸⡘⢿⣿⣿⡀⠀⠀⠣⡀⠂⠈⠉⠉⠀⢀⡟⣾⣿⣿⣿⠃⠸⣌⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⠜⠀⠆⢸⠅⠀⢀⡇⠀⠀⠈⣹⠉⠁⠀⢀⢴⠀⡰⢹⠀⡐⠁⠀⣇⠇⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣄⡏⠁⠀⣇⢎⠻⣿⣷⣶⣤⣤⣤⡤⠤⠤⠐⣶⣿⡇⣿⣿⣿⠏⠀⡇⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠇⠀⠘⡸⣸⣾⣿⠇⠀⠀⠀⢿⣿⣦⡔⠋⢸⡜⠀⡆⠔⠀⠀⠀⡟⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠋⠇⠀⡄⣸⡘⡄⠘⢿⣿⣿⣿⣿⣷⠀⠀⠀⢿⣿⣧⣿⣿⡟⠀⢰⠇⢻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠟⠛⠛⡇⠠⠀⡀⠀⠈⣻⣿⣷⡄⠏⠀⢰⠊⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠜⠁⠀⢠⢸⢀⣿⣧⢱⡀⠀⠙⢿⣿⣿⠟⠀⠀⠀⠈⣿⠛⢿⣿⡇⢠⣿⠀⠘⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡞⠁⠀⠀⢰⡇⠀⠀⠀⠑⣰⠿⠿⠿⠿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    // ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡇⢸⣿⣿⣎⣷⡄⠀⠘⣿⣿⣦⡀⠔⠂⠉⢻⡀⠀⢹⣧⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠫⣀⠀⠀⠀⠸⡇⠀⠀⠀⣰⠃⠀⠀⣠⠔⣫⢧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 }

@@ -37,8 +37,6 @@ import lombok.Getter;
 /**
  * Central configuration manager for the NonChat plugin
  * Handles loading, saving and accessing all plugin settings
- * 
- * TODO: Remove color codes from Bukkit.getLogger().log() messages - logger doesn't support color formatting.
  */
 @Getter
 public class PluginConfig {
@@ -1350,23 +1348,6 @@ public class PluginConfig {
     }
 
     /**
-     * Reads a file into a list of strings
-     * @param file File to read
-     * @return List of file lines
-     * @throws IOException if file cannot be read
-     */
-    private List<String> readFileToList(File file) throws IOException {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-        }
-        return lines;
-    }
-
-    /**
      * Reads a resource into a list of strings
      * @param resourcePath Resource path to read
      * @return List of resource lines
@@ -1426,7 +1407,7 @@ public class PluginConfig {
                 savesFile.createNewFile();
                 savesConfig = new YamlConfiguration();
             } catch (IOException e) {
-                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cFailed to create saves.yml: {0}", e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "[nonchat] Failed to create saves.yml: {0}", e.getMessage());
                 return;
             }
         } else {
@@ -1434,7 +1415,7 @@ public class PluginConfig {
         }
 
         String currentVersion = savesConfig.getString("version");
-        String pluginVersion = plugin.getDescription().getVersion();
+        String pluginVersion = plugin.getPluginMeta().getVersion(); // getDescription() is deprecated
         boolean isUpdated = pluginVersion.equals(currentVersion);
 
         // Only save if version changed
@@ -1443,14 +1424,14 @@ public class PluginConfig {
             try {
                 savesConfig.save(savesFile);
             } catch (IOException e) {
-                Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cCould not save saves.yml: {0}", e.getMessage());
+                Bukkit.getLogger().log(Level.WARNING, "[nonchat] Could not save saves.yml: {0}", e.getMessage());
             }
         }
 
         if (!isUpdated) {
-            Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aPlugin version changed from {0} to {1}", 
+            Bukkit.getLogger().log(Level.INFO, "[nonchat] Plugin version changed from {0} to {1}", 
                 new Object[]{(currentVersion != null ? currentVersion : "unknown"), pluginVersion});
-            Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aChecking for configuration updates...");
+            Bukkit.getLogger().log(Level.INFO, "[nonchat] Checking for configuration updates...");
             setupConfigFile(true);
         } else {
             setupConfigFile(false);
@@ -1467,15 +1448,12 @@ public class PluginConfig {
                 createBackup();
             }
 
-            List<String> fileAsList = readFileToList(configFile);
-            HashMap<Integer, FileLine> fileLines = processFileLines(fileAsList);
-
             FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(configFile);
             
             FileConfiguration defaultConfig;
             try (InputStream resourceStream = plugin.getResource("config.yml")) {
                 if (resourceStream == null) {
-                    Bukkit.getLogger().log(Level.WARNING, "&#FFAFFB[nonchat] &cCould not load default config.yml from plugin resources!");
+                    Bukkit.getLogger().log(Level.WARNING, "[nonchat] Could not load default config.yml from plugin resources!");
                     return;
                 }
                 
@@ -1492,7 +1470,7 @@ public class PluginConfig {
                 if (shouldAddMissingKey(key, currentConfig)) {
                     currentConfig.set(key, defaultConfig.get(key));
                     hasChanges = true;
-                    Bukkit.getLogger().log(Level.INFO, "&#FFAFFB[nonchat] &aAdded missing configuration key: {0}", key);
+                    Bukkit.getLogger().log(Level.INFO, "[nonchat] Added missing configuration key: {0}", key);
                 }
             }
 

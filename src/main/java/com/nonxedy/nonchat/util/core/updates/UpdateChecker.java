@@ -3,7 +3,8 @@ package com.nonxedy.nonchat.util.core.updates;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Bukkit;
@@ -42,7 +43,7 @@ public final class UpdateChecker implements Listener {
     // Constructor to initialize class variables
     public UpdateChecker(Nonchat plugin) {
         this.plugin = plugin;
-        this.currentVersion = plugin.getDescription().getVersion();
+        this.currentVersion = plugin.getPluginMeta().getVersion();
         
         if (plugin instanceof Nonchat nonchatPlugin) {
             if (!nonchatPlugin.getConfigService().getConfig().isUpdateCheckerEnabled()) {
@@ -75,9 +76,9 @@ public final class UpdateChecker implements Listener {
         // Run the update check asynchronously
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                // Connect to Modrinth API
-                URL url = new URL(MODRINTH_API);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                // TODO: Migrate to HttpClient (Java 11+) for async support and modern API usage.
+                // Connect to Modrinth API (using URI.toURL() to avoid deprecated URL constructor since Java 20)
+                HttpURLConnection connection = (HttpURLConnection) new URI(MODRINTH_API).toURL().openConnection();
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 
@@ -102,7 +103,7 @@ public final class UpdateChecker implements Listener {
                 plugin.logResponse("Update available: " + this.updateAvailable);
                 
                 future.complete(this.updateAvailable);
-            } catch (JsonIOException | JsonSyntaxException | IOException e) {
+            } catch (JsonIOException | JsonSyntaxException | IOException | URISyntaxException e) {
                 plugin.logError("Failed to check for updates: " + e.getMessage());
                 future.complete(false);
             }

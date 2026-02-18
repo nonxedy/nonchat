@@ -12,10 +12,8 @@ import github.scarsz.discordsrv.api.events.DiscordGuildMessagePreProcessEvent;
 import github.scarsz.discordsrv.api.events.GameChatMessagePreProcessEvent;
 
 public class DiscordSRVIntegration {
-    private final Nonchat plugin;
     
     public DiscordSRVIntegration(Nonchat plugin) {
-        this.plugin = plugin;
         DiscordSRV.api.subscribe(this);
     }
 
@@ -24,6 +22,7 @@ public class DiscordSRVIntegration {
     }
 
     @Subscribe
+    @SuppressWarnings("deprecation") // getMessage()/setMessage() are deprecated but replacements use incompatible shaded Adventure API
     public void onGameChatMessagePreProcess(GameChatMessagePreProcessEvent event) {
         Player player = event.getPlayer();
         String message = event.getMessage();

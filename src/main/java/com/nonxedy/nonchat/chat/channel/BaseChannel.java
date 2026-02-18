@@ -11,8 +11,6 @@ import org.bukkit.plugin.Plugin;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.Channel;
-import com.nonxedy.nonchat.command.impl.IgnoreCommand;
-import com.nonxedy.nonchat.service.ConfigService;
 import com.nonxedy.nonchat.util.chat.filters.LinkDetector;
 import com.nonxedy.nonchat.util.chat.formatting.HoverTextUtil;
 import com.nonxedy.nonchat.util.core.colors.ColorUtil;
@@ -42,9 +40,6 @@ public class BaseChannel implements Channel {
     private final int maxLength;
     private final HoverTextUtil hoverTextUtil;
     private boolean enabled;
-    private static final Pattern mentionPattern = Pattern.compile("@(\\w+)");
-    private IgnoreCommand ignoreCommand;
-    private ConfigService configService;
 
     /**
      * Creates a new BaseChannel with all properties.
@@ -407,38 +402,6 @@ public class BaseChannel implements Channel {
     }
 
     /**
-     * Processes legacy placeholders with color permission handling
-     */
-    private Component processLegacyPlaceholdersWithColorPermission(Player player, String message, String inheritedColor) {
-        // Always apply inherited color from the format
-        String processedMessage = message;
-        if (!inheritedColor.isEmpty()) {
-            processedMessage = inheritedColor + message;
-        }
-
-        // Handle color permissions - only strip player's own colors, keep format colors
-        if (!player.hasPermission("nonchat.color")) {
-            // Strip colors from the player's message content, but preserve the inherited color
-            if (!inheritedColor.isEmpty() && processedMessage.startsWith(inheritedColor)) {
-                String playerMessagePart = processedMessage.substring(inheritedColor.length());
-                String strippedPlayerPart = ColorUtil.stripAllColors(playerMessagePart);
-                processedMessage = inheritedColor + strippedPlayerPart;
-            } else {
-                processedMessage = ColorUtil.stripAllColors(processedMessage);
-            }
-        }
-
-        // Process with the new manager
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("nonchat");
-        if (plugin instanceof Nonchat nonchatPlugin && nonchatPlugin.getPlaceholderManager() != null) {
-            return nonchatPlugin.getPlaceholderManager().processMessage(player, processedMessage);
-        }
-
-        // Fallback
-        return LinkDetector.makeLinksClickable(processedMessage);
-    }
-
-    /**
      * Processes message content with color permission check
      */
     private Component processMessageWithColorPermission(Player player, String message, String inheritedColor) {
@@ -622,22 +585,6 @@ public class BaseChannel implements Channel {
         return builder.build();
     }
     
-    /**
-     * Sets the ignore command instance.
-     * @param ignoreCommand The ignore command instance
-     */
-    public void setIgnoreCommand(IgnoreCommand ignoreCommand) {
-        this.ignoreCommand = ignoreCommand;
-    }
-
-    /**
-     * Sets the config service instance.
-     * @param configService The config service instance
-     */
-    public void setConfigService(ConfigService configService) {
-        this.configService = configService;
-    }
-
     /**
      * Parses the beforeMessage part and adds hover only to the player name
      * @param beforeMessage The part of the format before {message}

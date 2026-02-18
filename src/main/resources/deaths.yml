@@ -38,6 +38,26 @@ settings:
   
   # Enable debug logging for the death message system
   debug: false
+  
+  # Entity name settings
+  entity-names:
+    # If true, use the entity's custom name (name tag) if it has one
+    # If false, always use the translated entity type name
+    use-entity-nametags: true
+    
+    # Priority order for entity names
+    # Options: "nametag" or "custom-type"
+    # - "nametag": Name tag has priority over custom-type-names (default)
+    # - "custom-type": custom-type-names has priority over name tag
+    # This only matters when both exist (entity has name tag AND its type is in custom-type-names)
+    priority: "nametag"
+    
+    # Custom entity type names (overrides default translation)
+    # Format: ENTITY_TYPE: "Custom Name"
+    # Leave empty to use default Minecraft translations
+    custom-type-names: {}
+    #  ZOMBIE: "Undead"
+    #  SKELETON: "Bone Warrior"
 
 # Indirect death tracking configuration
 # Tracks when a player causes another player's death indirectly

@@ -45,9 +45,6 @@ public class LinkDetector {
         // Strip color codes from the text to avoid interference with URL detection
         String cleanText = ColorUtil.stripAllColors(text);
 
-        // Calculate offset between original and clean text
-        int offset = text.length() - cleanText.length();
-
         // Find all URLs in the cleaned text
         Matcher matcher = URL_PATTERN.matcher(cleanText);
 
@@ -62,31 +59,37 @@ public class LinkDetector {
         // Build the component with clickable links
         TextComponent.Builder builder = Component.text();
         int lastEnd = 0;
+        int originalLastEnd = 0;
 
         while (matcher.find()) {
-            // Calculate actual positions in original text
-            int actualStart = matcher.start() + offset;
-            int actualEnd = matcher.end() + offset;
+            // Get the URL from cleaned text (without color codes)
+            String cleanUrl = cleanText.substring(matcher.start(), matcher.end());
 
-            // Add text before the URL
-            String beforeUrl = text.substring(lastEnd, actualStart);
+            // Find this URL in the original text starting from where we left off
+            int originalUrlStart = text.indexOf(cleanUrl, originalLastEnd);
+            if (originalUrlStart == -1) {
+                // Fallback: use the clean URL if we can't find it in original
+                originalUrlStart = lastEnd;
+            }
+            int originalUrlEnd = originalUrlStart + cleanUrl.length();
+
+            // Add text before the URL (from original text with colors preserved)
+            String beforeUrl = text.substring(originalLastEnd, originalUrlStart);
             if (!beforeUrl.isEmpty()) {
                 builder.append(ColorUtil.parseComponent(beforeUrl));
             }
 
-            // Get the URL from original text
-            String url = text.substring(actualStart, actualEnd);
-
-            // Create clickable link component
-            Component linkComponent = createLinkComponent(url);
+            // Create clickable link component using the clean URL
+            Component linkComponent = createLinkComponent(cleanUrl);
 
             builder.append(linkComponent);
 
-            lastEnd = actualEnd;
+            lastEnd = matcher.end();
+            originalLastEnd = originalUrlEnd;
         }
 
         // Add any remaining text after the last URL
-        String afterLastUrl = text.substring(lastEnd);
+        String afterLastUrl = text.substring(originalLastEnd);
         if (!afterLastUrl.isEmpty()) {
             builder.append(ColorUtil.parseComponent(afterLastUrl));
         }

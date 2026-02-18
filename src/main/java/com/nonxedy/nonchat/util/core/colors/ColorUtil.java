@@ -21,10 +21,8 @@ import net.md_5.bungee.api.ChatColor;
  */
 class LRUCache<K,V> {
     private final Map<K,V> cache;
-    private final int maxSize;
     
     public LRUCache(int maxSize) {
-        this.maxSize = maxSize;
         this.cache = Collections.synchronizedMap(
             new LinkedHashMap<K,V>(maxSize, 0.75f, true) {
                 @Override
@@ -48,26 +46,17 @@ class LRUCache<K,V> {
  * Supports legacy color codes, hex colors, and MiniMessage format
  */
 public class ColorUtil {
-    // Pattern for matching hex color codes in &#RRGGBB format
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
-    
-    // Pattern for matching legacy color codes (&0-&f, &k-&r)
     private static final Pattern LEGACY_COLOR_PATTERN = Pattern.compile("&[0-9a-fklmnor]");
-    
-    // Pattern for matching section symbol color codes (§0-§f, §k-§r)
     private static final Pattern SECTION_COLOR_PATTERN = Pattern.compile("§[0-9a-fklmnor]");
-    
-    // Pattern for matching MiniMessage format tags (more comprehensive)
-    private static final Pattern MINIMESSAGE_PATTERN = Pattern.compile("<[^>]+>");
-    
-    // Pattern for detecting MiniMessage tags more accurately
-    private static final Pattern MINIMESSAGE_TAG_PATTERN = Pattern.compile("<(?:[/#]?(?:color|c|gradient|rainbow|bold|b|italic|i|underlined|u|strikethrough|st|obfuscated|obf|reset|r|shadow|hover|click|insertion|font|transition|selector|keybind|translatable|score|nbt|newline|br|lang|key|translate|#[0-9a-fA-F]{6}|[a-z_]+)(?::[^>]*)?|/)>");
-    
-    // Pattern for detecting gradient tags specifically
+    private static final Pattern MINIMESSAGE_PATTERN = Pattern.compile("<[/#]?[a-zA-Z0-9_:#]+>");
+    private static final Pattern MINIMESSAGE_TAG_PATTERN = Pattern.compile("<[/#]?(?:[a-zA-Z_]+|#[0-9a-fA-F]{6})(?::[^>]*)?>");
     private static final Pattern GRADIENT_PATTERN = Pattern.compile("<gradient:[^>]+>");
-    
-    // MiniMessage instance for parsing MiniMessage format
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
+
+    private static final LRUCache<String, String> COLOR_CACHE = new LRUCache<>(1000);
+    private static final Map<String, Component> COMPONENT_CACHE = 
+        Collections.synchronizedMap(new WeakHashMap<>());
 
     /**
      * Converts color codes in text to actual colored output
@@ -75,14 +64,9 @@ public class ColorUtil {
      * @param message The text containing color codes
      * @return Processed string with color codes converted
      */
-    private static final LRUCache<String, String> COLOR_CACHE = new LRUCache<>(1000);
-    private static final Map<String, Component> COMPONENT_CACHE = 
-        Collections.synchronizedMap(new WeakHashMap<>());
-
     public static String parseColor(String message) {
         if (message == null) return "";
         
-        // Check cache first
         String cached = COLOR_CACHE.get(message);
         if (cached != null) return cached;
         
@@ -103,16 +87,7 @@ public class ColorUtil {
     public static Component parseComponentCached(String message) {
         if (message == null || message.isEmpty()) return Component.empty();
         
-        return COMPONENT_CACHE.computeIfAbsent(message, m -> {
-            if (containsMiniMessageTags(m)) {
-                // Parse with MiniMessage if it contains MiniMessage format tags
-                return parseMiniMessageComponent(m);
-            } else {
-                // Otherwise use legacy format parsing
-                String legacyMessage = parseColor(m);
-                return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
-            }
-        });
+        return COMPONENT_CACHE.computeIfAbsent(message, m -> parseComponent(m));
     }
 
     /**
@@ -124,14 +99,10 @@ public class ColorUtil {
     public static Component parseComponent(String message) {
         if (message == null || message.isEmpty()) return Component.empty();
         
-        // Check if the message contains any MiniMessage format tags
         if (containsMiniMessageTags(message)) {
-            // Parse with MiniMessage if it contains MiniMessage format tags
             return parseMiniMessageComponent(message);
         } else {
-            // Otherwise use legacy format parsing
             String legacyMessage = parseColor(message);
-            // Convert the legacy formatted string to a Component object
             return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
         }
     }
@@ -144,7 +115,6 @@ public class ColorUtil {
      */
     public static Component parseComponent(String message, Player player) {
         if (player != null && !player.hasPermission("nonchat.color")) {
-            // Strip all color codes if player doesn't have permission
             return Component.text(stripAllColors(message));
         }
         return parseComponent(message);
@@ -160,15 +130,11 @@ public class ColorUtil {
         if (message == null || message.isEmpty()) return Component.empty();
 
         try {
-            // Check if message contains legacy codes that need conversion
             if (containsLegacyCodes(message)) {
-                // Convert legacy codes to MiniMessage format before parsing
                 message = prepareMixedFormatMessage(message);
             }
-            // Parse with MiniMessage
             return MINI_MESSAGE.deserialize(message);
         } catch (Exception e) {
-            // Fallback to legacy parsing if MiniMessage parsing fails
             String legacyMessage = parseColor(message);
             return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
         }
@@ -182,7 +148,6 @@ public class ColorUtil {
      */
     public static Component parseMiniMessageComponent(String message, Player player) {
         if (player != null && !player.hasPermission("nonchat.color")) {
-            // Strip all color codes if player doesn't have permission
             return Component.text(stripAllColors(message));
         }
         return parseMiniMessageComponent(message);
@@ -199,120 +164,87 @@ public class ColorUtil {
         
         String result = message;
         
-        // Check if the message already has valid MiniMessage hex colors
-        boolean hasMiniMessageHex = result.matches(".*<#[0-9a-fA-F]{6}>.*");
+        Matcher miniMessageHexMatcher = Pattern.compile("<#[0-9a-fA-F]{6}>").matcher(result);
+        boolean hasMiniMessageHex = miniMessageHexMatcher.find();
         
-        // Only convert legacy hex codes if there are no MiniMessage hex colors present
-        // This prevents conflicts between &#RRGGBB and <#RRGGBB> formats
         if (!hasMiniMessageHex) {
             Matcher matcher = HEX_PATTERN.matcher(result);
             StringBuffer buffer = new StringBuffer(result.length() + 4 * 8);
             
             while (matcher.find()) {
                 String hexColor = matcher.group(1);
-                // Replace &#RRGGBB with <#RRGGBB>
                 matcher.appendReplacement(buffer, "<#" + hexColor + ">");
             }
             matcher.appendTail(buffer);
             result = buffer.toString();
         }
         
-        // For legacy color codes, only convert them if they're not part of existing MiniMessage tags
-        // We need to be more careful to avoid conflicts
         result = safelyConvertLegacyColors(result);
         
         return result;
     }
     
-    /**
-     * Safely converts legacy color codes to MiniMessage format, avoiding conflicts
-     * @param message The message to process
-     * @return Message with legacy colors converted to MiniMessage format
-     */
     private static String safelyConvertLegacyColors(String message) {
         if (message == null || message.isEmpty()) return message;
         
-        // Split the message by MiniMessage tags to process text between tags
-        String[] parts = message.split("(?=<)|(?<=>)");
         StringBuilder result = new StringBuilder();
+        int i = 0;
+        int len = message.length();
         
-        for (String part : parts) {
-            if (part.startsWith("<") && part.endsWith(">")) {
-                // This is a MiniMessage tag, keep it as is
-                result.append(part);
-            } else {
-                // This is text between tags, convert legacy codes
-                String converted = convertLegacyCodesInText(part);
-                result.append(converted);
+        while (i < len) {
+            if (message.charAt(i) == '<') {
+                int endTag = message.indexOf('>', i);
+                if (endTag != -1) {
+                    result.append(message, i, endTag + 1);
+                    i = endTag + 1;
+                    continue;
+                }
             }
+            
+            if (i < len - 1 && message.charAt(i) == '&') {
+                char code = message.charAt(i + 1);
+                String miniMessageTag = convertLegacyCodeToMiniMessage(code);
+                if (miniMessageTag != null) {
+                    result.append(miniMessageTag);
+                    i += 2;
+                    continue;
+                }
+            }
+            
+            result.append(message.charAt(i));
+            i++;
         }
         
         return result.toString();
     }
     
-    /**
-     * Converts legacy color codes in plain text (not inside MiniMessage tags)
-     * @param text The text to convert
-     * @return Text with legacy codes converted to MiniMessage format
-     */
-    private static String convertLegacyCodesInText(String text) {
-        String result = text;
-        
-        // Convert legacy color codes to MiniMessage format
-        result = result.replace("&0", "<black>");
-        result = result.replace("&1", "<dark_blue>");
-        result = result.replace("&2", "<dark_green>");
-        result = result.replace("&3", "<dark_aqua>");
-        result = result.replace("&4", "<dark_red>");
-        result = result.replace("&5", "<dark_purple>");
-        result = result.replace("&6", "<gold>");
-        result = result.replace("&7", "<gray>");
-        result = result.replace("&8", "<dark_gray>");
-        result = result.replace("&9", "<blue>");
-        result = result.replace("&a", "<green>");
-        result = result.replace("&b", "<aqua>");
-        result = result.replace("&c", "<red>");
-        result = result.replace("&d", "<light_purple>");
-        result = result.replace("&e", "<yellow>");
-        result = result.replace("&f", "<white>");
-        
-        // Convert § codes (section symbol)
-        result = result.replace("§0", "<black>");
-        result = result.replace("§1", "<dark_blue>");
-        result = result.replace("§2", "<dark_green>");
-        result = result.replace("§3", "<dark_aqua>");
-        result = result.replace("§4", "<dark_red>");
-        result = result.replace("§5", "<dark_purple>");
-        result = result.replace("§6", "<gold>");
-        result = result.replace("§7", "<gray>");
-        result = result.replace("§8", "<dark_gray>");
-        result = result.replace("§9", "<blue>");
-        result = result.replace("§a", "<green>");
-        result = result.replace("§b", "<aqua>");
-        result = result.replace("§c", "<red>");
-        result = result.replace("§d", "<light_purple>");
-        result = result.replace("§e", "<yellow>");
-        result = result.replace("§f", "<white>");
-        
-        // Format codes with & prefix
-        result = result.replace("&l", "<bold>");
-        result = result.replace("&m", "<strikethrough>");
-        result = result.replace("&n", "<underlined>");
-        result = result.replace("&o", "<italic>");
-        result = result.replace("&k", "<obfuscated>");
-        result = result.replace("&r", "<reset>");
-        
-        // Format codes with § prefix
-        result = result.replace("§l", "<bold>");
-        result = result.replace("§m", "<strikethrough>");
-        result = result.replace("§n", "<underlined>");
-        result = result.replace("§o", "<italic>");
-        result = result.replace("§k", "<obfuscated>");
-        result = result.replace("§r", "<reset>");
-        
-        return result;
+    private static String convertLegacyCodeToMiniMessage(char code) {
+        switch (code) {
+            case '0': return "<black>";
+            case '1': return "<dark_blue>";
+            case '2': return "<dark_green>";
+            case '3': return "<dark_aqua>";
+            case '4': return "<dark_red>";
+            case '5': return "<dark_purple>";
+            case '6': return "<gold>";
+            case '7': return "<gray>";
+            case '8': return "<dark_gray>";
+            case '9': return "<blue>";
+            case 'a': case 'A': return "<green>";
+            case 'b': case 'B': return "<aqua>";
+            case 'c': case 'C': return "<red>";
+            case 'd': case 'D': return "<light_purple>";
+            case 'e': case 'E': return "<yellow>";
+            case 'f': case 'F': return "<white>";
+            case 'k': case 'K': return "<obfuscated>";
+            case 'l': case 'L': return "<bold>";
+            case 'm': case 'M': return "<strikethrough>";
+            case 'n': case 'N': return "<underlined>";
+            case 'o': case 'O': return "<italic>";
+            case 'r': case 'R': return "<reset>";
+            default: return null;
+        }
     }
-    
     
     /**
      * Checks if a message contains MiniMessage tags using pattern matching
@@ -346,16 +278,9 @@ public class ColorUtil {
         
         String result = message;
         
-        // Remove hex color codes (&#RRGGBB)
         result = HEX_PATTERN.matcher(result).replaceAll("");
-        
-        // Remove legacy color codes (&0-&f, &k-&r)
         result = LEGACY_COLOR_PATTERN.matcher(result).replaceAll("");
-        
-        // Remove section symbol color codes (§0-§f, §k-§r)
         result = SECTION_COLOR_PATTERN.matcher(result).replaceAll("");
-        
-        // Remove MiniMessage format tags
         result = MINIMESSAGE_PATTERN.matcher(result).replaceAll("");
         
         return result;
@@ -407,19 +332,14 @@ public class ColorUtil {
     public static Component parseConfigComponent(String message) {
         if (message == null || message.isEmpty()) return Component.empty();
 
-        // For config strings, always try MiniMessage first if it contains any MiniMessage-like tags
-        // This ensures gradients and other MiniMessage features work properly in config
         if (containsMiniMessageTags(message) || containsGradient(message)) {
             try {
-                // Try to parse as MiniMessage first
                 return parseMiniMessageComponent(message);
             } catch (Exception e) {
-                // Fallback to legacy parsing if MiniMessage parsing fails
                 String legacyMessage = parseColor(message);
                 return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
             }
         } else {
-            // Use legacy format parsing for traditional color codes
             String legacyMessage = parseColor(message);
             return LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
         }
@@ -437,29 +357,24 @@ public class ColorUtil {
         }
 
         try {
-            // Remove # prefix if present
             String hex = hexColor.startsWith("#") ? hexColor.substring(1) : hexColor;
 
-            // Handle 3-digit hex (e.g., "RGB" -> "RRGGBB")
             if (hex.length() == 3) {
                 hex = "" + hex.charAt(0) + hex.charAt(0) +
                       hex.charAt(1) + hex.charAt(1) +
                       hex.charAt(2) + hex.charAt(2);
             }
 
-            // Ensure we have exactly 6 digits
             if (hex.length() != 6) {
                 return Color.BLACK;
             }
 
-            // Parse RGB components
             int r = Integer.parseInt(hex.substring(0, 2), 16);
             int g = Integer.parseInt(hex.substring(2, 4), 16);
             int b = Integer.parseInt(hex.substring(4, 6), 16);
 
             return Color.fromRGB(r, g, b);
         } catch (IllegalArgumentException e) {
-            // Return black color if parsing fails
             return Color.BLACK;
         }
     }

@@ -3,7 +3,7 @@
 # Plugin created by nonxedy (@nonxedy).
 # Published on github https://github.com/nonxedy/nonchat
 # Published on modrinth https://modrinth.com/plugin/nonchat
-# Version of the plugin: 1.5.7
+# Version of the plugin: 1.5.8
 #
 # - LuckPerms support.
 # - Vault support.
@@ -306,9 +306,9 @@ broadcast:
     # Enable/disable this specific broadcast.
     enabled: true
     # The message to be broadcasted.
-    message: "This message will be sent every 60 seconds"
+    message: "&#FFAFFBThis message is sent every &#E625DD5&#FFAFFB minutes. You can change the interval in the &#E625DDbroadcast.example.interval&#FFAFFB setting."
     # Interval in seconds for this message to be sent.
-    interval: 60
+    interval: 300
 
 # ==================================================
 # CHAT BUBBLE CONFIGURATION

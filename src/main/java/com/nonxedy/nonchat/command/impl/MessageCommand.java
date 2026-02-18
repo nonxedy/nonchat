@@ -128,7 +128,7 @@ public class MessageCommand implements CommandExecutor, TabCompleter {
         // Check if sender is ignoring the target
         if (sender instanceof Player && isIgnoringTarget((Player)sender, target)) {
             sender.sendMessage(ColorUtil.parseComponent(messages.getString("you-are-ignoring-player")
-                    .replace("%player%", target.getName())));
+                    .replace("{player}", target.getName())));
             if (plugin != null) {
                 plugin.logError("Player " + sender.getName() + " tried to message a player they are ignoring.");
             }
