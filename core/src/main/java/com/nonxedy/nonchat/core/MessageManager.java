@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 
 import com.nonxedy.nonchat.Nonchat;
 import com.nonxedy.nonchat.api.event.NonchatPrivateMessageEvent;
+import com.nonxedy.nonchat.api.event.NonchatPrivateMessageSentEvent;
 import com.nonxedy.nonchat.command.impl.IgnoreCommand;
 import com.nonxedy.nonchat.command.impl.SpyCommand;
 import com.nonxedy.nonchat.config.PluginConfig;
@@ -141,6 +142,9 @@ public class MessageManager {
             spyCommand.onPrivateMessage(playerSender, receiver, Component.text(processedMessage));
             updateReplyTargets(playerSender, receiver);
         }
+
+        Bukkit.getPluginManager().callEvent(
+                new NonchatPrivateMessageSentEvent(sender, receiver, processedMessage, reply));
     }
 
     public void replyToLastMessage(Player sender, String message) {
